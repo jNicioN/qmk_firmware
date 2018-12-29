@@ -23,6 +23,12 @@ as
 /*******************************************************************
 ** DESCRIPCION: Consulta de Persona Unica						  **
 ********************************************************************
+** ModificÓ:	Francisco Javier Carrillo Rojas					****
+** Fecha:		24/Nov/2018										****
+** Help:		01171269										****
+** Descripcion:	Agregar salida de a Per_Email, Per_Tipo,		****
+**				Per_Nombre,	Per_ApePat y Per_ApeMat a C5		****
+********************************************************************
 ** Modifico:	Francisco Javier Carrillo Rojas					****
 ** Fecha:		29/10/2018										****
 ** Help:		1147468											****
@@ -208,7 +214,8 @@ if @Tip_ConTip = @Str_C begin
 		select	Per_Numero, Per_ComOrd, Per_Comple,	Per_RFC, Per_CURP,
 				Per_Nombre,	Per_ApePat,	Per_ApeMat,	Adi_TipIde,	Adi_NumIde,
 				Adi_FeVeId,	Per_Nacion,	Adi_NacExt,	Adi_FeExId,	Adi_Sexo,
-				Adi_FecNac				
+				Adi_FecNac,	Per_Email,	Per_Tipo,	Per_Nombre,	Per_ApePat,
+				Per_ApeMat
 			from SOPERSON noholdlock
 			inner join SOPERADI P noholdlock on Adi_PerNum = Per_Numero
 			where	Per_Numero = @Per_Grupo

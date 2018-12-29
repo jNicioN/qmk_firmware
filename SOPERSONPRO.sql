@@ -12,6 +12,7 @@ create procedure SOPERSONPRO (
 	@DaP_EntNac	char(3),
 	@DaP_PaiNac	char(3),
 	@Adi_FeVeId	smalldatetime,
+	@Per_Email	varchar(50),
 	@Tip_Proces	char(1),
 
 	@NumTransac	char(10),
@@ -28,6 +29,12 @@ as
 /* DESCRIPCION: Personas (Proceso)						  		   */
 /*******************************************************************/
 /** REFERENCIAS:
+********************************************************************
+** Modificó:	Francisco Javier Carrillo Rojas					****
+** Fecha:		04/Dic/2018										****
+** Help:		01171269										****
+** Descripción:	Crear proceso de actualización de Per_Email		****
+**				por persona 									****
 ********************************************************************
 ** Modificó:	Karla Dosal										****
 ** Fecha:		16/Nov/2018										****
@@ -91,6 +98,7 @@ declare	@Str_Vacio	char(1),				/*	Declaracion de Constantes	*/
 		@Fec_Vacia	smalldatetime,
 		@Tip_Renapo	char(1),
 		@Tip_ProIne	char(1),
+		@Tip_Email	char(1),
 		@Ent_LonCur	smallint,
 		@Pai_Mexico	char(3),
 		@Nac_Nacion	char(1),
@@ -102,6 +110,7 @@ select	@Str_Vacio	= '',					/*	String Vacio				*/
 		@Fec_Vacia	= '1900-01-01',			/*	Fecha Vacía					*/
 		@Tip_Renapo	= 'A',					/*	Tipo proceso para actualizar datos requeridos para RENAPO */
 		@Tip_ProIne	= 'I',					/*	Tipo proceso para actualizar datos INE	*/
+		@Tip_Email	= 'C',					/*	Tipo proceso para actualizar email  */
 		@Ent_LonCur	= 18,					/*	Longitud CURP	*/
 		@Pai_Mexico	= '001',				/*	País de nacimiento México */
 		@Nac_Nacion	= 'N',					/*	Nacionalidad: Nacional */
@@ -297,7 +306,7 @@ if @Tip_Proces = @Tip_ProIne begin
 			@Bit_CodPos	= Per_CodPos,
 			@Bit_ApaPos	= Per_ApaPos,
 			@Bit_LadTel	= Per_LadTel,
-			@Bit_Telefo	= Per_Email,
+			@Bit_Telefo	= Per_Telefo,
 			@Bit_Email	= Per_Email,
 			@Bit_ComDom	= Per_ComDom,
 			@Bit_EstCiv	= Per_EstCiv,
@@ -361,6 +370,76 @@ if @Tip_Proces = @Tip_ProIne begin
 		rollback
 		return 1
 	end
+end else if @Tip_Proces = @Tip_Email begin
+	if @Per_Email = @Str_Vacio begin
+		select	Err_Codigo	= '000001', 
+				Err_Mensaj	= 'Debe capturar el correo electronico del cliente'
+		rollback
+		return 1
+	end
+	
+	select	@Bit_NumPer	= Per_Numero,
+			@Bit_Fecha	= Per_Fecha,
+			@Bit_NumTra	= Per_NumTra,
+			@Bit_Tipo	= Per_Tipo,
+			@Bit_NuSeFi	= Per_NuSeFi,
+			@Bit_Titulo	= Per_Titulo,
+			@Bit_Nombre	= Per_Nombre,
+			@Bit_ApePat	= Per_ApePat,
+			@Bit_ApeMat	= Per_ApeMat,
+			@Bit_RazSoc	= Per_RazSoc,
+			@Bit_Comple	= Per_Comple,
+			@Bit_ComOrd	= Per_ComOrd,
+			@Bit_RFC	= Per_RFC,
+			@Bit_CURP	= Per_CURP,
+			@Bit_Calle	= Per_Calle,
+			@Bit_CalNum	= Per_CalNum,
+			@Bit_Coloni	= Per_Coloni,
+			@Bit_Entida	= Per_Entida,
+			@Bit_Locali	= Per_Locali,
+			@Bit_CodPos	= Per_CodPos,
+			@Bit_ApaPos	= Per_ApaPos,
+			@Bit_LadTel	= Per_LadTel,
+			@Bit_Telefo	= Per_Telefo,
+			@Bit_Email	= Per_Email,
+			@Bit_ComDom	= Per_ComDom,
+			@Bit_EstCiv	= Per_EstCiv,
+			@Bit_Nacion	= Per_Nacion,
+			@Bit_ActEmp	= Per_ActEmp,
+			@Bit_Giro	= Per_Giro,
+			@Bit_Sector	= Per_Sector,
+			@Bit_Activi	= Per_Activi,
+			@Bit_ActINE	= Per_ActINE
+		from SOPERSON noholdlock
+		where	Per_Numero = @Per_Numero
+		
+	exec @Status = SOBITPERALT
+		@Bit_NumPer,	@Bit_Fecha,		@Bit_NumTra,	@Bit_Tipo,		@Bit_NuSeFi,
+		@Bit_Titulo,	@Bit_Nombre,	@Bit_ApePat,	@Bit_ApeMat,	@Bit_RazSoc,
+		@Bit_Comple,	@Bit_ComOrd,	@Bit_RFC,		@Bit_CURP,		@Bit_Calle,
+		@Bit_CalNum,	@Bit_Coloni,	@Bit_Entida,	@Bit_Locali,	@Bit_CodPos,
+		@Bit_ApaPos,	@Bit_LadTel,	@Bit_Telefo,	@Bit_Email,		@Bit_ComDom,
+		@Bit_EstCiv,	@Bit_Nacion,	@Bit_ActEmp,	@Bit_Giro,		@Bit_Sector,
+		@Bit_Activi,	@Bit_ActINE,	@NumTransac,	@Transaccio,	@Usuario,
+		@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
+	
+	if @Status <> @Ent_Cero begin
+		rollback
+		return 1
+	end
+	
+	update SOPERSON set
+		Per_Email	= @Per_Email,
+
+		NumTransac	= @NumTransac,
+		Transaccio	= @Transaccio,
+		Usuario		= @Usuario,
+		FechaSis	= @FechaSis,
+		SucOrigen	= @SucOrigen,
+		SucDestino	= @SucDestino
+	from SOUNIPER noholdlock
+	where	Per_Numero	= @Per_Numero
+
 end
 
 if @@nestlevel = @Ent_Uno

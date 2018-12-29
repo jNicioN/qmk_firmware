@@ -18,6 +18,12 @@ as
 /****************************************************************************
 ** Descripción:	 Telefonos de Personas									****
 ****************************************************************************
+** Modificó:	Francisco Javier Carrillo Rojas							****
+** Fecha:		05/Dic/2018												****
+** Help:		01171269												****
+** Descripción:	Se envían campos agregados a SOTELPER (Tep_Verifi) y 	****
+**				con valor default										****
+****************************************************************************
 ** Midificó:	Daniel Bautista Gomez									****
 ** Fecha:		08-03-2018												****
 ** Help:		01090212												****
@@ -41,7 +47,9 @@ declare	@Str_Vacio	char(1),
 		@Fec_Vacia	smalldatetime,
 		@Ent_Cero	int,
 		@Ent_Uno	int,
-		@Tep_Status char(1)
+		@Tep_Status char(1),
+		@Sta_SinVer	int
+		
 
 
 										/* Asignación de constantes */
@@ -49,7 +57,8 @@ select	@Str_Vacio	= '',				/* String vacío */
 		@Fec_Vacia	= '1900-01-01',		/* Fecha vacía */
 		@Ent_Cero	= 0,				/* Entero en cero */
 		@Ent_Uno	= 1,				/* Entero en uno */
-		@Tep_Status = 'A'				/* Estatus de Activo */	
+		@Tep_Status = 'A',				/* Estatus de Activo */	
+		@Sta_SinVer	= 0					/* Estatus sin verificar */
 		
 
 /* Validaciones */
@@ -97,7 +106,11 @@ end
 
 
 /* Alta de Telefonos de Personas	 */
-insert into SOTELPER values(
-	@PerPersoID,		@Tep_TipTel,		@ClClientID,		@Tep_Lada,			@Tep_Telefo,		
-	@NumTransac,		@Transaccio,		@Usuario,			@FechaSis,			@SucOrigen,			
-	@SucDestino)
+insert into SOTELPER
+	(PerPersoID,	Tep_TipTel,		ClClientID,		Tep_Lada,		Tep_Telefo,
+	Tep_Verifi,		NumTransac,		Transaccio,		Usuario,		FechaSis,
+	SucOrigen,		SucDestino)
+	values (
+	@PerPersoID,	@Tep_TipTel,	@ClClientID,	@Tep_Lada,		@Tep_Telefo,		
+	@Sta_SinVer,	@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,
+	@SucOrigen,		@SucDestino)
