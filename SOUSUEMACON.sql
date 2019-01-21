@@ -12,21 +12,30 @@ create procedure SOUSUEMACON(
 as
 
 /****************************************************************************/
-/* DESCRIPCION: ** Consulta de usuario por Email 							*/
+/* DESCRIPCION: ** Consulta de usuario por Email 			****/
 /****************************************************************************/
-/** REFERENCIAS: 														****
+/** REFERENCIAS: 							****
 ****************************************************************************
-** Creado:		Fabian Reyes											****
-** Fecha:		08/03/2018												****
+** ACtualizado:		Fabian Reyes					****
+** Fecha:		07/12/2018					****
+** Help:		1008848						****
+** Descripcion:	Se filtra por el usuario activo, en casos de mas de  	****
+**		un BRM/BRS						****
+****************************************************************************
+** Creado:		Fabian Reyes					****
+** Fecha:		08/03/2018					****
+** Help:		1008848						****
 ** Descripcion:	SP especifico de consulta de usuario por email para 	****
-**				salesforce												****
+**				salesforce				****
 ***************************************************************************/
 
 declare @Tip_ConTip char(1),		/* Declaracion de Variables */
-		@Tip_ConCon char(1)
+		@Tip_ConCon char(1),
+		@Sta_Activo char(1)
 
 select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
-		@Tip_ConCon	= substring(@Tip_Consul, 2, 1)	
+		@Tip_ConCon	= substring(@Tip_Consul, 2, 1),
+		@Sta_Activo = 'A'
 		
 /* 'C':  Consulta */
 if @Tip_ConTip = 'C' begin					
@@ -37,5 +46,6 @@ if @Tip_ConTip = 'C' begin
 			Usu.Usu_IPSesi,	Usu.Usu_Depart
 		from SOUSUARI Usu noholdlock
 		where	UPPER(Usu_EMail)	= UPPER(@Usu_EMail)
+		AND 	Usu_Status = @Sta_Activo
 	end
-end
+end 
