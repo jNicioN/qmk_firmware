@@ -23,6 +23,12 @@ as
 /*******************************************************************
 ** DESCRIPCION: Consulta de Persona Unica						  **
 ********************************************************************
+** Modificó:	Francisco Javier Carrillo Rojas					****
+** Fecha:		23/Ene/2019										****
+** Help:		01147468										****
+** Descripcion:	Agregar índice a tabla temporal utilizada 		****
+**				en consulta L7 									****
+********************************************************************
 ** ModificÓ:	Francisco Javier Carrillo Rojas					****
 ** Fecha:		24/Nov/2018										****
 ** Help:		01171269										****
@@ -583,10 +589,16 @@ end else begin
 	end
 	
 	if @Tip_ConCon	= @Str_Siete begin /* L7 - Busqueda por nombre de personas que representan la persona única*/
-		select Per_Person = Per_Numero, Per_Grupo = Per_Numero
-			into #personasUnicas
-			from SOPERSON noholdlock
-			where	Per_Comple like @Str_PeuNom
+		create table #personasUnicas(
+			Per_Person	char(8) not null,
+			Per_Grupo	char(8) not null)
+		
+		create index personasUnicas on #personasUnicas(Per_Grupo)
+		
+		insert into #personasUnicas
+			select Per_Numero, Per_Numero
+				from SOPERSON noholdlock
+				where	Per_Comple like @Str_PeuNom
 
 		update #personasUnicas set
 			Per_Grupo = Peu_Grupo

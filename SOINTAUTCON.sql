@@ -21,6 +21,13 @@ as
 ** DESCRIPCION: Consulta de intervinientes Autorizados			  **
 **				(para Identificación de Operaciones)			  **
 ********************************************************************
+** Modificó:	Francisco Javier Carrillo Rojas					****
+** Fecha:		23/Ene/2019										****
+** Help:		01147468										****
+** Descripcion:	Considerar como tercero autorizado el titular	****
+**				cuando no haya ninguno registrado				****
+**				agregar índices a tablas temporales				****
+********************************************************************
 **					STORE CONVERTIDO							****
 ** Convirtió:	Francisco Javier Carrillo Rojas					****
 ** Fecha:		10/Jun/2018										****
@@ -37,7 +44,8 @@ declare	@Tip_ConTip	char(1),	/* Consulta Tipo C/L*/
 		@Tip_ConCon	char(1),	/* Tipo Consecutivo */
 		@Opi_TipOpe int,		/* Tipo de operación (Disposición, entrega de medios y contratación ver referencia de campo en tabla SOOPEIDE)*/
 		@Opi_BasOpe varchar(4),	/* Tipo de base en parámetro recibido (ver metadata de campo en tabla SOPEIDE)*/
-		@Cio_Status	char(1)		/* Estatus de configuración */
+		@Cio_Status	char(1),	/* Estatus de configuración */
+		@Ins_PerCli	int			/* Bandera para saber si se inserta el registro de la persona del cliente */
 
 /* Declaracion de Constantes */
 declare	@Str_C		char(1),
@@ -50,7 +58,10 @@ declare	@Str_C		char(1),
 		@Tip_Titula	char(1),
 		@Sta_Activo	char(1),
 		@Tip_BasCli	varchar(4),
-		@Tip_BasCue	varchar(4)
+		@Tip_BasCue	varchar(4),
+		@Tip_TerAut	char(1),
+		@Tip_FirA	char(1),
+		@Ent_Uno	int
 
 /* Asignacion de Constantes */
 select	@Str_C		= 'C',		/* Tipo C */
@@ -63,7 +74,10 @@ select	@Str_C		= 'C',		/* Tipo C */
 		@Tip_Titula	= '1',		/* Tipo de interviniente Titular */
 		@Sta_Activo	= 'A',		/* Status Activo */
 		@Tip_BasCli	= 'CLI',	/* Tipo base cliente(Operación con) */
-		@Tip_BasCue	= 'CUE'	/* Tipo base cuenta(Operación con) */
+		@Tip_BasCue	= 'CUE',	/* Tipo base cuenta(Operación con) */
+		@Tip_TerAut	= '7',		/* Tipo tercero autorizado */
+		@Tip_FirA	= 'A',		/* Tipo de firma A */
+		@Ent_Uno	= 1			/* Entero en uno */
 
 select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
 		@Tip_ConCon	= substring(@Tip_Consul, 2, 1)
@@ -76,6 +90,9 @@ create table #Personas(
 	Per_Grupo	char(8),
 	Per_TipFir	char(1)) 
 
+create index PersonasAutorizadas on #PersonasAutorizadas(Per_Numero)
+create index Personas on #Personas(Per_Grupo)
+	
 select	@Opi_TipOpe	= Opi_TipOpe,
 		@Cio_NuIdCo	= Cio_NuIdCo,
 		@Cio_Status	= Cio_Status,
@@ -85,6 +102,7 @@ select	@Opi_TipOpe	= Opi_TipOpe,
 	where	con.Cio_NuIdOp	= @Opi_NuIdOp
 	  and	con.Cio_NuIdCo	= @Cio_NuIdCo
 
+select	@Ins_PerCli	= @Ent_Cero
 /*Base para poder obtener los intervinientes autorizados de acuerdo a la configuración dada */
 if isnull(@Opi_TipOpe, @Ent_Cero) != @Ent_Cero and isnull(@Cio_Status, @Str_Vacio) = @Sta_Activo begin
 	if @Opi_BasOpe	= @Tip_BasCli begin
@@ -125,9 +143,29 @@ if isnull(@Opi_TipOpe, @Ent_Cero) != @Ent_Cero and isnull(@Cio_Status, @Str_Vaci
 										from SOTIINID noholdlock
 										where	Tii_NuIdCo	= @Cio_NuIdCo
 										  and	Tii_Status	= @Sta_Activo)
+			
+		/*Insertar de forma manual al titular como tercero autorizado cuando no haya 
+		ni un tercero autorizado ligado a la cuenta, para considerarlo como firma A (ver update de tabla #Personas de más abajo)
+		solo en los casos en los que para la operación en cuestión figuran como intervinientes autorizados los terceros autorizados */
+		if (select count(*)
+				from #PersonasAutorizadas) = @Ent_Cero begin
+				if @Tip_TerAut in(select Tii_TipInt
+										from SOTIINID noholdlock
+										where	Tii_NuIdCo	= @Cio_NuIdCo
+										  and	Tii_Status	= @Sta_Activo) begin
+					insert into #PersonasAutorizadas
+						select	adi.Adi_NumPer
+							from CLCLIENT cli noholdlock
+								 inner join CLADICIO adi noholdlock on adi.ClClientID = cli.ClClientID 					
+							where	cli.Cli_Numero	= @Cli_Numero
+							  and	cli.Cli_Tipo	= @Tip_PerFis
+
+					select	@Ins_PerCli	= @Ent_Uno
+				end
+		end
 	end
 end
-	  
+				  	  
 if @Tip_ConTip = @Str_C begin
 	if @Tip_ConCon	= @Str_Uno begin /* C1 - Búsqueda de interviniente autorizado(consulta principal) por id único de persona*/
 		insert into #Personas
@@ -142,13 +180,18 @@ if @Tip_ConTip = @Str_C begin
 
 		/*Solo para operaciones ligadas a cuentas, se actualiza su nivel de firma de los terceros autorizados*/
 		if @Opi_BasOpe	= @Tip_BasCue begin
-			update #Personas set
-				Per_TipFir	= Fof_TipFir
-				from CHPEFOFI noholdlock					
-				where	Fof_Cuenta	= @Cue_Numero
-				  and	Fof_Person	= Per_Person
+			if @Ins_PerCli = @Ent_Uno begin
+				update #Personas set
+					Per_TipFir	= @Tip_FirA
+			end else begin
+				update #Personas set
+					Per_TipFir	= Fof_TipFir
+					from CHPEFOFI noholdlock					
+					where	Fof_Cuenta	= @Cue_Numero
+					  and	Fof_Person	= Per_Person			
+			end
 		end
-			
+		
 		--Salida de intervinientes autorizados para identificación
 		select	Per_Numero, Per_ComOrd, Per_Comple,	Per_RFC,	Per_CURP,
 				Per_Nombre,	Per_ApePat,	Per_ApeMat,	Adi_TipIde,	Adi_NumIde,
@@ -184,11 +227,16 @@ end else begin
 			
 		/*Solo para operaciones ligadas a cuentas, se actualiza su nivel de firma de los terceros autorizados*/
 		if @Opi_BasOpe	= @Tip_BasCue begin
-			update #Personas set
-				Per_TipFir	= Fof_TipFir
-				from CHPEFOFI noholdlock					
-				where	Fof_Cuenta	= @Cue_Numero
-				  and	Fof_Person	= Per_Person
+			if @Ins_PerCli = @Ent_Uno begin
+				update #Personas set
+					Per_TipFir	= @Tip_FirA
+			end else begin 
+				update #Personas set
+					Per_TipFir	= Fof_TipFir
+					from CHPEFOFI noholdlock					
+					where	Fof_Cuenta	= @Cue_Numero
+					  and	Fof_Person	= Per_Person			
+			end
 		end		
 			
 		--Salida de intervinientes autorizados para identificación
