@@ -38,20 +38,28 @@ as
 ****************************************************************************
 ** REFERENCIAS:															****
 ****************************************************************************
+** Moidfico:	Esthepny Aguilar										****
+** Fecha:		18/09/2018												****
+** Help:		1134677													****
+** Descripcion: Se agrega modificacion A para modificar los campos de 	****
+** DaP_NumEmi, DaP_ClvEle, DaP_EntNac									****
+****************************************************************************
 ** Creó:		Armando Alexis Sepúlveda Cruz							****
 ** Fecha:		24/Jul/2018												****
 ** Help:		1088831													****
 ***************************************************************************/
 
 /* Declaración de Variables */
-declare	@Per_Numero	char(8)
+declare	@Per_Numero	char(8)	/* Persona Numero */
 
 /* Declaración de Constantes */
 declare	@Str_Vacio	char(1),
-		@Tip_ClvNum	char(1)							
+		@Tip_ClvNum	char(1),
+		@Tip_AcualA char(1)				
 
 select	@Str_Vacio	= '',	/*String Vacio*/
-		@Tip_ClvNum = '1'	/*Tipo de Actualización de Clave Elector y Número de Emision*/
+		@Tip_ClvNum = '1',	/*Tipo de Actualización de Clave Elector y Número de Emision*/
+		@Tip_AcualA = 'A'	/* Tipo de actualizacion A*/
 
 /* Validar Número de Cliente */
 select	@Per_Numero	= DaP_Person
@@ -79,4 +87,11 @@ if @Tip_Actual = @Tip_ClvNum begin	/* Modificar Clave Elector y Número de Emisi
 		SucOrigen	= @SucOrigen,
 		SucDestino	= @SucDestino
 	 where	DaP_Person	= @DaP_Person
+end
+if @Tip_Actual = @Tip_AcualA begin /* A Modifica  Clave Elector, Número de Emision y Entidad de Nacimiento */
+	update SOPEDACO set
+		DaP_ClvEle	= @DaP_ClvEle,	
+		DaP_NumEmi	= @DaP_NumEmi,
+		DaP_EntNac  = @DaP_EntNac
+	where	DaP_Person	= @DaP_Person
 end

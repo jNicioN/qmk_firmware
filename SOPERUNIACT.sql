@@ -34,6 +34,9 @@ create procedure SOPERUNIACT (
 	@Adi_FecCon	smalldatetime,
 	@Adi_Sexo char(1),
 	@Adi_LugNac varchar(50),
+	@Adi_TipIde char(1),
+	@Adi_NumIde varchar(30),
+	@Adi_NacExt char(1),
 	@Tip_Actual	char(1),
 
 	@NumTransac	char(10),
@@ -48,6 +51,12 @@ as
 *** DESCRIPCION: Actualiza Datos de Persona Unificada			  **
 ********************************************************************
 *** REFERENCIAS: 												  **
+********************************************************************
+** Modifico:	Esthepny Aguilar								****
+** Fecha:		18/Septiembre/18								****
+** Help:		1134677											****
+** Descripcion:	Tipo de actualizacion @Act_GenPer incluye 		****
+**              Adi_TipIde, Adi_NumIde y Adi_NacExt				****
 ********************************************************************
 ** Modifico:	Ricardo Garcia Cerda							****
 ** Fecha:		15/Agosto/17									****
@@ -82,92 +91,94 @@ as
 ** Help:		0744849											****
 *******************************************************************/
 declare	@Per_Comple	varchar(180),	/*	Declaracion de Variables	*/
-		@Per_ComOrd	varchar(180),
-		@Per_ActINE	char(6),
-		@Per_Titulo varchar(10),
-		@Status		int,
-		@Bit_Fecha	smalldatetime,
-		@Bit_NumTra	char(10),
-		@Bit_Tipo	char(1),
-		@Bit_NuSeFi	varchar(30),
-		@Bit_Titulo	varchar(10),
-		@Bit_Nombre	varchar(40),
-		@Bit_ApePat	varchar(40),
-		@Bit_ApeMat	varchar(40),
-		@Bit_RazSoc	varchar(180),
-		@Bit_Comple	varchar(180),
-		@Bit_ComOrd	varchar(180),
-		@Bit_RFC	char(15),
-		@Bit_CURP	char(18),
-		@Bit_Calle	char(40),
-		@Bit_CalNum	varchar(10),
-		@Bit_Coloni	varchar(150),
-		@Bit_Entida	char(3),
-		@Bit_Locali	char(8),
-		@Bit_CodPos	char(6),
-		@Bit_ApaPos	char(6),
-		@Bit_LadTel	varchar(5),
-		@Bit_Telefo	char(15),
-		@Bit_Email	varchar(50),
-		@Bit_ComDom	char(1),
-		@Bit_EstCiv	varchar(20),
-		@Bit_Nacion	char(3),
-		@Bit_ActEmp	char(1),
-		@Bit_Giro	char(30),
-		@Bit_Sector	char(3),
-		@Bit_Activi	char(10),
-		@Bit_ActINE	varchar(10),
-		@Bit_LugNac	varchar(50),
-		@Bit_Sexo	char(1),
-		@Bit_FecNac	smalldatetime,
-		@Bit_RegMat	char(1),
-		@Bit_VivCas	char(1),
-		@Bit_TieRes	int,
-		@Bit_Fax    varchar(20),
-		@Bit_NumDep	int,
-		@Bit_Puesto	varchar(50),
-		@Bit_Ocupac	varchar(50),
-		@Bit_AntLab	int,
-		@Bit_LugTra	varchar(50),
-		@Bit_TelTra	varchar(20),
-		@Bit_CalTra	varchar(20),
-		@Bit_NuCaTr	varchar(30),
-		@Bit_ColTra	varchar(50),
-		@Bit_CPTra	varchar(50),
-		@Bit_FecCon	smalldatetime,
-		@Bit_CaNuIn	varchar(10),
-		@Bit_NacExt	char(1),
-		@Bit_Reside char(1),
-		@Bit_DocEst	char(3),
-		@Bit_OtDoEs varchar(50),
-		@Bit_FeExDo	smalldatetime,
-		@Bit_CalInm	char(1),
-		@Bit_CalExt	varchar(40),
-		@Bit_CaNuEx	varchar(10),
-		@Bit_ColExt	varchar(150),
-		@Bit_LocExt	varchar(40),
-		@Bit_EntExt	varchar(40),
-		@Bit_PaiExt	varchar(3),
-		@Bit_CoPoEx	char(6),
-		@Bit_TipIde	char(1),
-		@Bit_OtrIde	varchar(50),
-		@Bit_NumIde	varchar(30),
-		@Bit_FeExId	smalldatetime,
-		@Bit_FeVeId	smalldatetime,
-		@Bit_NuIdFi	varchar(20),
-		@Bit_EntPri char(40), 
-		@Bit_EntSeg char(40)
+		@Per_ComOrd	varchar(180),	/* Persona nombre Ordenado*/
+		@Per_ActINE	char(6),		/* Persona Actividad según INEGI */
+		@Per_Titulo varchar(10),	/* Persona titulo */
+		@Status		int,			/* Status */
+		@Bit_Fecha	smalldatetime,	/* Bitacora Fecha */
+		@Bit_NumTra	char(10),		/* Bitacora Numero de transaccion */
+		@Bit_Tipo	char(1),		/* Bitacora tipo */
+		@Bit_NuSeFi	varchar(30),	/* Bitacora Numero de serie de la Firma Electronica Avanzada */
+		@Bit_Titulo	varchar(10),	/* Bitacora titulo */
+		@Bit_Nombre	varchar(40),	/* Bitacora Nombre */
+		@Bit_ApePat	varchar(40),	/* Bitacora apellido paterno */
+		@Bit_ApeMat	varchar(40),	/* Bitacora Apellido Materno */
+		@Bit_RazSoc	varchar(180),	/* Bitacora Razon social */
+		@Bit_Comple	varchar(180),	/* Bitacora nombre completo */
+		@Bit_ComOrd	varchar(180),	/* Bitacora nombre ordenado */
+		@Bit_RFC	char(15),		/* Bitacora RFC */
+		@Bit_CURP	char(18),		/* Bitacora CURP */
+		@Bit_Calle	char(40),		/* Bitacora Calle */
+		@Bit_CalNum	varchar(10),	/* Bitacora Calle numero */
+		@Bit_Coloni	varchar(150),	/* Bitacora Colonia */
+		@Bit_Entida	char(3),		/* Bitacora Identidad */
+		@Bit_Locali	char(8),		/* Bitacora Localidad */
+		@Bit_CodPos	char(6),		/* Bitacora Codigo Postal */
+		@Bit_ApaPos	char(6),		/* Bitacora Apartado Postal */
+		@Bit_LadTel	varchar(5),		/* Bitacora lada telefono */
+		@Bit_Telefo	char(15),		/* Bitacora telefono */
+		@Bit_Email	varchar(50),	/* Bitacora email */	
+		@Bit_ComDom	char(1),		/* Bitacora Comprobante de domicilio */
+		@Bit_EstCiv	varchar(20),	/* Bitacora Estado civil */
+		@Bit_Nacion	char(3),		/* Bitacora nacionalidad */
+		@Bit_ActEmp	char(1),		/* Bitacora Actividad Empresarial */
+		@Bit_Giro	char(30),		/* Bitacora giro */
+		@Bit_Sector	char(3),		/* Bitacora sector */
+		@Bit_Activi	char(10),		/* Bitacora actividad */
+		@Bit_ActINE	varchar(10),	/* Bitacora Actividad según INEGI */	
+		@Bit_LugNac	varchar(50),	/* Bitacora Lugar Nacimiento */
+		@Bit_Sexo	char(1),		/* Bitacora Sexo */
+		@Bit_FecNac	smalldatetime,	/* Bitacora Fecha Nacimiento */
+		@Bit_RegMat	char(1),		/* Bitacora Rrgimen matrimonial Mancomunados, Separados */
+		@Bit_VivCas	char(1),		/* Bitacora Vive en casa  Propia, Renta , Casa*/
+		@Bit_TieRes	int,			/* Bitacora Tiempo de residencia */
+		@Bit_Fax    varchar(20),	/* Bitacora Fax */
+		@Bit_NumDep	int,			/* Bitacora Numero de dependientes */
+		@Bit_Puesto	varchar(50),	/* Bitacora Puesto */
+		@Bit_Ocupac	varchar(50),	/* Bitacora Ocupacion */
+		@Bit_AntLab	int,			/* Bitacora Antiguedad laboral  */
+		@Bit_LugTra	varchar(50),	/* Bitacora Lugar trabajo */
+		@Bit_TelTra	varchar(20),	/* Bitacora Telefono trabajo */
+		@Bit_CalTra	varchar(20),	/* Bitacora Calle de Trabajo */
+		@Bit_NuCaTr	varchar(30),	/* Bitacora Numero de calle del  Trabajo*/
+		@Bit_ColTra	varchar(50),	/* Bitacora Numero trabajo */
+		@Bit_CPTra	varchar(50),	/* Bitacora Codigo postal trabajo */
+		@Bit_FecCon	smalldatetime,	/* Bitacora Fecha  */
+		@Bit_CaNuIn	varchar(10),	/* Bitacora Numero ineterior */
+		@Bit_NacExt	char(1),		/* Bitacora Nacionalidad Extranjera */
+		@Bit_Reside char(1),		/* Bitacora Recidente */
+		@Bit_DocEst	char(3),		/* Bitacora Documento  */
+		@Bit_OtDoEs varchar(50),	/* Bitacora Otro Documento que Acredita Estancia Legal */
+		@Bit_FeExDo	smalldatetime,	/* Bitacora Fecha de expiracion o expedicion del documento que acredita la estancia legal */
+		@Bit_CalInm	char(1),		/* Bitacora  Calidad de Inmigrante */
+		@Bit_CalExt	varchar(40),	/* Bitacora Calle  del Domicilio en el extranjero en caso de extranjero */
+		@Bit_CaNuEx	varchar(10),	/* Bitacora Calle numero exteriro */
+		@Bit_ColExt	varchar(150),	/* Bitacora Colonia Extranjero */
+		@Bit_LocExt	varchar(40),	/* Bitacora Localidad Extranjero */
+		@Bit_EntExt	varchar(40),	/* Bitacora Entidad Extranjero */
+		@Bit_PaiExt	varchar(3),		/* Bitacora Pais Extranjero */
+		@Bit_CoPoEx	char(6),		/* Bitacora Codigo Postak Extranjero */
+		@Bit_TipIde	char(1),		/* Bitacora Tipo de identificacion */
+		@Bit_OtrIde	varchar(50),	/* Bitacora Otra identificacion */
+		@Bit_NumIde	varchar(30),	/* Bitacora numero identificacion */
+		@Bit_FeExId	smalldatetime,	/* Bitacora Fecha de expedicion de la identificacion */
+		@Bit_FeVeId	smalldatetime,	/* Bitacora Fecha de vencimiento de la identificacion */
+		@Bit_NuIdFi	varchar(20),	/* Bitacora Numero de Identificacion Fiscal */
+		@Bit_EntPri char(40), 		/* Bitacora Entre Calle Primera */
+		@Bit_EntSeg char(40)		/* Bitacora Entre Calle Segunda */
 
 declare	@Str_Vacio	char(1),	/*	Declaracion de Constantes	*/
-		@Per_Moral	char(1),
-		@Str_23		char(4),
-		@Ent_Cero	int,
-		@Fec_Vacia	smalldatetime,
-		@Act_PerIW	char(1),
-		@Act_PerNEC	char(1),
-		@Str_Vacios	char(10),
-		@Act_PerCRM char(1),
-		@Act_PerSb3 char(1)
+		@Per_Moral	char(1),	/* Persona Moral */
+		@Str_23		char(4),	/* Cadena 23 */
+		@Ent_Cero	int,		/* Numero entero 0 */
+		@Fec_Vacia	smalldatetime,	/* Fecha vacia */
+		@Act_PerIW	char(1),		/* Actualizacion persona IW */
+		@Act_PerNEC	char(1),		/* Actualizacion persona NEC */
+		@Str_Vacios	char(10),		/* Cadena vacia */
+		@Act_PerCRM char(1),		/* Actualizacion persona CRM */
+		@Act_PerSb3 char(1),		/* Actualizacion persona SB3 */
+		@Act_GenPer char(1),		/* Actualizacion para generacion de persona */
+		@Str_Vacio1 char(1)			/* Cadena vacia con un espacio */
 
 select	@Str_Vacio	= '',			/* String Vacio	*/
 		@Per_Moral	= '1',			/* Persona Moral */
@@ -178,7 +189,9 @@ select	@Str_Vacio	= '',			/* String Vacio	*/
 		@Act_PerNEC	= 'B',
 		@Act_PerCRM	= 'C',
 		@Str_Vacios	= '',
-		@Act_PerSb3 = 'D'
+		@Act_PerSb3 = 'D',
+		@Act_GenPer = 'G',
+		@Str_Vacio1 = ' '
 
 if not exists (	select	Per_Numero
 					from SOPERSON noholdlock
@@ -362,8 +375,8 @@ if @Per_Tipo = @Per_Moral begin
 	select	@Per_Comple	= LTrim(RTrim(@Per_RazSoc))
 	select	@Per_ComOrd	= LTrim(RTrim(@Per_RazSoc))
 end else begin
-	select	@Per_Comple	= LTrim(RTrim(@Per_ApePat)) + ' ' + LTrim(RTrim(@Per_ApeMat)) + ' ' + LTrim(RTrim(@Per_Nombre))
-	select	@Per_ComOrd	= LTrim(RTrim(@Per_Nombre)) + ' ' + LTrim(RTrim(@Per_ApePat)) + ' ' + LTrim(RTrim(@Per_ApeMat))
+	select	@Per_Comple	= LTrim(RTrim(@Per_ApePat)) + @Str_Vacio1 + LTrim(RTrim(@Per_ApeMat)) + @Str_Vacio1 + LTrim(RTrim(@Per_Nombre))
+	select	@Per_ComOrd	= LTrim(RTrim(@Per_Nombre)) + @Str_Vacio1 + LTrim(RTrim(@Per_ApePat)) + @Str_Vacio1 + LTrim(RTrim(@Per_ApeMat))
 end
 
 /* Actividad de Inegi */ 
@@ -590,6 +603,37 @@ if @Tip_Actual = @Act_PerSb3 begin
 		SucDestino	= @SucDestino
 	where	Adi_PerNum	= @Per_Numero
 	
+end
+
+if @Tip_Actual = @Act_GenPer begin
+	select 
+		@Per_Fecha = @FechaSis,
+		@Per_NumTra = @NumTransac
+	
+	update SOPERSON set
+		Per_CURP	= @Per_CURP,
+	
+		NumTransac	= @NumTransac,
+		Transaccio	= @Transaccio,
+		Usuario		= @Usuario,
+		FechaSis	= @FechaSis,
+		SucOrigen	= @SucOrigen,
+		SucDestino	= @SucDestino
+	where	Per_Numero	= @Per_Numero
+	
+	update SOPERADI set
+		Adi_TipIde	= @Adi_TipIde,
+		Adi_NumIde	= @Adi_NumIde,
+		Adi_Sexo 	= @Adi_Sexo,
+		Adi_NacExt	= @Adi_NacExt,
+		
+		NumTransac	= @NumTransac,
+		Transaccio	= @Transaccio,
+		Usuario		= @Usuario,
+		FechaSis	= @FechaSis,
+		SucOrigen	= @SucOrigen,
+		SucDestino	= @SucDestino
+	where	Adi_PerNum	= @Per_Numero
 end
 
 select	Err_Codigo	= '000000',

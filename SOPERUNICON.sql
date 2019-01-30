@@ -23,6 +23,13 @@ as
 /*******************************************************************
 ** DESCRIPCION: Consulta de Persona Unica						  **
 ********************************************************************
+** Modifico:	Esthepny Aguilar							    ****
+** Fecha:		28/05/2018										****
+** Help:		1134677 										****
+** Descripcion:	Se modifica consulta C1 se agregan los campos   ****
+** SOPEDACO(DaP_ClvEle, DaP_NumEmi,	DaP_EntNac) y se quita		****
+** espacio al campo Adi_TipIde									****
+********************************************************************
 ** Modificó:	Francisco Javier Carrillo Rojas					****
 ** Fecha:		23/Ene/2019										****
 ** Help:		01147468										****
@@ -147,10 +154,12 @@ if @Tip_ConTip = @Str_C begin
 				Adi_CaNuIn,		Adi_NacExt,		Adi.Adi_Reside,	Adi.Adi_DocEst,	Adi_OtDoEs,
 				Adi.Adi_FeExDo,	Adi.Adi_CalInm,	Adi.Adi_CalExt,	Adi.Adi_CaNuEx,	Adi.Adi_ColExt,
 				Adi.Adi_LocExt,	Adi.Adi_EntExt,	Adi.Adi_PaiExt,	Adi.Adi_CoPoEx,	Adi_TelExt,
-				Adi_TipIde,		Adi_OtrIde,		Adi_NumIde,		Adi_FeExId,		Adi_FeVeId,
-				Adi_NuIdFi,		Adi.Adi_EntPri,	Adi.Adi_EntSeg,	Per_Client = Adi_Client
+				LTRIM(RTRIM(Adi_TipIde)) as Adi_TipIde,		Adi_OtrIde,		Adi_NumIde,		Adi_FeExId,		Adi_FeVeId,
+				Adi_NuIdFi,		Adi.Adi_EntPri,	Adi.Adi_EntSeg,	Per_Client = Adi_Client,	DaP_ClvEle,
+				DaP_NumEmi,		DaP_EntNac
 			from SOPERSON noholdlock
 			join SOPERADI Adi noholdlock  on Adi_PerNum = Per_Numero
+			left join SOPEDACO noholdlock on DaP_Person = Per_Numero
 			left join CLADICIO noholdlock on Adi_NumPer = Per_Numero
 			where	Per_Numero	= @Per_Numero
 	end
