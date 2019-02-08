@@ -22,6 +22,12 @@ as
 **				(para Identificación de Operaciones)			  **
 ********************************************************************
 ** Modificó:	Francisco Javier Carrillo Rojas					****
+** Fecha:		31/Ene/2019										****
+** Help:		01091555										****
+** Descripcion:	Considerar varios registros de firmas 			****
+**				existentes y obtener el correcto				****
+********************************************************************
+** Modificó:	Francisco Javier Carrillo Rojas					****
 ** Fecha:		23/Ene/2019										****
 ** Help:		01147468										****
 ** Descripcion:	Considerar como tercero autorizado el titular	****
@@ -45,7 +51,9 @@ declare	@Tip_ConTip	char(1),	/* Consulta Tipo C/L*/
 		@Opi_TipOpe int,		/* Tipo de operación (Disposición, entrega de medios y contratación ver referencia de campo en tabla SOOPEIDE)*/
 		@Opi_BasOpe varchar(4),	/* Tipo de base en parámetro recibido (ver metadata de campo en tabla SOPEIDE)*/
 		@Cio_Status	char(1),	/* Estatus de configuración */
-		@Ins_PerCli	int			/* Bandera para saber si se inserta el registro de la persona del cliente */
+		@Ins_PerCli	int,		/* Bandera para saber si se inserta el registro de la persona del cliente */
+		@Fof_MaxCon	smallint	/* Consecutivo máximo del registro de firmas */
+
 
 /* Declaracion de Constantes */
 declare	@Str_C		char(1),
@@ -61,7 +69,9 @@ declare	@Str_C		char(1),
 		@Tip_BasCue	varchar(4),
 		@Tip_TerAut	char(1),
 		@Tip_FirA	char(1),
-		@Ent_Uno	int
+		@Ent_Uno	int,
+		@Sta_FirEsc	char(1),
+		@Tip_ReFiNu	char(1)
 
 /* Asignacion de Constantes */
 select	@Str_C		= 'C',		/* Tipo C */
@@ -77,7 +87,9 @@ select	@Str_C		= 'C',		/* Tipo C */
 		@Tip_BasCue	= 'CUE',	/* Tipo base cuenta(Operación con) */
 		@Tip_TerAut	= '7',		/* Tipo tercero autorizado */
 		@Tip_FirA	= 'A',		/* Tipo de firma A */
-		@Ent_Uno	= 1			/* Entero en uno */
+		@Ent_Uno	= 1,		/* Entero en uno */
+		@Sta_FirEsc	= 'S',		/* Status de firma escaneado */
+		@Tip_ReFiNu	= 'N'		/* Tipo de registro de firmas nuevo */
 
 select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
 		@Tip_ConCon	= substring(@Tip_Consul, 2, 1)
@@ -88,7 +100,9 @@ create table #PersonasAutorizadas(
 create table #Personas(
 	Per_Person	char(8),
 	Per_Grupo	char(8),
-	Per_TipFir	char(1)) 
+	Per_TipFir	char(1),
+	Per_CobTip	char(1),
+	Per_CobNom	varchar(120)) 
 
 create index PersonasAutorizadas on #PersonasAutorizadas(Per_Numero)
 create index Personas on #Personas(Per_Grupo)
@@ -147,7 +161,7 @@ if isnull(@Opi_TipOpe, @Ent_Cero) != @Ent_Cero and isnull(@Cio_Status, @Str_Vaci
 		/*Insertar de forma manual al titular como tercero autorizado cuando no haya 
 		ni un tercero autorizado ligado a la cuenta, para considerarlo como firma A (ver update de tabla #Personas de más abajo)
 		solo en los casos en los que para la operación en cuestión figuran como intervinientes autorizados los terceros autorizados */
-		if (select count(*)
+		if (select count(1)
 				from #PersonasAutorizadas) = @Ent_Cero begin
 				if @Tip_TerAut in(select Tii_TipInt
 										from SOTIINID noholdlock
@@ -169,7 +183,7 @@ end
 if @Tip_ConTip = @Str_C begin
 	if @Tip_ConCon	= @Str_Uno begin /* C1 - Búsqueda de interviniente autorizado(consulta principal) por id único de persona*/
 		insert into #Personas
-			select	Per_Numero,	Per_Numero,	@Str_Vacio
+			select	Per_Numero,	Per_Numero,	@Str_Vacio,	@Str_Vacio,	@Str_Vacio
 				from SOPERSON noholdlock
 				where	Per_Numero in(select	aut.Per_Numero
 										from #PersonasAutorizadas aut)
@@ -185,10 +199,39 @@ if @Tip_ConTip = @Str_C begin
 					Per_TipFir	= @Tip_FirA
 			end else begin
 				update #Personas set
+					Per_CobTip	= Cob_Tipo,
+					Per_CobNom	= Cob_Nombre
+					from CHCOTBEN noholdlock 
+					where	Cob_Cuenta	= @Cue_Numero
+					  and	Cob_Person	= Per_Person
+					  and	Cob_Tipo	= @Tip_TerAut
+
+			  --Se consigue el consecutivo del registro actual válido para poder actualizar los tipos de firma de acuerdo al registro vigente y o adicionales
+			  	select @Fof_MaxCon	= convert(smallint, max(Fof_Consec))
+					from CHPEFOFI noholdlock
+					where	Fof_Cuenta	= @Cue_Numero
+					  and	Fof_Status	= @Sta_FirEsc
+					  and	Fof_Tipo	= @Tip_ReFiNu
+			
+				update #Personas set
 					Per_TipFir	= Fof_TipFir
 					from CHPEFOFI noholdlock					
 					where	Fof_Cuenta	= @Cue_Numero
-					  and	Fof_Person	= Per_Person			
+					  and	Fof_Person	= Per_Person
+					  and	Fof_Status	= @Sta_FirEsc
+					  and	convert(smallint, Fof_Consec)	>= @Fof_MaxCon
+					  
+				--Complementar el tipo de firma con aquellos casos de terceros autorizados que no tengan el número de persona asociado en el registro de CHPEFOFI infiriéndolo de CHCOTBEN
+				update #Personas set
+					Per_TipFir	= Fof_TipFir
+					from CHPEFOFI noholdlock
+					where	Fof_Cuenta	= @Cue_Numero
+					  and	ltrim(Fof_Person) is null
+					  and	Fof_Status	= @Sta_FirEsc
+					  and	convert(smallint, Fof_Consec)	>= @Fof_MaxCon
+					  and	ltrim(Per_Person) is not null
+					  and	Per_CobNom	= Fof_Nombre
+					  and	ltrim(Per_TipFir) is null
 			end
 		end
 		
@@ -205,7 +248,7 @@ end else begin
 	if @Tip_ConCon	= @Str_Uno begin /* L1 - Búsqueda de personas autorizadas ligadas a configuración por nombre completo*/
 		if isnull(@Per_Comple, @Str_Vacio) = @Str_Vacio begin
 			insert into #Personas
-				select	Per_Numero,	Per_Numero, @Str_Vacio
+				select	Per_Numero,	Per_Numero, @Str_Vacio,	@Str_Vacio,	@Str_Vacio
 					from SOPERSON noholdlock
 					where	Per_Numero in(select	aut.Per_Numero
 											from #PersonasAutorizadas aut)
@@ -213,7 +256,7 @@ end else begin
 			select	@Per_Comple	= ltrim(isnull(@Per_Comple, @Str_Vacio)) + @Str_Porcie
 			
 			insert into #Personas
-				select	Per_Numero,	Per_Numero, @Str_Vacio
+				select	Per_Numero,	Per_Numero, @Str_Vacio,	@Str_Vacio,	@Str_Vacio
 					from SOPERSON noholdlock
 					where	Per_Numero in(select	aut.Per_Numero
 											from #PersonasAutorizadas aut)
@@ -232,10 +275,39 @@ end else begin
 					Per_TipFir	= @Tip_FirA
 			end else begin 
 				update #Personas set
+					Per_CobTip	= Cob_Tipo,
+					Per_CobNom	= Cob_Nombre
+					from CHCOTBEN noholdlock 
+					where	Cob_Cuenta	= @Cue_Numero
+					  and	Cob_Person	= Per_Person
+					  and	Cob_Tipo	= @Tip_TerAut
+			
+				--Se consigue el consecutivo del registro actual válido para poder actualizar los tipos de firma de acuerdo al registro vigente y o adicionales
+			  	select @Fof_MaxCon	= convert(smallint, max(Fof_Consec))
+					from CHPEFOFI noholdlock
+					where	Fof_Cuenta	= @Cue_Numero
+					  and	Fof_Status	= @Sta_FirEsc
+					  and	Fof_Tipo	= @Tip_ReFiNu
+
+				update #Personas set
 					Per_TipFir	= Fof_TipFir
 					from CHPEFOFI noholdlock					
 					where	Fof_Cuenta	= @Cue_Numero
 					  and	Fof_Person	= Per_Person			
+					  and	Fof_Status	= @Sta_FirEsc
+					  and	convert(smallint, Fof_Consec)	>= @Fof_MaxCon
+					  
+				--Complementar el tipo de firma con aquellos casos de terceros autorizados que no tengan el número de persona asociado en el registro de CHPEFOFI infiriéndolo de CHCOTBEN
+				update #Personas set
+					Per_TipFir	= Fof_TipFir
+					from CHPEFOFI noholdlock
+					where	Fof_Cuenta	= @Cue_Numero
+					  and	ltrim(Fof_Person) is null
+					  and	Fof_Status	= @Sta_FirEsc
+					  and	convert(smallint, Fof_Consec)	>= @Fof_MaxCon
+					  and	ltrim(Per_Person) is not null
+					  and	Per_CobNom	= Fof_Nombre
+					  and	ltrim(Per_TipFir) is null
 			end
 		end		
 			
