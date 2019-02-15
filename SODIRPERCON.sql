@@ -17,6 +17,10 @@ as
 /***************************************************************************
 ** Descripción:	 Consulta de Direccion Persona							****
 ****************************************************************************
+** Modifico:	Marcell Moreno											****
+** Fecha:		14-02-2019												****
+** Help:		001187875												****
+****************************************************************************
 ** Modifico:		Norma Tijerina											****
 ** Fecha:		05-05-2017												****
 ** Help:		00946339												****
@@ -37,7 +41,13 @@ declare	@Str_Vacio	char(1),
 		@Por_LlaPri	char(1),
 		@Tip_Ppal	char(1),
 		@Tip_Adicio	char(1),
-		@Str_A		char(1)
+		@Str_A		char(1),
+		@Str_Uno    char(1),   
+		@Str_Dos    char(1),
+		@Str_Tres   char(1),
+		@Str_Cuatro char(1),
+		@Ent_Uno    int,
+		@Ent_Dos    int
 
 										/* Asignación de constantes */
 select	@Str_Vacio	= '',				/* String vacío */
@@ -45,15 +55,21 @@ select	@Str_Vacio	= '',				/* String vacío */
 		@Con_Listas	= 'L',				/* Tipo: Lista */
 		@Tip_Ppal	= '1',
 		@Tip_Adicio	= '0',
-		@Str_A		= 'A'
+		@Str_A		= 'A',
+		@Str_Uno    = '1',              /*String del numero 1*/
+		@Str_Dos    = '2',              /*String del numero 2*/
+		@Str_Tres   = '3',              /*String del numero 3*/
+		@Str_Cuatro = '4',              /*String del numero 4*/
+		@Ent_Uno    =  1,               /*Entero del numero 1*/
+		@Ent_Dos    =  2                /*Entero del numero 2*/
 		
-select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
-		@Tip_ConCon	= substring(@Tip_Consul, 2, 1)
+select	@Tip_ConTip	= substring(@Tip_Consul, @Ent_Uno, @Ent_Uno),
+		@Tip_ConCon	= substring(@Tip_Consul, @Ent_Dos, @Ent_Uno)
 
 /* Consulta a Descripcion */
 if @Tip_ConTip = @Con_Consul begin		/* Consultas */
 
-	if @Tip_ConCon = '1' begin	/* Consulta por persona */
+	if @Tip_ConCon = @Str_Uno begin	/* Consulta por persona */
 
 		select	PerPersoID,	ClClientID,	Dip_TipDir,	Dip_Calle,	Dip_NumExt,
 				Dip_NumInt,	Dip_NumCP,	Dip_EntCa1,	Dip_EntCa2,	Dip_Refere,
@@ -63,7 +79,7 @@ if @Tip_ConTip = @Con_Consul begin		/* Consultas */
 			and		Dip_Status = @Str_A
 	end
 	
-	if @Tip_ConCon = '2' begin	/* Consulta por cliente  */
+	if @Tip_ConCon = @Str_Dos begin	/* Consulta por cliente  */
 
 		select	PerPersoID,	ClClientID,	Dip_TipDir,	Dip_Calle,	Dip_NumExt,
 				Dip_NumInt,	Dip_NumCP,	Dip_EntCa1,	Dip_EntCa2,	Dip_Refere,
@@ -73,7 +89,7 @@ if @Tip_ConTip = @Con_Consul begin		/* Consultas */
 			and 	Dip_Status = @Str_A
 	end
 	
-	if @Tip_ConCon = '3' begin	/* Consulta de Direccion Por Indices */
+	if @Tip_ConCon = @Str_Tres begin	/* Consulta de Direccion Por Indices */
 
 		select	PerPersoID,	ClClientID,	Dip_TipDir,	Dip_Calle,	Dip_NumExt,
 				Dip_NumInt,	Dip_NumCP,	Dip_EntCa1,	Dip_EntCa2,	Dip_Refere,
@@ -85,17 +101,29 @@ if @Tip_ConTip = @Con_Consul begin		/* Consultas */
 			and		Dip_TipDir 		= @Dip_TipDir 
 					 
 	end
+	
+	if @Tip_ConCon = @Str_Cuatro begin	/* Consulta de Direccion Por Indices */
+
+		select	PerPersoID,	ClClientID,	Dip_TipDir,	Dip_Calle,	Dip_NumExt,
+				Dip_NumInt,	Dip_NumCP,	Dip_EntCa1,	Dip_EntCa2,	Dip_Refere,
+				Dip_Status
+			from SODIRPER noholdlock
+			inner join SOCATIDI noholdlock on  Ctd_Numero  = Dip_TipDir
+			and		ClClientID  	= @ClClientID 
+			and		Dip_TipDir 		= @Dip_TipDir 
+					 
+	end
 
 end else if @Tip_ConTip = @Con_Listas begin	/* Listas */
 
-	if @Tip_ConCon = '1' begin	/* Lista por llave principal */
+	if @Tip_ConCon = @Str_Uno begin	/* Lista por llave principal */
 		select	PerPersoID,	ClClientID,	Dip_TipDir,	Dip_Calle,	Dip_NumExt,
 				Dip_NumInt,	Dip_NumCP,	Dip_EntCa1,	Dip_EntCa2,	Dip_Refere,
 				Dip_Status
 			from SODIRPER noholdlock
 			 where	Dip_Status = @Str_A
 	end
-	if @Tip_ConCon = '2' begin	/* Lista de direcciones adicionales por llave principal */
+	if @Tip_ConCon = @Str_Dos begin	/* Lista de direcciones adicionales por llave principal */
 		select	PerPersoID,	ClClientID,	Dip_TipDir,	Dip_Calle,	Dip_NumExt,
 				Dip_NumInt,	Dip_NumCP,	Dip_EntCa1,	Dip_EntCa2,	Dip_Refere,
 				Dip_Status
