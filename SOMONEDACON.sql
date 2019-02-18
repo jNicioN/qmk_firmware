@@ -22,6 +22,11 @@ as
 
 /*
 ****************************************************************************
+** Modifico:	Francisco Mora											****
+** Fecha:		11/Oct/18												****
+** HelpDesk:	1071093													****
+** Descripcion:	Agrega consulta monedas tradair L8						****
+****************************************************************************
 ** Modifico:	Felipe Castillo Rendon									****
 ** Fecha:		12/Abr/18												****
 ** HelpDesk:	1105258													****
@@ -271,7 +276,9 @@ declare	@Str_Vacio	char(1),
 		@Ent_Uno	int,			/*	Constante entero uno	*/
 		@Ent_Dos	int,			/*	Constante entero dos	*/
 		@Ent_Tres	int,			/*	Constante entero tres	*/
-		@Str_N		char(1)			/*	Cadena con valor N	*/
+		@Str_N		char(1),		/*	Cadena con valor N	*/
+		@Con_LisTra	char(1),
+		@Mon_NumMxn	char(2)
 
 /* Asignacion de valores a constantes */
 select	@Str_Vacio	= '',				/* String Vacio */
@@ -316,7 +323,9 @@ select	@Str_Vacio	= '',				/* String Vacio */
 		@Ent_Uno	= 1,
 		@Ent_Dos	= 2,
 		@Ent_Tres	= 3,
-		@Str_N		= 'N'
+		@Str_N		= 'N',
+		@Con_LisTra	= '8',				/* Consulta de lista de monedas de cambio de tradair */
+		@Mon_NumMxn	= '01'				/*	Numero de moneda para pesos */
 		
 		
 select	@Par_FecAct	= Par_FecAct
@@ -606,6 +615,13 @@ end else begin			/* Cliente:  Visual Basic */
 				where	Mon_Descri like @Mon_Descri
 				  and	Mon_OpeCam	= @Ope_MonCam
 				   or	Mon_Numero	= @Mon_Pesos
+				order by Mon_Numero
+		end else if @Tip_ConCon = @Con_LisTra begin		/* Lista de monedas de cambio de tradair */
+			select  Mon_Numero,	Mon_Descri,	Mon_Simbol, Mon_AbrISO 
+				from SOMONEDA noholdlock
+				where	Mon_Descri like @Mon_Descri
+				  and	Mon_OpeCam	= @Ope_MonCam 
+				  or	Mon_Numero	= @Mon_NumMxn
 				order by Mon_Numero
 		end
 	end
