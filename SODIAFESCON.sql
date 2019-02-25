@@ -17,6 +17,12 @@ as
 ****************************************************************************
 ** REFERENCIAS:															****
 ****************************************************************************
+** Modifico:		Arely Dominguez										****
+** Fecha:			14/Febrero/2019										****
+** Descripcion: 	Se crea consulta para verificar si el dia actual    ****
+**					es festivo											****
+** Requisicion:		1202372												****
+****************************************************************************
 ** Modifico:		Guillmar Illescas López								****
 ** Fecha:			22/Noviembre/2016									****
 ** Descripcion: 	Se crea para realizar consultas por fechas SODIAFES	****
@@ -69,6 +75,11 @@ end else begin			/* Cliente:  Visual Basic */
 			select	Dfe_Fecha,	Dfe_Coment
 				from SODIAFES noholdlock
 				where	Dfe_Fecha	= @Dfe_Fecha
+		end
+		if @Tip_ConCon = @Str_Dos begin		/*Consulta dia Actual*/
+			select	Dfe_Fecha,	Dfe_Coment
+				from SODIAFES noholdlock
+				where	Dfe_Fecha	= convert(char(10), getdate(), 112)
 		end
 	end else begin					/* 'L':  Lista */
 		if @Tip_ConCon = @Str_Uno begin			/* Lista General */
