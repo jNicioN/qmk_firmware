@@ -1,4 +1,4 @@
-create procedure SOESFITIPRO (
+﻿create procedure SOESFITIPRO (
 	@Eft_TipFor	int,
 	@Eft_ClEsFi	int,
 	@Eft_EsFin1	int,
@@ -18,7 +18,12 @@ create procedure SOESFITIPRO (
 as
 /****************************************************************/
 /* DESCRIPCION: Proceso de Estados Financieros Tipo Cuenta		*/
-/****************************************************************/
+/****************************************************************
+** Modifica:		Edwin Santiago                     	        **
+** Fecha:			27/11/2018                               	**
+** Descripcion:		Se agrega TIPO H							**
+** Help:			1074432 					 				**
+*****************************************************************/
 /** Modifico:		Victor Osorio								*/
 /** Fecha:			20/09/2017                               	*/
 /** Descripcion:	Se agrega proceso G para reporte caratula	*/
@@ -58,6 +63,7 @@ declare	@Tip_ProA char(1),		/* Caracter A */
 		@Tip_ProE char(1),		/* Caracter E */
 		@Tip_ProF char(1),		/* Caracter F */
 		@Tip_ProG char(1),		/* Caracter G */
+		@Tip_ProH char(1),		/* Caracter H */
 		@Tip_A char(1),			/* Caracter tipo A */
 		@Tip_E char(1),			/* Caracter tipo E */
 		@Ent_Cero	int,		/* Entero Cero */
@@ -69,8 +75,10 @@ declare	@Tip_ProA char(1),		/* Caracter A */
 		@Cha_Vacio	char(1),	/* Char vacio */
 		@Tip_C2		char(2),	/* Char C2 */
 		@Tip_C4 	char(2),	/* Char C4 */
-		@Tip_C6		char(2)		/* Char C6 */
+		@Tip_C6		char(2),	/* Char C6 */
+		@Tip_C7		char(2)		/* Char C7 */
 
+/* Asignacion de Constantes */
 select	@Ent_Cero	= 0,
 		@Ent_Uno	= 1,
 		@Bit_Si		= 1,
@@ -84,6 +92,7 @@ select	@Ent_Cero	= 0,
 		@Tip_ProE	= 'E',
 		@Tip_ProF	= 'F',
 		@Tip_ProG	= 'G',
+		@Tip_ProH	= 'H',
 		@Cha_Vacio	= '',
 		@Esf_EfiNu1 = 0,
 		@Esf_EfiNu2 = 0,
@@ -100,7 +109,8 @@ select	@Ent_Cero	= 0,
 		@Esf_MesFin3 = 0,
 		@Tip_C2 = 'C2',
 		@Tip_C4 = 'C4',
-		@Tip_C6 = 'C6'
+		@Tip_C6 = 'C6',
+		@Tip_C7 = 'C7'
 			
 		
 select	@Ent_Cuenta = @Ent_Uno,
@@ -136,13 +146,13 @@ if @Tip_Proces = @Tip_ProA begin
 		Eft_Numero	int,
 		Eft_EsFin1	int,
 		Eft_Valor1	money,
-		Eft_Porce1	money,
+		Eft_Porce1	money null,
 		Eft_EsFin2	int,
 		Eft_Valor2	money,
-		Eft_Porce2	money,
+		Eft_Porce2	money null,
 		Eft_EsFin3	int,
 		Eft_Valor3	money,
-		Eft_Porce3	money,
+		Eft_Porce3	money null,
 		Eft_Indice	int,
 		Eft_TipAna	int null,
 		Eft_TieAn1  bit not null,
@@ -261,7 +271,7 @@ if @Tip_Proces = @Tip_ProA begin
 				 on Eft_TipCue = Cue_TipCue
 				and Eft_EstFin = @Eft_EsFin1
 
-	if @Eft_EsFin1 > 0 begin
+	if @Eft_EsFin1 > @Ent_Cero begin
 		update #CueEEFF set
 			Eft_TieAn1	= Eft_TieAna,
 			Eft_ParAc1	= Eft_ParAct
@@ -270,7 +280,7 @@ if @Tip_Proces = @Tip_ProA begin
 			  and SOESFITI.Eft_TipCue = #CueEEFF.Eft_TipCue
 	end
 
-	if @Eft_EsFin2 > 0 begin
+	if @Eft_EsFin2 > @Ent_Cero begin
 		update #CueEEFF set
 			Eft_Valor2	= Eft_Valor,
 			Eft_Porce2	= Eft_Porcen,
@@ -281,7 +291,7 @@ if @Tip_Proces = @Tip_ProA begin
 			  and SOESFITI.Eft_TipCue = #CueEEFF.Eft_TipCue
 	end
 
-	if @Eft_EsFin3 > 0 begin
+	if @Eft_EsFin3 > @Ent_Cero begin
 		update #CueEEFF set
 			Eft_Valor3	= Eft_Valor,
 			Eft_Porce3	= Eft_Porcen,
@@ -424,6 +434,7 @@ end else if @Tip_Proces = @Tip_ProD begin
 		Eft_Indice	int,
 		Eft_Numero	int,
 		Eft_EsFin1	int,
+		Esf_CoAct1  int null,
 		Eft_AplIc1	bit not null,
 		Eff_Icap1	numeric(10,2) null,
 		EFf_CapNe1	numeric(10,2) null,
@@ -432,6 +443,7 @@ end else if @Tip_Proces = @Tip_ProD begin
 		Esf_TipLi1	int  null,
 		Esf_TipEf1	int  null,
 		Eft_EsFin2	int,
+		Esf_CoAct2  int  null,
 		Eft_AplIc2	bit not null,
 		Eff_Icap2	numeric(10,2) null,
 		EFf_CapNe2	numeric(10,2) null,
@@ -440,6 +452,7 @@ end else if @Tip_Proces = @Tip_ProD begin
 		Esf_TipLi2	int  null,
 		Esf_TipEf2	int  null,
 		Eft_EsFin3	int,
+		Esf_CoAct3  int null,
 		Eft_AplIc3	bit not null,
 		Eff_Icap3	numeric(10,2) null,
 		EFf_CapNe3	numeric(10,2) null,
@@ -479,16 +492,17 @@ end else if @Tip_Proces = @Tip_ProD begin
 	insert into #EeffAdi
 		select	Cue_Report, Cue_PaTiCu, Cue_TipCue,	Cue_Descri,
 				Cue_Visibl, Cue_Indice, isnull(Eft_Numero, @Ent_Cero),
-				@Eft_EsFin1, @Bit_No, @Mon_Cero, @Mon_Cero, @Mon_Cero, @Ent_Cero, @Ent_Cero, @Ent_Cero,
-				@Eft_EsFin2, @Bit_No, @Mon_Cero, @Mon_Cero, @Mon_Cero, @Ent_Cero, @Ent_Cero, @Ent_Cero,
-				@Eft_EsFin3, @Bit_No, @Mon_Cero, @Mon_Cero, @Mon_Cero, @Ent_Cero, @Ent_Cero, @Ent_Cero
+				@Eft_EsFin1, @Mon_Cero, @Bit_No, @Mon_Cero, @Mon_Cero, @Mon_Cero, @Ent_Cero, @Ent_Cero, @Ent_Cero,
+				@Eft_EsFin2, @Mon_Cero,	@Bit_No, @Mon_Cero, @Mon_Cero, @Mon_Cero, @Ent_Cero, @Ent_Cero, @Ent_Cero,
+				@Eft_EsFin3, @Mon_Cero,	@Bit_No, @Mon_Cero, @Mon_Cero, @Mon_Cero, @Ent_Cero, @Ent_Cero, @Ent_Cero
 			from #CuentasAdi
 			left join SOESFITI noholdlock 
 				 on Eft_TipCue = Cue_TipCue
 				and Eft_EstFin = @Eft_EsFin1
 
-	if @Eft_EsFin1 > 0 begin
+	if @Eft_EsFin1 > @Ent_Cero begin
 		update #EeffAdi set
+			Esf_CoAct1  = Esf_CoAct,
 			Eft_AplIc1	= Esf_AplIca,
 			Eff_Icap1	= Esf_Icap,
 			EFf_CapNe1	= Esf_CapNet,
@@ -500,8 +514,9 @@ end else if @Tip_Proces = @Tip_ProD begin
 			where Esf_Numero = @Eft_EsFin1
 	end
 
-	if @Eft_EsFin2 > 0 begin
+	if @Eft_EsFin2 > @Ent_Cero begin
 		update #EeffAdi set
+			Esf_CoAct2  = Esf_CoAct,
 			Eft_AplIc2	= Esf_AplIca,
 			Eff_Icap2	= Esf_Icap,
 			EFf_CapNe2	= Esf_CapNet,
@@ -513,8 +528,9 @@ end else if @Tip_Proces = @Tip_ProD begin
 			where Esf_Numero = @Eft_EsFin2
 	end
 
-	if @Eft_EsFin3 > 0 begin
+	if @Eft_EsFin3 > @Ent_Cero begin
 		update #EeffAdi set
+			Esf_CoAct3  = Esf_CoAct,
 			Eft_AplIc3	= Esf_AplIca,
 			Eff_Icap3	= Esf_Icap,
 			EFf_CapNe3	= Esf_CapNet,
@@ -526,14 +542,13 @@ end else if @Tip_Proces = @Tip_ProD begin
 			where  Esf_Numero = @Eft_EsFin3
 	end
 
-	select	Eft_TipCue,	Eft_Descri,	Eft_Visibl,	Eft_Indice,
-			Eft_Numero,	Eft_EsFin1,	Eft_AplIc1,	Eff_Icap1,
-			EFf_CapNe1,	Esf_AcSuR1,	Esf_TipSo1,	Esf_TipLi1,
-			Esf_TipEf1,	Eft_EsFin2,	Eft_AplIc2,	Eff_Icap2,
-			EFf_CapNe2,	Esf_AcSuR2,	Esf_TipSo2,	Esf_TipLi2,
-			Esf_TipEf2,	Eft_EsFin3,	Eft_AplIc3,	Eff_Icap3,
-			EFf_CapNe3,	Esf_AcSuR3,	Esf_TipSo3,	Esf_TipLi3,
-			Esf_TipEf3
+	select	Eft_TipCue,	Eft_Descri,	Eft_Visibl,	Eft_Indice,	Eft_Numero,	
+			Eft_EsFin1,	Esf_CoAct1,	Eft_AplIc1,	Eff_Icap1,	EFf_CapNe1,	
+			Esf_AcSuR1,	Esf_TipSo1,	Esf_TipLi1,Esf_TipEf1,	Eft_EsFin2,
+			Esf_CoAct2,	Eft_AplIc2,	Eff_Icap2,EFf_CapNe2,	Esf_AcSuR2,	
+			Esf_TipSo2,	Esf_TipLi2,	Esf_TipEf2,	Eft_EsFin3,	Esf_CoAct3,
+			Eft_AplIc3,	Eff_Icap3,	EFf_CapNe3,	Esf_AcSuR3,	Esf_TipSo3,	
+			Esf_TipLi3,	Esf_TipEf3
 		from #EeffAdi
 		where Eft_Visibl	= @Bit_Si
 	order by Eft_Indice
@@ -685,7 +700,7 @@ end else if @Tip_Proces = @Tip_ProE begin		/* EEFF Gobierno */
 				 on Eft_TipCue = Cgo_TipCue
 				and Eft_EstFin = @Eft_EsFin1
 
-	if @Eft_EsFin2 > 0 begin
+	if @Eft_EsFin2 > @Ent_Cero begin
 		update #CuentasEstadosGobierno set
 			Cef_Valor2	= Eft_Valor,
 			Cef_Porce2	= Eft_Porcen
@@ -694,7 +709,7 @@ end else if @Tip_Proces = @Tip_ProE begin		/* EEFF Gobierno */
 			  and SOESFITI.Eft_TipCue = #CuentasEstadosGobierno.Cef_TipCue
 	end
 
-	if @Eft_EsFin3 > 0 begin
+	if @Eft_EsFin3 > @Ent_Cero begin
 		update #CuentasEstadosGobierno set
 			Cef_Valor3	= Eft_Valor,
 			Cef_Porce3	= Eft_Porcen
@@ -703,7 +718,7 @@ end else if @Tip_Proces = @Tip_ProE begin		/* EEFF Gobierno */
 			  and SOESFITI.Eft_TipCue = #CuentasEstadosGobierno.Cef_TipCue
 	end
 
-	if @Eft_EsFin4 > 0 begin
+	if @Eft_EsFin4 > @Ent_Cero begin
 		update #CuentasEstadosGobierno set
 			Cef_Valor4	= Eft_Valor,
 			Cef_Porce4	= Eft_Porcen
@@ -841,4 +856,46 @@ end	else if @Tip_Proces = @Tip_ProG begin
 		order by Eft_Indice
 
 	drop table #CuentaValorEeff, #CuentaReporte
+end	else if @Tip_Proces = @Tip_ProH begin /*busca el estado financiero anterior con el mismo periodo de tiempo*/
+	
+	select @Esf_PerNum = Esf_PerNum
+			from SOESTFIN efn noholdlock
+				where Esf_Numero = @Eft_EsFin1
+
+	select @Esf_SolNum = Esf_Solici
+			from SOESTFIN efn noholdlock
+				where Esf_Numero = @Eft_EsFin1
+	
+	if @Eft_EsFin1 > @Ent_Cero begin
+		exec SOESTFINCON @Eft_EsFin1, @Esf_PerNum, @Esf_SolNum, @Ent_Cero, 
+			@Cha_Vacio, @Ent_Cero, @Ent_Cero, @Esf_EfiNu1 output, @Tip_C7, @NumTransac, @Transaccio, @Usuario,
+			@FechaSis, @SucOrigen, @SucDestino, @Modulo
+	end
+	if @Eft_EsFin2 > @Ent_Cero begin
+		exec SOESTFINCON @Eft_EsFin2, @Esf_PerNum, @Esf_SolNum, @Ent_Cero,
+			@Cha_Vacio, @Ent_Cero, @Ent_Cero, @Esf_EfiNu2 output, @Tip_C7, @NumTransac, @Transaccio, @Usuario,
+			@FechaSis, @SucOrigen, @SucDestino, @Modulo
+	end
+	if @Eft_EsFin3 > @Ent_Cero begin
+		exec SOESTFINCON @Eft_EsFin3, @Esf_PerNum, @Esf_SolNum, @Ent_Cero,
+			@Cha_Vacio, @Ent_Cero, @Ent_Cero, @Esf_EfiNu3 output, @Tip_C7, @NumTransac, @Transaccio, @Usuario, 
+			@FechaSis, @SucOrigen, @SucDestino, @Modulo
+	end
+	if @Eft_EsFin4 > @Ent_Cero begin
+		exec SOESTFINCON @Eft_EsFin4, @Esf_PerNum, @Esf_SolNum, @Ent_Cero, 
+			@Cha_Vacio, @Ent_Cero, @Ent_Cero, @Esf_EfiNu4 output, @Tip_C7, @NumTransac, @Transaccio, @Usuario, 
+			@FechaSis, @SucOrigen, @SucDestino, @Modulo
+	end
+
+	exec @Status = SOESFITIPRO @Eft_TipFor, @Eft_ClEsFi, @Esf_EfiNu1, @Esf_EfiNu2, @Esf_EfiNu3, @Esf_EfiNu4, @Tip_A,
+		@NumTransac, @Transaccio, @Usuario, @FechaSis, @SucOrigen, @SucDestino, @Modulo
+
+	if @Status <> @Ent_Cero begin
+		select	Err_Codigo	= '000001',
+				Err_Mensaj	= 'Error en proceso de Estados Financieros'
+
+		rollback
+		return @Ent_Uno
+	end
+	
 end
