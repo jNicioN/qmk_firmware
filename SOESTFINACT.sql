@@ -1,4 +1,4 @@
-﻿create procedure SOESTFINACT (
+create procedure SOESTFINACT (
    @Esf_Numero	int,
    @Esf_PerNum	int, 
    @Esf_Solici	int,
