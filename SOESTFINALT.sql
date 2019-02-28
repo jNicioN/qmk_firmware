@@ -1,4 +1,4 @@
-create procedure SOESTFINALT (
+﻿create procedure SOESTFINALT (
    @Esf_Numero int,
    @Esf_TipFor int,
    @Esf_Anio int,

@@ -1,4 +1,4 @@
-create procedure SOESFITIPRO (
+﻿create procedure SOESFITIPRO (
 	@Eft_TipFor	int,
 	@Eft_ClEsFi	int,
 	@Eft_EsFin1	int,

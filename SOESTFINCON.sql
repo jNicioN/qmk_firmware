@@ -1,4 +1,4 @@
-create procedure SOESTFINCON (
+﻿create procedure SOESTFINCON (
    @Esf_Numero int,
    @Esf_PerNum int, 
    @Esf_Solici int,
