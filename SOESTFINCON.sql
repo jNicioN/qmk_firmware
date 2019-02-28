@@ -21,12 +21,12 @@
 /*******************************************************************
 ** DESCRIPCION: Consulta de registros de estados financieros      **
 ********************************************************************
-** Modifica:		Jose Eduardo Sanchez Mendez                   **
+** Modifica:		Edwin Dennis 				                  **
 ** Fecha:			27/11/2018                               	  **
 ** Descripcion:		Se puede filtrar por numero de persona        **
 ** 					validando si es de tipo estado financiero 	  **
 **					y regulada L6,Se agrega consulta C7 Y C8	  **
-** Help: 1074432		 					 			     	  **
+** Help: 			1074432		 					 			   **
 ********************************************************************
 ** Modifica:		Edwin Santiago                     	          **
 ** Fecha:			21/09/2018                               	  **
