@@ -21,7 +21,7 @@
 /*******************************************************************
 ** DESCRIPCION: Consulta de registros de estados financieros      **
 ********************************************************************
-** Modifica:		Edwin Dennis 				                  **
+** Modifica:		Edwin Santiago 				                  **
 ** Fecha:			27/11/2018                               	  **
 ** Descripcion:		Se puede filtrar por numero de persona        **
 ** 					validando si es de tipo estado financiero 	  **
