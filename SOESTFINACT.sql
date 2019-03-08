@@ -1,11 +1,11 @@
-﻿create procedure SOESTFINACT (
+create procedure SOESTFINACT (
    @Esf_Numero	int,
    @Esf_PerNum	int, 
    @Esf_Solici	int,
    @Tic_ClEsFi	int,
    @Esf_Filtro	varchar(1000),
    @Esf_EsEsFi	int,
-   @Esf_CoAct  int,
+   @Esf_ConAct  int,
    @Esf_AplIca	bit,
    @Esf_Icap	numeric(10,2),
    @Esf_CapNet	numeric(10,2),
@@ -30,7 +30,7 @@ as
 /****************************************************************/
 /** Modifico:	Edwin Santiago								    */
 /** Fecha:		27/11/2018                               		*/
-/** Descripcion: Se agrega campo Eft_CoAct						*/
+/** Descripcion: Se agrega campo Esf_ConAct						*/
 /** Help:		1074432 					 					*/
 /****************************************************************/
 /** Creo:		Felipe Castillo									*/
@@ -43,8 +43,10 @@ declare @Str_Filtro varchar(1000), 	/*Filtro*/
 		@Ent_Posici numeric(20),   	/*Posicion*/
 		@Str_EstFin varchar(50),   	/*Estado Financiero*/
 		@Str_Vacio varchar(2),     	/*String vacio*/
-		@Str_Coma varchar(2),       /*String coma*/
-		@Tip_ActA	char(1), 		/*	Actualiza el valor de status para visualizar o no el estado financiero*/
+		@Str_Coma varchar(2)       /*String coma*/
+		
+/* Declaracion de constantes*/
+declare	@Tip_ActA	char(1), 		/*	Actualiza el valor de status para visualizar o no el estado financiero*/
 		@Tip_ActB	char(1), 		/*  Tipo de Actualizacion B*/
 		@Tip_ActC	char(1), 		/*  Tipo de Actualizacion C*/
 		@Tip_ActD	char(1), 		/*  Tipo de Actualizacion D*/
@@ -52,7 +54,7 @@ declare @Str_Filtro varchar(1000), 	/*Filtro*/
 		@Ent_Cero	int,     		/*  ENTERO CERO*/
 		@Ent_Uno	int      		/*  ENTERO UNO*/
 
-/* Asignacion de variables */
+/* Asignacion de Constantes */
 select	@Tip_ActA = 'A',	
 		@Tip_ActB = 'B',    
 		@Tip_ActC = 'C',	
@@ -126,7 +128,7 @@ end
 
 if @Tip_Actual = @Tip_ActC begin
 	update SOESTFIN set
-		Esf_CoAct   = @Esf_CoAct,
+		Esf_ConAct   = @Esf_ConAct,
 		Esf_AplIca	= @Esf_AplIca,
 		Esf_Icap	= @Esf_Icap,
 		Esf_CapNet	= @Esf_CapNet,

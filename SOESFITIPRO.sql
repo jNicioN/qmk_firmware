@@ -1,4 +1,4 @@
-﻿create procedure SOESFITIPRO (
+create procedure SOESFITIPRO (
 	@Eft_TipFor	int,
 	@Eft_ClEsFi	int,
 	@Eft_EsFin1	int,
@@ -434,7 +434,7 @@ end else if @Tip_Proces = @Tip_ProD begin
 		Eft_Indice	int,
 		Eft_Numero	int,
 		Eft_EsFin1	int,
-		Esf_CoAct1  int null,
+		Esf_ConAct1  int null,
 		Eft_AplIc1	bit not null,
 		Eff_Icap1	numeric(10,2) null,
 		EFf_CapNe1	numeric(10,2) null,
@@ -443,7 +443,7 @@ end else if @Tip_Proces = @Tip_ProD begin
 		Esf_TipLi1	int  null,
 		Esf_TipEf1	int  null,
 		Eft_EsFin2	int,
-		Esf_CoAct2  int  null,
+		Esf_ConAct2  int  null,
 		Eft_AplIc2	bit not null,
 		Eff_Icap2	numeric(10,2) null,
 		EFf_CapNe2	numeric(10,2) null,
@@ -452,7 +452,7 @@ end else if @Tip_Proces = @Tip_ProD begin
 		Esf_TipLi2	int  null,
 		Esf_TipEf2	int  null,
 		Eft_EsFin3	int,
-		Esf_CoAct3  int null,
+		Esf_ConAct3  int null,
 		Eft_AplIc3	bit not null,
 		Eff_Icap3	numeric(10,2) null,
 		EFf_CapNe3	numeric(10,2) null,
@@ -502,7 +502,7 @@ end else if @Tip_Proces = @Tip_ProD begin
 
 	if @Eft_EsFin1 > @Ent_Cero begin
 		update #EeffAdi set
-			Esf_CoAct1  = Esf_CoAct,
+			Esf_ConAct1  = Esf_ConAct,
 			Eft_AplIc1	= Esf_AplIca,
 			Eff_Icap1	= Esf_Icap,
 			EFf_CapNe1	= Esf_CapNet,
@@ -516,7 +516,7 @@ end else if @Tip_Proces = @Tip_ProD begin
 
 	if @Eft_EsFin2 > @Ent_Cero begin
 		update #EeffAdi set
-			Esf_CoAct2  = Esf_CoAct,
+			Esf_ConAct2  = Esf_ConAct,
 			Eft_AplIc2	= Esf_AplIca,
 			Eff_Icap2	= Esf_Icap,
 			EFf_CapNe2	= Esf_CapNet,
@@ -530,7 +530,7 @@ end else if @Tip_Proces = @Tip_ProD begin
 
 	if @Eft_EsFin3 > @Ent_Cero begin
 		update #EeffAdi set
-			Esf_CoAct3  = Esf_CoAct,
+			Esf_ConAct3  = Esf_ConAct,
 			Eft_AplIc3	= Esf_AplIca,
 			Eff_Icap3	= Esf_Icap,
 			EFf_CapNe3	= Esf_CapNet,
@@ -543,10 +543,10 @@ end else if @Tip_Proces = @Tip_ProD begin
 	end
 
 	select	Eft_TipCue,	Eft_Descri,	Eft_Visibl,	Eft_Indice,	Eft_Numero,	
-			Eft_EsFin1,	Esf_CoAct1,	Eft_AplIc1,	Eff_Icap1,	EFf_CapNe1,	
+			Eft_EsFin1,	Esf_ConAct1,	Eft_AplIc1,	Eff_Icap1,	EFf_CapNe1,	
 			Esf_AcSuR1,	Esf_TipSo1,	Esf_TipLi1,Esf_TipEf1,	Eft_EsFin2,
-			Esf_CoAct2,	Eft_AplIc2,	Eff_Icap2,EFf_CapNe2,	Esf_AcSuR2,	
-			Esf_TipSo2,	Esf_TipLi2,	Esf_TipEf2,	Eft_EsFin3,	Esf_CoAct3,
+			Esf_ConAct2,	Eft_AplIc2,	Eff_Icap2,EFf_CapNe2,	Esf_AcSuR2,	
+			Esf_TipSo2,	Esf_TipLi2,	Esf_TipEf2,	Eft_EsFin3,	Esf_ConAct3,
 			Eft_AplIc3,	Eff_Icap3,	EFf_CapNe3,	Esf_AcSuR3,	Esf_TipSo3,	
 			Esf_TipLi3,	Esf_TipEf3
 		from #EeffAdi
@@ -859,37 +859,62 @@ end	else if @Tip_Proces = @Tip_ProG begin
 end	else if @Tip_Proces = @Tip_ProH begin /*busca el estado financiero anterior con el mismo periodo de tiempo*/
 	
 	select @Esf_PerNum = Esf_PerNum
-			from SOESTFIN efn noholdlock
-				where Esf_Numero = @Eft_EsFin1
+		from SOESTFIN efn noholdlock
+	where Esf_Numero = @Eft_EsFin1
 
 	select @Esf_SolNum = Esf_Solici
-			from SOESTFIN efn noholdlock
-				where Esf_Numero = @Eft_EsFin1
+		from SOESTFIN efn noholdlock
+	where Esf_Numero = @Eft_EsFin1
 	
 	if @Eft_EsFin1 > @Ent_Cero begin
-		exec SOESTFINCON @Eft_EsFin1, @Esf_PerNum, @Esf_SolNum, @Ent_Cero, 
-			@Cha_Vacio, @Ent_Cero, @Ent_Cero, @Esf_EfiNu1 output, @Tip_C7, @NumTransac, @Transaccio, @Usuario,
-			@FechaSis, @SucOrigen, @SucDestino, @Modulo
+		select	@Status	= @Ent_Cero
+		exec @Status = SOESTFINCON 
+					   @Eft_EsFin1, @Esf_PerNum, @Esf_SolNum, @Ent_Cero, 
+					   @Cha_Vacio, @Ent_Cero, @Ent_Cero, @Esf_EfiNu1 output, @Tip_C7, @NumTransac, @Transaccio, @Usuario,
+					   @FechaSis, @SucOrigen, @SucDestino, @Modulo
+		if @Status <> @Ent_Cero begin
+				rollback
+				return 1
+		end
 	end
 	if @Eft_EsFin2 > @Ent_Cero begin
-		exec SOESTFINCON @Eft_EsFin2, @Esf_PerNum, @Esf_SolNum, @Ent_Cero,
-			@Cha_Vacio, @Ent_Cero, @Ent_Cero, @Esf_EfiNu2 output, @Tip_C7, @NumTransac, @Transaccio, @Usuario,
-			@FechaSis, @SucOrigen, @SucDestino, @Modulo
+		select	@Status	= @Ent_Cero
+		exec @Status = SOESTFINCON 
+		               @Eft_EsFin2, @Esf_PerNum, @Esf_SolNum, @Ent_Cero,
+					   @Cha_Vacio, @Ent_Cero, @Ent_Cero, @Esf_EfiNu2 output, @Tip_C7, @NumTransac, @Transaccio, @Usuario,
+					   @FechaSis, @SucOrigen, @SucDestino, @Modulo
+		if @Status <> @Ent_Cero begin
+				rollback
+				return 1
+		end
 	end
 	if @Eft_EsFin3 > @Ent_Cero begin
-		exec SOESTFINCON @Eft_EsFin3, @Esf_PerNum, @Esf_SolNum, @Ent_Cero,
-			@Cha_Vacio, @Ent_Cero, @Ent_Cero, @Esf_EfiNu3 output, @Tip_C7, @NumTransac, @Transaccio, @Usuario, 
-			@FechaSis, @SucOrigen, @SucDestino, @Modulo
+		select	@Status	= @Ent_Cero
+		exec @Status = SOESTFINCON 
+		               @Eft_EsFin3, @Esf_PerNum, @Esf_SolNum, @Ent_Cero,
+					   @Cha_Vacio, @Ent_Cero, @Ent_Cero, @Esf_EfiNu3 output, @Tip_C7, @NumTransac, @Transaccio, @Usuario, 
+					   @FechaSis, @SucOrigen, @SucDestino, @Modulo
+		if @Status <> @Ent_Cero begin
+				rollback
+				return 1
+		end
 	end
 	if @Eft_EsFin4 > @Ent_Cero begin
-		exec SOESTFINCON @Eft_EsFin4, @Esf_PerNum, @Esf_SolNum, @Ent_Cero, 
-			@Cha_Vacio, @Ent_Cero, @Ent_Cero, @Esf_EfiNu4 output, @Tip_C7, @NumTransac, @Transaccio, @Usuario, 
-			@FechaSis, @SucOrigen, @SucDestino, @Modulo
+		select	@Status	= @Ent_Cero
+		exec @Status = SOESTFINCON 
+					   @Eft_EsFin4, @Esf_PerNum, @Esf_SolNum, @Ent_Cero, 
+					   @Cha_Vacio, @Ent_Cero, @Ent_Cero, @Esf_EfiNu4 output, @Tip_C7, @NumTransac, @Transaccio, @Usuario, 
+					   @FechaSis, @SucOrigen, @SucDestino, @Modulo
+		if @Status <> @Ent_Cero begin
+				rollback
+				return 1
+		end
 	end
 
-	exec @Status = SOESFITIPRO @Eft_TipFor, @Eft_ClEsFi, @Esf_EfiNu1, @Esf_EfiNu2, @Esf_EfiNu3, @Esf_EfiNu4, @Tip_A,
-		@NumTransac, @Transaccio, @Usuario, @FechaSis, @SucOrigen, @SucDestino, @Modulo
-
+	select	@Status	= @Ent_Cero
+	exec @Status = SOESFITIPRO 
+				   @Eft_TipFor, @Eft_ClEsFi, @Esf_EfiNu1, @Esf_EfiNu2, @Esf_EfiNu3, @Esf_EfiNu4, @Tip_A,
+		           @NumTransac, @Transaccio, @Usuario, @FechaSis, @SucOrigen, @SucDestino, @Modulo
 	if @Status <> @Ent_Cero begin
 		select	Err_Codigo	= '000001',
 				Err_Mensaj	= 'Error en proceso de Estados Financieros'

@@ -1,4 +1,4 @@
-﻿create procedure SOESTFINALT (
+create procedure SOESTFINALT (
    @Esf_Numero int,
    @Esf_TipFor int,
    @Esf_Anio int,
@@ -11,7 +11,7 @@
    @Esf_Solici int,
    @Esf_EsEsFi int,
    @Esf_ValInp float,
-   @Esf_CoAct  int,
+   @Esf_ConAct  int,
    @Esf_AplIca bit,
    @Esf_Icap numeric(10,2),
    @Esf_CapNet numeric(10,2),
@@ -34,7 +34,7 @@
 /****************************************************************/
 /** Modifico:	Edwin Santiago								    */
 /** Fecha:		27/11/2018                               		*/
-/** Descripcion: Se agrega campo Eft_CoAct						*/
+/** Descripcion: Se agrega campo Eft_CoActi						*/
 /** Help:		1074432 					 					*/
 /****************************************************************/
 /** Creo:		Felipe Castillo									*/
@@ -51,14 +51,14 @@ insert into SOESTFIN
 	(Esf_TipFor,	Esf_Anio,		Esf_MesIni,		Esf_MesFin,		Esf_TiEsFi, 
     Esf_ExpCif,		Esf_Moneda,		Esf_PerNum,		Esf_Solici,		Esf_EsEsFi,
 	Esf_ValInp,		Esf_AplIca,		Esf_Icap,		Esf_CapNet,		Esf_AcSuRi,
-	Esf_TipSol,		Esf_TipLiq,		Esf_TipEfi,		Esf_Status,		Esf_CoAct ,
+	Esf_TipSol,		Esf_TipLiq,		Esf_TipEfi,		Esf_Status,		Esf_ConAct ,
 	Esf_UsuCre,		Esf_FecCre,		Esf_UsuMod,		Esf_FecMod,		NumTransac,		
 	Transaccio,		Usuario,		FechaSis,		SucOrigen,		SucDestino)
 values (
 	@Esf_TipFor,	@Esf_Anio,		@Esf_MesIni,	@Esf_MesFin,	@Esf_TiEsFi,
     @Esf_ExpCif,    @Esf_Moneda,	@Esf_PerNum,	@Esf_Solici,	@Esf_EsEsFi,
 	@Esf_ValInp,    @Esf_AplIca,	@Esf_Icap,		@Esf_CapNet,	@Esf_AcSuRi,
-	@Esf_TipSol,    @Esf_TipLiq,	@Esf_TipEfi,    @Esf_Status,	@Esf_CoAct ,
+	@Esf_TipSol,    @Esf_TipLiq,	@Esf_TipEfi,    @Esf_Status,	@Esf_ConAct ,
 	@Usuario,		@FechaSis,		@Usuario,		@FechaSis,		@NumTransac,    
 	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino)
 
