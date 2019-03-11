@@ -34,7 +34,7 @@ create procedure SOESTFINALT (
 /****************************************************************/
 /** Modifico:	Edwin Santiago								    */
 /** Fecha:		27/11/2018                               		*/
-/** Descripcion: Se agrega campo Eft_CoActi						*/
+/** Descripcion: Se agrega campo Eft_ConAct						*/
 /** Help:		1074432 					 					*/
 /****************************************************************/
 /** Creo:		Felipe Castillo									*/
@@ -42,10 +42,11 @@ create procedure SOESTFINALT (
 /** Help:		929417 					 						*/
 /****************************************************************/
 
-/* Declaracion de Variables */
-DECLARE @Int_Uno int	/* Entero Uno*/
+/* Declaracion de Constantes */
+declare @Int_Uno int	/* Entero Uno*/
 
-SELECT  @Int_Uno = 1
+/* Asignacion de constantes*/
+select  @Int_Uno = 1
 
 insert into SOESTFIN 
 	(Esf_TipFor,	Esf_Anio,		Esf_MesIni,		Esf_MesFin,		Esf_TiEsFi, 
