@@ -85,7 +85,12 @@ as
 /******************************************************************/
 /** REFERENCIAS: 												  
 ********************************************************************
-** Modifico:		Armando Alexis Sepúlveda Cruz					****
+** Modifico:	Erika Báez										****
+** Fecha:		04/Marzo/2019									****
+** Help:		1191883											****
+** Descripcion: Se modifica mensaje cuando el RFC ya existe		****
+********************************************************************
+** Modifico:		Armando Alexis Sepúlveda Cruz				****
 ** Fecha:		26/Junio/2017									****
 ** Help:		991811											****
 ** Descripcion: Se elimina la concatenación de Per_Titulo en 	****
@@ -122,18 +127,15 @@ as
 ** Help:	   	371155											****
 ** Help:		Condicionar generacion de Transaccion			****
 ******************************************************************/*/
-declare	@Per_NumTra	char(10),
-		@Per_Comple	varchar(180),	/*	Declaracion de Variables	*/
-		@Per_ComOrd	varchar(180),
-		@Act_Numero	char(10),
-		@Act_Status	char(1),
-		@Status		int,
-		@PerPersoID	int,
-		@PerExist	char(8),
-		@Lon_Telefo	smallint,
-		@Tel_Comple	varchar(11),
-		@Per_ActINE	char(6),
-		@Existe		char(1)
+
+/*	Declaracion de Variables	*/
+declare	@Per_NumTra	char(10),		/*Numero de transaccion*/
+		@Per_Comple	varchar(180),	/*Nombre completo*/
+		@Per_ComOrd	varchar(180),	/*Nombre completo ordenado*/
+		@Status		int,			/*Status*/
+		@PerPersoID	int,			/*Id de persona*/
+		@Per_ActINE	char(6),		/*Numero de actividad INE*/
+		@Existe		char(1)			/*Bandera de si existe persona*/
 
 declare	@Str_Vacio	char(1),		/*	Declaracion de Constantes	*/
 		@Str_Espaci	char(1),
@@ -149,8 +151,12 @@ declare	@Str_Vacio	char(1),		/*	Declaracion de Constantes	*/
 		@Str_No123	char(6),
 		@Str_23		char(4),
 		@Lon_Fisica	int,
-		@Lon_Moral	int
+		@Lon_Moral	int,
+		@Str_Ceros	char(8),
+		@Ent_Ocho	int,
+		@Usu_Prueba	char(6)
 
+/*Asignacion de constantes*/
 select	@Str_Vacio	= '',			/* String Vacio	*/
 		@Str_Espaci	= ' ',			/* String Espacio */
 		@Per_Moral	= '1',			/* Persona Moral */
@@ -162,12 +168,15 @@ select	@Str_Vacio	= '',			/* String Vacio	*/
 		@Tip_Titula	= '1',			/* Titular */
 		@Str_Si		= 'S',			/* String Si */
 		@Str_No		= 'N',			/* String No */
-		@Str_No123	= '[^123]',
-		@Str_23		= '[23]',
-		@Lon_Fisica	= 13,
-		@Lon_Moral	= 12
+		@Str_No123	= '[^123]',		/*String 1 2 3*/
+		@Str_23		= '[23]',		/*String 2 3*/
+		@Lon_Fisica	= 13,			/*Longitud RFC perosna fisica*/
+		@Lon_Moral	= 12,			/*Longitud RFC persona moral*/
+		@Str_Ceros	='00000000',	/*String ceros*/
+		@Ent_Ocho	= 8,			/*Entero ocho*/
+		@Usu_Prueba	= '009999'		/*Usuario Pruebas*/
 
-if (@NumTransac = @Str_Vacio or isnull(@NumTransac, @Str_Vacio) = @Str_Vacio)  begin
+if (@NumTransac	= @Str_Vacio or isnull(@NumTransac, @Str_Vacio)	= @Str_Vacio) begin
 	/***** Genera el @NumTransac *****/
 	exec @Status = SYINITRANSA
 		@NumTransac output,	@SucOrigen
@@ -179,69 +188,69 @@ end
 
 select	@Per_NumTra	= @NumTransac
 
-if (@Per_Tipo = @Per_Moral) and (@Per_RazSoc = @Str_Vacio) begin
+if (@Per_Tipo	= @Per_Moral) and (@Per_RazSoc	= @Str_Vacio) begin
 	select	Err_Codigo	= '000001',
 			Err_Mensaj	= 'Proporcione la Razon social'
 	rollback
 	return 1
 end
 
-if (@Per_Tipo like @Str_23) and (@Per_Nombre = @Str_Vacio) begin
+if (@Per_Tipo like @Str_23) and (@Per_Nombre	= @Str_Vacio) begin
 	select	Err_Codigo	= '000002',
 			Err_Mensaj	= 'Proporcione el Nombre'
 	rollback
 	return 1
 end
 
-if (@Per_Tipo like @Str_23) and (@Per_ApePat = @Str_Vacio) begin
+if (@Per_Tipo like @Str_23) and (@Per_ApePat	= @Str_Vacio) begin
 	select	Err_Codigo	= '000003',
 			Err_Mensaj	= 'Proporcione el Apellido paterno'
 	rollback
 	return 1
 end
 
-if @Per_Tipo = @Per_Moral and @Per_RFC = @Str_Vacio begin
+if @Per_Tipo	= @Per_Moral and @Per_RFC	= @Str_Vacio begin
 	select	Err_Codigo	= '000004',
 			Err_Mensaj	= 'Proporcione el RFC'
 	rollback
 	return 1
 end
 
-if (@Per_Tipo = @Per_Fisica and len(ltrim(rtrim(@Per_RFC))) = @Lon_Fisica) OR
-	(@Per_Tipo = @Per_Moral and len(ltrim(rtrim(@Per_RFC))) = @Lon_Moral) begin
+if (@Per_Tipo	= @Per_Fisica and len(ltrim(rtrim(@Per_RFC)))	= @Lon_Fisica) OR
+	(@Per_Tipo	= @Per_Moral and len(ltrim(rtrim(@Per_RFC)))	= @Lon_Moral) begin
 	select	@Existe	= @Str_No
 	select	@Existe	= @Str_Si
 		from SOPERSON noholdlock
-		where	Per_RFC = ltrim(rtrim(@Per_RFC))
+		where	Per_RFC	= ltrim(rtrim(@Per_RFC))
 	
 	if @Existe	= @Str_Si begin
 		select	Err_Codigo	= '000005',
-				Err_Mensaj	= 'Ya existe persona con el RFC, favor de validar informacion'
+				Err_Mensaj	= 'Ya existe el RFC ' + @Per_RFC + ', favor de buscar por el nombre completo a la persona capturada' 
 		rollback
 		return 1
 	end
 end
 
 
-if @Per_Tipo = @Per_Moral begin
-	select	@Per_Comple	= LTrim(RTrim(@Per_RazSoc))
-	select	@Per_ComOrd	= LTrim(RTrim(@Per_RazSoc))
+if @Per_Tipo	= @Per_Moral begin
+	select	@Per_Comple	= ltrim(rtrim(@Per_RazSoc))
+	select	@Per_ComOrd	= ltrim(rtrim(@Per_RazSoc))
 end else begin
-	select	@Per_Comple	= LTrim(RTrim(@Per_ApePat)) + ' ' + LTrim(RTrim(@Per_ApeMat)) + ' ' + LTrim(RTrim(@Per_Nombre))
-	select	@Per_ComOrd	= LTrim(RTrim(@Per_Nombre)) + ' ' + LTrim(RTrim(@Per_ApePat)) + ' ' + LTrim(RTrim(@Per_ApeMat))
+	select	@Per_Comple	= ltrim(rtrim(@Per_ApePat)) + ' ' + ltrim(rtrim(@Per_ApeMat)) + ' ' + ltrim(rtrim(@Per_Nombre))
+	select	@Per_ComOrd	= ltrim(rtrim(@Per_Nombre)) + ' ' + ltrim(rtrim(@Per_ApePat)) + ' ' + ltrim(rtrim(@Per_ApeMat))
 end
 
 exec @Status	= SOFOLIOSACT
 	@Fol_Tabla	= @Tab_Nombre,
 	@Fol_Numero	= @PerPersoID output
-if @Status <> @Ent_Cero begin
+if @Status <> 0 begin
 	rollback
 	return 1
 end
 
-select	@Per_Numero	= right('00000000' + ltrim(rtrim(convert(char, @PerPersoID))), 8)
+select	@Per_Numero	= right(@Str_Ceros + ltrim(rtrim(convert(char, @PerPersoID))), @Ent_Ocho)
 
-select	@Per_ActINE	= ''
+select	@Per_ActINE	= @Str_Vacio
 if isnull(@Per_Activi, @Str_Vacio) != @Str_Vacio begin
 	select	@Per_ActINE	= Act_NumINE
 		from CLACTIVI noholdlock
@@ -275,11 +284,16 @@ insert into SOPERADI values (
 	@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,
 	@SucDestino)
 
-exec SOUNIPERPRO
+exec @Status	= SOUNIPERPRO
 	@Per_Numero,	@NumTransac,	@Transaccio,	@Usuario,	@FechaSis,
 	@SucOrigen,		@SucDestino,	@Modulo
+	
+if @Status <> 0 begin
+	rollback
+	return 1
+end
 
-if @@nestlevel = 1 begin
+if @@nestlevel	= @Ent_Uno begin
 	select	Err_Codigo	= '000000',
 			Err_Mensaj	= 'Registro agregado',
 			Per_Numero	= @Per_Numero,
@@ -287,7 +301,7 @@ if @@nestlevel = 1 begin
 			Per_NumTra	= @Per_NumTra
 end
 
-if @Usuario = '009999' begin
+if @Usuario	= @Usu_Prueba begin
 	select	Per_Fecha	= @Per_Fecha,
 			Per_NumTra	= @Per_NumTra
 end
