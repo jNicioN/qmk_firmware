@@ -21,6 +21,13 @@ create procedure SOESTFINCON (
 /*******************************************************************
 ** DESCRIPCION: Consulta de registros de estados financieros      **
 ********************************************************************
+** Modifica:		Jose Eduardo Sanchez Mendez                   **
+** Fecha:			27/11/2018                               	  **
+** Descripcion:		Se puede filtrar por numero de persona        **
+** 					validando si es de tipo estado financiero 	  **
+**					y regulada L6,Se agrega consulta C7 Y C8	  **
+** Help: 1074432		 					 			     	  **
+********************************************************************
 ** Modifica:		Edwin Santiago                     	          **
 ** Fecha:			21/09/2018                               	  **
 ** Descripcion:		Modificacion a L2 para traer solo 3 estados   **
@@ -44,20 +51,34 @@ create procedure SOESTFINCON (
 ** Descripcion:		Se puede filtrar sin numero de solicitud en L2**
 ** Help:		929417 					 						  **
 ********************************************************************
-** Modifica:		José Eduardo Sánchez Méndez                   **
-** Fecha:			25/07/2018                               	  **
-** Descripcion:		Se puede filtrar por numero de persona        **
-** validando si es de tipo estado financiero y regulada L6        **
-** Help: 1074432		 					 			     	  **
-********************************************************************
 ** Creo:		Felipe Castillo Rendon                     		  **
 ** Fecha:		19/05/2017                               		  **
 ** Help:		929417 					 						  **
 *******************************************************************/
 
 /* Declaracion de Variables */
+declare @Status			int,           /*Estatus*/
+        @Str_PerNum 	varchar(8),	   /*Numero de la persona*/
+		@Ent_ValInp 	float,		   /* Validar Inp*/
+		@Ent_TipEFF 	int,           /* Tipo de Estado Financiero*/
+		@Ent_Mes 		int,		   /* Entero Mes*/
+		@Ent_Anio 		int,		   /* Entero Anio*/
+		@Str_EstFin 	varchar(50),   /* Cadena Estado Financiero*/
+		@Ent_Posici 	numeric(20),   /* Entero Posicion*/
+		@Ent_PerTip 	char(1),       /* Entero Persona Tipo*/
+		@Ent_InsEnt 	char(1),       /* Entero Entidad Financiera*/
+		@Ent_InsReg 	char(1),       /* Entero Institucion Registrada*/
+		@Str_Filtro 	varchar(100),  /* String filtro*/
+		@Ef_Anterio  	int,		   /* Estado Financiero Anterior*/
+        @Ef_AntParc  	int,           /* Estado Financiero Anterior Parcial*/
+        @Ef_RangoAc     int,           /* Perido de tiempo del estado financiero anterior*/
+        @Ef_RangoAn     int,           /* Perido de tiempo del estado financiero Actual*/
+		@Ent_Solici     int            /* Entero 0	solicitud */
+
+/* Declaracion de Constantes*/
 declare @Tip_ConTip char(1),
         @Tip_ConCon char(1), 
+		@Str_B char(1), 
         @Str_C char(1), 
         @Str_Uno char(1), 
         @Str_Dos char(1),
@@ -65,19 +86,27 @@ declare @Tip_ConTip char(1),
 		@Str_Cuatro char(1),
 		@Str_Cinco char(1),
 		@Str_Seis char(1),
+        @Str_Siete char(1),
+        @Str_Ocho char(1),
         @Ent_Uno int,
-        @Ent_Solici int,
-        @Ent_TipF int,
-		@EsfNum int,
+        @Ent_Dos int,
+        @Ent_Tres int,
+        @Ent_Cuatro int,
+        @Ent_Ocho   int,
+        @Ent_TipEnt int,
 		@Ent_MesFin int,
-		@Ent_InsReg char(1),
-		@Ent_InsEntFin char(1),
-        @Ent_PerTipo char(1),
         @Str_S char(1),
-        @Str_N char(1)	
-
+        @Str_N char(1)	,
+        @Str_C2 char(2),	
+        @Str_C7 char(2),	   
+		@Ent_Cero int,
+		@Str_Vacio varchar(2),
+		@Str_Coma varchar(2)
+		
+/* Asignacion de constantes*/
 select @Tip_ConTip = substring(@Tip_Consul, 1, 1),	/* Tipo de consulta */
        @Tip_ConCon = substring(@Tip_Consul, 2, 1),  /* Numero de consulta */
+       @Str_B = 'B',								/* String B */
        @Str_C = 'C',								/* String C */
        @Str_Uno = '1',								/* String 1 */
        @Str_Dos = '2',								/* String 2 */
@@ -85,28 +114,30 @@ select @Tip_ConTip = substring(@Tip_Consul, 1, 1),	/* Tipo de consulta */
 	   @Str_Cuatro = '4',							/* String 4 */
 	   @Str_Cinco = '5',							/* String 5 */
 	   @Str_Seis = '6',								/* String 6 */
+       @Str_Siete = '7',							/* String 7 */
+       @Str_Ocho  = '8',							/* String 8 */
        @Ent_Uno = 1,								/* Entero 1 */
-       @Ent_Solici = 0,								/* Entero 0	*/
-	   @Ent_TipF=518,                               /* Tipo Entidad Financiera*/
-	   @Ent_MesFin=12,								/* Mes 12 */
+       @Ent_Dos = 2,								/* Entero 2 */
+       @Ent_Tres = 3,								/* Entero 3 */
+       @Ent_Cuatro = 4,								/* Entero 4 */
+       @Ent_Ocho = 8,								/* Entero 8 */
+	   @Ent_TipEnt=518,                               /* Tipo Entidad Financiera*/
+	   @Ent_MesFin=12,								/* Mes Doce*/
 	   @Str_S='S',									/* String S*/
-	   @Str_N='N'									/* String N*/
-
-declare @Str_Filtro varchar(100),					/* Filtro cadena*/
-		@Ent_Posici numeric(20),                    /* Posicion*/
-		@Str_EstFin varchar(50),					/* Estado Financiero Cadena*/
-		@Ent_Cero int,								/* Entero Cero */
-		@Str_Vacio varchar(2),						/* Vacio */
-		@Str_Coma varchar(2),						/* Coma */
-		@Ent_Anio int,                              /* Entero Anio */
-		@Ent_Mes int,                               /* Entero Mes */
-		@Ent_TipEFF int,                            /* Tipo Entidad Financiera */
-		@Ent_ValInp float                           /* Validacion INPC */
-
-SET @Str_Filtro = @Esf_Filtro,	/* String filtro */
-		@Ent_Cero = 0,			/* Entero 0	*/
-		@Str_Vacio = '',		/* String vacio */
-		@Str_Coma = ','			/* String coma	*/
+	   @Str_N='N',									/* String N*/
+	   @Str_C2='C2',                                /* Tipo Consulta C2*/
+	   @Str_C7='C7',                                /* Tipo Consulta C7*/
+	   @Ent_Cero = 0,								/* Entero 0	*/
+	   @Str_Vacio = '',								/* String vacio */
+	   @Str_Coma = ','								/* String coma	*/
+	   
+/*Asignacion de variables*/
+select @Str_Filtro = @Esf_Filtro,					
+	   @Ef_Anterio=0,	                            
+	   @Ef_AntParc=0,								
+	   @Ef_RangoAn=0,    							
+	   @Ef_RangoAc=0,								
+	   @Ent_Solici = 0								
 		
 if @Esf_Solici > @Ent_Cero begin 
 	select @Ent_Solici = @Esf_Solici
@@ -346,10 +377,11 @@ end else if @Tip_ConCon = @Str_Cinco begin		/* C5  Obtiene EEFF de anio anterior
 	 drop table #EstadoAnterior, #EstadoAnteriorMaximo, #EstadoFinanciero
 
 end else if @Tip_ConCon = @Str_Seis begin		/* C6 */
-	select Esf_Numero, Esf_TipFor, Esf_Anio, Esf_MesIni, Esf_MesFin, Esf_TiEsFi
-				into #EstadoGobierno
-				from SOESTFIN efi noholdlock
-				where Esf_Numero = @Esf_Numero
+	select Esf_Numero,	Esf_TipFor,	Esf_Anio,  Esf_MesIni,	Esf_MesFin, 
+		   Esf_TiEsFi
+		   into #EstadoGobierno
+		from SOESTFIN efi noholdlock
+		where Esf_Numero = @Esf_Numero
 
 	select @Ent_Anio = (select (#EstadoGobierno.Esf_Anio)-@Ent_Uno from #EstadoGobierno where Esf_Numero = @Esf_Numero)
 	select @Ent_TipEFF = (select #EstadoGobierno.Esf_TiEsFi from #EstadoGobierno where Esf_Numero = @Esf_Numero)
@@ -371,8 +403,8 @@ end else if @Tip_ConCon = @Str_Seis begin		/* C6 */
 	 order by efn.Esf_Anio desc
 	 
 	select Esf_PerNum,  Esf_Solici, Esf_Anio, Esf_RaMax = max(Esf_Rango)
-	into #GobiernoMaximo
-	from #EstadoGobiernoAnterior
+		   into #GobiernoMaximo
+		from #EstadoGobiernoAnterior
 	group by Esf_PerNum, Esf_Solici, Esf_Anio
 
 	update #EstadoGobiernoAnterior set
@@ -387,12 +419,118 @@ end else if @Tip_ConCon = @Str_Seis begin		/* C6 */
 	where Esf_Mayor	= @Ent_Cero
 
 	select @Esf_EfiNum = efn.Esf_Numero
-     from #EstadoGobiernoAnterior efn
-	 where efn.Esf_PerNum = @Esf_PerNum
-		and efn.Esf_Solici = @Esf_Solici
-	 order by efn.Esf_Anio desc
+		from #EstadoGobiernoAnterior efn
+	where efn.Esf_PerNum = @Esf_PerNum
+	  and efn.Esf_Solici = @Esf_Solici
+	order by efn.Esf_Anio desc
 
 	 drop table #EstadoGobiernoAnterior, #GobiernoMaximo, #EstadoGobierno
+end else if @Tip_ConCon = @Str_Siete begin		/* C7*/  /*obtiene el estado financiero anterior con el mismo periodo de tiempo que el actual*/
+	 
+	 select	 Esf_Numero, Esf_TipFor, Esf_Anio, Esf_MesIni, Esf_MesFin,
+			 Esf_Rango = convert(int, Esf_MesFin) - convert(int, Esf_MesIni) + @Ent_Uno
+		into #AnioAnterior
+		from SOESTFIN efi noholdlock
+		where Esf_Numero = @Esf_Numero
+		
+	select
+          efn.Esf_Numero,    		efn.Esf_TipFor,    efn.Esf_Anio,    	efn.Esf_MesIni,    	efn.Esf_MesFin, 
+          efn.Esf_TiEsFi,    		efn.Esf_ExpCif,    efn.Esf_Moneda,    	efn.Esf_PerNum,    	efn.Esf_Solici,
+		  efn.Esf_EsEsFi,    		efn.Esf_ValInp,    efn.Esf_AplIca,    	efn.Esf_Icap,    	efn.Esf_CapNet,    
+		  efn.Esf_AcSuRi,    		efn.Esf_TipSol,    efn.Esf_TipLiq,    	efn.Esf_TipEfi,    	Esf_Rango = convert(int, Esf_MesFin) - convert(int, Esf_MesIni) + @Ent_Uno, 
+		  Esf_Mayor = @Ent_Cero,	efn.NumTransac,	   efn.Transaccio,      efn.Usuario,    	efn.FechaSis,    	
+		  efn.SucOrigen,     efn.SucDestino 
+	 into #RangosEstadosFinancieros
+		 from SOESTFIN efn noholdlock
+		 where efn.Esf_PerNum = @Esf_PerNum
+			and efn.Esf_Solici = @Esf_Solici
+			and Esf_Status = @Ent_Uno
+			and efn.Esf_Anio = (select (#AnioAnterior.Esf_Anio)-@Ent_Uno from #AnioAnterior where Esf_Numero = @Esf_Numero)
+		 order by efn.Esf_Anio desc
+	 
+	 
+	select Esf_Numero,Esf_PerNum,  Esf_Solici, Esf_Anio,Esf_Rango
+		into #EstadoFinancieroSeleccionado
+		from #RangosEstadosFinancieros
+		group by Esf_PerNum, Esf_Solici, Esf_Anio
+	
+	update #RangosEstadosFinancieros set
+	Esf_Mayor	= @Ent_Uno
+	from #EstadoFinancieroSeleccionado efm
+	where	efm.Esf_PerNum	= #RangosEstadosFinancieros.Esf_PerNum
+	  and	efm.Esf_Solici	= #RangosEstadosFinancieros.Esf_Solici
+	  and	efm.Esf_Anio	= #RangosEstadosFinancieros.Esf_Anio
+
+	  
+	delete #RangosEstadosFinancieros
+	where Esf_Mayor	= @Ent_Cero
+	
+	select @Esf_EfiNum = efn.Esf_Numero
+		from #RangosEstadosFinancieros efn
+	where efn.Esf_PerNum = @Esf_PerNum
+	  and efn.Esf_Solici = @Esf_Solici
+	  and Esf_Rango= (select #AnioAnterior.Esf_Rango from #AnioAnterior where Esf_Numero = @Esf_Numero)
+	 order by efn.Esf_Anio desc
+	 
+	 drop table #RangosEstadosFinancieros, #EstadoFinancieroSeleccionado, #AnioAnterior
+	 
+end else if @Tip_ConCon = @Str_Ocho begin	 /* C8*/  /*se obtiene el caso a evaluar para ROE*/
+
+	select	@Status		= @Ent_Cero
+	-- se evalua si existe un estado financiero anterior
+	exec @Status = SOESTFINCON 
+				   @Esf_Numero, @Esf_PerNum, @Ent_Cero, @Ent_Cero,@Str_Vacio, 
+				   @Ent_Cero, @Ent_Cero, @Ef_Anterio output, @Str_C2, @NumTransac, 
+				   @Transaccio, @Usuario,@FechaSis, @SucOrigen, @SucDestino, @Modulo
+	if @Status <> @Ent_Cero begin
+			rollback
+			return 1
+		end
+		 
+	
+	select @Ef_RangoAc = (convert(int, Esf_MesFin) - convert(int, Esf_MesIni) + @Ent_Uno) FROM SOESTFIN where  Esf_Numero =@Esf_Numero  -- margen de tiempo del EF Actual
+	select @Ef_RangoAn = (convert(int, Esf_MesFin) - convert(int, Esf_MesIni) + @Ent_Uno) FROM SOESTFIN where  Esf_Numero =@Ef_Anterio -- margen de tiempo del EF Anterior
+	
+	if (@Ef_Anterio <> @Ent_Cero) begin
+		if(@Ef_RangoAc<>@Ent_MesFin) begin /*es parcial*/
+			
+			select	@Status		= @Ent_Cero
+			--se busca su estado financiero anterior parcial con el mismo margen de tiempo en balance general
+			exec @Status =  SOESTFINCON 
+							@Esf_Numero, @Esf_PerNum, @Ent_Cero, @Ent_Cero,@Str_Vacio, 
+							@Ent_Cero, @Ent_Cero, @Ef_AntParc output,@Str_C7, @NumTransac, 
+							@Transaccio, @Usuario,@FechaSis, @SucOrigen, @SucDestino, @Modulo
+			if @Status <> @Ent_Cero begin
+				rollback
+				return 1
+			end
+			
+			if(@Ef_AntParc > @Ent_Cero and @Ef_RangoAn=@Ent_MesFin) begin /* 1 CIERRE  Y 2 PARCIALES CON MISMO PERIODO DE TIEMPO*/
+				select @Ent_Cuatro as Esf_Caso
+			end
+			else begin
+				select @Ent_Uno as Esf_Caso
+			end
+			
+		end
+		else begin
+            if(@Ef_RangoAc=@Ent_MesFin and @Ef_RangoAn=@Ent_MesFin) begin  /*ES CIERRE Y EXISTE UN ESTADO FINANCIERO ANTERIOR QUE TAMBIEN ES CIERRE*/
+				select @Ent_Dos as Esf_Caso
+			end
+			else begin /*NO EXISTE UN ESTADO FINANCIERO ANTERIOR Y ES CIERRE*/
+				select @Ent_Tres as Esf_Caso
+			end 
+        end
+	end
+	else begin
+		if(@Ef_RangoAc=@Ent_MesFin) begin /*NO EXISTE UN ESTADO FINANCIERO ANTERIOR Y ES CIERRE*/
+			select @Ent_Tres as Esf_Caso
+		end 
+		else begin
+			select @Ent_Uno as Esf_Caso
+		end 
+	end
+	
 end
 end else begin
    if @Tip_ConCon = @Str_Uno begin		/* L1 */
@@ -584,45 +722,54 @@ end else begin
 	 drop table #ListadoRazones, #RazonesRangos, #RazonesMaximos, #RazonesUltimos
 	end else if @Tip_ConCon = @Str_Seis begin /* L6 obtiene los Estados Financieros de tipo Entidad Financiera y que sean reguladas*/
 		
-		select @Ent_PerTipo = Per_Tipo
-		from SOPERSON noholdlock 
-		where Per_Numero = convert(char(8), @Esf_PerNum)
+		select	@Status		= @Ent_Cero
+		select  @Str_PerNum = convert(varchar(8), @Esf_PerNum)
 		
-		if @Ent_PerTipo = @Str_Uno begin
-            select
-                @Ent_InsEntFin=Clp_EntFin, @Ent_InsReg=Clp_InsReg 
-            from SOCLCAPE noholdlock   
-            where Clp_NumPer = convert(char(8), @Esf_PerNum)
+		exec @Status = UTCERIZQ 
+			@Str_PerNum output,	@Longitud	= @Ent_Ocho
+		if @Status <> @Ent_Cero begin
+			rollback
+			return 1
+		end
+
+		select @Ent_PerTip = Per_Tipo
+			from SOPERSON noholdlock 
+		where Per_Numero = @Str_PerNum
+		
+		if @Ent_PerTip = @Str_Uno begin
+            select	@Ent_InsEnt=Clp_EntFin,	@Ent_InsReg=Clp_InsReg 
+				from SOCLCAPE noholdlock   
+            where Clp_NumPer = @Str_PerNum
         end 
         else begin
-            set @Ent_InsEntFin=@Str_N,@Ent_InsReg=@Str_N
+            set @Ent_InsEnt=@Str_N,@Ent_InsReg=@Str_N
         end
 	
-		if @Ent_InsEntFin =@Str_S AND @Ent_InsReg=@Str_S	begin
+		if @Ent_InsEnt =@Str_S AND @Ent_InsReg=@Str_S	begin
 	
 			select
-				top 1 Esf_Numero,    		Esf_TipFor,    Esf_Anio,    	Esf_MesIni,    	Esf_MesFin,
+				top 1 Esf_Numero,	Esf_TipFor,    Esf_Anio,    	Esf_MesIni,    	Esf_MesFin,
 				Esf_TiEsFi,    		Esf_ExpCif,    Esf_Moneda,    	Esf_PerNum,    	Esf_Solici,
 				Esf_EsEsFi,    		Esf_ValInp,    Esf_AplIca,    	Esf_Icap,    	Esf_CapNet,
 				Esf_AcSuRi,    		Esf_TipSol,    Esf_TipLiq,    	Esf_TipEfi,    	NumTransac,
-				Transaccio,      		Usuario,       FechaSis,    	SucOrigen,      SucDestino
-			from SOESTFIN noholdlock   
+				Transaccio,      	Usuario,       FechaSis,    	SucOrigen,      SucDestino
+				from SOESTFIN noholdlock   
 			where Esf_PerNum = @Esf_PerNum
-			and Esf_TipFor=@Ent_TipF
-			order by Esf_Anio desc
+			  and Esf_TipFor = @Ent_TipEnt
+			order by Esf_Anio desc,Esf_MesFin desc
 		end 
 		else begin
 			select
-				top 1 Esf_Numero,    		Esf_TipFor,    Esf_Anio,    	Esf_MesIni,    	Esf_MesFin,
+				top 1 Esf_Numero,   Esf_TipFor,    Esf_Anio,    	Esf_MesIni,    	Esf_MesFin,
 				Esf_TiEsFi,    		Esf_ExpCif,    Esf_Moneda,    	Esf_PerNum,    	Esf_Solici,
 				Esf_EsEsFi,    		Esf_ValInp,    Esf_AplIca,    	Esf_Icap,    	Esf_CapNet,
 				Esf_AcSuRi,    		Esf_TipSol,    Esf_TipLiq,    	Esf_TipEfi,    	NumTransac,
 				Transaccio,      		Usuario,       FechaSis,    	SucOrigen,      SucDestino
 			from SOESTFIN noholdlock   
 			where Esf_PerNum = @Esf_PerNum
-			and Esf_MesIni = @Ent_Uno
-			and Esf_MesFin = @Ent_MesFin
-			order by Esf_Anio desc
+			  and Esf_MesIni   = @Ent_Uno
+			  and Esf_MesFin   = @Ent_MesFin
+			order by Esf_Anio desc,Esf_MesFin desc
         end
 	end
 end

@@ -5,6 +5,7 @@ create procedure SOESTFINACT (
    @Tic_ClEsFi	int,
    @Esf_Filtro	varchar(1000),
    @Esf_EsEsFi	int,
+   @Esf_ConAct  int,
    @Esf_AplIca	bit,
    @Esf_Icap	numeric(10,2),
    @Esf_CapNet	numeric(10,2),
@@ -27,35 +28,40 @@ as
 /** DESCRIPCION: Actualizacion de registros de Estados			*/
 /**				Financieros en la tabla SOESTFIN				*/
 /****************************************************************/
+/** Modifico:	Edwin Santiago								    */
+/** Fecha:		27/11/2018                               		*/
+/** Descripcion: Se agrega campo Esf_ConAct						*/
+/** Help:		1074432 					 					*/
+/****************************************************************/
 /** Creo:		Felipe Castillo									*/
 /** Fecha:		19/05/2017                               		*/
 /** Help:		929417 					 						*/
 /****************************************************************/
 
 /* Declaracion de variables  */
-declare @Str_Filtro varchar(1000),
-		@Ent_Posici numeric(20),
-		@Str_EstFin varchar(50),
-		@Str_Vacio varchar(2),
-		@Str_Coma varchar(2)
-	
-/* DeclaraciÃ³n de constantes */
-declare	@Tip_ActA	char(1),
-		@Tip_ActB	char(1),
-		@Tip_ActC	char(1),
-		@Tip_ActD	char(1),
-		@Tip_ActE	char(1),
-		@Ent_Cero	int,
-		@Ent_Uno	int
+declare @Str_Filtro varchar(1000), 	/*Filtro*/
+		@Ent_Posici numeric(20),   	/*Posicion*/
+		@Str_EstFin varchar(50),   	/*Estado Financiero*/
+		@Str_Vacio varchar(2),     	/*String vacio*/
+		@Str_Coma varchar(2)       /*String coma*/
+		
+/* Declaracion de constantes*/
+declare	@Tip_ActA	char(1), 		/*	Actualiza el valor de status para visualizar o no el estado financiero*/
+		@Tip_ActB	char(1), 		/*  Tipo de Actualizacion B*/
+		@Tip_ActC	char(1), 		/*  Tipo de Actualizacion C*/
+		@Tip_ActD	char(1), 		/*  Tipo de Actualizacion D*/
+		@Tip_ActE	char(1), 		/*  Tipo de Actualizacion E*/
+		@Ent_Cero	int,     		/*  ENTERO CERO*/
+		@Ent_Uno	int      		/*  ENTERO UNO*/
 
-/* AsignaciÃ³n de constantes */
-select	@Tip_ActA = 'A',	/*	Actualiza el valor de status para visualizar o no el estado financiero*/
-		@Tip_ActB = 'B',
-		@Tip_ActC = 'C',
-		@Tip_ActD = 'D',
-		@Tip_ActE = 'E',
-		@Ent_Cero = 0,
-		@Ent_Uno = 1
+/* Asignacion de Constantes */
+select	@Tip_ActA = 'A',	
+		@Tip_ActB = 'B',    
+		@Tip_ActC = 'C',	
+		@Tip_ActD = 'D', 	
+		@Tip_ActE = 'E',	
+		@Ent_Cero = 0,      
+		@Ent_Uno = 1		
 		
 if @Tip_Actual = @Tip_ActA begin
 	
@@ -122,6 +128,7 @@ end
 
 if @Tip_Actual = @Tip_ActC begin
 	update SOESTFIN set
+		Esf_ConAct   = @Esf_ConAct,
 		Esf_AplIca	= @Esf_AplIca,
 		Esf_Icap	= @Esf_Icap,
 		Esf_CapNet	= @Esf_CapNet,
