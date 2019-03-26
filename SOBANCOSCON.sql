@@ -22,7 +22,7 @@ as
 ************************************************************************************
 ** Modificó:	Mauricio Avalos Pérez											****
 ** Fecha:		08/Mar/2019														****
-** Help:		1120901															****
+** Help:		1137159															****
 ** Descripción:	Se agrega la consulta por siglas C7								****
 ****************************************************************************
 ** Modificó:		Lucina Gonzalez Trejo						****
