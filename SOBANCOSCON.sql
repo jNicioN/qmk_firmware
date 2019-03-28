@@ -14,6 +14,71 @@ create procedure SOBANCOSCON	(
 
 as
 
+/***********************************************************************************
+** DESCRIPCION: ** Consulta alfabetica o consulta numerica de bancos.			  **
+************************************************************************************
+************************************************************************************
+**	REFERENCIAS:																****
+************************************************************************************
+** Modificó:	Mauricio Avalos Pérez											****
+** Fecha:		08/Mar/2019														****
+** Help:		1137159															****
+** Descripción:	Se agrega la consulta por siglas C7								****
+****************************************************************************
+** Modificó:		Lucina Gonzalez Trejo						****
+** Fecha:		15/Febrero/2007							****
+** Help:			20121										****
+** Descripción:	Agregar Ban_Direcc y ban_LocEnt 			****
+**				a Consula Vacia								****
+****************************************************************************
+**				STORE CONVERTIDO						****
+** Convirtió: fchia											****
+** Fecha:     17/Mar/2005									****
+****************************************************************************
+** Modificó:		Fernando Martinez M.						****
+** Fecha:		17/Marzo/2005								****
+** Descripción:	Agregar Ban_CoOPVe a la consulta C3		****
+** Help:			Corrección									****
+****************************************************************************
+**				STORE CONVERTIDO						****
+** Convirtió: Perla J. Abundis Orozco							****
+** Fecha:     02/Mar/2005									****
+****************************************************************************
+** Modificó:		Fernando Martinez M.						****
+** Fecha:		22/Febrero/2005							****
+** Descripción:	Agregar campos Ban_CoOPVe				****
+** Help:			00079403									****
+****************************************************************************
+**				STORE CONVERTIDO						****
+** Convirtió: Perla J. Abundis Orozco							****
+** Fecha:     22/Sep/2004									****
+****************************************************************************
+** Modificó:		Lucina Gonzalez Trejo						****
+** Fecha:		07/Septiembre/2004							****
+** Descripción:	Agregar campos Ban_CodGru, Ban_DiLiCa	****
+****************************************************************************
+**                           Store CONVERTIDO 						****
+** Convirtió:		Laura Elena Cervantes D.					****
+** Fecha:		05/Julio/2004								****
+****************************************************************************
+** Modificó:		Eduardo Salazar Gutiérrez					****
+** Fecha:		24/Septiembre/2003							****
+** Descripción:	Se agregó Ban_UsuCon en la Consulta Llave	****
+** 				Foranea Bancos del Extranjero				****
+****************************************************************************
+** Modificó:		Ricardo Elizondo Guerrero					****
+** Fecha:		19/Septiembre/2002							****
+** Descripción:	Consulta de Ban_Domici y Ban_PagInt		****
+****************************************************************************
+** Modificó:		Ing. Ricardo Elizondo Guerrero				****
+** Fecha:		03/Septiembre/2002							****
+** Descripción:	Consulta Todos Los Bancos De Visual Basic	****
+****************************************************************************
+** Modificó:		Mayra Estrada								****
+** Fecha:		21/Julio/1999								****
+** Descripción:	@Tip_Consul p/ Cons. Tipificadas de Visual.	****
+****************************************************************************/
+
 declare	@Tip_ConTip	char(1),			/*	Declaracion De Variables	*/
 		@Tip_ConCon	char(1)
 
@@ -84,6 +149,10 @@ end else begin			/* Cliente:  Visual Basic	*/
 				from SOBANCOS noholdlock
 				where	Ban_Numero	= @Ban_Numero
 				  and	Ban_Domici	= @Si_Status
+		end else if @Tip_ConCon = '7' begin		/* Consulta De Bancos por Ban_Siglas	*/
+			select	Ban_Numero,	Ban_Nombre	
+				from SOBANCOS noholdlock
+				where	Ban_Siglas	= @Ban_Nombre /* Se reutiliza el nombre del campo @Ban_Nombre, par abuscar por Sigla*/
 		end		  
 	end else begin					/* 'L':  Lista */
 		select	@Ban_Nombre	= ltrim(rtrim(@Ban_Nombre)) + '%'
