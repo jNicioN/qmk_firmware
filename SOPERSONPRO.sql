@@ -30,6 +30,12 @@ as
 /*******************************************************************/
 /** REFERENCIAS:
 ********************************************************************
+** Modificó:	Angel Cisneros               					****
+** Fecha:		04/Ene/2019										****
+** Help:		01138771										****
+** Descripción:	Crear proceso de actualización para documentos  ****
+**              para autenticacion de persona 					****
+********************************************************************
 ** Modificó:	Francisco Javier Carrillo Rojas					****
 ** Fecha:		04/Dic/2018										****
 ** Help:		01171269										****
@@ -439,6 +445,98 @@ end else if @Tip_Proces = @Tip_Email begin
 		SucDestino	= @SucDestino
 	from SOUNIPER noholdlock
 	where	Per_Numero	= @Per_Numero
+
+end
+
+if @Tip_Proces = 'D' begin        /*Actualizacion de doctos para autenticacion de personas */	
+	select @Peu_Grupo =  Peu_Grupo 
+	from SOUNIPER noholdlock
+	where  Peu_Person  = @Per_Numero
+	
+	
+	/*Se guarda en bitacora la informacion a actualizar*/	
+	insert into SOBIPEAD  (
+		Bit_PerNum,	Bit_Fecha,	Bit_NumTra,	Bit_LugNac,	Bit_Sexo,
+		Bit_FecNac,	Bit_RegMat,	Bit_VivCas,	Bit_TieRes,	Bit_Fax,
+		Bit_NumDep,	Bit_Puesto,	Bit_Ocupac,	Bit_AntLab,	Bit_LugTra,
+		Bit_TelTra,	Bit_CalTra,	Bit_NuCaTr,	Bit_ColTra,	Bit_Locali,
+		Bit_CPTra,	Bit_FecCon,	Bit_CaNuIn,	Bit_NacExt,	Bit_Reside,
+		Bit_DocEst,	Bit_OtDoEs,	Bit_FeExDo,	Bit_CalInm,	Bit_CalExt,	
+		Bit_CaNuEx,	Bit_ColExt,	Bit_LocExt,	Bit_EntExt,	Bit_PaiExt,	
+		Bit_CoPoEx,	Bit_TipIde,	Bit_OtrIde,	Bit_NumIde,	Bit_FeExId,	
+		Bit_FeVeId,	Bit_NuIdFi,	Bit_EntPri,	Bit_EntSeg,	NumTransac,
+		Transaccio,	Usuario,	FechaSis,	SucOrigen,	SucDestino)
+	
+	select	Adi_PerNum, Adi_Fecha, Adi_NumTra, Adi_LugNac, Adi_Sexo,
+		Adi_FecNac, Adi_RegMat, Adi_VivCas, Adi_TieRes, Adi_Fax,
+		Adi_NumDep, Adi_Puesto, Adi_Ocupac, Adi_AntLab, Adi_LugTra,
+		Adi_TelTra, Adi_CalTra, Adi_NuCaTr, Adi_ColTra, Adi_Locali,
+		Adi_CPTra, Adi_FecCon, Adi_CaNuIn, Adi_NacExt, Adi_Reside,
+		Adi_DocEst, Adi_OtDoEs, Adi_FeExDo, Adi_CalInm, Adi_CalExt,
+		Adi_CaNuEx, Adi_ColExt, Adi_LocExt, Adi_EntExt, Adi_PaiExt,
+		Adi_CoPoEx, Adi_TipIde, Adi_OtrIde, Adi_NumIde, Adi_FeExId,
+		Adi_FeVeId, Adi_NuIdFi, Adi_EntPri, Adi_EntSeg, NumTransac,
+		Transaccio, Usuario,    FechaSis,   SucOrigen,  SucDestino
+	from SOPERADI noholdlock
+	where	 Adi_PerNum 	= @Per_Numero
+	or       Adi_PerNum     = @Peu_Grupo
+	
+	update SOPERADI set
+		Adi_TipIde	= @Adi_TipIde,
+        Adi_NumIde  = @Adi_NumIde,
+        Adi_FeVeId  = @Adi_FeExId,
+        
+		NumTransac	= @NumTransac,
+		Transaccio	= @Transaccio,
+		Usuario		= @Usuario,
+		FechaSis	= @FechaSis,
+		SucOrigen	= @SucOrigen,
+		SucDestino	= @SucDestino
+	where Adi_PerNum = @Per_Numero
+	
+	/* Se ejcuta el SOPEDACOPRO para actualizar  */
+	exec @Status = SOPEDACOPRO
+				@Per_Numero,	@Str_Vacio,		@Str_Vacio,		@Str_Vacio,		@Str_Vacio,
+				@Str_Vacio,		@Str_Vacio,		@Str_Vacio,		@Str_Vacio,		@Str_Vacio,
+				@Str_Vacio,		@Str_Vacio,		@Str_Vacio,		@Str_Vacio,		@Str_Vacio,
+				@Str_Vacio,		@Str_Vacio,		@Str_Vacio,		@Fec_Vacia,		@Fec_Vacia,
+				@DaP_ClvEle,	@DaP_NumEmi,	@NumTransac,	@Transaccio,	@Usuario,
+				@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
+	
+	if @Status <> @Ent_Cero begin
+		rollback
+		return 1
+	end
+	
+	if (@Peu_Grupo <> @Per_Numero)begin /*Si son diferentes personas, se actualiza la info tambien para persona unica*/
+		/*Se guarda en bitacora la informacion a actualizar*/			
+		update SOPERADI set
+			Adi_TipIde	= @Adi_TipIde,
+			Adi_NumIde  = @Adi_NumIde,
+			Adi_FeVeId  = @Adi_FeExId,
+			
+			NumTransac	= @NumTransac,
+			Transaccio	= @Transaccio,
+			Usuario		= @Usuario,
+			FechaSis	= @FechaSis,
+			SucOrigen	= @SucOrigen,
+			SucDestino	= @SucDestino
+		where Adi_PerNum = @Peu_Grupo
+		
+		/* Se ejcuta el SOPEDACOPRO para actualizar  */
+		exec @Status = SOPEDACOPRO
+					@Peu_Grupo,	   @Str_Vacio,		@Str_Vacio,		@Str_Vacio,		@Str_Vacio,
+					@Str_Vacio,		@Str_Vacio,		@Str_Vacio,		@Str_Vacio,		@Str_Vacio,
+					@Str_Vacio,		@Str_Vacio,		@Str_Vacio,		@Str_Vacio,		@Str_Vacio,
+					@Str_Vacio,		@Str_Vacio,		@Str_Vacio,		@Fec_Vacia,		@Fec_Vacia,
+					@DaP_ClvEle,	@DaP_NumEmi,	@NumTransac,	@Transaccio,	@Usuario,
+					@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
+		
+		if @Status <> @Ent_Cero begin
+			rollback
+			return 1
+		end	
+	end 
 
 end
 
