@@ -18,6 +18,11 @@ as
 /****************************************************************************
 ** Descripción:	 Modifica Telefonos de Persona							****
 ****************************************************************************
+** Modificó:	Raul Minor												****
+** Fecha:		24/Abril/2019											****
+** Help:		1239991													****
+** Descripción:	Se cambia tipo de dato de  @Btp_Telefo por bigint		****
+****************************************************************************
 ** Modificó:	Francisco Javier Carrillo Rojas							****
 ** Fecha:		09/Dic/2018												****
 ** Help:		01171269												****
@@ -49,7 +54,7 @@ as
 declare	@Status		int,
 		@Btp_TipTel		int, 
 		@Btp_Lada		int, 
-		@Btp_Telefo		int,
+		@Btp_Telefo		bigint,
 		@Str_A			char(1),
 		@Tep_Verifi		int
 										/* Declaración de constantes */
