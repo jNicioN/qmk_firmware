@@ -37,6 +37,13 @@ DESCRIPCION:	**Procedimiento que genera las Rentas en la cotización
 **************************************************************************
 REFERENCIAS:
 ****************************************************************************
+** Modifico:		Heber Arango										****
+** Fecha:			25/Enero/2019		  								****
+** Help:			1205034												****
+** Descripcion:		Se cambia obtencion del porcentaje de IVA desde la	****
+** 					la tabla SOZONAS de acuerdo a la zona capturada en	****
+** 					la cotizacion										****
+****************************************************************************
 ** Modifico:		Zaida C. Lucas G.									****
 ** Fecha:			14/Marzo/2016		  								****
 ** Help:			830922												****
@@ -73,40 +80,41 @@ REFERENCIAS:
 **				cotización de ArrendaRegio					****
 ****************************************************************************
 */
-
-declare	@Ren_ResCap	double precision,		/*	Declaración de Variables	*/
-		@Res_IvaFac	double precision,
-		@Ren_Capita	double precision,
-		@Ren_Intere	double precision,
-		@Ren_TtCaIn	double precision,
-		@Ren_IvaInt	double precision,
-		@Ren_IvaFac	double precision,
-		@Ren_Total	double precision,
-		@Mon_Intere	double precision,
-		@Mon_InAPag	double precision,
-		@Frecuencia	smallint,
-		@Mon_CapREx	double precision,
-		@Mon_IvaREx	double precision,
-		@Par_DiaMes	smallint,
-		@Par_DiBaCr	smallint,
-		@Par_IVA	smallmoney,
-		@Ren_Consec	smallint,
-		@Ren_Numero	char(3),
-		@PerGra		smallint,
-		@Tot_Capita	double precision,
-		@Tot_IvaFac	double precision,
-		@Mon_IvaFac	double precision,
-		@Ren_IvaRen	money,
-		@Num_Meses	smallint,
-		@SumCaPaEx	money,
-		@NumPagExt	smallint,
-		@Pae_Cantid	money,
-		@Amo_Mensua	money,
-		@Status		int,
-		@Par_PorIVA	smallmoney,
-		@Amo_FecIni	smalldatetime,
-		@Amo_FecVen	smalldatetime,
-		@Ban_PaExCe	char(1)
+/*	Declaración de Variables	*/
+declare	@Ren_ResCap	double precision,		/*Resultado capital*/
+		@Res_IvaFac	double precision,		/*IVA de factura*/
+		@Ren_Capita	double precision,		/*Capital*/
+		@Ren_Intere	double precision,		/*Interes*/
+		@Ren_TtCaIn	double precision,		/*Calculo de interes*/
+		@Ren_IvaInt	double precision,		/*IVA interes*/
+		@Ren_IvaFac	double precision,		/*IVA de factura*/
+		@Ren_Total	double precision,		/*Total*/
+		@Mon_Intere	double precision,		/*Interes*/
+		@Mon_InAPag	double precision,		/*Interes a pagar*/
+		@Frecuencia	smallint,				/*Frecuencia*/
+		@Mon_CapREx	double precision,		/*Capital exigible*/
+		@Mon_IvaREx	double precision,		/*IVA renta exigible*/
+		@Par_DiaMes	smallint,				/*Dia del mes*/
+		@Par_DiBaCr	smallint,				/*Dias base*/
+		@Par_IVA	smallmoney,				/*IVA de parametros*/
+		@Ren_Consec	smallint,				/*Consecutivo*/
+		@Ren_Numero	char(3),				/*Numero*/
+		@PerGra		smallint,				/*Periodo de gracia*/
+		@Tot_Capita	double precision,		/*Capital*/
+		@Tot_IvaFac	double precision,		/*IVA de factura*/
+		@Mon_IvaFac	double precision,		/*IVA de factura*/
+		@Ren_IvaRen	money,					/*IVA de renta*/
+		@Num_Meses	smallint,				/*Meses*/
+		@SumCaPaEx	money,					/*Suma*/
+		@NumPagExt	smallint,				/*Numero de pago*/
+		@Pae_Cantid	money,					/*Cantidad*/
+		@Amo_Mensua	money,					/*Mensual*/
+		@Status		int,					/*Estatus*/
+		@Par_PorIVA	smallmoney,				/*Porcentaje de IVA*/
+		@Amo_FecIni	smalldatetime,			/*Fecha de inicio*/
+		@Amo_FecVen	smalldatetime,			/*Fecha de vencimiento*/
+		@Ban_PaExCe	char(1),				/*Pago exigible*/
+		@Zon_IVA	smallmoney				/*IVA de la zona interior de la republica o zona fronteriza segun la cotizacion*/
 
 declare	@Mon_Cero	smallint,				/*	Declaración de Constantes	*/
 		@Mon_Uno	smallint,
@@ -138,7 +146,7 @@ declare	@Mon_Cero	smallint,				/*	Declaración de Constantes	*/
 		@Str_Vacio	char(1),
 		@Str_3Ceros	char(3),
 		@Amo_PagIni	char(3),
-		@CadTotales	char(7),
+		@Cad_Totale	char(7),
 		@Cal_ConEsp	char(1),
 		@Fec_Vacia	smalldatetime,
 		@Con_B2BPur	char(1),
@@ -149,7 +157,8 @@ declare	@Mon_Cero	smallint,				/*	Declaración de Constantes	*/
 		@Cad_No		char(1),
 		@Uni_ArrMex	int,
 		@Uni_Especi	int,
-		@Con_LeaVIP char(1)		
+		@Con_LeaVIP char(1),		
+		@Ent_Tres	int
 
 /*	Asignación de Constantes	*/
 select	@Mon_Cero	= 0.00,			/*	Moneda Cero																	*/
@@ -182,7 +191,7 @@ select	@Mon_Cero	= 0.00,			/*	Moneda Cero																	*/
 		@Str_Vacio	= '',			/*	Cadena Vacia																*/
 		@Str_3Ceros	= '000',		/*	Cadena 3 ceros																*/
 		@Amo_PagIni	= '000',		/*	Amorizacion 000 donde se muestra lo que el cliente dará de pago inicial		*/
-		@CadTotales	= 'TOTALES',	/*	Cadena Totales																*/
+		@Cad_Totale	= 'TOTALES',	/*	Cadena Totales																*/
 		@Cal_ConEsp	= '3',			/*	El resultado ira a la pantalla de contrato especifico						*/
 		@Fec_Vacia	= '1900-01-01',	/*	Fecha Vacia																	*/
 		@Con_B2BPur	= '2',			/*	Tipo de Contrato B2B Puro													*/
@@ -192,8 +201,9 @@ select	@Mon_Cero	= 0.00,			/*	Moneda Cero																	*/
 		@Cad_Si		= 'S',			/*	Cadena Si																	*/
 		@Cad_No		= 'N', 			/*	Cadena No																	*/
 		@Uni_ArrMex	= 3,			/*	Unidad de Negocio Arrendamiento Mexico										*/
-		@Uni_Especi	= 1,				/*	Unidad de Negocio Especializado												*/
-		@Con_LeaVIP	= '5'			/* Tipo de contrato Auto Leasing Plus*/
+		@Uni_Especi	= 1,			/*	Unidad de Negocio Especializado												*/
+		@Con_LeaVIP	= '5',			/* Tipo de contrato Auto Leasing Plus*/
+		@Ent_Tres	= 3				/* Entero tres */
 		
 create table #Rentas (
 	Ren_Consec	smallint not null,
@@ -204,9 +214,7 @@ create table #Rentas (
 	Ren_IvaInt	money,
 	Ren_IvaFac	money,
 	Ren_IvaRen	money, 
-	Ren_Total	money
-)
-
+	Ren_Total	money)
 
 select	@Par_DiaMes	= Par_DiaMes,
 		@Par_PorIVA	= Par_PorIVA
@@ -217,15 +225,25 @@ select	@Par_DiBaCr	= Par_DiBaCr,
 	from SOPARAMS noholdlock
 	where	Par_Sucurs	= @SucOrigen
 
+/*PROM-37*/		
+select	@Zon_IVA	= Zon_IVA  --Se obtiene el IVA en base a la zona de la cotizacion, 01 interior de la republica o 02 frontera 
+	from ABCOTIZA noholdlock
+	inner join SOZONAS noholdlock on Cot_Zona = Zon_Numero
+	where	Cot_Numero	= @Num_Cotiza
+
+select	@Zon_IVA	= isnull(@Zon_IVA, @Mon_Cero)
+
 if @Amo_RenExt > @Mon_Cero begin
 	select	@Mon_CapREx	= round(@Amo_RenExt / (@Mon_Uno + (@Amo_IVAFac/@Mon_Cien) ), 2),
 			@Mon_IvaREx	= @Amo_RenExt - round(@Amo_RenExt / (@Mon_Uno + (@Amo_IVAFac/@Mon_Cien) ), 2)
 
-	insert into #Rentas values(	@Mon_Cero,	@Str_RenExt,	@Mon_CapREx,	@Mon_Cero,	@Mon_CapREx,
-								@Mon_Cero,	@Mon_IvaREx,	@Mon_Cero,		@Amo_RenExt)
+	insert into #Rentas 
+		values(	@Mon_Cero,	@Str_RenExt,	@Mon_CapREx,	@Mon_Cero,	@Mon_CapREx,
+				@Mon_Cero,	@Mon_IvaREx,	@Mon_Cero,		@Amo_RenExt)
 end else
-	insert into #Rentas values(	@Mon_Cero,	@Str_RenExt,	@Mon_Cero,	@Mon_Cero,	@Mon_Cero,
-								@Mon_Cero,	@Mon_Cero,		@Mon_Cero,	@Mon_Cero)
+	insert into #Rentas
+		values(	@Mon_Cero,	@Str_RenExt,	@Mon_Cero,	@Mon_Cero,	@Mon_Cero,
+				@Mon_Cero,	@Mon_Cero,		@Mon_Cero,	@Mon_Cero)
 
 
 -- Inserción de amortización cero "000" correspondiente al pago inicial
@@ -234,37 +252,42 @@ select	@Ren_Consec = @Ent_Cero
 select	@Ren_Numero	= convert(char, @Ren_Consec)
 exec UTCERIZQ
 		@Valor		= @Ren_Numero output,
-		@Longitud	= 3
+		@Longitud	= @Ent_Tres
 
 select	@Ren_Capita	= @Amo_ToPaIn
 
 select	@Ren_Capita	= @Ren_Capita
 
-insert into #Rentas values(	@Mon_Cero,	@Ren_Numero,	@Ren_Capita,	@Mon_Cero,	@Ren_Capita,
-							@Mon_Cero,	@Mon_Cero,		@Mon_Cero,		@Ren_Capita)
+insert into #Rentas
+	values(	@Mon_Cero,	@Ren_Numero,	@Ren_Capita,	@Mon_Cero,	@Ren_Capita,
+			@Mon_Cero,	@Mon_Cero,		@Mon_Cero,		@Ren_Capita)
 
-select	@Frecuencia	= case @Amo_Frecue  when @Tip_FreSem then @Fre_Semest
-										when @Tip_FreAnu then @Fre_Anual
-										else @Amo_Frecue end
+select	@Frecuencia	= case @Amo_Frecue
+						when @Tip_FreSem then @Fre_Semest
+						when @Tip_FreAnu then @Fre_Anual
+						else @Amo_Frecue
+					  end
 
-select	@Ren_Consec = @Ent_Uno
+select	@Ren_Consec	= @Ent_Uno
 
 while @Ren_Consec <= @Amo_Plazo begin
 	select	@Ren_Numero	= convert(char, @Ren_Consec)
 	exec UTCERIZQ
 		@Valor		= @Ren_Numero output,
-		@Longitud	= 3
+		@Longitud	= @Ent_Tres
 
-	insert into #Rentas values(	@Ren_Consec,	@Ren_Numero,	@Mon_Cero,	@Mon_Cero,	@Mon_Cero,
-								@Mon_Cero,		@Mon_Cero,		@Mon_Cero,	@Mon_Cero)
+	insert into #Rentas
+		values(	@Ren_Consec,	@Ren_Numero,	@Mon_Cero,	@Mon_Cero,	@Mon_Cero,
+				@Mon_Cero,		@Mon_Cero,		@Mon_Cero,	@Mon_Cero)
 
 	select	@Ren_Consec	= @Ren_Consec + @Ent_Uno
 end
 
 if @Amo_TipCon = @Con_ComPur/*Comercial Puro*/ begin
 	select	@Ren_Numero	= @Str_ValFut
-	insert into #Rentas values(	@Mon_Cero,	@Ren_Numero,	@Amo_OpcCom,	@Mon_Cero,	@Amo_OpcCom,
-								@Mon_Cero,	@Mon_Cero,		@Mon_Cero,		@Amo_OpcCom)
+	insert into #Rentas
+		values(	@Mon_Cero,	@Ren_Numero,	@Amo_OpcCom,	@Mon_Cero,	@Amo_OpcCom,
+				@Mon_Cero,	@Mon_Cero,		@Mon_Cero,		@Amo_OpcCom)
 end
 
 if @Amo_MonCer = @Cad_No begin
@@ -272,19 +295,23 @@ if @Amo_MonCer = @Cad_No begin
 			@Res_IvaFac	= round((@Amo_MonFin * @Amo_IVAFac) / @Mon_Cien, 2)
 	
 	/*	Para calcular la Tasa Nominal - El monto no se debe de redondear	*/
-	select	@Mon_Intere	= case @Amo_Frecue 	when @Tip_FreMen then @Amo_TasBas / @Mon_Cien / @Fre_Anual
-											when @Tip_FreBim then @Amo_TasBas / @Mon_Cien / @Fre_Semest
-											when @Tip_FreTri then @Amo_TasBas / @Mon_Cien / @Fre_Cuatri
-											when @Tip_FreCua then @Amo_TasBas / @Mon_Cien / @Fre_Trimen
-											when @Tip_FreSem then @Amo_TasBas / @Mon_Cien / @Fre_Bimens
-											when @Tip_FreAnu then @Amo_TasBas / @Mon_Cien / @Fre_Mensua end
+	select	@Mon_Intere	= case @Amo_Frecue
+							when @Tip_FreMen then @Amo_TasBas / @Mon_Cien / @Fre_Anual
+							when @Tip_FreBim then @Amo_TasBas / @Mon_Cien / @Fre_Semest
+							when @Tip_FreTri then @Amo_TasBas / @Mon_Cien / @Fre_Cuatri
+							when @Tip_FreCua then @Amo_TasBas / @Mon_Cien / @Fre_Trimen
+							when @Tip_FreSem then @Amo_TasBas / @Mon_Cien / @Fre_Bimens
+							when @Tip_FreAnu then @Amo_TasBas / @Mon_Cien / @Fre_Mensua
+						  end
 	
-	select	@Num_Meses	= case @Amo_Frecue 	when @Tip_FreMen then @Fre_Anual
-											when @Tip_FreBim then @Fre_Semest
-											when @Tip_FreTri then @Fre_Cuatri
-											when @Tip_FreCua then @Fre_Trimen
-											when @Tip_FreSem then @Fre_Bimens
-											when @Tip_FreAnu then @Fre_Mensua end
+	select	@Num_Meses	= case @Amo_Frecue 
+							when @Tip_FreMen then @Fre_Anual
+							when @Tip_FreBim then @Fre_Semest
+							when @Tip_FreTri then @Fre_Cuatri
+							when @Tip_FreCua then @Fre_Trimen
+							when @Tip_FreSem then @Fre_Bimens
+							when @Tip_FreAnu then @Fre_Mensua
+						  end
 	
 	select	@SumCaPaEx	= sum(Pae_Cantid),
 			@NumPagExt	= count(Pae_Amorti)
@@ -354,7 +381,7 @@ if @Amo_MonCer = @Cad_No begin
 			select	@Ren_Numero	= convert(char, @Ren_Consec)
 			exec UTCERIZQ
 				@Valor		= @Ren_Numero output,
-				@Longitud	= 3
+				@Longitud	= @Ent_Tres
 			
 			select	@Amo_FecIni	= Ren_FecIni, 
 					@Amo_FecVen	= Ren_FecVen
@@ -414,7 +441,10 @@ if @Amo_MonCer = @Cad_No begin
 			select	@Ren_TtCaIn	= @Mon_Cero
 		end
 
-		select	@Ren_IvaInt	= case @Amo_CobIVA when @Str_Si then round(@Ren_Intere * @Amo_IVA, 4) else @Mon_Cero end
+		select	@Ren_IvaInt	= case @Amo_CobIVA 
+								when @Str_Si then round(@Ren_Intere * @Amo_IVA, 4) 
+								else @Mon_Cero
+							  end
 		select	@Ren_IvaInt	= round(@Ren_IvaInt * (@Par_PorIVA/@Mon_Cien),4)
 		select	@Ren_IvaFac	= round((@Ren_Capita * @Amo_IVAFac) / @Mon_Cien, 4)
 		select	@Ren_IvaRen	= @Ren_IvaInt + @Ren_IvaFac
@@ -431,11 +461,11 @@ if @Amo_MonCer = @Cad_No begin
 				Ren_Capita	= @Amo_RenMen,
 				Ren_Intere	= @Mon_Cero,
 				Ren_TtCaIn	= @Mon_Cero,
-				Ren_IvaInt	= (@Amo_RenMen * @Par_IVA),
+				Ren_IvaInt	= (@Amo_RenMen * @Zon_IVA),
 				Ren_IvaFac	= @Mon_Cero,
-				Ren_IvaRen	= (@Amo_RenMen * @Par_IVA) + @Mon_Cero,
-				Ren_Total	= @Amo_RenMen + (@Amo_RenMen * @Par_IVA)
-			where	Ren_Consec	= @Ren_Consec
+				Ren_IvaRen	= (@Amo_RenMen * @Zon_IVA) + @Mon_Cero,
+				Ren_Total	= @Amo_RenMen + (@Amo_RenMen * @Zon_IVA)
+				where	Ren_Consec	= @Ren_Consec
 	
 		end else begin /*Arrendamiento-comercial puro-credito*/
 	
@@ -447,7 +477,7 @@ if @Amo_MonCer = @Cad_No begin
 				Ren_IvaFac	= @Ren_IvaFac,
 				Ren_IvaRen	= @Ren_IvaRen, 
 				Ren_Total	= @Ren_Total
-			where	Ren_Consec	= @Ren_Consec
+				where	Ren_Consec	= @Ren_Consec
 		end
 	
 		select	@Ren_ResCap	= @Ren_ResCap - @Ren_Capita
@@ -504,7 +534,10 @@ if @Amo_MonCer = @Cad_No begin
 	end
 
 	select	@Ren_TtCaIn	= @Ren_Capita + @Ren_Intere
-	select	@Ren_IvaInt	= case @Amo_CobIVA when @Str_Si then round(@Ren_Intere * @Amo_IVA, 2) else @Mon_Cero end
+	select	@Ren_IvaInt	= case @Amo_CobIVA 
+							when @Str_Si then round(@Ren_Intere * @Amo_IVA, 2)
+							else @Mon_Cero
+						  end
 	select	@Ren_IvaInt	= round(@Ren_IvaInt * (@Par_PorIVA/@Mon_Cien),2)
 	select	@Ren_IvaRen	= @Ren_IvaInt + @Ren_IvaFac 
 	select	@Ren_Total	= @Ren_Capita + @Ren_Intere + @Ren_IvaInt + @Ren_IvaFac
@@ -512,13 +545,13 @@ if @Amo_MonCer = @Cad_No begin
 	if @Amo_TipCon = @Con_B2BPur/*B2B Puro*/ or @Amo_TipCon = @Con_LeaVIP begin
 	
 		update #Rentas set
-				Ren_Capita	= @Amo_RenMen,
-				Ren_Intere	= @Mon_Cero,
-				Ren_TtCaIn	= @Mon_Cero,
-				Ren_IvaInt	= (@Amo_RenMen * @Par_IVA),
-				Ren_IvaFac	= @Mon_Cero,
-				Ren_IvaRen	= (@Amo_RenMen * @Par_IVA) + @Mon_Cero,
-				Ren_Total	= @Amo_RenMen + (@Amo_RenMen * @Par_IVA)
+			Ren_Capita	= @Amo_RenMen,
+			Ren_Intere	= @Mon_Cero,
+			Ren_TtCaIn	= @Mon_Cero,
+			Ren_IvaInt	= (@Amo_RenMen * @Zon_IVA),
+			Ren_IvaFac	= @Mon_Cero,
+			Ren_IvaRen	= (@Amo_RenMen * @Zon_IVA) + @Mon_Cero,
+			Ren_Total	= @Amo_RenMen + (@Amo_RenMen * @Zon_IVA)
 			where	Ren_Consec	= @Amo_Plazo
 
 	end else begin /*Arrendamientos-comerciales puro-credito*/
@@ -526,9 +559,9 @@ if @Amo_MonCer = @Cad_No begin
 		if @Amo_TipArr = @Arr_Puro begin /*Si el tipo de arrendamiento es comercial puro */
 
 			update #Rentas set
-					Ren_Capita	= @Ren_Capita,
-					Ren_Intere	= @Ren_Intere,
-					Ren_TtCaIn	= @Ren_TtCaIn
+				Ren_Capita	= @Ren_Capita,
+				Ren_Intere	= @Ren_Intere,
+				Ren_TtCaIn	= @Ren_TtCaIn
 				where	Ren_Consec	= @Amo_Plazo
 		
 			update #Rentas set
@@ -546,13 +579,13 @@ if @Amo_MonCer = @Cad_No begin
 
 		end else begin /*Si el tipo de arrendamiento es comercial financiero o credito */
 			update #Rentas set
-					Ren_Capita	= @Ren_Capita,
-					Ren_Intere	= @Ren_Intere,
-					Ren_TtCaIn	= @Ren_TtCaIn,
-					Ren_IvaInt	= @Ren_IvaInt,
-					Ren_IvaFac	= @Ren_IvaFac,
-					Ren_IvaRen	= @Ren_IvaRen,
-					Ren_Total	= @Ren_Total
+				Ren_Capita	= @Ren_Capita,
+				Ren_Intere	= @Ren_Intere,
+				Ren_TtCaIn	= @Ren_TtCaIn,
+				Ren_IvaInt	= @Ren_IvaInt,
+				Ren_IvaFac	= @Ren_IvaFac,
+				Ren_IvaRen	= @Ren_IvaRen,
+				Ren_Total	= @Ren_Total
 				where	Ren_Consec	= @Amo_Plazo
 		end
 	end
@@ -577,34 +610,34 @@ if @Amo_MonCer = @Cad_No begin
 
 		if @Amo_TipCon = @Con_B2BPur  or @Amo_TipCon = @Con_LeaVIP begin /*B2B Puro o Auto Leasing Plus*/
 
-			update #RenMen
-				set Ren_Cotiza	= @Num_Cotiza,
-					Ren_Numero	= #Rentas.Ren_Numero,
-					Ren_Capita	= #Rentas.Ren_Capita,
-					Ren_Intere	= #Rentas.Ren_Intere,
-					Ren_TtCaIn	= #Rentas.Ren_TtCaIn,
-					Ren_IvaInt	= #Rentas.Ren_IvaInt,
-					Ren_IvaFac	= #Rentas.Ren_IvaFac,
-					Ren_IvaRen	= #Rentas.Ren_IvaRen,
-					Ren_Total	= #Rentas.Ren_Total
-			from #Rentas
-				 inner join #RenMen on #Rentas.Ren_Numero = #RenMen.Ren_Numero
+			update #RenMen set
+				Ren_Cotiza	= @Num_Cotiza,
+				Ren_Numero	= #Rentas.Ren_Numero,
+				Ren_Capita	= #Rentas.Ren_Capita,
+				Ren_Intere	= #Rentas.Ren_Intere,
+				Ren_TtCaIn	= #Rentas.Ren_TtCaIn,
+				Ren_IvaInt	= #Rentas.Ren_IvaInt,
+				Ren_IvaFac	= #Rentas.Ren_IvaFac,
+				Ren_IvaRen	= #Rentas.Ren_IvaRen,
+				Ren_Total	= #Rentas.Ren_Total
+				from #Rentas
+				inner join #RenMen on #Rentas.Ren_Numero = #RenMen.Ren_Numero
 	
 		end else begin /*Arrendamiento-Comercial puro-credito*/
 
-			update #RenMen
-				set Ren_Cotiza	= @Num_Cotiza,
-					Ren_Numero	= #Rentas.Ren_Numero,
-					Ren_Capita	= #Rentas.Ren_Capita,
-					Ren_Intere	= #Rentas.Ren_Intere,
-					Ren_TtCaIn	= #Rentas.Ren_TtCaIn,
-					Ren_IvaInt	= #Rentas.Ren_IvaInt,
-					Ren_IvaFac	= #Rentas.Ren_IvaFac,
-					Ren_IvaRen	= #Rentas.Ren_IvaRen,
-					Ren_Total	= #Rentas.Ren_Total
-			from #Rentas
-				 inner join #RenMen on #Rentas.Ren_Numero = #RenMen.Ren_Numero
-			where	#Rentas.Ren_Numero <> @Amo_PagIni
+			update #RenMen set
+				Ren_Cotiza	= @Num_Cotiza,
+				Ren_Numero	= #Rentas.Ren_Numero,
+				Ren_Capita	= #Rentas.Ren_Capita,
+				Ren_Intere	= #Rentas.Ren_Intere,
+				Ren_TtCaIn	= #Rentas.Ren_TtCaIn,
+				Ren_IvaInt	= #Rentas.Ren_IvaInt,
+				Ren_IvaFac	= #Rentas.Ren_IvaFac,
+				Ren_IvaRen	= #Rentas.Ren_IvaRen,
+				Ren_Total	= #Rentas.Ren_Total
+				from #Rentas
+				inner join #RenMen on #Rentas.Ren_Numero = #RenMen.Ren_Numero
+				where	#Rentas.Ren_Numero <> @Amo_PagIni
 
 		end
 	
@@ -612,65 +645,65 @@ if @Amo_MonCer = @Cad_No begin
 	
 		if @Amo_TipCon = @Con_B2BPur or @Amo_TipCon = @Con_LeaVIP begin /*B2B Puro o Auto Leasing Plus*/
 
-			update #RenMen
-				set Ren_Cotiza	= @Num_Cotiza,
-					Ren_Numero	= #Rentas.Ren_Numero,
-					Ren_Capita	= #Rentas.Ren_Capita,
-					Ren_Intere	= #Rentas.Ren_Intere,
-					Ren_TtCaIn	= #Rentas.Ren_TtCaIn,
-					Ren_IvaInt	= #Rentas.Ren_IvaInt,
-					Ren_IvaFac	= #Rentas.Ren_IvaFac,
-					Ren_IvaRen	= #Rentas.Ren_IvaRen,
-					Ren_Total	= #Rentas.Ren_Total
-			from #Rentas
-				 inner join #RenMen on #Rentas.Ren_Numero = #RenMen.Ren_Numero
+			update #RenMen set
+				Ren_Cotiza	= @Num_Cotiza,
+				Ren_Numero	= #Rentas.Ren_Numero,
+				Ren_Capita	= #Rentas.Ren_Capita,
+				Ren_Intere	= #Rentas.Ren_Intere,
+				Ren_TtCaIn	= #Rentas.Ren_TtCaIn,
+				Ren_IvaInt	= #Rentas.Ren_IvaInt,
+				Ren_IvaFac	= #Rentas.Ren_IvaFac,
+				Ren_IvaRen	= #Rentas.Ren_IvaRen,
+				Ren_Total	= #Rentas.Ren_Total
+				from #Rentas
+				inner join #RenMen on #Rentas.Ren_Numero = #RenMen.Ren_Numero
 
 			insert into #RenMen
-			select	Ren_Cotiza	= @Str_Vacio,
-					Ren_Numero	= @CadTotales,
-					Ren_FecIni	= null,
-					Ren_FecVen	= null,
-					Ren_FecTer	= null,
-					Ren_Capita	= sum(Ren_Capita),
-					Ren_Intere	= sum(Ren_Intere),
-					Ren_TtCaIn	= sum(Ren_TtCaIn),
-					Ren_IvaInt	= sum(Ren_IvaInt),
-					Ren_IvaFac	= sum(Ren_IvaFac),
-					Ren_IvaRen	= sum(Ren_IvaRen),
-					Ren_Total	= sum(Ren_Total)
-			from #Rentas
-			where	Ren_Numero <> @Amo_PagIni
+				select	Ren_Cotiza	= @Str_Vacio,
+						Ren_Numero	= @Cad_Totale,
+						Ren_FecIni	= null,
+						Ren_FecVen	= null,
+						Ren_FecTer	= null,
+						Ren_Capita	= sum(Ren_Capita),
+						Ren_Intere	= sum(Ren_Intere),
+						Ren_TtCaIn	= sum(Ren_TtCaIn),
+						Ren_IvaInt	= sum(Ren_IvaInt),
+						Ren_IvaFac	= sum(Ren_IvaFac),
+						Ren_IvaRen	= sum(Ren_IvaRen),
+						Ren_Total	= sum(Ren_Total)
+					from #Rentas
+					where	Ren_Numero <> @Amo_PagIni
 
 		end else begin /*Arrendamiento-comercial puro-credito*/
-			update #RenMen
-				set Ren_Cotiza	= @Num_Cotiza,
-					Ren_Numero	= #Rentas.Ren_Numero,
-					Ren_Capita	= #Rentas.Ren_Capita,
-					Ren_Intere	= #Rentas.Ren_Intere,
-					Ren_TtCaIn	= #Rentas.Ren_TtCaIn,
-					Ren_IvaInt	= #Rentas.Ren_IvaInt,
-					Ren_IvaFac	= #Rentas.Ren_IvaFac,
-					Ren_IvaRen	= #Rentas.Ren_IvaRen,
-					Ren_Total	= #Rentas.Ren_Total
-			from #Rentas
-				 inner join #RenMen on #Rentas.Ren_Numero = #RenMen.Ren_Numero
-			where	#Rentas.Ren_Numero <> @Amo_PagIni
+			update #RenMen set
+				Ren_Cotiza	= @Num_Cotiza,
+				Ren_Numero	= #Rentas.Ren_Numero,
+				Ren_Capita	= #Rentas.Ren_Capita,
+				Ren_Intere	= #Rentas.Ren_Intere,
+				Ren_TtCaIn	= #Rentas.Ren_TtCaIn,
+				Ren_IvaInt	= #Rentas.Ren_IvaInt,
+				Ren_IvaFac	= #Rentas.Ren_IvaFac,
+				Ren_IvaRen	= #Rentas.Ren_IvaRen,
+				Ren_Total	= #Rentas.Ren_Total
+				from #Rentas
+				inner join #RenMen on #Rentas.Ren_Numero = #RenMen.Ren_Numero
+				where	#Rentas.Ren_Numero <> @Amo_PagIni
 	
 			insert into #RenMen
-			select	Ren_Cotiza	= @Str_Vacio,
-					Ren_Numero	= @CadTotales,
-					Ren_FecIni	= null,
-					Ren_FecVen	= null,
-					Ren_FecTer	= null,
-					Ren_Capita	= sum(Ren_Capita),
-					Ren_Intere	= sum(Ren_Intere),
-					Ren_TtCaIn	= sum(Ren_TtCaIn),
-					Ren_IvaInt	= sum(Ren_IvaInt),
-					Ren_IvaFac	= sum(Ren_IvaFac),
-					Ren_IvaRen	= sum(Ren_IvaRen),
-					Ren_Total	= sum(Ren_Total)
-			from #Rentas
-			where	Ren_Numero <> @Amo_PagIni
+				select	Ren_Cotiza	= @Str_Vacio,
+						Ren_Numero	= @Cad_Totale,
+						Ren_FecIni	= null,
+						Ren_FecVen	= null,
+						Ren_FecTer	= null,
+						Ren_Capita	= sum(Ren_Capita),
+						Ren_Intere	= sum(Ren_Intere),
+						Ren_TtCaIn	= sum(Ren_TtCaIn),
+						Ren_IvaInt	= sum(Ren_IvaInt),
+						Ren_IvaFac	= sum(Ren_IvaFac),
+						Ren_IvaRen	= sum(Ren_IvaRen),
+						Ren_Total	= sum(Ren_Total)
+				from #Rentas
+				where	Ren_Numero <> @Amo_PagIni
 
 		end
 	
@@ -680,31 +713,31 @@ end else begin
 	if @Amo_TipCal = @Cal_ConEsp begin
 		delete from #RenMen
 		insert into #RenMen
-		select	@Num_Cotiza,	Ren_Numero,	@Fec_Vacia,	@Fec_Vacia,	@Fec_Vacia,
-				Ren_Capita,		Ren_Intere,	Ren_TtCaIn,	Ren_IvaInt,	Ren_IvaFac,
-				Ren_IvaRen,		Ren_Total
-		from #Rentas
-		where	Ren_Numero	not in (@Str_RenExt, @Str_ValFut, @Amo_PagIni)
+			select	@Num_Cotiza,	Ren_Numero,	@Fec_Vacia,	@Fec_Vacia,	@Fec_Vacia,
+					Ren_Capita,		Ren_Intere,	Ren_TtCaIn,	Ren_IvaInt,	Ren_IvaFac,
+					Ren_IvaRen,		Ren_Total
+			from #Rentas
+			where	Ren_Numero	not in (@Str_RenExt, @Str_ValFut, @Amo_PagIni)
 	
 	end else begin
 		if @Amo_TipCon = @Con_B2BPur or @Amo_TipCon = @Con_LeaVIP begin /*B2B Puro o Auto Leasing Plus*/
 
 			delete from #RenMen
 			insert into #RenMen
-			select	@Num_Cotiza,	Ren_Numero,	@Fec_Vacia,	@Fec_Vacia,	@Fec_Vacia,
-					Ren_Capita,		Ren_Intere,	Ren_TtCaIn,	Ren_IvaInt,	Ren_IvaFac,
-					Ren_IvaRen,		Ren_Total
-			from #Rentas
+				select	@Num_Cotiza,	Ren_Numero,	@Fec_Vacia,	@Fec_Vacia,	@Fec_Vacia,
+						Ren_Capita,		Ren_Intere,	Ren_TtCaIn,	Ren_IvaInt,	Ren_IvaFac,
+						Ren_IvaRen,		Ren_Total
+				from #Rentas
 	
 		end else begin /*Arrendamiento-comercial puro-credito*/
 
 			delete from #RenMen
 			insert into #RenMen
-			select	@Num_Cotiza,	Ren_Numero,	@Fec_Vacia,	@Fec_Vacia,	@Fec_Vacia,
-					Ren_Capita,		Ren_Intere,	Ren_TtCaIn,	Ren_IvaInt,	Ren_IvaFac,
-					Ren_IvaRen,		Ren_Total
-			from #Rentas
-			where	Ren_Numero <> @Amo_PagIni
+				select	@Num_Cotiza,	Ren_Numero,	@Fec_Vacia,	@Fec_Vacia,	@Fec_Vacia,
+						Ren_Capita,		Ren_Intere,	Ren_TtCaIn,	Ren_IvaInt,	Ren_IvaFac,
+						Ren_IvaRen,		Ren_Total
+				from #Rentas
+				where	Ren_Numero <> @Amo_PagIni
 	
 		end
 	end
