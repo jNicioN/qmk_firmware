@@ -2,9 +2,9 @@ create procedure SORIPOFIALT (
    @Rpf_Numero int,
    @Rpf_NumRib int,
    @Rpf_Politi varchar(75),
-   @Rpf_DCPoCo varchar(3),
-   @Rpf_DiaInv varchar(3),
-   @Rpf_DiaPro varchar(3),
+   @Rpf_DCPoCo varchar(4),
+   @Rpf_DiaInv varchar(4),
+   @Rpf_DiaPro varchar(4),
    @Rpf_PerPic varchar(50),
    @Rpf_PerRec varchar(50),
    @Rpf_ComCic varchar(2),
@@ -20,6 +20,12 @@ create procedure SORIPOFIALT (
  as 
 /****************************************************************/
 /* DESCRIPCION: Alta de registros de Politica Financiera de RIB	*/
+/****************************************************************/
+/* Modifico:	Edwin Santiago Marcial							*/
+/* Descripcion:	Se modifica longitud de parametros de entrada	*/
+/* Rpf_DCPoCo, Rpf_DiaInv, Rpf_DiaPro 							*/
+/* Fecha:		03/05/2019										*/
+/* Help:		1240903											*/
 /****************************************************************/
 /* Creo:		Jorge Armando Garcia							*/
 /* Fecha:		24/02/2017										*/
