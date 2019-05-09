@@ -17,6 +17,11 @@ as
 /******************************************************************/
 /* DESCRIPCION: Usuario por regiones							  */
 /******************************************************************/
+/* Modifica:	Jaret Guanajuato Ruvalcaba						****
+** Fecha:		06/05/2019										****
+** Help:		1058568 										****
+** Modifica:	Se agrega Reg_SegNum a L3						****
+*******************************************************************/
 /* Modifica:	Jorge A. Garcia Leal							****
 ** Fecha:		20/07/2017										****
 ** Help:		985322 											****
@@ -50,7 +55,10 @@ declare	@Str_Vacio	char(1),
 		@Str_Tres	char(1),
 		@Str_Cuatro	char(1),
 		@Str_Cinco	char(1),
-		@Str_Seis	char(1)
+		@Str_Seis	char(1),
+		@Str_Coma	char(1),
+		@Int_Uno	int,
+		@Tip_Lista	char(1)
 
 select	@Str_Vacio	= '',			/* Caracter Vacio			*/
 		@Str_Activo	= 'A',
@@ -61,12 +69,15 @@ select	@Str_Vacio	= '',			/* Caracter Vacio			*/
 		@Str_Tres	= '3',
 		@Str_Cuatro	= '4',
 		@Str_Cinco	= '5',
-		@Str_Seis	= '6'
+		@Str_Seis	= '6',
+		@Str_Coma   = ',',
+		@Int_Uno	= 1,
+		@Tip_Lista  = 'L'
 
 select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
 		@Tip_ConCon	= substring(@Tip_Consul, 2, 1)
 
-if @Tip_ConTip	= 'L' begin					/* 'L': Listas */
+if @Tip_ConTip	= @Tip_Lista begin			/* 'L': Listas */
 	if @Tip_ConCon	= @Str_Uno begin		/* L1 Usuarios por Region */
 		select	Usr_Region,	Reg_Descri,	Usr_Usuari,	Usu_Clave,	Usu_Nombre
 			from SOUSUREG noholdlock
@@ -84,7 +95,8 @@ if @Tip_ConTip	= 'L' begin					/* 'L': Listas */
 			order by Reg_Descri
 	end
 	if @Tip_ConCon	= @Str_Tres begin /* L3 Regiones por Numero de Usuario */
-		select	Usr_Region,	Reg_Descri,	Usr_Usuari,	Usu_Clave,	Usu_Nombre
+		select	Usr_Region,	Reg_Descri,	Usr_Usuari,	Usu_Clave,	Usu_Nombre,
+				Reg_SegNum
 			from SOUSUREG noholdlock
 			inner join SOUSUARI noholdlock on Usu_Numero = Usr_Usuari
 			inner join SOREGION noholdlock on Reg_Numero = Usr_Region
@@ -109,13 +121,13 @@ if @Tip_ConTip	= 'L' begin					/* 'L': Listas */
 		create table #Regiones_Tmp(id int)
 				
 		/* Se separan los IDs de Zonas*/
-		select @Int_Index = charindex(',', @Usr_MulReg)
+		select @Int_Index = charindex(@Str_Coma, @Usr_MulReg)
 		while @Int_Index > @Int_Cero begin
 			insert into #Regiones_Tmp
-				values (CONVERT(INT,left(@Usr_MulReg, @Int_Index-1)))
+				values (CONVERT(INT,left(@Usr_MulReg, @Int_Index-@Int_Uno)))
 		
-			set @Usr_MulReg	= substring(@Usr_MulReg, @Int_Index+1, datalength(@Usr_MulReg) - @Int_Index)
-			select @Int_Index = charindex(',', @Usr_MulReg)
+			set @Usr_MulReg	= substring(@Usr_MulReg, @Int_Index+@Int_Uno, datalength(@Usr_MulReg) - @Int_Index)
+			select @Int_Index = charindex(@Str_Coma, @Usr_MulReg)
 		end
 		
 		if (datalength(@Usr_MulReg) > @Int_Cero) begin
