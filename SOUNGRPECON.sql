@@ -17,7 +17,7 @@
 as
 
 /***************************************************************************
-** DESCRIPCION: ** Consulta de Grupo de Personas y Grupos de Clientes	****
+** DESCRIPCION: ** Consulta Unificacion Grupo de Persona				****
 ****************************************************************************
 ** REFERENCIAS: 														****
 ****************************************************************************
@@ -57,69 +57,69 @@ select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
 		@Tip_Person	= 'P'								/* Tipo Persona */
 		
 		
-create table #PersonasBusqueda (
+create table #PersonaBus (
 	Gpc_Person char(8)
-) create index PersonasBusqueda on #PersonasBusqueda(Gpc_Person)
+) create index PersonaBus on #PersonaBus(Gpc_Person)
 
-create table #GrupoBusqueda (
+create table #GrupoBus (
 	Gpc_Grupo char(8)
-) create index GrupoBusqueda on #GrupoBusqueda(Gpc_Grupo)
+) create index GrupoBus on #GrupoBus(Gpc_Grupo)
 
-create table #GrupoPersonaBusqueda (
+create table #GrupoPer (
 	Gpc_Grupo char(8),
 	Gpc_Person char(8)
-) create index GrupoPersonaBusqueda on #GrupoPersonaBusqueda(Gpc_Grupo)
+) create index GrupoPer on #GrupoPer(Gpc_Grupo)
 
 if @Tip_ConTip = 'L' begin
 	if @Tip_ConCon = '1' begin					/* Consulta por llave principal */
 		/*Busqueda Persona Unica*/
-		insert into #PersonasBusqueda
+		insert into #PersonaBus
 		select @Gpc_Person
 	
 		/*Búsqueda de RFC + Homoclave*/
 		if len(@Gpc_RFC) > 13 begin
-			insert into #PersonasBusqueda
+			insert into #PersonaBus
 			select Per_Numero
 			  from SOPERSON noholdlock
 			 where Per_RFC = @Gpc_RFC
 		end
 		
 		/*Búsqueda de Nombre + RFC*/
-		insert into #PersonasBusqueda
+		insert into #PersonaBus
 		select Per_Numero
 		  from SOPERSON noholdlock
 		 where Per_Comple = @Gpc_Comple
 		   and Per_RFC like substring(@Gpc_RFC, 1, 10) + '%'
 		
 		/*Búsqueda de Nombre + CURP*/
-		insert into #PersonasBusqueda
+		insert into #PersonaBus
 		select Per_Numero
 		  from SOPERSON noholdlock
 		 where Per_Comple = @Gpc_Comple
 		   and Per_CURP like @Gpc_CURP
 		   
 		/*Búsqueda de Grupos*/
-		insert into #GrupoBusqueda
+		insert into #GrupoBus
 		select Peu_Grupo
 		  from SOUNIPER noholdlock
 		 where Peu_Person in (
 			select distinct Gpc_Person
-			  from #PersonasBusqueda
+			  from #PersonaBus
 		)
 		
 		/*Búsqueda de Personas relacionadas a los grupos*/
-		insert into #GrupoPersonaBusqueda
+		insert into #GrupoPer
 		select Peu_Grupo, Peu_Person
 		  from SOUNIPER noholdlock
 		 where Peu_Grupo in (
 			 select distinct Gpc_Grupo
-			   from #GrupoBusqueda
+			   from #GrupoBus
 		 )
 		 		
 		/*Salida de información relacionada a la busqueda y grupos*/
 		select Gpc_Grupo  as Gpc_Grupo, Gpc_Person as Gpc_Person, Per_Nombre as Gpc_Nombre, Per_ApePat as Gpc_ApePat, Per_ApeMat as Gpc_ApeMat, 
 		       Adi_FecNac as Gpc_FecNac, Adi_Sexo  as Gpc_Sexo,   Ent_Abrevi as Gpc_EntNac, Per_RFC    as Gpc_RFC,	  Per_CURP   as Gpc_CURP
-		  from #GrupoPersonaBusqueda
+		  from #GrupoPer
 		 inner join SOPERSON noholdlock on Per_Numero = Gpc_Person
 		 inner join SOPERADI noholdlock on Adi_PerNum = Per_Numero
 		 inner join CLENTIDA noholdlock on Ent_Numero = Per_Entida
@@ -127,4 +127,4 @@ if @Tip_ConTip = 'L' begin
 	end
 end
 
-drop table #PersonasBusqueda, #GrupoBusqueda, #GrupoPersonaBusqueda
+drop table #PersonaBus, #GrupoBus, #GrupoPer

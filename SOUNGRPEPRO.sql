@@ -23,7 +23,7 @@
 as
 
 /***************************************************************************
-** DESCRIPCION: ** Actualización y Agrupación de Personas				****
+** DESCRIPCION: ** Proceso de unificación de grupos de Persona			****
 ****************************************************************************
 ** REFERENCIAS: 														****
 ****************************************************************************
@@ -38,7 +38,7 @@ declare	@Reg_Existe	int,					/*Existe Registro*/
 		@Gpc_Comple char(120),				/*Nombre Completo*/
 		@Gpc_ComOrd char(120),				/*Nombre Completo Ordenado*/
 		@Per_Entida char(3),				/*Entidad*/
-		@Status		int,					/* Status */
+		@Ent_Status	int,					/* Status */
 		@Bit_Fecha	smalldatetime,			/* Bitacora Fecha */
 		@Bit_NumTra	char(10),				/* Bitacora Numero de transaccion */
 		@Bit_Tipo	char(1),				/* Bitacora tipo */
@@ -158,7 +158,7 @@ if @Tip_Proces = '1' begin		/*Actualización de Datos*/
 		from SOPERSON noholdlock
 		where	Per_Numero = @Gpc_Person
 
-	exec @Status = SOBITPERALT
+	exec @Ent_Status = SOBITPERALT
 		@Gpc_Person,	@Bit_Fecha,		@Bit_NumTra,	@Bit_Tipo,		@Bit_NuSeFi,
 		@Bit_Titulo,	@Bit_Nombre,	@Bit_ApePat,	@Bit_ApeMat,	@Bit_RazSoc,
 		@Bit_Comple,	@Bit_ComOrd,	@Bit_RFC,		@Bit_CURP,		@Bit_Calle,
@@ -167,7 +167,7 @@ if @Tip_Proces = '1' begin		/*Actualización de Datos*/
 		@Bit_EstCiv,	@Bit_Nacion,	@Bit_ActEmp,	@Bit_Giro,		@Bit_Sector,
 		@Bit_Activi,	@Bit_ActINE,	@NumTransac,	@Transaccio,	@Usuario,
 		@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
-	if @Status <> @Ent_Cero begin
+	if @Ent_Status <> @Ent_Cero begin
 		rollback
 		return 1
 	end
@@ -218,7 +218,7 @@ if @Tip_Proces = '1' begin		/*Actualización de Datos*/
 		from SOPERADI noholdlock
 		where	Adi_PerNum	= @Gpc_Person
 
-		exec @Status =	SOBIPEADALT
+		exec @Ent_Status =	SOBIPEADALT
 			@Gpc_Person,	@Bit_Fecha,		@Bit_NumTra,	@Bit_LugNac,	@Bit_Sexo,
 			@Bit_FecNac,	@Bit_RegMat,	@Bit_VivCas,	@Bit_TieRes,	@Bit_Fax,
 			@Bit_NumDep,    @Bit_Puesto,	@Bit_Ocupac,	@Bit_AntLab,	@Bit_LugTra,
@@ -231,7 +231,7 @@ if @Tip_Proces = '1' begin		/*Actualización de Datos*/
 			@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino,
 			@Modulo
 
-		if @Status <> 0 begin
+		if @Ent_Status <> 0 begin
 			rollback
 			return 1
 		end
