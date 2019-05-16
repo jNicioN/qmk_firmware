@@ -38,6 +38,9 @@ declare	@Reg_Existe	int,					/*Existe Registro*/
 		@Gpc_Comple char(120),				/*Nombre Completo*/
 		@Gpc_ComOrd char(120),				/*Nombre Completo Ordenado*/
 		@Per_Entida char(3),				/*Entidad*/
+		@Pro_Datos	char(1),				/*Proceso de actualización de Datos*/
+		@Pro_DesAgr	char(1),				/*Proceso de desagrupación de persona*/
+		@Pro_Agrupa	char(1),				/*Proceso de agrupación de persona*/
 		@Ent_Status	int,					/* Status */
 		@Bit_Fecha	smalldatetime,			/* Bitacora Fecha */
 		@Bit_NumTra	char(10),				/* Bitacora Numero de transaccion */
@@ -118,9 +121,12 @@ declare	@Ent_Uno	int,					/*Entero: Uno*/
 
 select	@Ent_Uno	= 1,
 		@Sta_Activo	= 'A',
-		@Ent_Cero	= 0
+		@Ent_Cero	= 0,
+		@Pro_Datos	= '1',
+		@Pro_DesAgr = '2',
+		@Pro_Agrupa	= '3'
 		
-if @Tip_Proces = '1' begin		/*Actualización de Datos*/
+if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 	select	@Bit_Fecha	= Per_Fecha,
 			@Bit_NumTra	= Per_NumTra,
 			@Bit_Tipo	= Per_Tipo,
@@ -275,7 +281,7 @@ if @Tip_Proces = '1' begin		/*Actualización de Datos*/
 		SucDestino	= @SucDestino
 	where Adi_PerNum = @Gpc_Person
 	
-end	else if @Tip_Proces = '2' begin		/*Desagrupacion de Registros*/
+end	else if @Tip_Proces = @Pro_DesAgr begin		/*Desagrupacion de Registros*/
 	update SOUNIPER set
 		Peu_Grupo = @Gpc_Person,
 		
@@ -286,7 +292,7 @@ end	else if @Tip_Proces = '2' begin		/*Desagrupacion de Registros*/
 		SucOrigen	= @SucOrigen,
 		SucDestino	= @SucDestino
 	where Peu_Person = @Gpc_Person
-end	else if @Tip_Proces = '3' begin		/*Agrupacion de Registros*/
+end	else if @Tip_Proces = @Pro_Agrupa begin		/*Agrupacion de Registros*/
 	update SOUNIPER set
 		Peu_Grupo = @Gpc_Grupo,
 		
