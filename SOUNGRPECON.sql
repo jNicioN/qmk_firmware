@@ -70,6 +70,22 @@ create table #GrupoPer (
 	Gpc_Person char(8)
 ) create index GrupoPer on #GrupoPer(Gpc_Grupo)
 
+create table #InfoPer (
+	Gpc_Id		int identity,
+	Gpc_Grupo	char(8),
+	Gpc_Person	char(8),
+	Gpc_Nombre	char(40),
+	Gpc_ApePat	char(40),
+	Gpc_ApeMat	char(40),
+	Gpc_FecNac	smalldatetime,
+	Gpc_Sexo	char(1),
+	Gpc_EntNac	char(2),
+	Gpc_RFC		char(15),
+	Gpc_CURP	char(18),
+	Gpc_Client  char(8),
+	Gpc_CliUni	char(8)
+) create index InfoPer on #InfoPer(Gpc_Id)
+
 if @Tip_ConTip = 'L' begin
 	if @Tip_ConCon = '1' begin					/* Consulta por llave principal */
 		/*Busqueda Persona Unica*/
@@ -117,14 +133,28 @@ if @Tip_ConTip = 'L' begin
 		 )
 		 		
 		/*Salida de información relacionada a la busqueda y grupos*/
+		insert into #InfoPer
 		select Gpc_Grupo  as Gpc_Grupo, Gpc_Person as Gpc_Person, Per_Nombre as Gpc_Nombre, Per_ApePat as Gpc_ApePat, Per_ApeMat as Gpc_ApeMat, 
-		       Adi_FecNac as Gpc_FecNac, Adi_Sexo  as Gpc_Sexo,   Ent_Abrevi as Gpc_EntNac, Per_RFC    as Gpc_RFC,	  Per_CURP   as Gpc_CURP
+		       Adi_FecNac as Gpc_FecNac, Adi_Sexo  as Gpc_Sexo,   Ent_Abrevi as Gpc_EntNac, Per_RFC    as Gpc_RFC,	  Per_CURP   as Gpc_CURP,
+		       @Str_Vacio, @Str_Vacio
 		  from #GrupoPer
 		 inner join SOPERSON noholdlock on Per_Numero = Gpc_Person
 		 inner join SOPERADI noholdlock on Adi_PerNum = Per_Numero
 		 inner join CLENTIDA noholdlock on Ent_Numero = Per_Entida
 		 order by Gpc_Grupo, Gpc_Person
+		 
+		update #InfoPer set
+			Gpc_Client = Clu_Client,
+			Gpc_CliUni = Clu_Grupo
+		  from CLADICIO noholdlock
+		  join CLCLIUNI noholdlock on Adi_Client = Clu_Client
+		 where Gpc_Person = Adi_NumPer
+		 
+		select Gpc_Grupo,	Gpc_Person,	Gpc_Nombre, Gpc_ApePat, Gpc_ApeMat,
+			   Gpc_FecNac,	Gpc_Sexo,	Gpc_EntNac,	Gpc_RFC,	Gpc_CURP,
+			   Gpc_Client,  Gpc_CliUni
+		  from #InfoPer
 	end
 end
 
-drop table #PersonaBus, #GrupoBus, #GrupoPer
+drop table #PersonaBus, #GrupoBus, #GrupoPer, #InfoPer

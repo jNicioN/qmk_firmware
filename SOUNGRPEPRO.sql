@@ -1,6 +1,6 @@
 ﻿create procedure SOUNGRPEPRO (
 	@Gpc_Person char(8),
-	@Gpc_Grupo char(8),
+	@Gpc_Grupo  char(8),
 	@Gpc_Nombre char(40),
 	@Gpc_ApePat char(40),
 	@Gpc_ApeMat char(40),
@@ -35,12 +35,15 @@ as
 /* Declaracion de variables */
 declare	@Reg_Existe	int,					/*Existe Registro*/
 		@Peu_Person char(8),				/*Persona*/
+		@Gpc_GrpAnt	char(8),				/*Grupo Anterior*/
 		@Gpc_Comple char(120),				/*Nombre Completo*/
 		@Gpc_ComOrd char(120),				/*Nombre Completo Ordenado*/
+		@Gpc_PrClUn char(8),				/*Persona del Cliente Único*/
 		@Per_Entida char(3),				/*Entidad*/
 		@Pro_Datos	char(1),				/*Proceso de actualización de Datos*/
 		@Pro_DesAgr	char(1),				/*Proceso de desagrupación de persona*/
-		@Pro_Agrupa	char(1),				/*Proceso de agrupación de persona*/
+		@Pro_GruMin	char(1),				/*Proceso de agrupación de persona por minimo*/
+		@Pro_GrClUn char(1),				/*Proceso de agrupacion de persona por persona del cliente único*/
 		@Ent_Status	int,					/* Status */
 		@Bit_Fecha	smalldatetime,			/* Bitacora Fecha */
 		@Bit_NumTra	char(10),				/* Bitacora Numero de transaccion */
@@ -117,16 +120,28 @@ declare	@Reg_Existe	int,					/*Existe Registro*/
 /* Declaracion de Constantes */
 declare	@Ent_Uno	int,					/*Entero: Uno*/
 		@Sta_Activo	char(1),				/*Estatus: Activo*/
-		@Ent_Cero	int						/* Numero entero 0 */
+		@Ent_Cero	int,					/*Numero entero 0 */
+		@Str_Vacio	char(1)					/*String: vacio*/
 
 select	@Ent_Uno	= 1,
 		@Sta_Activo	= 'A',
 		@Ent_Cero	= 0,
 		@Pro_Datos	= '1',
 		@Pro_DesAgr = '2',
-		@Pro_Agrupa	= '3'
+		@Pro_GruMin	= '3',
+		@Pro_GrClUn = '4',
+		@Str_Vacio	= ''
 		
 if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
+	select @Gpc_Nombre	= isnull(@Gpc_Nombre, @Str_Vacio)
+	select @Gpc_ApePat	= isnull(@Gpc_ApePat, @Str_Vacio)
+	select @Gpc_ApeMat	= isnull(@Gpc_ApeMat, @Str_Vacio)
+	select @Gpc_FecNac	= isnull(@Gpc_FecNac, @Str_Vacio)
+	select @Gpc_Sexo	= isnull(@Gpc_Sexo, @Str_Vacio)
+	select @Gpc_EntNac	= isnull(@Gpc_EntNac, @Str_Vacio)
+	select @Gpc_RFC		= isnull(@Gpc_RFC, @Str_Vacio)
+	select @Gpc_CURP	= isnull(@Gpc_CURP, @Str_Vacio)
+
 	select	@Bit_Fecha	= Per_Fecha,
 			@Bit_NumTra	= Per_NumTra,
 			@Bit_Tipo	= Per_Tipo,
@@ -282,17 +297,21 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 	where Adi_PerNum = @Gpc_Person
 	
 end	else if @Tip_Proces = @Pro_DesAgr begin		/*Desagrupacion de Registros*/
-	update SOUNIPER set
-		Peu_Grupo = @Gpc_Person,
-		
-		NumTransac	= @NumTransac,
-		Transaccio	= @Transaccio,
-		Usuario		= @Usuario,
-		FechaSis	= @FechaSis,
-		SucOrigen	= @SucOrigen,
-		SucDestino	= @SucDestino
-	where Peu_Person = @Gpc_Person
-end	else if @Tip_Proces = @Pro_Agrupa begin		/*Agrupacion de Registros*/
+	/*Consulta de la persona del Cliente Unico ligada a la persona consultada*/
+	select @Gpc_PrClUn = AdiUni.Adi_NumPer
+	  from CLADICIO as AicionalOuter noholdlock
+	 inner join CLCLIUNI as CliOuter noholdlock on CliOuter.Clu_Client = AicionalOuter.Adi_Client
+	 inner join CLADICIO as AdiUni   noholdlock on CliOuter.Clu_Grupo = AdiUni.Adi_Client
+	 where AicionalOuter.Adi_NumPer = @Gpc_Person
+	 group by AdiUni.Adi_NumPer
+	 
+	/*Si existe le asigna la persona del Cliente Único*/
+	if isnull(@Gpc_PrClUn, @Str_Vacio) <> @Str_Vacio begin
+		select @Gpc_Grupo = @Gpc_PrClUn
+	end else begin 
+		select @Gpc_Grupo = @Gpc_Person
+	end
+	
 	update SOUNIPER set
 		Peu_Grupo = @Gpc_Grupo,
 		
@@ -304,29 +323,42 @@ end	else if @Tip_Proces = @Pro_Agrupa begin		/*Agrupacion de Registros*/
 		SucDestino	= @SucDestino
 	where Peu_Person = @Gpc_Person
 	
-	/*Busqueda para confirmar si es lider de algun grupo*/
-	select @Reg_Existe = @Ent_Uno
-	  from SOUNIPER noholdlock
-	 where Peu_Grupo = @Gpc_Person
-	 
-	/*Si es lider de grupo elegir un nuevo lider para ese grupo*/
-	if @Reg_Existe = @Ent_Uno begin
-		select @Peu_Person = min(Peu_Person)
-		  from SOUNIPER noholdlock
-		 where Peu_Grupo = @Gpc_Person
+	/*Salida: Notificación cambio Persona IDE*/
+	select @Gpc_GrpAnt as Gpc_Person, @Gpc_Grupo as Gpc_Grupo
+	
+end	else if @Tip_Proces = @Pro_GruMin or @Tip_Proces = @Pro_GrClUn begin		/*Agrupacion de Registros*/
+
+	if @Tip_Proces = @Pro_GrClUn begin 
+		/*Consulta de la persona del Cliente Unico ligada a la persona consultada*/
+		select @Gpc_PrClUn = Adi_NumPer
+		  from CLCLIUNI noholdlock
+		 inner join CLADICIO noholdlock on Clu_Grupo = Adi_Client
+		 where Clu_Grupo = @Gpc_Grupo
 		 
-		update SOUNIPER set
-			Peu_Grupo = @Peu_Person,
-			
-			NumTransac	= @NumTransac,
-			Transaccio	= @Transaccio,
-			Usuario		= @Usuario,
-			FechaSis	= @FechaSis,
-			SucOrigen	= @SucOrigen,
-			SucDestino	= @SucDestino
-		where Peu_Grupo = @Gpc_Person
+		/*Si existe le asigna la persona del Cliente Único*/
+		if isnull(@Gpc_PrClUn, @Str_Vacio) <> @Str_Vacio begin
+			select @Gpc_Grupo = @Gpc_PrClUn
+		end else begin
+			select @Gpc_Grupo = @Gpc_Person
+		end
 	end
 	
+	/*Consulta de grupo anterior*/
+	select @Gpc_GrpAnt = Peu_Grupo
+	  from SOUNIPER noholdlock
+	 where Peu_Person = @Gpc_Person
+	
+	update SOUNIPER set
+		Peu_Grupo = @Gpc_Grupo,
+		
+		NumTransac	= @NumTransac,
+		Transaccio	= @Transaccio,
+		Usuario		= @Usuario,
+		FechaSis	= @FechaSis,
+		SucOrigen	= @SucOrigen,
+		SucDestino	= @SucDestino
+	where Peu_Person = @Gpc_Person
+	
 	/*Salida: Notificación cambio Persona IDE*/
-	select @Gpc_Person as Gpc_GrpAnt, @Peu_Person Gpc_GrpNue
+	select @Gpc_GrpAnt as Gpc_Person, @Gpc_Grupo as Gpc_Grupo
 end
