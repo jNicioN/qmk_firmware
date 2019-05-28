@@ -20,6 +20,14 @@ as
 /*******************************************************************
 ** DESCRIPCION: Consulta de Persona Unica						****
 ********************************************************************
+** Modifico:	Gaspar Jesus Gonzalez Zamora					****
+** Fecha:		27/05/2019										****
+** Help:		11156562										****
+** OTRS:		2019052742000158								****
+** Descripcion:	Modificación a la consulta L1 para agregar 		****
+**				campos de salida Per_Entida, Per_Locali			****
+**				   												****
+********************************************************************
 ** Modifico:	Jose Olguin Garmendia							****
 ** Fecha:		14/05/2019										****
 ** Help:		1215354											****
@@ -257,7 +265,7 @@ end else begin
 		select	P.Per_Numero,	P.Per_Tipo,		P.Per_Benefi,	P.Per_NuSeFi,	P.Per_Titulo,
 				P.Per_Nombre,	P.Per_ApePat,	P.Per_ApeMat,	P.Per_RazSoc,	P.Per_Comple,
 				P.Per_ComOrd,	P.Per_RFC,		A.Adi_Client as Per_Client,		P.Per_CURP,
-				P.FechaSis as 	Per_Fecha
+				P.FechaSis as 	Per_Fecha,		P.Per_Entida,	P.Per_Locali
 		  from	SOPERSON P noholdlock
 		  left	join
 		  		CLADICIO A noholdlock
