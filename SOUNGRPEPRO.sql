@@ -27,6 +27,12 @@ as
 ****************************************************************************
 ** REFERENCIAS: 														****
 ****************************************************************************
+** Modifico:	Armando Alexis Sepulveda Cruz							****
+** Fecha:		28/Mayo/2019											****
+** Help:		1214398													****
+** Descripcion:	Se modifica la unificación de la persona tomando en 	****
+**				cuenta a la persona del cliente único.					****
+****************************************************************************
 ** Creó:	Armando Alexis Sepúlveda Cruz								****
 ** Fecha:	11/Abril/2019												****
 ** Help:	1214398														****
@@ -34,6 +40,7 @@ as
 
 /* Declaracion de variables */
 declare	@Reg_Existe	int,					/*Existe Registro*/
+		@Status		int,					/*Estatus de Procedimiento*/
 		@Peu_Person char(8),				/*Persona*/
 		@Gpc_GrpAnt	char(8),				/*Grupo Anterior*/
 		@Gpc_Comple char(120),				/*Nombre Completo*/
@@ -343,21 +350,47 @@ end	else if @Tip_Proces = @Pro_GruMin or @Tip_Proces = @Pro_GrClUn begin		/*Agru
 		end
 	end
 	
+	select @Gpc_Grupo = rtrim(ltrim(isnull(@Gpc_Grupo, @Str_Vacio)))
+	
+	if isnull(@Gpc_Grupo, @Str_Vacio) = @Str_Vacio begin
+		select @Gpc_Grupo = AdiUni.Adi_NumPer
+		  from CLADICIO as AicionalOuter noholdlock
+		 inner join CLCLIUNI as CliOuter noholdlock on CliOuter.Clu_Client = AicionalOuter.Adi_Client
+		 inner join CLADICIO as AdiUni   noholdlock on CliOuter.Clu_Grupo = AdiUni.Adi_Client
+		 where AicionalOuter.Adi_NumPer = @Gpc_Person
+		 group by AdiUni.Adi_NumPer
+	end
+	
 	/*Consulta de grupo anterior*/
 	select @Gpc_GrpAnt = Peu_Grupo
 	  from SOUNIPER noholdlock
 	 where Peu_Person = @Gpc_Person
-	
-	update SOUNIPER set
-		Peu_Grupo = @Gpc_Grupo,
+	 
+	if isnull(@Gpc_Grupo, @Str_Vacio) = @Str_Vacio begin
+		select @Gpc_Grupo = @Gpc_GrpAnt
+	end
+	 
+	if isnull(@Gpc_GrpAnt, @Str_Vacio) = @Str_Vacio and not exists(select @Ent_Uno from SOUNIPER where Peu_Grupo = @Gpc_Grupo and Peu_Person = @Gpc_Person) begin
+		select @Gpc_GrpAnt as Grupo, @Gpc_Person, 1
+		exec @Status = SOUNIPERALT @Gpc_Grupo, @Gpc_Person, @NumTransac, @Transaccio, @Usuario, @FechaSis, @SucOrigen, @SucDestino, @Modulo
 		
-		NumTransac	= @NumTransac,
-		Transaccio	= @Transaccio,
-		Usuario		= @Usuario,
-		FechaSis	= @FechaSis,
-		SucOrigen	= @SucOrigen,
-		SucDestino	= @SucDestino
-	where Peu_Person = @Gpc_Person
+		if @Status <> @Ent_Cero begin
+			rollback
+			return 1
+		end
+	end else if not exists(select @Ent_Uno from SOUNIPER where Peu_Grupo = @Gpc_Grupo and Peu_Person = @Gpc_Person) begin
+		select @Gpc_Grupo as Grupo, 2
+		update SOUNIPER set
+			Peu_Grupo = @Gpc_Grupo,
+			
+			NumTransac	= @NumTransac,
+			Transaccio	= @Transaccio,
+			Usuario		= @Usuario,
+			FechaSis	= @FechaSis,
+			SucOrigen	= @SucOrigen,
+			SucDestino	= @SucDestino
+		where Peu_Person = @Gpc_Person
+	end
 	
 	/*Salida: Notificación cambio Persona IDE*/
 	select @Gpc_GrpAnt as Gpc_Person, @Gpc_Grupo as Gpc_Grupo
