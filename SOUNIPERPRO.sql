@@ -47,7 +47,8 @@ declare	@Per_RFC	varchar(15),
 		@Per_Grupo  char(8),
 		@Ent_Cero	int,
 		@Status		int,
-		@Peu_CliUni char(8)
+		@Peu_CliUni char(8),
+		@Cli_Grupo	char(8)
 		
 select	@Str_Vacios	= '',			-- String Vacio
 		@Rfc_Moral	= 12,			-- Longitud Persona Moral
@@ -77,15 +78,19 @@ else
 										where	Per_Comple	= @Per_Comple
 										  and	Per_RFC		like @Per_RFC) /* RFC Corto y Nombre */
 										  
-										  
-select @Peu_CliUni = AdiUni.Adi_NumPer
-  from SOUNIPER as UniOuter noholdlock 
- inner join CLADICIO as AicionalOuter noholdlock on UniOuter.Peu_Person = AicionalOuter.Adi_NumPer
- inner join CLCLIUNI as CliOuter noholdlock on CliOuter.Clu_Client = AicionalOuter.Adi_Client
- inner join CLADICIO as AdiUni   noholdlock on CliOuter.Clu_Grupo = AdiUni.Adi_Client
- where AicionalOuter.Adi_NumPer = @Peu_Grupo
- group by AdiUni.Adi_NumPer
-  
+if isnull(@Peu_Grupo, @Str_Vacios) <> @Str_Vacios begin										  
+	select @Cli_Grupo = AdiUni.Adi_NumPer
+	  from SOUNIPER noholdlock 
+	 inner join CLADICIO noholdlock on Peu_Person = Adi_NumPer
+	 inner join CLCLIUNI noholdlock on Clu_Client = Adi_Client
+	 where Peu_Grupo = @Peu_Grupo
+	 
+	select @Peu_CliUni = Adi_NumPer
+	  from CLADICIO noholdlock
+	 inner join CLCLIUNI noholdlock on Adi_Client = Cli_Numero
+	 where Cli_Numero = @Cli_Grupo
+end
+ 
 /*Si encuentra un número de persona dado al cliente unico entonces se asigna*/
 if isnull(@Peu_CliUni, @Str_Vacios) <> @Str_Vacios begin
 	select @Peu_Grupo = @Peu_CliUni

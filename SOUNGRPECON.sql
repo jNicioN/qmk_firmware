@@ -36,7 +36,8 @@ declare	@Tip_ConTip	char(1),					/* Declaracion de variables */
 		@Tip_ConCon	char(1),
 		@Rev_Regist	int,						/* Revision de registros */
 		@Peu_Grupo	char(8),					/* Grupo de personas */
-		@Col_Id		int
+		@Col_Id		int,
+		@Str_PerRFC	varchar(15)					/*String persona rfc*/
 		
 declare	@Str_Vacio	char(1),					/* Declaracion de Constantes */
 		@Cue_Activa	char(1),
@@ -44,7 +45,10 @@ declare	@Str_Vacio	char(1),					/* Declaracion de Constantes */
 		@Per_FisAct	char(1),
 		@Ent_Uno	int,
 		@Tip_Client	char(1),
-		@Tip_Person	char(1)
+		@Tip_Person	char(1),
+		@Str_Porcen	char(1),
+		@Len_RFCOrd	int,
+		@Len_RFCHom int
 
 select @Gpc_Person	= isnull(@Gpc_Person, @Str_Vacio)
 select @Gpc_CURP	= isnull(@Gpc_CURP, @Str_Vacio)
@@ -60,8 +64,12 @@ select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
 		@Per_FisAct = '3',								/* Persona Fisica con Actividad Empresarial */
 		@Ent_Uno	= 1,								/* Enero Uno */
 		@Tip_Client	= 'C',								/* Tipo Cliente */
-		@Tip_Person	= 'P'								/* Tipo Persona */
+		@Tip_Person	= 'P',								/* Tipo Persona */
+		@Str_Porcen	= '%',								/* String porcentaje % */
+		@Len_RFCOrd	= 10,								/* Longitud de rfc ordinario*/
+		@Len_RFCHom = 13								/* Longitud de rfc con homoclave*/
 		
+select @Str_PerRFC = ltrim(rtrim(@Gpc_RFC))
 		
 create table #PersonaBus (
 	Gpc_Person char(8)
@@ -109,12 +117,19 @@ if @Tip_ConTip = 'L' begin
 			insert into #PersonaBus
 			select @Gpc_Person
 		end
-	
-		/*Búsqueda de Nombre + RFC*/
---		insert into #PersonaBus
---		select Per_Numero
---		  from SOPERSON noholdlock
---		 where Per_RFC like @Gpc_RFC + '%'
+		
+		/*Búsqueda de RFC*/
+		if isnull(@Str_PerRFC, @Str_Vacio) <> @Str_Vacio and len(@Str_PerRFC) = @Len_RFCHom begin
+			insert into #PersonaBus
+			select Per_Numero
+			  from SOPERSON noholdlock
+			 where Per_RFC = @Str_PerRFC
+		end else if isnull(@Str_PerRFC, @Str_Vacio) <> @Str_Vacio and len(@Str_PerRFC) >= @Len_RFCOrd begin
+			insert into #PersonaBus
+			select Per_Numero
+			  from SOPERSON noholdlock
+			 where Per_RFC like @Str_PerRFC + @Str_Porcen
+		end
 		
 		/*Búsqueda de Nombre + CURP*/
 		insert into #PersonaBus
@@ -184,7 +199,7 @@ if @Tip_ConTip = 'L' begin
 			select Gpc_Person
 			  from #GrupoPer
 		 )
-		 					   
+		 		 					   
 		insert into #Grupo
 		select isnull(Clu_Grupo, @Str_Vacio),
 			   isnull(Clu_Client, @Str_Vacio),
@@ -193,17 +208,17 @@ if @Tip_ConTip = 'L' begin
 		  from #GrupoPer
 		  left join CLADICIO noholdlock on Gpc_Person = Adi_NumPer
 		  left join CLCLIUNI noholdlock on Clu_Client = Adi_Client
-		  		  		  	
+				  		  		  	
 		/*Salida de información relacionada a la busqueda y grupos*/
 		insert into #InfoPer
 		select Gpc_CliUni as Gpc_CliUni, Gpc_Client as Gpc_Client, Gpc_Grupo  as Gpc_Grupo,  Gpc_Person as Gpc_Person, Per_Nombre as Gpc_Nombre, 
-			   Per_ApePat as Gpc_ApePat, Per_ApeMat as Gpc_ApeMat, Adi_FecNac as Gpc_FecNac, Adi_Sexo   as Gpc_Sexo,   Ent_Abrevi as Gpc_EntNac, 
+			   Per_ApePat as Gpc_ApePat, Per_ApeMat as Gpc_ApeMat, Adi_FecNac as Gpc_FecNac, Adi_Sexo   as Gpc_Sexo,   isnull(Ent_Abrevi, @Str_Vacio) as Gpc_EntNac, 
 			   Per_RFC    as Gpc_RFC,	 Per_CURP   as Gpc_CURP
 		  from #Grupo
 		 inner join SOPERSON noholdlock on Per_Numero = Gpc_Person
-		 inner join SOPERADI noholdlock on Adi_PerNum = Per_Numero
-		 inner join CLENTIDA noholdlock on Ent_Numero = Per_Entida
-		 
+		 left join SOPERADI noholdlock on Adi_PerNum = Per_Numero
+		 left join CLENTIDA noholdlock on Ent_Numero = Per_Entida
+		 		 		 
 		select Gpc_CliUni,  Gpc_Client, Gpc_Grupo,	Gpc_Person,	Gpc_Nombre, 
 			   Gpc_ApePat,	Gpc_ApeMat,	Gpc_FecNac,	Gpc_Sexo,	Gpc_EntNac,	
 			   Gpc_RFC,		Gpc_CURP

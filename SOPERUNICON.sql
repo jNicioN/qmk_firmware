@@ -20,6 +20,12 @@ as
 /*******************************************************************
 ** DESCRIPCION: Consulta de Persona Unica						****
 ********************************************************************
+** Modifico:	Armando Alexis Sepúlveda Cruz					****
+** Fecha:		04/06/2019										****
+** Help:		1214398											****
+** Descripcion:	Se agrega consulta L8 y L9 para búsqueda		****
+**				avanzada de personas							****
+********************************************************************
 ** Modifico:	Gaspar Jesus Gonzalez Zamora					****
 ** Fecha:		27/05/2019										****
 ** Help:		11156562										****
@@ -111,7 +117,8 @@ declare	@Tip_ConTip	char(1), /* Consulta Tipo C/L*/
 		@Per_Grupo	char(8), /* Persona Grupo */
 		@Cli_Unific	char(8), /* Cliente Unificado */
 		@Int_Existe	int,     /* Existe */
-		@Str_PeuNom	varchar(150) /* Persona unica Nombre */
+		@Str_PeuNom	varchar(150), /* Persona unica Nombre */
+		@Str_PerRFC	varchar(15) /*RFC persona*/
 
 /* Declaracion de Constantes */
 declare	@Str_Vacio	char(1), /* Vacio */
@@ -128,7 +135,11 @@ declare	@Str_Vacio	char(1), /* Vacio */
 		@Str_Porcen	char(1), /* String porcentaje % */
 		@Str_Cinco	char(1), /* Tipo 5 */
 		@Str_Seis	char(1), /* Tipo 6 */
-		@Str_Siete	char(1)	 /* Tipo 7 */
+		@Str_Siete	char(1), /* Tipo 7 */
+		@Str_Ocho   char(1), /* Tipo 8*/
+		@Str_Nueve	char(1), /* Tipo 9*/
+		@Len_RFCOrd	int,
+		@Len_RFCHom int
 
 /* Asignacion de Constantes */
 select	@Str_Vacio	= '',
@@ -145,12 +156,27 @@ select	@Str_Vacio	= '',
 		@Str_Porcen	= '%',
 		@Str_Cinco	= '5',
 		@Str_Seis	= '6',
-		@Str_Siete	= '7'
+		@Str_Siete	= '7',
+		@Str_Ocho	= '8',
+		@Str_Nueve  = '9',
+		@Len_RFCOrd	= 10,								/* Longitud de rfc ordinario*/
+		@Len_RFCHom = 13								/* Longitud de rfc con homoclave*/
 
-select	@Str_PeuNom	= ltrim(rtrim(@Per_Comple)) + @Str_Porcen
+select	@Str_PerRFC = ltrim(rtrim(@Per_RFC)),
+		@Str_PeuNom	= ltrim(rtrim(@Per_Comple)) + @Str_Porcen
 
 select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
 		@Tip_ConCon	= substring(@Tip_Consul, 2, 1)
+		
+create table #personas (
+	Per_Numero	char(8),
+	Per_ComOrd  char(120),
+	Per_Comple	char(120),
+	Per_RFC		char(15),
+	Per_CURP	char(18),
+	Per_Nombre	char(40),
+	Per_Grupo	char(8)
+)
 
 if @Tip_ConTip = @Str_C begin
 
@@ -642,4 +668,46 @@ end else begin
 
 		drop table #personasUnicas
 	end
+	
+	if @Tip_ConCon = @Str_Ocho begin /* L8 - Busqueda por nombre de personas que representan la persona Ãºnica*/
+	
+		select @Cli_Unific = Clu_Grupo
+		  from CLCLIENT noholdlock 
+		 inner join CLCLIUNI noholdlock on Clu_Client = Cli_Numero
+		 where Cli_Numero = @Per_Numero
+		 
+		select Per_Numero, Per_ComOrd, Per_Comple,	Per_RFC, Per_CURP,
+			   Per_Nombre
+		  from CLADICIO noholdlock 
+		 inner join SOPERSON on Per_Numero = Adi_NumPer
+		 where Adi_Client = @Cli_Unific
+	end
+	
+	if @Tip_ConCon = @Str_Nueve begin /* L9 - Busqueda por RFC*/
+		if isnull(@Str_PerRFC, @Str_Vacio) <> @Str_Vacio and len(@Str_PerRFC) = @Len_RFCHom begin
+			insert into #personas
+			select Per_Numero, Per_ComOrd, Per_Comple,	Per_RFC, Per_CURP,
+				   Per_Nombre, @Str_Vacio
+			from	SOPERSON noholdlock
+			 where Per_RFC = @Str_PerRFC
+		end else if isnull(@Str_PerRFC, @Str_Vacio) <> @Str_Vacio and len(@Str_PerRFC) >= @Len_RFCOrd begin
+			insert into #personas
+			select Per_Numero, Per_ComOrd, Per_Comple,	Per_RFC, Per_CURP,
+				   Per_Nombre, @Str_Vacio
+			from	SOPERSON noholdlock
+			 where Per_RFC like @Str_PerRFC + @Str_Porcen
+		end
+				
+		update #personas set
+			Per_Grupo = Peu_Grupo
+			from	SOUNIPER noholdlock
+				where	Peu_Person = Per_Numero
+		
+		select	Per_Numero, Per_ComOrd, Per_Comple,	Per_RFC, Per_CURP,
+			    Per_Nombre, Per_Grupo
+			from	#personas
+			order by Per_Comple, Per_RFC, Per_Numero
+	end 
 end
+
+drop table #personas
