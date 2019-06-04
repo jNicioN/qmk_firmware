@@ -371,7 +371,6 @@ end	else if @Tip_Proces = @Pro_GruMin or @Tip_Proces = @Pro_GrClUn begin		/*Agru
 	end
 	 
 	if isnull(@Gpc_GrpAnt, @Str_Vacio) = @Str_Vacio and not exists(select @Ent_Uno from SOUNIPER where Peu_Grupo = @Gpc_Grupo and Peu_Person = @Gpc_Person) begin
-		select @Gpc_GrpAnt as Grupo, @Gpc_Person, 1
 		exec @Status = SOUNIPERALT @Gpc_Grupo, @Gpc_Person, @NumTransac, @Transaccio, @Usuario, @FechaSis, @SucOrigen, @SucDestino, @Modulo
 		
 		if @Status <> @Ent_Cero begin
@@ -379,7 +378,6 @@ end	else if @Tip_Proces = @Pro_GruMin or @Tip_Proces = @Pro_GrClUn begin		/*Agru
 			return 1
 		end
 	end else if not exists(select @Ent_Uno from SOUNIPER where Peu_Grupo = @Gpc_Grupo and Peu_Person = @Gpc_Person) begin
-		select @Gpc_Grupo as Grupo, 2
 		update SOUNIPER set
 			Peu_Grupo = @Gpc_Grupo,
 			
