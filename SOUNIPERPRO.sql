@@ -9,21 +9,15 @@ create procedure SOUNIPERPRO (
 	@SucDestino	char(3),
 	@Modulo		char(2))
 as
-/*******************************************************************
-** DESCRIPCION: Unifica la persona o crea su nuevo grupo		  **
-********************************************************************
-** REFERENCIAS: 												  **
-********************************************************************
-** Modifico:	Armando Alexis Sepulveda Cruz					****
-** Fecha:		28/Mayo/2019									****
-** Help:		1214398											****
-** Descripcion:	Se considera la asignacion de la persona del 	****
-**				Cliente Unico en caso de existir.				****
-********************************************************************
+/******************************************************************/
+/* DESCRIPCION: Unifica la persona o crea su nuevo grupo		  */
+/******************************************************************/
+/* REFERENCIAS: 												  */
+/********************************************************************
 ** Modifico:	Armando Alexis Sepulveda Cruz					****
 ** Fecha:		22/Sep/17										****
 ** Help:		1020500											****
-** Descripcion:	Se agrega la actualizacion de unificación    	****
+** Descripcion:	Se agrega la actualizacion de unificación    ****
 **              grupos.											****
 ********************************************************************
 ** Modifico:	Claudia V Sandoval P							****
@@ -46,14 +40,12 @@ declare	@Per_RFC	varchar(15),
 		@Peu_Grupo	char(8),
 		@Per_Grupo  char(8),
 		@Ent_Cero	int,
-		@Status		int,
-		@Peu_CliUni char(8),
-		@Cli_Grupo	char(8)
+		@Status		int
 		
 select	@Str_Vacios	= '',			-- String Vacio
 		@Rfc_Moral	= 12,			-- Longitud Persona Moral
 		@RFC_Fisic	= 13,			-- Longitud Persona Fisica
-		@Ent_Cero	= 0				-- Entero en Cero
+		@Ent_Cero	= 0			-- Entero en Cero
 
 select	@Per_Grupo	= isnull(Peu_Grupo,	@Str_Vacios)
 	from SOUNIPER noholdlock 
@@ -77,24 +69,6 @@ else
 										from SOPERSON noholdlock 
 										where	Per_Comple	= @Per_Comple
 										  and	Per_RFC		like @Per_RFC) /* RFC Corto y Nombre */
-										  
-if isnull(@Peu_Grupo, @Str_Vacios) <> @Str_Vacios begin										  
-	select @Cli_Grupo = AdiUni.Adi_NumPer
-	  from SOUNIPER noholdlock 
-	 inner join CLADICIO noholdlock on Peu_Person = Adi_NumPer
-	 inner join CLCLIUNI noholdlock on Clu_Client = Adi_Client
-	 where Peu_Grupo = @Peu_Grupo
-	 
-	select @Peu_CliUni = Adi_NumPer
-	  from CLADICIO noholdlock
-	 inner join CLCLIUNI noholdlock on Adi_Client = Cli_Numero
-	 where Cli_Numero = @Cli_Grupo
-end
- 
-/*Si encuentra un número de persona dado al cliente unico entonces se asigna*/
-if isnull(@Peu_CliUni, @Str_Vacios) <> @Str_Vacios begin
-	select @Peu_Grupo = @Peu_CliUni
-end
 	
 if ltrim(@Per_Grupo) <> ltrim(@Str_Vacios) begin							/* Actualizar grupo*/
 	if @Per_Grupo <> @Peu_Grupo and isnull(ltrim(@Peu_Grupo), @Str_Vacios) <> @Str_Vacios begin 
@@ -113,11 +87,11 @@ end else begin																/* Alta de grupo*/
 	if isnull(ltrim(@Peu_Grupo), @Str_Vacios) = @Str_Vacios
 		select	@Peu_Grupo = @Peu_Person
 
-		exec @Status =  SOUNIPERALT
-			@Peu_Grupo,	@Peu_Person,	@NumTransac,	@Transaccio,	@Usuario,
-			@FechaSis,	@SucOrigen,		@SucDestino,	@Modulo
-		if @Status <> @Ent_Cero begin
-			rollback
-		return 1
-	end
+	exec @Status =  SOUNIPERALT
+		@Peu_Grupo,	@Peu_Person,	@NumTransac,	@Transaccio,	@Usuario,
+		@FechaSis,	@SucOrigen,		@SucDestino,	@Modulo
+	if @Status <> @Ent_Cero begin
+		rollback
+	return 1
+end
 end
