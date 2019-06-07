@@ -168,7 +168,7 @@ select	@Str_PerRFC = ltrim(rtrim(@Per_RFC)),
 select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
 		@Tip_ConCon	= substring(@Tip_Consul, 2, 1)
 		
-create table #personas (
+create table #Personas (
 	Per_Numero	char(8),
 	Per_ComOrd  char(120),
 	Per_Comple	char(120),
@@ -641,18 +641,18 @@ end else begin
 	end
 
 	if @Tip_ConCon	= @Str_Siete begin /* L7 - Busqueda por nombre de personas que representan la persona única*/
-		create table #personasUnicas(
+		create table #PersonasUnicas(
 			Per_Person	char(8) not null,
 			Per_Grupo	char(8) not null)
 
-		create index personasUnicas on #personasUnicas(Per_Grupo)
+		create index personasUnicas on #PersonasUnicas(Per_Grupo)
 
-		insert into #personasUnicas
+		insert into #PersonasUnicas
 			select Per_Numero, Per_Numero
 				from SOPERSON noholdlock
 				where	Per_Comple like @Str_PeuNom
 
-		update #personasUnicas set
+		update #PersonasUnicas set
 			Per_Grupo = Peu_Grupo
 			from SOUNIPER noholdlock
 			where	Peu_Person = Per_Person
@@ -661,12 +661,12 @@ end else begin
 				Per_Nombre,	Per_ApePat,	Per_ApeMat,	Adi_TipIde,	Adi_NumIde,
 				Adi_FeVeId,	Per_Nacion,	Adi_NacExt,	Adi_FeExId,	Adi_Sexo,
 				Adi_FecNac
-			from #personasUnicas
+			from #PersonasUnicas
 			inner join SOPERSON noholdlock on Per_Numero = Per_Grupo
 			left outer join SOPERADI noholdlock on Adi_PerNum	= Per_Numero
 			where Per_Person	= Per_Grupo
 
-		drop table #personasUnicas
+		drop table #PersonasUnicas
 	end
 	
 	if @Tip_ConCon = @Str_Ocho begin /* L8 - Busqueda por nombre de personas que representan la persona Ãºnica*/
@@ -685,29 +685,29 @@ end else begin
 	
 	if @Tip_ConCon = @Str_Nueve begin /* L9 - Busqueda por RFC*/
 		if isnull(@Str_PerRFC, @Str_Vacio) <> @Str_Vacio and len(@Str_PerRFC) = @Len_RFCHom begin
-			insert into #personas
+			insert into #Personas
 			select Per_Numero, Per_ComOrd, Per_Comple,	Per_RFC, Per_CURP,
 				   Per_Nombre, @Str_Vacio
 			from	SOPERSON noholdlock
 			 where Per_RFC = @Str_PerRFC
 		end else if isnull(@Str_PerRFC, @Str_Vacio) <> @Str_Vacio and len(@Str_PerRFC) >= @Len_RFCOrd begin
-			insert into #personas
+			insert into #Personas
 			select Per_Numero, Per_ComOrd, Per_Comple,	Per_RFC, Per_CURP,
 				   Per_Nombre, @Str_Vacio
 			from	SOPERSON noholdlock
 			 where Per_RFC like @Str_PerRFC + @Str_Porcen
 		end
 				
-		update #personas set
+		update #Personas set
 			Per_Grupo = Peu_Grupo
 			from	SOUNIPER noholdlock
 				where	Peu_Person = Per_Numero
 		
 		select	Per_Numero, Per_ComOrd, Per_Comple,	Per_RFC, Per_CURP,
 			    Per_Nombre, Per_Grupo
-			from	#personas
+			from	#Personas
 			order by Per_Comple, Per_RFC, Per_Numero
 	end 
 end
 
-drop table #personas
+drop table #Personas

@@ -122,7 +122,8 @@ declare	@Reg_Existe	int,					/*Existe Registro*/
 		@Bit_FeVeId	smalldatetime,			/* Bitacora Fecha de vencimiento de la identificacion */
 		@Bit_NuIdFi	varchar(20),			/* Bitacora Numero de Identificacion Fiscal */
 		@Bit_EntPri char(40), 				/* Bitacora Entre Calle Primera */
-		@Bit_EntSeg char(40)				/* Bitacora Entre Calle Segunda */
+		@Bit_EntSeg char(40),				/* Bitacora Entre Calle Segunda */
+		@Exi_Regist int						/* Variable de control de existencia de registro*/
 
 /* Declaracion de Constantes */
 declare	@Ent_Uno	int,					/*Entero: Uno*/
@@ -369,15 +370,22 @@ end	else if @Tip_Proces = @Pro_GruMin or @Tip_Proces = @Pro_GrClUn begin		/*Agru
 	if isnull(@Gpc_Grupo, @Str_Vacio) = @Str_Vacio begin
 		select @Gpc_Grupo = @Gpc_GrpAnt
 	end
+	
+	select @Exi_Regist = @Ent_Uno 
+	  from SOUNIPER noholdlock
+	 where Peu_Grupo = @Gpc_Grupo 
+	   and Peu_Person = @Gpc_Person
 	 
-	if isnull(@Gpc_GrpAnt, @Str_Vacio) = @Str_Vacio and not exists(select @Ent_Uno from SOUNIPER where Peu_Grupo = @Gpc_Grupo and Peu_Person = @Gpc_Person) begin
-		exec @Status = SOUNIPERALT @Gpc_Grupo, @Gpc_Person, @NumTransac, @Transaccio, @Usuario, @FechaSis, @SucOrigen, @SucDestino, @Modulo
+	if isnull(@Gpc_GrpAnt, @Str_Vacio) = @Str_Vacio and isnull(@Exi_Regist, @Ent_Cero) = @Ent_Cero begin
+		exec @Status = SOUNIPERALT 
+		@Gpc_Grupo,	@Gpc_Person,	@NumTransac,	@Transaccio,	@Usuario, 
+		@FechaSis,	@SucOrigen,		@SucDestino,	@Modulo
 		
 		if @Status <> @Ent_Cero begin
 			rollback
 			return 1
 		end
-	end else if not exists(select @Ent_Uno from SOUNIPER where Peu_Grupo = @Gpc_Grupo and Peu_Person = @Gpc_Person) begin
+	end else if  isnull(@Exi_Regist, @Ent_Cero) = @Ent_Cero begin
 		update SOUNIPER set
 			Peu_Grupo = @Gpc_Grupo,
 			
