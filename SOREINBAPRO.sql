@@ -70,7 +70,7 @@ if @Tip_Proces	= @Str_A begin /* 'A': Proceso para realizar la copia de RIB cuan
 		if @Rib_NumInt = @Ent_Cero and @Rib_NumSol = @Ent_Cero and @Int_RibBas <> @Ent_Cero begin
 			select		Err_Codigo	= '000001',
 						Err_Mensaj	= 'Ya existe un RIB BASE'
-			return return @Ent_Uno
+			return @Ent_Uno
 		end
 				
 		/* Si existe Rib Persona Base, se crea copia */
