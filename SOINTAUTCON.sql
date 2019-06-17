@@ -1,4 +1,4 @@
-create procedure SOINTAUTCON (
+﻿create procedure SOINTAUTCON (
 	@Opi_NuIdOp	int,			/* Número identificador de operación de identificación */
 	@Cio_NuIdCo	int,			/* Número identificador de configuración de Operación de Identificación */
 	@Per_Numero	char(8),		/* Número de persona */
@@ -20,6 +20,13 @@ as
 /* *****************************************************************
 ** DESCRIPCION: Consulta de intervinientes Autorizados			  **
 **				(para Identificación de Operaciones)			  **
+********************************************************************
+** Modificó:	Francisco Javier Carrillo Rojas					****
+** Fecha:		12/Junio/2019									****
+** Help:		01258559										****
+** Descripcion:	Considerar status de registros nuevos de firma	****
+**				autorizados y escaneados para obtener el		****
+**				conjunto de firmas/personas que aplican			****
 ********************************************************************
 ** Modificó:	Francisco Javier Carrillo Rojas					****
 ** Fecha:		31/Ene/2019										****
@@ -71,6 +78,7 @@ declare	@Str_C		char(1),
 		@Tip_FirA	char(1),
 		@Ent_Uno	int,
 		@Sta_FirEsc	char(1),
+		@Sta_FirAut	char(1),
 		@Tip_ReFiNu	char(1)
 
 /* Asignacion de Constantes */
@@ -89,6 +97,7 @@ select	@Str_C		= 'C',		/* Tipo C */
 		@Tip_FirA	= 'A',		/* Tipo de firma A */
 		@Ent_Uno	= 1,		/* Entero en uno */
 		@Sta_FirEsc	= 'S',		/* Status de firma escaneado */
+		@Sta_FirAut	= 'A',		/* Status de firma autorizado */
 		@Tip_ReFiNu	= 'N'		/* Tipo de registro de firmas nuevo */
 
 select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
@@ -210,7 +219,7 @@ if @Tip_ConTip = @Str_C begin
 			  	select @Fof_MaxCon	= convert(smallint, max(Fof_Consec))
 					from CHPEFOFI noholdlock
 					where	Fof_Cuenta	= @Cue_Numero
-					  and	Fof_Status	= @Sta_FirEsc
+					  and	Fof_Status	in (@Sta_FirEsc, @Sta_FirAut)
 					  and	Fof_Tipo	= @Tip_ReFiNu
 			
 				update #Personas set
@@ -218,7 +227,7 @@ if @Tip_ConTip = @Str_C begin
 					from CHPEFOFI noholdlock					
 					where	Fof_Cuenta	= @Cue_Numero
 					  and	Fof_Person	= Per_Person
-					  and	Fof_Status	= @Sta_FirEsc
+					  and	Fof_Status	in (@Sta_FirEsc, @Sta_FirAut)
 					  and	convert(smallint, Fof_Consec)	>= @Fof_MaxCon
 					  
 				--Complementar el tipo de firma con aquellos casos de terceros autorizados que no tengan el número de persona asociado en el registro de CHPEFOFI infiriéndolo de CHCOTBEN
@@ -227,7 +236,7 @@ if @Tip_ConTip = @Str_C begin
 					from CHPEFOFI noholdlock
 					where	Fof_Cuenta	= @Cue_Numero
 					  and	ltrim(Fof_Person) is null
-					  and	Fof_Status	= @Sta_FirEsc
+					  and	Fof_Status	in (@Sta_FirEsc, @Sta_FirAut)
 					  and	convert(smallint, Fof_Consec)	>= @Fof_MaxCon
 					  and	ltrim(Per_Person) is not null
 					  and	Per_CobNom	= Fof_Nombre
@@ -286,7 +295,7 @@ end else begin
 			  	select @Fof_MaxCon	= convert(smallint, max(Fof_Consec))
 					from CHPEFOFI noholdlock
 					where	Fof_Cuenta	= @Cue_Numero
-					  and	Fof_Status	= @Sta_FirEsc
+					  and	Fof_Status	in (@Sta_FirEsc, @Sta_FirAut)
 					  and	Fof_Tipo	= @Tip_ReFiNu
 
 				update #Personas set
@@ -294,7 +303,7 @@ end else begin
 					from CHPEFOFI noholdlock					
 					where	Fof_Cuenta	= @Cue_Numero
 					  and	Fof_Person	= Per_Person			
-					  and	Fof_Status	= @Sta_FirEsc
+					  and	Fof_Status	in (@Sta_FirEsc, @Sta_FirAut)
 					  and	convert(smallint, Fof_Consec)	>= @Fof_MaxCon
 					  
 				--Complementar el tipo de firma con aquellos casos de terceros autorizados que no tengan el número de persona asociado en el registro de CHPEFOFI infiriéndolo de CHCOTBEN
@@ -303,7 +312,7 @@ end else begin
 					from CHPEFOFI noholdlock
 					where	Fof_Cuenta	= @Cue_Numero
 					  and	ltrim(Fof_Person) is null
-					  and	Fof_Status	= @Sta_FirEsc
+					  and	Fof_Status	in (@Sta_FirEsc, @Sta_FirAut)
 					  and	convert(smallint, Fof_Consec)	>= @Fof_MaxCon
 					  and	ltrim(Per_Person) is not null
 					  and	Per_CobNom	= Fof_Nombre
