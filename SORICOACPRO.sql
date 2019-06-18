@@ -16,6 +16,11 @@ as
 	/**					Accionaria de Aspectos de Calificacion asociados	*/
 	/**					a RIB												*/
 	/************************************************************************/
+	/** Modifico:	Jose Rodriguez											*/
+	/** Fecha:		07/06/2019                               				*/
+	/** Help:		1229452					 								*/
+	/** Descripcion: Se agrega un campo     								*/
+	/************************************************************************/
 	/** Creo:     		Victor Osorio										*/
 	/** Fecha:    		03/05/2017											*/
 	/** Help:			929417												*/
@@ -50,15 +55,15 @@ as
 						Rca_NumRib,		Rca_CoPaGP,		Rca_TipAdm,		Rca_NuCoTo,
 						Rca_NuCoIn,		Rca_TiAdUn,		Rca_PlaSuc,		Rca_OrAdSe,
 						Rca_ArACIn,		Rca_PrCuAd,		Rca_CuExBa,		Rca_CuExPr,
-						Rca_EdFiAu,		Rca_PrExBa,		Rca_ExPoPr,		Rca_InArRi,
-						NumTransac,		Transaccio,		Usuario,		FechaSis,
-						SucOrigen,		SucDestino)
+						Rca_EdFiAu,		Rca_PrExBa,		Rca_EnCuEm,		Rca_ExPoPr,		
+						Rca_InArRi,		NumTransac,		Transaccio,		Usuario,		
+						FechaSis,		SucOrigen,		SucDestino)
 				select	@Int_RibBas,	Rca_CoPaGP,		Rca_TipAdm,		Rca_NuCoTo,
 						Rca_NuCoIn,		Rca_TiAdUn,		Rca_PlaSuc,		Rca_OrAdSe,
 						Rca_ArACIn,		Rca_PrCuAd,		Rca_CuExBa,		Rca_CuExPr,
-						Rca_EdFiAu,		Rca_PrExBa,		Rca_ExPoPr,		Rca_InArRi,
-						@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,
-						@SucOrigen,		@SucDestino
+						Rca_EdFiAu,		Rca_PrExBa,		Rca_EnCuEm,		Rca_ExPoPr,		
+						Rca_InArRi,		@NumTransac,	@Transaccio,	@Usuario,		
+						@FechaSis,		@SucOrigen,		@SucDestino
 				from SORICOAC noholdlock
 				where Rca_NumRib = @Rca_NumRib
 			end
