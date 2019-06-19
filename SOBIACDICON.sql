@@ -67,9 +67,9 @@ declare @Tip_ConTip char(1),
 		@Cli_Numero char(12),
 		@Cli_Tipo   char(1),
 		@Opi_NuIdOp	int,
-		@Fec_Actual	smalldatetime,
-		@Fec_PriDia	smalldatetime,
-		@Udi_EfeVen float
+		@FechaActua	smalldatetime,
+		@FecPriDia	smalldatetime,
+		@ValorUdi float
 		
 							/******Declaracion de constantes******/
 declare @Str_Consul char(1),
@@ -114,17 +114,17 @@ select	@ClClientID = ClClientID
 	where	Cli_Numero	= @Bad_Client
 
 /* Tomar el valor del UDI del primer día del año en curso, en caso de no encontrarlo, tomarlo de lo registrado en SOMONEDA(día actual)*/
-select	@Fec_Actual	= getdate()
+select	@FechaActua	= getdate()
 
-select	@Fec_PriDia	= convert(char, datepart(yy, @Fec_Actual)) +  '-01-01'
+select	@FecPriDia	= convert(char, datepart(yy, @FechaActua)) +  '-01-01'
 
-select	@Udi_EfeVen	= Him_EfeVen
+select	@ValorUdi	= Him_EfeVen
 	from	SOHISMON noholdlock
 	where	Him_Moneda	= @Str_Udis
-	  and	Him_Fecha	= @Fec_PriDia
+	  and	Him_Fecha	= @FecPriDia
 	  
-if isnull(@Udi_EfeVen, @Flo_Cero)	= @Flo_Cero begin
-	select	@Udi_EfeVen = Mon_EfeVen
+if isnull(@ValorUdi, @Flo_Cero)	= @Flo_Cero begin
+	select	@ValorUdi = Mon_EfeVen
 		from	SOMONEDA noholdlock
 		where	Mon_Numero = @Str_Udis	
 end
@@ -161,8 +161,8 @@ if @Tip_ConTip = @Str_Consul begin
 			  and	con.Cio_TiMeDi	= @TaP_TitAdi
 			
 						
-		select	@CoI_AcDiEx = isnull((@CoI_AcDiEx *  @Udi_EfeVen), @Mon_Cero),
-				@CoI_AcDiLi = isnull((@CoI_AcDiLi *  @Udi_EfeVen), @Mon_Cero)
+		select	@CoI_AcDiEx = isnull((@CoI_AcDiEx *  @ValorUdi), @Mon_Cero),
+				@CoI_AcDiLi = isnull((@CoI_AcDiLi *  @ValorUdi), @Mon_Cero)
 
 		if @TaP_TitAdi =  @Str_TipAdi begin
 			select @CoI_AcDiLi = @CoI_AcDiEx
@@ -236,8 +236,8 @@ if @Tip_ConTip = @Str_Consul begin
 					@CoI_AcDiLi	= @Int_Nueves
 	    end
 	       			
-		select	@CoI_AcDiEx = (@CoI_AcDiEx *  @Udi_EfeVen),
-				@CoI_AcDiLi = (@CoI_AcDiLi *  @Udi_EfeVen)
+		select	@CoI_AcDiEx = (@CoI_AcDiEx *  @ValorUdi),
+				@CoI_AcDiLi = (@CoI_AcDiLi *  @ValorUdi)
 
 
 		/* Para operaciones de tarjeta de débito adicionales no aplicará el tope de dispo diaria sin opción a huella disponer más con la huella */
