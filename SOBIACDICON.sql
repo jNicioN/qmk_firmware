@@ -1,4 +1,4 @@
-create procedure SOBIACDICON(
+﻿create procedure SOBIACDICON(
 	@Bad_MovNum	char(10),
 	@Bad_Client	char(8),
 	@Bad_Cuenta	char(12),
@@ -28,7 +28,14 @@ as
 /* *****************************************************************
 ** DESCRIPCION: Consulta de bitácora de acumulados diarios		  **
 ********************************************************************
-** Creó:		Francisco Javier Carrillo Rojas					****
+** Modificó		Francisco Javier Carrillo Rojas					****
+** Fecha:		04/May/2019										****
+** Help:		01258559										****
+** Descripcion:	Tomar valor de UDI de primer día de enero del 	****
+** 				año en curso como primera opción, si no del día	****
+**				actual(SOMONEDA)								****
+********************************************************************
+** Modificó:	Francisco Javier Carrillo Rojas					****
 ** Fecha:		25/Oct/2018										****
 ** Help:		01091555										****
 ** Descripcion:	Para adicionales TD, no considerar que tope es	****
@@ -59,7 +66,10 @@ declare @Tip_ConTip char(1),
 		@TaP_TitAdi char(1),
 		@Cli_Numero char(12),
 		@Cli_Tipo   char(1),
-		@Opi_NuIdOp	int
+		@Opi_NuIdOp	int,
+		@FechaActua	smalldatetime,
+		@FecPriDia	smalldatetime,
+		@ValorUdi float
 		
 							/******Declaracion de constantes******/
 declare @Str_Consul char(1),
@@ -75,7 +85,9 @@ declare @Str_Consul char(1),
 		@Str_TipAdi char(1),
 		@Int_Nueves money,
 		@Str_PerMor char(1),
-		@Opi_DiTaDe	int
+		@Opi_DiTaDe	int,
+		@Flo_Cero	float,
+		@Mon_Cero	money
 		
 select  @Str_Consul = 'C',	/* Consulta			*/
 		@Str_Uno    = '1',	/* String Uno		*/
@@ -90,16 +102,33 @@ select  @Str_Consul = 'C',	/* Consulta			*/
 		@Str_TipAdi = 'A',	/* Tipo de medio de disposición adicional */
 		@Int_Nueves = 999999999,	/* Entero en nueves */
 		@Str_PerMor = '1',	/* String persona moral */
-		@Opi_DiTaDe	= 1		/* Operación disposición de tarjeta de débito */
+		@Opi_DiTaDe	= 1,	/* Operación disposición de tarjeta de débito */
+		@Flo_Cero	= 0.00,	/* Flotante en ceros */
+		@Mon_Cero	= 0.00	/* Moneda en ceros */
 		
 select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
 		@Tip_ConCon	= substring(@Tip_Consul, 2, 1)
-
 
 select	@ClClientID = ClClientID
 	from CLCLIENT noholdlock
 	where	Cli_Numero	= @Bad_Client
 
+/* Tomar el valor del UDI del primer día del año en curso, en caso de no encontrarlo, tomarlo de lo registrado en SOMONEDA(día actual)*/
+select	@FechaActua	= getdate()
+
+select	@FecPriDia	= convert(char, datepart(yy, @FechaActua)) +  '-01-01'
+
+select	@ValorUdi	= Him_EfeVen
+	from	SOHISMON noholdlock
+	where	Him_Moneda	= @Str_Udis
+	  and	Him_Fecha	= @FecPriDia
+	  
+if isnull(@ValorUdi, @Flo_Cero)	= @Flo_Cero begin
+	select	@ValorUdi = Mon_EfeVen
+		from	SOMONEDA noholdlock
+		where	Mon_Numero = @Str_Udis	
+end
+	
 if @Tip_ConTip = @Str_Consul begin
 
 	if @Tip_ConCon = @Str_Uno begin /**Consulta por el numero de transaccion**/
@@ -120,8 +149,8 @@ if @Tip_ConTip = @Str_Consul begin
 	    --Al ser el tipo de dato de Cio_TiMeDi char(1), se requiere inicializar el valor de la variable @TaP_TitAd para que pueda hacer match con la tabla en SOCOIDOP
 	    select	@TaP_TitAdi	= isnull(@TaP_TitAdi, @Str_Vacio)
 
-		select	@CoI_AcDiEx = isnull(Cio_AcDiEx,00.00),	/*Consultas*/
-				@CoI_AcDiLi = isnull(Cio_AcDiLi,00.00)
+		select	@CoI_AcDiEx = isnull(Cio_AcDiEx, @Mon_Cero),	/*Consultas*/
+				@CoI_AcDiLi = isnull(Cio_AcDiLi, @Mon_Cero)
 			from SOCOIDOP con noholdlock
 				 inner join SOOPEIDE ope noholdlock on con.Cio_NuIdOp = ope.Opi_NuIdOp
 			where	con.Cio_NuIdOp	= @CoI_NuIdCo	
@@ -132,16 +161,14 @@ if @Tip_ConTip = @Str_Consul begin
 			  and	con.Cio_TiMeDi	= @TaP_TitAdi
 			
 						
-		select	@CoI_AcDiEx = isnull((@CoI_AcDiEx *  Mon_EfeVen),00.00),
-				@CoI_AcDiLi = isnull((@CoI_AcDiLi *  Mon_EfeVen),00.00)
-			from SOMONEDA noholdlock
-			where	Mon_Numero = @Str_Udis 
+		select	@CoI_AcDiEx = isnull((@CoI_AcDiEx *  @ValorUdi), @Mon_Cero),
+				@CoI_AcDiLi = isnull((@CoI_AcDiLi *  @ValorUdi), @Mon_Cero)
 
 		if @TaP_TitAdi =  @Str_TipAdi begin
 			select @CoI_AcDiLi = @CoI_AcDiEx
 		end		
 
-	    select	distinct @Sum_Movimi	= isnull(sum(Bad_Cantid),00.00),
+	    select	distinct @Sum_Movimi	= isnull(sum(Bad_Cantid), @Mon_Cero),
 				@Bad_Moneda = Bad_Moneda
 			from SOBIACDI noholdlock 
 			where	ClClientID	= @ClClientID
@@ -154,7 +181,7 @@ if @Tip_ConTip = @Str_Consul begin
 			from SOMONEDA noholdlock
 			where	Mon_Numero	= @Bad_Moneda
 	    
-	    select	distinct @Sum_Revers	= isnull(sum(Bad_Cantid),00.00),
+	    select	distinct @Sum_Revers	= isnull(sum(Bad_Cantid), @Mon_Cero),
 				@Bad_Moneda	= Bad_Moneda
 			from SOBIACDI noholdlock 
 	    where	ClClientID = @ClClientID
@@ -193,8 +220,8 @@ if @Tip_ConTip = @Str_Consul begin
 			where	Cli_Numero	= @Cli_Numero 
 	    
 	    if(@Cli_Tipo != @Str_PerMor)begin
-			select	@CoI_AcDiEx = isnull(Cio_AcDiEx,00.00),	
-					@CoI_AcDiLi = isnull(Cio_AcDiLi,00.00),
+			select	@CoI_AcDiEx = isnull(Cio_AcDiEx, @Mon_Cero),	
+					@CoI_AcDiLi = isnull(Cio_AcDiLi, @Mon_Cero),
 					@Opi_NuIdOp	= Opi_NuIdOp
 				from SOCOIDOP con noholdlock
 					inner join SOOPEIDE ope noholdlock on con.Cio_NuIdOp = ope.Opi_NuIdOp
@@ -209,10 +236,8 @@ if @Tip_ConTip = @Str_Consul begin
 					@CoI_AcDiLi	= @Int_Nueves
 	    end
 	       			
-		select	@CoI_AcDiEx = (@CoI_AcDiEx *  Mon_EfeVen),
-				@CoI_AcDiLi = (@CoI_AcDiLi *  Mon_EfeVen)
-			from SOMONEDA noholdlock			
-			where	Mon_Numero = @Str_Udis
+		select	@CoI_AcDiEx = (@CoI_AcDiEx *  @ValorUdi),
+				@CoI_AcDiLi = (@CoI_AcDiLi *  @ValorUdi)
 
 
 		/* Para operaciones de tarjeta de débito adicionales no aplicará el tope de dispo diaria sin opción a huella disponer más con la huella */
@@ -222,7 +247,7 @@ if @Tip_ConTip = @Str_Consul begin
 			end		
 		end
 			
-	    select	distinct @Sum_Movimi	= isnull(sum(Bad_Cantid),00.00),
+	    select	distinct @Sum_Movimi	= isnull(sum(Bad_Cantid), @Mon_Cero),
 				@Bad_Moneda = Bad_Moneda
 			from SOBIACDI noholdlock 
 			where	Bad_Cuenta	= @Bad_Cuenta
@@ -234,7 +259,7 @@ if @Tip_ConTip = @Str_Consul begin
 			from SOMONEDA noholdlock
 			where	Mon_Numero	= @Bad_Moneda
 	    
-	    select	distinct @Sum_Revers	= isnull(sum(Bad_Cantid),00.00),
+	    select	distinct @Sum_Revers	= isnull(sum(Bad_Cantid), @Mon_Cero),
 				@Bad_Moneda = Bad_Moneda
 			from SOBIACDI noholdlock 
 			where	Bad_Cuenta	= @Bad_Cuenta
