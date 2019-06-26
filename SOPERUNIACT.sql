@@ -52,6 +52,12 @@ as
 ********************************************************************
 *** REFERENCIAS: 												  **
 ********************************************************************
+** Modifico:	Erika Báez										****
+** Fecha:		26/Junio/2019									****
+** Help:		1215830											****
+** Descripcion:	Tipo de actualizacion de tarjetas adicionales 	****
+**				@Act_TarAdi										****
+********************************************************************
 ** Modifico:	Esthepny Aguilar								****
 ** Fecha:		18/Septiembre/18								****
 ** Help:		1134677											****
@@ -178,20 +184,22 @@ declare	@Str_Vacio	char(1),	/*	Declaracion de Constantes	*/
 		@Act_PerCRM char(1),		/* Actualizacion persona CRM */
 		@Act_PerSb3 char(1),		/* Actualizacion persona SB3 */
 		@Act_GenPer char(1),		/* Actualizacion para generacion de persona */
-		@Str_Vacio1 char(1)			/* Cadena vacia con un espacio */
+		@Str_Vacio1 char(1),		/* Cadena vacia con un espacio */
+		@Act_TarAdi	char(1)			/*Actualizacion tarjetas adicionales*/
 
 select	@Str_Vacio	= '',			/* String Vacio	*/
 		@Per_Moral	= '1',			/* Persona Moral */
 		@Ent_Cero	= 0,			/* Entero en Cero */
-	 	@Str_23		= '[23]',
-	 	@Fec_Vacia	= '1900-01-01',
-		@Act_PerIW	= 'A',
-		@Act_PerNEC	= 'B',
-		@Act_PerCRM	= 'C',
-		@Str_Vacios	= '',
-		@Act_PerSb3 = 'D',
-		@Act_GenPer = 'G',
-		@Str_Vacio1 = ' '
+	 	@Str_23		= '[23]',		/*String 2 3*/
+	 	@Fec_Vacia	= '1900-01-01',	/*Fecha Vacia*/
+		@Act_PerIW	= 'A',			/*Actualizacion persona IW*/
+		@Act_PerNEC	= 'B',			/*Actualizacion persona NEC*/
+		@Act_PerCRM	= 'C',			/*Actualizacion persona CRM*/
+		@Str_Vacios	= '',			/*String vacio*/
+		@Act_PerSb3 = 'D',			/*Actualizacion persona SB3*/
+		@Act_GenPer = 'G',			/*Actualizacion para generacion de persona */
+		@Str_Vacio1 = ' ',			/*String vacio*/
+		@Act_TarAdi	= 'H'			/*Actualizacion tarjetas adicionales*/
 
 if not exists (	select	Per_Numero
 					from SOPERSON noholdlock
@@ -478,9 +486,9 @@ if @Tip_Actual = @Act_PerNEC begin
 	update SOPERADI set
 		Adi_Fecha	= @Per_Fecha,
 		Adi_NumTra	= @Per_NumTra,
-		Adi_Fax		= @Adi_Fax,     /* TelÃÂ©fono Celular */
+		Adi_Fax		= @Adi_Fax,     /* Telefono Celular */
 		Adi_Ocupac	= @Adi_Ocupac, /* actividad especifica */
-		Adi_TelTra	= @Adi_TelTra,  /* TelÃÂ©fono Oficina: lada, tel y ext */
+		Adi_TelTra	= @Adi_TelTra,  /* Telefono Oficina: lada, tel y ext */
 		
 		NumTransac	= @NumTransac,
 		Transaccio	= @Transaccio,
@@ -626,6 +634,34 @@ if @Tip_Actual = @Act_GenPer begin
 		Adi_NumIde	= @Adi_NumIde,
 		Adi_Sexo 	= @Adi_Sexo,
 		Adi_NacExt	= @Adi_NacExt,
+		
+		NumTransac	= @NumTransac,
+		Transaccio	= @Transaccio,
+		Usuario		= @Usuario,
+		FechaSis	= @FechaSis,
+		SucOrigen	= @SucOrigen,
+		SucDestino	= @SucDestino
+	where	Adi_PerNum	= @Per_Numero
+end
+
+if @Tip_Actual	= @Act_TarAdi begin 
+	update SOPERSON set 
+		Per_RFC		= @Per_RFC, 
+		Per_CURP	= @Per_CURP,
+		Per_LadTel	= @Per_LadTel, 
+		Per_Telefo	= @Per_Telefo, 
+		Per_Email	= @Per_Email,
+		
+		NumTransac	= @NumTransac,
+		Transaccio	= @Transaccio,
+		Usuario		= @Usuario,
+		FechaSis	= @FechaSis,
+		SucOrigen	= @SucOrigen,
+		SucDestino	= @SucDestino
+	where	Per_Numero	= @Per_Numero
+	
+	update SOPERADI set 
+		Adi_FecNac	= @Adi_FecNac, 
 		
 		NumTransac	= @NumTransac,
 		Transaccio	= @Transaccio,
