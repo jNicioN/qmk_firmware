@@ -23,13 +23,13 @@ as
 /****************************************************************/
 
 /* Declaracion de Constantes */
-declare @Tip_ActualA char(1)		/* Caracter A */
+declare @Str_A char(1)		/* Caracter A */
 		
 
 /* Asignacion de Constantes */
-select 	@Tip_ActualA = 'A'
+select 	@Str_A = 'A'
 
-if @Tip_Actual = @Tip_ActualA begin
+if @Tip_Actual = @Str_A begin
 
 	update SOREGION set
 		Reg_Status	= @Reg_Status,
