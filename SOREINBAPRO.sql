@@ -20,7 +20,7 @@ as
 /** Modifico:		Claudia Sandoval							*/
 /** Descripcion:	Corrige copia si es RIB Base				*/
 /** Fecha:			07/06/2019                               	*/
-/** Help:			1252125					 					*/
+/** Help:			1229452					 					*/
 /****************************************************************/
 /** Modifico:		Victor Osorio								*/
 /** Descripcion:	Se agrega condiciones a la copia de RIB		*/
