@@ -92,7 +92,7 @@ select	@Str_Vacio	= '',			/* Caracter Vacio*/
 select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
 		@Tip_ConCon	= substring(@Tip_Consul, 2, 1)
 
-if @Tip_ConTip	= 'L' begin					/* 'L': Listas */
+if @Tip_ConTip	= @Tip_Lista begin					/* 'L': Listas */
 	if @Tip_ConCon	= @Str_Uno begin		/* L1 Usuarios por Region */
 		select	Usr_Region,	Reg_Descri,	Usr_Usuari,	Usu_Clave,	Usu_Nombre
 			from SOUSUREG noholdlock
