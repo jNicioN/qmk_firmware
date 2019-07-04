@@ -19,7 +19,7 @@ as
 /******************************************************************/
 /* Modifica:	Edwin Dennis Santiago							****
 ** Fecha:		04/07/2019										****
-** Help:		1212881  										****
+** Help:		1267901  										****
 ** Modifica:	Se corrige consulta L3							***/
 /******************************************************************/
 /* Modifica:	Edwin Dennis Santiago							****
