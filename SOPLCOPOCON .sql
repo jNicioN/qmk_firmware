@@ -1,4 +1,4 @@
-﻿create procedure SOPLCOPOCON (
+create procedure SOPLCOPOCON (
 	@Cpc_Numero	char(6),
 
 	@NumTransac	char(10),
@@ -43,4 +43,4 @@ select @Est_Numero = Est_Numero
 
 select top 1 Suc_Plaza
 from SOSUCURS noholdlock
-where  Suc_Estado = '19' order by Suc_Numero
+where  Suc_Estado = @Est_Numero order by Suc_Numero
