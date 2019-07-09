@@ -17,6 +17,12 @@ as
 /* DESCRIPCION: Consulta de Regiones							  */
 /******************************************************************/
 /* Modifico:	Edwin Santiago   							    ****
+** Fecha:		09/07/2019									    ****
+** Descripcion:	Se modifica consulta L3 eliminando el 			****
+**              segmento como filtro							****
+** Help Desk:	1212881 										***
+********************************************************************/
+/* Modifico:	Edwin Santiago   							    ****
 ** Fecha:		10/06/2019									    ****
 ** Descripcion:	Se agrega consulta L3,C3 para obtener todas las ****
 **              regiones independientemente del estatus			****
@@ -107,7 +113,6 @@ end else begin
 			from SOREGION reg noholdlock
 			inner join SOSEGMEN seg noholdlock on (seg.Seg_Numero = reg.Reg_SegNum )
 			and     reg.Reg_Descri like ltrim(@Reg_Descri)+'%'
-			and     reg.Reg_SegNum = @Reg_SegNum
 			order by reg.Reg_Descri
 	end
 	
