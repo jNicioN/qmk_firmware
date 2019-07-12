@@ -26,18 +26,18 @@ as
 	/** Help:			929417												*/
 	/************************************************************************/
 	/* declaracion de constantes */
-	declare	@Str_A		char(1),
-			@Int_Cero	int,
-			@Int_Uno	int
+	declare	@Str_A		char(1),        /* Constante tipo A*/
+			@Int_Cero	int,			/* Constante Entero Cero*/
+			@Int_Uno	int				/* Constante Entero Uno*/
 
 	select	@Str_A		= 'A',
 			@Int_Cero	= 0,
 			@Int_Uno	= 1
 
 	/* declaracion de variables */
-	declare	@Int_RibBas	int,
-			@Str_NumPer	char(8),
-			@Int_NumSol int
+	declare	@Int_RibBas	int,			/* Variable Entero RIB Base*/
+			@Str_NumPer	char(8),		/* Variable Numero Persona*/
+			@Int_NumSol int				/* Variable Numero Solicitud*/
 	
 	if @Tip_Proces = @Str_A begin
 

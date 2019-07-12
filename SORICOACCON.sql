@@ -23,12 +23,12 @@ create procedure SORICOACCON (
 /* Help:		929417											*/
 /****************************************************************/
 /* Declaracion de Variables */
-declare @Tip_ConTip char(1),
-        @Tip_ConCon char(1), 
-        @Str_C char(1) 
+declare @Tip_ConTip char(1),		/* Tipo de consulta    */
+        @Tip_ConCon char(1), 		/* Subtipo de consulta */
+        @Str_C char(1) 				/* Constante tipo C    */
 
-declare @Str_Uno char(1), 
-        @Str_Dos char(1) 
+declare @Str_Uno char(1), 			/* Constante tipo Uno  */
+        @Str_Dos char(1) 			/* Constante tipo Dos  */
 
 select @Str_C = 'C',
        @Str_Uno = '1',
