@@ -17,6 +17,11 @@ as
 /* DESCRIPCION: Procesamiento de copia de registros de Reporte	*/
 /*				de Informacion Basica							*/
 /****************************************************************/
+/** Modifico:		Claudia Sandoval							*/
+/** Descripcion:	Corrige copia si es RIB Base				*/
+/** Fecha:			07/06/2019                               	*/
+/** Help:			1229452					 					*/
+/****************************************************************/
 /** Modifico:		Victor Osorio								*/
 /** Descripcion:	Se agrega condiciones a la copia de RIB		*/
 /**					Numero de Interviniente = 0					*/
@@ -51,18 +56,24 @@ select	@Str_A		= 'A',
 declare @Int_RibBas	int,
 		@Int_RibCop	int
 
-
 if @Tip_Proces	= @Str_A begin /* 'A': Proceso para realizar la copia de RIB cuando se da de alta un Interviniente por solicitud. */
-	
-	if exists (select Rib_Numero from SORIB noholdlock where Rib_NumPer = @Rib_NumPer and Rib_NumSol = @Ent_Cero and Rib_NumInt = @Ent_Cero) begin
-	
-		/* Si existe Rib Persona Base, se crea copia */
-		select @Int_RibBas = (select Rib_Numero 
-								from SORIB noholdlock
-								where Rib_NumPer = @Rib_NumPer 
-								and Rib_NumSol = @Ent_Cero
-								and Rib_NumInt = @Ent_Cero)
 
+	select @Int_RibBas = @Ent_Cero 
+	select @Int_RibBas = Rib_Numero 
+		from SORIB noholdlock 
+		where Rib_NumPer = @Rib_NumPer 
+		  and Rib_NumSol = @Ent_Cero 
+		  and Rib_NumInt = @Ent_Cero
+			
+	if @Int_RibBas <> @Ent_Cero  begin
+		
+		if @Rib_NumInt = @Ent_Cero and @Rib_NumSol = @Ent_Cero and @Int_RibBas <> @Ent_Cero begin
+			select		Err_Codigo	= '000001',
+						Err_Mensaj	= 'Ya existe un RIB BASE'
+			return @Ent_Uno
+		end
+				
+		/* Si existe Rib Persona Base, se crea copia */
 		insert into SORIB (
 				Rib_NumPer,    	Rib_NumInt,		Rib_NumSol,    	Rib_TipSol,		Rib_TipRib,
 				Rib_FecEla,		Rib_SucSol,    	Rib_ConNom,		Rib_ConPue,    	Rib_PagWeb,
@@ -369,12 +380,15 @@ if @Tip_Proces	= @Str_A begin /* 'A': Proceso para realizar la copia de RIB cuan
 			
 		if @Status <> @Ent_Cero begin
 			select	Err_Codigo	= '000001',
-				Err_Mensaj	= 'Error en proceso de alta de Rib'
+				Err_Mensaj	= 'Error en proceso de alta de Rib BASE'
 
 			rollback
 			return @Ent_Uno
 		end
-
+		
+		if @Rib_NumInt = @Ent_Cero and @Rib_NumSol = @Ent_Cero 
+			return @Ent_Uno
+		
 		exec @Status = SORIBALT
 			@Ent_Cero,		@Rib_NumPer,    @Rib_NumInt,	@Rib_NumSol,   	@Ent_Cero,
 			@Ent_Cero,		@Fec_Null,		@Str_Vacio,    	@Str_Vacio,		@Str_Vacio,
