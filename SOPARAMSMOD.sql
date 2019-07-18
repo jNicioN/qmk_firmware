@@ -1,9 +1,10 @@
-create procedure SOPARAMSMOD (
+﻿create procedure SOPARAMSMOD (
 	@Par_Sucurs	char(3),  		
 	@Par_CheCaj	int,           
 	@Par_IVA	smallmoney, 
 	@Par_ISR	smallmoney,  		
-	@Par_DiBaIn	int,           
+	@Par_DiBaIn	int,          
+	@Par_DiBISR	int,          
 	@Par_DiBaCr	int, 
  	@Par_DiBaCh	int,      		
  	@Par_ChLey1	varchar(80),   
@@ -53,164 +54,203 @@ create procedure SOPARAMSMOD (
 
 as
 
+
+/***************************************************************************
+** DESCRIPCION: ** Modificacion de Parametros  de Soporte 				****
+****************************************************************************
+** REFERENCIAS: 														****
+****************************************************************************
+** Modificó:		Ricardo Rivas 						****
+** Fecha:		15/Julio/2019								****
+** Help Desk:	00726428									****
+** Descripcion: Se agrega campo Par_DiBISR para actualizar tabla	 	****
+**Descripcion: 	y se estandariza sp															****
+****************************************************************************
+** Modificó:		Gabriela Alonso   							****
+** Fecha:		04/Oct/05									****
+** Descripción:	Modifique para que al modificar se actualice   ****
+**				el iva tambien en la sucursal					****
+****************************************************************************
+** Modificó:		Sandra Almaguer   							****
+** Fecha:		26/Sep/00									****
+** Descripción:	Agregue Cue_Compan cuando se selecciona	****
+**				info de COCUENTA							****
+******************************************************************************
+** Modificó:		Ruth Alemán	  							****
+** Fecha:		28/Julio/98									****
+** Descripción:	Campo Par_LinSob char(20), antes char(5)	****
+****************************************************************************
+** Modificó:		Ing. Laura Elena Cervantes D. 				****
+** Fecha:		01/Jul/98									****
+** Descripción:	Agregar Parámetros         					****
+****************************************************************************/
+
 /* Declaración de Variables */
 declare	@Status	int
 
 declare	@Cue_Compan	char(3),		/* Declaración de Constantes */
-		@Tip_Actual	char(1)	
+		@Tip_Actual	char(1),
+		@Ent_Cero	int,
+		@Ent_Anio int,
+		@Ent_365 int,
+		@Fec_Vacia	smalldatetime
 
 /* Asignación de Constantes */
 select	@Cue_Compan	= '001',		/* Compañia Contable BANREGIO */
-		@Tip_Actual	= 'A'
+		@Tip_Actual	= 'A',
+		@Ent_Cero	= 0,				/* Entero en Cero			  */
+		@Ent_Anio	= 360,				/* Anio */
+		@Ent_365	= 365,				/* 365 Dias del anio */
+		@Fec_Vacia	= '1990-01-01'		/* Fecha Vacia  */
 
-if @Par_IVA <= 0 begin
+if @Par_IVA <= @Ent_Cero begin
 	select	Err_Codigo	= '000001', 
 			Err_Mensaj	= 'IVA incorrecto', 
 			Err_Variab	= 'Par_IVA'
 	rollback 
 	return 1
 	
-end else if @Par_ISR <= 0 begin
+end else if @Par_ISR <= @Ent_Cero begin
 	select	Err_Codigo	= '000002', 
 			Err_Mensaj	= 'ISR incorrecto', 
 			Err_Variab	= 'Par_ISR'
 	rollback 
 	return 1
 	
-end else if @Par_CheCaj < 0 begin
+end else if @Par_CheCaj < @Ent_Cero begin
 	select	Err_Codigo	= '000003', 
 			Err_Mensaj	= 'El num. de cheques de caja est  incorrecto', 
 			Err_Variab	= 'Par_CheCaj'
 	rollback 
 	return 1
 	
-end else if @Par_DiBaIn < 360 begin
+end else if @Par_DiBaIn < @Ent_Anio begin
 	select	Err_Codigo	= '000004', 
 			Err_Mensaj	= 'Número de días base de inversiones incorrecto', 
 			Err_Variab	= 'Par_DiBaIn'
 	rollback 
 	return 1
 	
-end else if @Par_DiBaCr < 360  begin
+end else if @Par_DiBaCr < @Ent_Anio  begin
 	select	Err_Codigo	= '000005', 
 			Err_Mensaj	= 'Número de días base de créditos incorrecto', 
 			Err_Variab	= 'Par_DiBaCr'
 	rollback 
 	return 1
 	
-end else if @Par_DiBaCh < 360 begin
+end else if @Par_DiBaCh < @Ent_Anio begin
 	select	Err_Codigo	= '000006', 
 			Err_Mensaj	= 'Número de días base de cheques incorrecto', 
 			Err_Variab	= 'Par_DiBaCh'
 	rollback 
 	return 1
 	
-end else if convert(int, @Par_CheCer) < 0 begin
+end else if convert(int, @Par_CheCer) < @Ent_Cero begin
 	select	Err_Codigo	= '000007', 
 			Err_Mensaj	= 'Número de Cheques certificados incorrecto', 
 			Err_Variab	= 'Par_CheCer'
 	rollback 
 	return 1
 	
-end else if @Par_DiaRem < 0 begin
+end else if @Par_DiaRem < @Ent_Cero begin
 	select	Err_Codigo	= '000008', 
 			Err_Mensaj	= 'Número de días de remesa incorrecto', 
 			Err_Variab	= 'Par_DiaRem'
 	rollback 
 	return 1
 	
-end else if @Par_LimAut < 0 begin
+end else if @Par_LimAut < @Ent_Cero begin
 	select	Err_Codigo	= '000009', 
 			Err_Mensaj	= 'Cantidad de límite autorizado incorrecta', 
 			Err_Variab	= 'Par_LimAut'
 	rollback 
 	return 1
 	
-end else if convert(float, @Par_TranBR) <= 0 begin
+end else if convert(float, @Par_TranBR) <= @Ent_Cero begin
 	select	Err_Codigo	= '000010', 
 			Err_Mensaj	= 'Tr nsito BanRegio está en ceros', 
 			Err_Variab	= 'Par_TranBR'
 	rollback 
 	return 1
 	
-end else if @Par_CliInd < 0 begin
+end else if @Par_CliInd < @Ent_Cero begin
 	select	Err_Codigo	= '000011', 
 			Err_Mensaj	= 'Número de cliente indeseables incorrecto', 
 			Err_Variab	= 'Par_CliInd'
 	rollback 
 	return 1
 	
-end else if @Par_BanFol <= 0 begin
+end else if @Par_BanFol <= @Ent_Cero begin
 	select	Err_Codigo	= '000011', 
 			Err_Mensaj	= 'El folio está incorrecto', 
 			Err_Variab	= 'Par_BanFol'
 	rollback 
 	return 1
 	
-end else if @Par_FecAct < '1990-01-01' begin
+end else if @Par_FecAct < @Fec_Vacia begin
 	select	Err_Codigo	= '000012', 
 			Err_Mensaj	= 'Fecha actual incorrecta', 
 			Err_Variab	= 'Par_FecAct'
 	rollback 
 	return 1
 	
-end else if @Par_CoCoIn <= 0 begin
+end else if @Par_CoCoIn <= @Ent_Cero begin
 	select	Err_Codigo	= '000013', 
 			Err_Mensaj	= 'Cantidad para Devolución Cobro Inmediato incorrecta', 
 			Err_Variab	= 'Par_CoCoIn'
 	rollback 
 	return 1
 	
-end else if @Par_CoReme < 0 begin
+end else if @Par_CoReme < @Ent_Cero begin
 	select	Err_Codigo	= '000014', 
 			Err_Mensaj	= 'Cantidad de Remesa en falso incorrecta', 
 			Err_Variab	= 'Par_CoReme'
 	rollback 
 	return 1
 	
-end else if @Par_OpeBan < 0 begin
+end else if @Par_OpeBan < @Ent_Cero begin
 	select	Err_Codigo	= '000015', 
 			Err_Mensaj	= 'Número de operaciones incorrecto', 
 			Err_Variab	= 'Par_OpeBan'
 	rollback 
 	return 1
 	
-end else if @Par_ConPap < 0 begin
+end else if @Par_ConPap < @Ent_Cero begin
 	select	Err_Codigo	= '000016', 
 			Err_Mensaj	= 'Número de papel de mesa de dinero incorrecto', 
 			Err_Variab	= 'Par_ConPap'
 	rollback 
 	return 1
 	
-end else if convert(int, @Par_MonCom) <= 0 begin
+end else if convert(int, @Par_MonCom) <= @Ent_Cero begin
 	select	Err_Codigo	= '000017', 
 			Err_Mensaj	= 'Número de Moneda de comisiones incorrecto', 
 			Err_Variab	= 'Par_MonCom'
 	rollback 
 	return 1
 	
-end else if convert(int, @Par_LinSob) < 0 begin
+end else if convert(int, @Par_LinSob) < @Ent_Cero begin
 	select	Err_Codigo	= '000018', 
 			Err_Mensaj	= 'Número de línea de sobregiro est  incorrecto', 
 			Err_Variab	= 'Par_LinSob'
 	rollback 
 	return 1
 	
-end else if @Par_EnvSPE < 0 begin
+end else if @Par_EnvSPE < @Ent_Cero begin
 	select	Err_Codigo	= '000019', 
 			Err_Mensaj	= 'Número de folio de SPEUA incorrecto', 
 			Err_Variab	= 'Par_EnvSPE'
 	rollback 
 	return 1
 	
-end else if convert(int, @Par_Banco) <=0 begin
+end else if convert(int, @Par_Banco) <= @Ent_Cero begin
 	select	Err_Codigo	= '000020',	
 			Err_Mensaj	= 'Número de Banco incorrecto', 
 			Err_Variab	= 'Par_Banco'
 	rollback 
 	return 1
 	
-end else if convert(int, @Par_NumTes) = 0 begin
+end else if convert(int, @Par_NumTes) = @Ent_Cero begin
 	select	Err_Codigo	= '000021', 
 			Err_Mensaj	= 'El NumTes está en ceros', 
 			Err_Variab	= 'Par_NumTes'
@@ -337,7 +377,7 @@ end else if not exists (select	Cue_Descri
 	rollback 
 	return 1
 	
-end else if @Par_FecRem < '1990-01-01' begin
+end else if @Par_FecRem < @Fec_Vacia begin
 	select	Err_Codigo	= '000037', 
 			Err_Mensaj	= 'Fecha de Remesa incorrecta', 
 			Err_Variab	= 'Par_FecRem'
@@ -373,6 +413,13 @@ end else if not exists (select	Cue_Descri
 			Err_Variab	= 'Par_CobInm'
 	rollback 
 	return 1
+
+end else if @Par_DiBISR < @Ent_365 begin
+	select	Err_Codigo	= '000038', 
+			Err_Mensaj	= 'Número de días base de ISR incorrecto', 
+			Err_Variab	= 'Par_DiBISR'
+	rollback 
+	return 1	
 	
 end else begin
 	update SOPARAMS set	
@@ -380,6 +427,7 @@ end else begin
 	 	Par_IVA		= @Par_IVA,			
 	 	Par_ISR 	= @Par_ISR,
 	 	Par_DiBaIn	= @Par_DiBaIn,    
+	 	Par_DiBISR	= @Par_DiBISR,
 	 	Par_DiBaCr	= @Par_DiBaCr,
 	 	Par_DiBaCh	= @Par_DiBaCh,  	
 	 	Par_ChLey1	= @Par_ChLey1,
