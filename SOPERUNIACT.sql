@@ -649,8 +649,6 @@ if @Tip_Actual	= @Act_TarAdi begin
 		Per_RFC		= @Per_RFC, 
 		Per_CURP	= @Per_CURP,
 		Per_LadTel	= @Per_LadTel, 
-		Per_Telefo	= @Per_Telefo, 
-		Per_Email	= @Per_Email,
 		
 		NumTransac	= @NumTransac,
 		Transaccio	= @Transaccio,
