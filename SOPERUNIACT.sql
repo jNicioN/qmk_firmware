@@ -648,7 +648,6 @@ if @Tip_Actual	= @Act_TarAdi begin
 	update SOPERSON set 
 		Per_RFC		= @Per_RFC, 
 		Per_CURP	= @Per_CURP,
-		Per_LadTel	= @Per_LadTel, 
 		
 		NumTransac	= @NumTransac,
 		Transaccio	= @Transaccio,
