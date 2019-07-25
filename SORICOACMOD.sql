@@ -14,6 +14,7 @@ create procedure SORICOACMOD (
    @Rca_CuExPr int,
    @Rca_EdFiAu int,
    @Rca_PrExBa int,
+   @Rca_EnCuEm int,
    @Rca_ExPoPr int,
    @Rca_InArRi int,
    @NumTransac char(10),
@@ -24,9 +25,15 @@ create procedure SORICOACMOD (
    @SucDestino char(3),
    @Modulo char(2))
  as 
+ 
 /****************************************************************/
 /* DESCRIPCION: Modificacion de registros de Composicion		*/
 /*				Accionaria de RIB								*/
+/****************************************************************/
+/** Modifico:	Jose Rodriguez									*/
+/** Fecha:		07/06/2019                               		*/
+/** Help:		1229452					 						*/
+/** Descripcion: Se agrega un campo     						*/
 /****************************************************************/
 /** Modifico:	Edwin Dennis									*/
 /** Fecha:		01/11/2018                               		*/
@@ -72,6 +79,10 @@ if (@Rca_CoPaGP = @Int_Menos1) begin
 	select @Rca_CoPaGP=null
 end
 
+if (@Rca_EnCuEm = @Int_Menos1) begin
+	select @Rca_EnCuEm = null
+end
+
 if (@Rca_ExPoPr = @Int_Menos1) begin
 	select @Rca_ExPoPr=null
 end
@@ -96,7 +107,8 @@ Update SORICOAC set
    Rca_CuExBa = @Rca_CuExBa, 
    Rca_CuExPr = @Rca_CuExPr, 
    Rca_EdFiAu = @Rca_EdFiAu, 
-   Rca_PrExBa = @Rca_PrExBa, 
+   Rca_PrExBa = @Rca_PrExBa,
+   Rca_EnCuEm = @Rca_EnCuEm,
    Rca_ExPoPr = @Rca_ExPoPr, 
    Rca_InArRi = @Rca_InArRi, 
    NumTransac = @NumTransac, 
