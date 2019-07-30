@@ -1,4 +1,4 @@
-create procedure SOSUCURSCON(
+﻿create procedure SOSUCURSCON(
 	@Suc_Numero	char(3),
 	@Suc_Nombre	varchar(50),
 	@Tip_Consul	char(2),
@@ -17,6 +17,11 @@ as
  REFERENCIAS:
 ****************************************************************************
 **                           Store CONVERTIDO 							****
+****************************************************************************
+** Modifico:	Marcelo Bautista Hernandez								****
+** Fecha:		24/Julio/2019											****
+** Descripcion:	Se agrega consulta C8									****
+** Help Desk:	01202239 												****
 ****************************************************************************
 ** Modifico:	Melissa Sepulveda										****
 ** Fecha:		08/Feb/2018												****
@@ -56,6 +61,7 @@ as
 ** Help Desk:	749260													****
 ****************************************************************************
 ** Modifico:	Ignacio Ordaz Valtierra									****
+
 ** Fecha:		03/Abril/2013											****
 ** Descripcion:	Se elimina el filtro de consulta a Estado de cuenta		****
 ** Help Desk:	533483													****
@@ -201,7 +207,8 @@ declare	@Str_Vacio	char(1),		/* Declaracion de Constantes */
 		@Str_Modulo char(2),
 		@Con_SucFab	char(1),
 		@Con_SucZon	char(1),
-		@Cat_Sucurs	char(1)
+		@Cat_Sucurs	char(1),
+		@Str_Ocho	char(1)
 		
 /* Asignacion de Constantes */
 select	@Str_Vacio	= '',			/*	String Vacio 		*/
@@ -233,7 +240,8 @@ select	@Str_Vacio	= '',			/*	String Vacio 		*/
 		@Str_Modulo = 'FB',			/*  Modulo de Fabrica							*/
 		@Con_SucFab	= 'F',			/*	Consulta: Sucursal, plaza y parametros		*/
 		@Con_SucZon	= 'Z',			/*	Consulta: Sucursal, zona y ciudad			*/
-		@Cat_Sucurs = 'S'			/*	Consulta: Categoria Sucursal				*/
+		@Cat_Sucurs = 'S',			/*	Consulta: Categoria Sucursal				*/
+		@Str_Ocho	= '8'
 
 			
 if isnull(@Tip_Consul, @Str_Vacio) = @Str_Vacio begin	/* Cliente:  FoxPro */
@@ -389,6 +397,12 @@ end else begin													/* Cliente:  Visual Basic */
 					Pla_Abrevi,	Pla_ClaMin,	Pla_Region,	SoCiudadID
 				from SOSUCURS noholdlock
 					inner join SOPLAZAS noholdlock on Suc_Plaza = Pla_Numero
+				where	Suc_Numero	= @Suc_Numero
+		end else if @Tip_ConCon = @Str_Ocho begin
+			select Suc_Numero,Suc_Nombre,Ciu_Nombre,Est_Abrevi,Est_Nombre,Suc_Gerent,Suc_SubGer
+				from SOSUCURS suc noholdlock
+				inner join SOCIUDAD ciu noholdlock on suc.SoCiudadID = ciu.SoCiudadID
+				inner join SOESTADO est noholdlock on ciu.Ciu_Estado = est.Est_Numero
 				where	Suc_Numero	= @Suc_Numero
 		end
 		

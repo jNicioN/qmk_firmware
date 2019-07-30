@@ -1,4 +1,4 @@
-create procedure SOOPEIDECON (
+﻿create procedure SOOPEIDECON (
 	@Opi_NuIdOp	int,			/* Número identificador de operación de identificación */
 	@Opi_Descri	varchar(200),	/* Descripción de operación de Identificación */
 	@Tip_Consul	char(2),		/* Tipo de consulta*/
@@ -15,6 +15,11 @@ as
 
 /* *****************************************************************
 ** DESCRIPCION: Consulta de Operaciones de Identificación		  **
+********************************************************************
+** Modificó:	Francisco Javier Carrillo Rojas					****
+** Fecha:		06/Jul/2019										****
+** Help:		01202239										****
+** Descripción:	Devolver campo nuevo Opi_EsqCer en C1			****
 ********************************************************************
 ** Modificó:	Francisco Javier Carrillo Rojas					****
 ** Fecha:		08/Oct/2018										****
@@ -54,16 +59,10 @@ select	@Str_C		= 'C',	/* Tipo C */
 select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
 		@Tip_ConCon	= substring(@Tip_Consul, 2, 1)
 
-create table #PersonasAutorizadas(
-	Per_Numero   char(8)  not null)
-
-create table #tmpPerson(
-	Per_Person	char(8),
-	Per_Grupo	char(8)) 
-
 if @Tip_ConTip = @Str_C begin
 	if @Tip_ConCon	= @Str_Uno begin /* C1 - Búsqueda principal por llave primaria */			  			
-		select	Opi_NuIdOp,	Opi_TipOpe,	Opi_Descri,	Opi_BasOpe,	Opi_Status
+		select	Opi_NuIdOp,	Opi_TipOpe,	Opi_Descri,	Opi_BasOpe,	Opi_Status,
+				Opi_EsqCer
 			from SOOPEIDE noholdlock
 			where	Opi_NuIdOp	= @Opi_NuIdOp
 	end	
