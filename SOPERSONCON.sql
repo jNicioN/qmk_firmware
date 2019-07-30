@@ -22,6 +22,12 @@ as
 ********************************************************************
 ** Modifico:		Armando Alexis Sepúlveda Cruz				****
 ** Fecha:			09/Enero/2019								****
+** Help:			1202239	 									****
+** Descripcion:		Se modifican consultas CA, CB para retornar	****
+**					el nombre y apellidos de la persona			****
+********************************************************************
+** Modifico:		Armando Alexis Sepúlveda Cruz				****
+** Fecha:			09/Enero/2019								****
 ** Help:			1147468	 									****
 ** Descripcion:		Se modifican consultas CA, CB para retornar	****
 **					el número del grupo y optimizar las 		****
@@ -612,12 +618,14 @@ if @Tip_ConTip = 'C' begin
 			 and	Per_Numero	*= Adi_PerNum
 			 and	Per_Numero	*= DaP_Person 
 	end else if @Tip_ConCon	= 'A' begin   /* Consulta Móvil por RFC **/
-		select Peu_Grupo as Per_Numero, Per_Comple, Per_ComOrd, Per_RFC, Per_CURP
+		select Peu_Grupo as Per_Numero, Per_Comple, Per_ComOrd, Per_RFC, Per_CURP,
+		       Per_Nombre, Per_ApePat, Per_ApeMat
 		  from SOPERSON noholdlock
 		  join SOUNIPER noholdlock on Per_Numero = Peu_Person 
 		 where Per_RFC = @Per_RFC
 	end else if @Tip_ConCon	= 'B' begin   /* Consulta Móvil por Nombre Completo**/
-		select Peu_Grupo as Per_Numero, Per_Comple, Per_ComOrd, Per_RFC, Per_CURP
+		select Peu_Grupo as Per_Numero, Per_Comple, Per_ComOrd, Per_RFC, Per_CURP,
+		       Per_Nombre, Per_ApePat, Per_ApeMat
 		  from SOPERSON noholdlock
 		  join SOUNIPER noholdlock on Per_Numero = Peu_Person 
 		  where Per_Comple like @Per_Comple + '%'
