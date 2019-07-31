@@ -21,7 +21,7 @@ as
 ** REFERENCIAS:													****
 ********************************************************************
 ** Modifico:		Armando Alexis Sepúlveda Cruz				****
-** Fecha:			09/Enero/2019								****
+** Fecha:			31/Julio/2019								****
 ** Help:			1202239	 									****
 ** Descripcion:		Se modifican consultas CA, CB para retornar	****
 **					el nombre y apellidos de la persona			****
