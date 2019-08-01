@@ -20,6 +20,7 @@ as
 ** Fecha:		06/Jul/2019										****
 ** Help:		01202239										****
 ** Descripción:	Devolver campo nuevo Opi_EsqCer en C1			****
+**				y agregar consulta C2							****
 ********************************************************************
 ** Modificó:	Francisco Javier Carrillo Rojas					****
 ** Fecha:		08/Oct/2018										****
@@ -46,7 +47,8 @@ declare	@Str_C		char(1),
 		@Str_Dos    char(1),
 		@Str_Porcie	char(1),
 		@Str_Vacio	char(1),
-		@Sta_Activa	char(1)
+		@Sta_Activa	char(1),
+		@Ent_Uno	int
 
 /* Asignacion de Constantes */
 select	@Str_C		= 'C',	/* Tipo C */
@@ -54,7 +56,8 @@ select	@Str_C		= 'C',	/* Tipo C */
 		@Str_Dos    = '2',	/* Tipo 2 */
 		@Str_Porcie	= '%',	/* String porciento */
 		@Str_Vacio	= '',	/* String vacío */
-		@Sta_Activa	= 'A'	/* Status de operación de identificación activa */
+		@Sta_Activa	= 'A',	/* Status de operación de identificación activa */
+		@Ent_Uno	= 1		/* Entero en uno */
 
 select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
 		@Tip_ConCon	= substring(@Tip_Consul, 2, 1)
@@ -65,6 +68,10 @@ if @Tip_ConTip = @Str_C begin
 				Opi_EsqCer
 			from SOOPEIDE noholdlock
 			where	Opi_NuIdOp	= @Opi_NuIdOp
+	end else if @Tip_ConCon	= @Str_Dos begin /* C2 -  Conteo de operaciones con esquema cerrado */
+		select	count(Opi_NuIdOp) as Opi_NumOpe
+			from SOOPEIDE noholdlock
+			where	Opi_EsqCer	= @Ent_Uno
 	end	
 end else begin
 	if @Tip_ConCon	= @Str_Uno begin /* L1 - Búsqueda de operaciones de identificación de acuerdo a su descripción */
