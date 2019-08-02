@@ -204,9 +204,6 @@ if @Tip_Proces = @Tip_Renapo begin
 	from SOUNIPER uni noholdlock
 		 inner join SOPERADI per noholdlock on Peu_Person= Adi_PerNum 
 	where	Peu_Grupo	= @Peu_Grupo
-
-		select	@Adi_NacExt	= @Nac_Nacion
-		select	@Adi_NacExt	= @Nac_Extran
 	
 	/* Se considera la nacionalidad	que será asignada para no sobreescribir el tipo, el número, la fecha de expedición y vencimiento de la identificación usada en la captura de la persona cuando es extranjero */
 	if @Adi_NacExt = @Nac_Nacion begin
