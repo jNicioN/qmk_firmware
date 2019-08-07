@@ -153,11 +153,11 @@ if @Tip_ConTip	= @Str_C begin /* Consulta */
    if @Tip_ConCon = @Str_Uno begin		/* C1 */
      select 
           soef.Esf_Numero,	soef.Esf_TipFor,		soef.Esf_Anio,		soef.Esf_MesIni,		soef.Esf_MesFin,
-          soef.Esf_TiEsFi,	soef.Esf_ExpCif,		soef.Esf_Moneda,	soef.Esf_NomCon,	    soef.Esf_NuCePr,
-		  soef.Esf_DesDic,	soef.Esf_PerNum,		soef.Esf_Solici,    soef.Esf_EsEsFi,		soef.Esf_ValInp,		
-		  soef.Esf_AplIca,	soef.Esf_Icap,			soef.Esf_CapNet,	soef.Esf_AcSuRi,		soef.Esf_TipSol,		
-		  soef.Esf_TipLiq,	soef.Esf_TipEfi,		soef.Esf_UsuCre,	soef.Esf_FecCre,	    soef.Esf_UsuMod,		
-		  soef.Esf_FecMod,	soef.NumTransac,		soef.Transaccio,    soef.Usuario,			soef.FechaSis,			
+          soef.Esf_TiEsFi,	soef.Esf_ExpCif,		soef.Esf_Moneda,	soef.Esf_PerNum,		soef.Esf_Solici,    
+		  soef.Esf_EsEsFi,	soef.Esf_ValInp,		soef.Esf_AplIca,	soef.Esf_Icap,			soef.Esf_CapNet,	
+		  soef.Esf_AcSuRi,	soef.Esf_TipSol,		soef.Esf_TipLiq,	soef.Esf_TipEfi,		soef.Esf_UsuCre,	
+		  soef.Esf_FecCre,	soef.Esf_UsuMod,		soef.Esf_FecMod,	soef.Esf_NomCon,	    soef.Esf_NuCePr,
+		  soef.Esf_DesDic,  soef.NumTransac,		soef.Transaccio,    soef.Usuario,			soef.FechaSis,			
 		  soef.SucOrigen,	soef.SucDestino,		souc.Usu_Nombre as Esf_UsCrNo,
 		  soum.Usu_Nombre as Esf_UsCrMo
      from SOESTFIN soef noholdlock
@@ -175,12 +175,11 @@ if @Tip_ConTip	= @Str_C begin /* Consulta */
 	
 	select
           efn.Esf_Numero,    		efn.Esf_TipFor,    efn.Esf_Anio,    	efn.Esf_MesIni,    	efn.Esf_MesFin, 
-          efn.Esf_TiEsFi,    		efn.Esf_ExpCif,    efn.Esf_Moneda,    	efn.Esf_NomCon,	    efn.Esf_NuCePr,
-		  efn.Esf_DesDic,           efn.Esf_PerNum,    efn.Esf_Solici,		efn.Esf_EsEsFi,    	efn.Esf_ValInp,    
-		  efn.Esf_AplIca,    		efn.Esf_Icap,      efn.Esf_CapNet,    	efn.Esf_AcSuRi,    	efn.Esf_TipSol,    
-		  efn.Esf_TipLiq,    		efn.Esf_TipEfi,    Esf_Rango = convert(int, Esf_MesFin) - convert(int, Esf_MesIni) + @Ent_Uno, 
-		  Esf_Mayor = @Ent_Cero,	efn.NumTransac,	   efn.Transaccio,      efn.Usuario,    	efn.FechaSis,    	
-		  efn.SucOrigen,     efn.SucDestino 
+          efn.Esf_TiEsFi,    		efn.Esf_ExpCif,    efn.Esf_Moneda,    	efn.Esf_PerNum,     efn.Esf_Solici,		
+		  efn.Esf_EsEsFi,    	    efn.Esf_ValInp,    efn.Esf_AplIca,      efn.Esf_Icap,       efn.Esf_CapNet,    	
+		  efn.Esf_AcSuRi,    	    efn.Esf_TipSol,    efn.Esf_TipLiq,    	efn.Esf_TipEfi,     Esf_Rango = convert(int, Esf_MesFin) - convert(int, Esf_MesIni) + @Ent_Uno, 
+		  Esf_Mayor = @Ent_Cero,	efn.Esf_NomCon,	   efn.Esf_NuCePr,      efn.Esf_DesDic,     efn.NumTransac,	   
+		  efn.Transaccio,           efn.Usuario,       efn.FechaSis,    	efn.SucOrigen,      efn.SucDestino 
 	 into #TemporalRango
 		 from SOESTFIN efn noholdlock
 		 where efn.Esf_PerNum = @Esf_PerNum
@@ -224,12 +223,11 @@ if @Tip_ConTip	= @Str_C begin /* Consulta */
 
 	select
           efn.Esf_Numero,    		efn.Esf_TipFor,    efn.Esf_Anio,    	efn.Esf_MesIni,    	efn.Esf_MesFin, 
-          efn.Esf_TiEsFi,    		efn.Esf_ExpCif,    efn.Esf_Moneda,    	efn.Esf_NomCon,	    efn.Esf_NuCePr,
-		  efn.Esf_DesDic,			efn.Esf_PerNum,    efn.Esf_Solici,		efn.Esf_EsEsFi,    	efn.Esf_ValInp,    
-		  efn.Esf_AplIca,    		efn.Esf_Icap,      efn.Esf_CapNet,    	efn.Esf_AcSuRi,     efn.Esf_TipSol,    
-		  efn.Esf_TipLiq,    		efn.Esf_TipEfi,    Esf_Rango = convert(int, Esf_MesFin) - convert(int, Esf_MesIni) + @Ent_Uno, 
-		  Esf_Mayor = @Ent_Cero,	efn.NumTransac,	   efn.Transaccio,      efn.Usuario,    	efn.FechaSis,    	
-		  efn.SucOrigen,     efn.SucDestino 
+          efn.Esf_TiEsFi,    		efn.Esf_ExpCif,    efn.Esf_Moneda,      efn.Esf_PerNum,     efn.Esf_Solici,		
+		  efn.Esf_EsEsFi,    	    efn.Esf_ValInp,    efn.Esf_AplIca,      efn.Esf_Icap,       efn.Esf_CapNet,    	
+		  efn.Esf_AcSuRi,           efn.Esf_TipSol,    efn.Esf_TipLiq,      efn.Esf_TipEfi,     Esf_Rango = convert(int, Esf_MesFin) - convert(int, Esf_MesIni) + @Ent_Uno, 
+		  Esf_Mayor = @Ent_Cero,	efn.Esf_NomCon,	   efn.Esf_NuCePr,      efn.Esf_DesDic,     efn.NumTransac,	   
+		  efn.Transaccio,           efn.Usuario,       efn.FechaSis,    	efn.SucOrigen,      efn.SucDestino 
 	 into #EstadoSolicitud
      from SOESTFIN efn noholdlock
 	 where efn.Esf_PerNum = @Esf_PerNum
@@ -265,11 +263,11 @@ if @Tip_ConTip	= @Str_C begin /* Consulta */
 
 	 select 
           Esf_Numero,    Esf_TipFor,    Esf_Anio, 	   Esf_MesIni,    Esf_MesFin, 
-          Esf_TiEsFi,    Esf_ExpCif,    Esf_Moneda,    Esf_NomCon,	  Esf_NuCePr,
-		  Esf_DesDic,	 Esf_PerNum,    Esf_Solici,    Esf_EsEsFi,    @Ent_ValInp AS Esf_ValInp,    
-		  Esf_AplIca,    Esf_Icap,      Esf_CapNet,    Esf_AcSuRi,    Esf_TipSol,    
-		  Esf_TipLiq,    Esf_TipEfi,    NumTransac,    Transaccio,    Usuario,    
-		  FechaSis,    SucOrigen,    SucDestino 
+          Esf_TiEsFi,    Esf_ExpCif,    Esf_Moneda,    Esf_PerNum,    Esf_Solici,    
+		  Esf_EsEsFi,    @Ent_ValInp AS Esf_ValInp,    Esf_AplIca,    Esf_Icap,      
+		  Esf_CapNet,    Esf_AcSuRi,    Esf_TipSol,    Esf_TipLiq,    Esf_TipEfi,    
+		  Esf_NomCon,	 Esf_NuCePr,    Esf_DesDic,    NumTransac,    Transaccio,    
+		  Usuario,       FechaSis,      SucOrigen,     SucDestino 
      from SOESTFIN noholdlock 
      where Esf_Numero = @Esf_EfiNum
      and Esf_Status = @Ent_Uno
@@ -285,12 +283,11 @@ if @Tip_ConTip	= @Str_C begin /* Consulta */
 	
 	select
           efn.Esf_Numero,    		efn.Esf_TipFor,    efn.Esf_Anio,    	efn.Esf_MesIni,    	efn.Esf_MesFin, 
-          efn.Esf_TiEsFi,    		efn.Esf_ExpCif,    efn.Esf_Moneda,    	efn.Esf_NomCon,	    efn.Esf_NuCePr,
-		  efn.Esf_DesDic,			efn.Esf_PerNum,    efn.Esf_Solici,		efn.Esf_EsEsFi,    	efn.Esf_ValInp,    
-		  efn.Esf_AplIca,    		efn.Esf_Icap,      efn.Esf_CapNet,      efn.Esf_AcSuRi,     efn.Esf_TipSol,    
-		  efn.Esf_TipLiq,    	    efn.Esf_TipEfi,    Esf_Rango = convert(int, Esf_MesFin) - convert(int, Esf_MesIni) + @Ent_Uno, 
-		  Esf_Mayor = @Ent_Cero,	efn.NumTransac,	   efn.Transaccio,      efn.Usuario,    	efn.FechaSis,    	
-		  efn.SucOrigen,     efn.SucDestino 
+          efn.Esf_TiEsFi,    		efn.Esf_ExpCif,    efn.Esf_Moneda,    	efn.Esf_PerNum,     efn.Esf_Solici,		
+		  efn.Esf_EsEsFi,    	    efn.Esf_ValInp,    efn.Esf_AplIca,      efn.Esf_Icap,       efn.Esf_CapNet,      
+		  efn.Esf_AcSuRi,           efn.Esf_TipSol,    efn.Esf_TipLiq,      efn.Esf_TipEfi,     Esf_Rango = convert(int, Esf_MesFin) - convert(int, Esf_MesIni) + @Ent_Uno, 
+		  Esf_Mayor = @Ent_Cero,	efn.Esf_NomCon,	   efn.Esf_NuCePr,      efn.Esf_DesDic,     efn.NumTransac,	   
+		  efn.Transaccio,           efn.Usuario,       efn.FechaSis,    	efn.SucOrigen,      efn.SucDestino 
 	 into #PeriodoMayor
      from SOESTFIN efn noholdlock
 	 where efn.Esf_PerNum = @Esf_PerNum
@@ -336,12 +333,11 @@ end else if @Tip_ConCon = @Str_Cinco begin		/* C5  Obtiene EEFF de anio anterior
 
 	select
           efn.Esf_Numero,    		efn.Esf_TipFor,    efn.Esf_Anio,    	efn.Esf_MesIni,    	efn.Esf_MesFin,
-          efn.Esf_TiEsFi,    		efn.Esf_ExpCif,    efn.Esf_Moneda,    	efn.Esf_NomCon,	    efn.Esf_NuCePr,
-		  efn.Esf_DesDic,			efn.Esf_PerNum,    efn.Esf_Solici,      efn.Esf_EsEsFi,     efn.Esf_ValInp,    
-		  efn.Esf_AplIca,    		efn.Esf_Icap,      efn.Esf_CapNet,      efn.Esf_AcSuRi,     efn.Esf_TipSol,    
-		  efn.Esf_TipLiq,    	    efn.Esf_TipEfi,    Esf_Rango = convert(int, Esf_MesFin) - convert(int, Esf_MesIni) + @Ent_Uno,
-		  Esf_Mayor = @Ent_Cero,	efn.NumTransac,	   efn.Transaccio,      efn.Usuario,    	efn.FechaSis,
-		  efn.SucOrigen,            efn.SucDestino
+          efn.Esf_TiEsFi,    		efn.Esf_ExpCif,    efn.Esf_Moneda,      efn.Esf_PerNum,     efn.Esf_Solici,      
+		  efn.Esf_EsEsFi,           efn.Esf_ValInp,    efn.Esf_AplIca,      efn.Esf_Icap,       efn.Esf_CapNet,      
+		  efn.Esf_AcSuRi,           efn.Esf_TipSol,    efn.Esf_TipLiq,    	efn.Esf_TipEfi,     Esf_Rango = convert(int, Esf_MesFin) - convert(int, Esf_MesIni) + @Ent_Uno,
+		  Esf_Mayor = @Ent_Cero,	efn.Esf_NomCon,	   efn.Esf_NuCePr,      efn.Esf_DesDic,     efn.NumTransac,	   
+		  efn.Transaccio,           efn.Usuario,       efn.FechaSis,         efn.SucOrigen,            efn.SucDestino
 	 into #EstadoAnterior
      from SOESTFIN efn noholdlock
 	 where efn.Esf_PerNum = @Esf_PerNum
@@ -378,11 +374,11 @@ end else if @Tip_ConCon = @Str_Cinco begin		/* C5  Obtiene EEFF de anio anterior
 
 	 select 
           Esf_Numero,    Esf_TipFor,    Esf_Anio, 	   Esf_MesIni,    Esf_MesFin, 
-          Esf_TiEsFi,    Esf_ExpCif,    Esf_Moneda,    Esf_NomCon,	  Esf_NuCePr,
-		  Esf_DesDic,	 Esf_PerNum,    Esf_Solici,    Esf_EsEsFi,    @Ent_ValInp AS Esf_ValInp,    
-		  Esf_AplIca,    Esf_Icap,      Esf_CapNet,    Esf_AcSuRi,    Esf_TipSol,    
-		  Esf_TipLiq,    Esf_TipEfi,    NumTransac,    Transaccio,    Usuario,    
-		  FechaSis,    SucOrigen,    SucDestino 
+          Esf_TiEsFi,    Esf_ExpCif,    Esf_Moneda,    Esf_PerNum,    Esf_Solici,    
+		  Esf_EsEsFi,    @Ent_ValInp AS Esf_ValInp,    Esf_AplIca,    Esf_Icap,      
+		  Esf_CapNet,    Esf_AcSuRi,    Esf_TipSol,    Esf_TipLiq,    Esf_TipEfi,    
+		  Esf_NomCon,	 Esf_NuCePr,    Esf_DesDic,    NumTransac,    Transaccio,    
+		  Usuario,       FechaSis,      SucOrigen,     SucDestino 
      from SOESTFIN noholdlock 
      where Esf_Numero = @Esf_EfiNum
      and Esf_Status = @Ent_Uno
@@ -401,12 +397,11 @@ end else if @Tip_ConCon = @Str_Seis begin		/* C6 */
 
 	select
           efn.Esf_Numero,    		efn.Esf_TipFor,    efn.Esf_Anio,    	efn.Esf_MesIni,    	efn.Esf_MesFin,
-          efn.Esf_TiEsFi,    		efn.Esf_ExpCif,    efn.Esf_Moneda,    	efn.Esf_NomCon,	    efn.Esf_NuCePr,
-		  efn.Esf_DesDic,			efn.Esf_PerNum,    efn.Esf_Solici,      efn.Esf_EsEsFi,    	efn.Esf_ValInp,    
-		  efn.Esf_AplIca,    	    efn.Esf_Icap,      efn.Esf_CapNet,      efn.Esf_AcSuRi,    	efn.Esf_TipSol,    
-		  efn.Esf_TipLiq,    	    efn.Esf_TipEfi,    Esf_Rango = convert(int, Esf_MesFin) - convert(int, Esf_MesIni) + @Ent_Uno,
-		  Esf_Mayor = @Ent_Cero,	efn.NumTransac,	   efn.Transaccio,      efn.Usuario,    	efn.FechaSis,
-		  efn.SucOrigen,     		efn.SucDestino
+          efn.Esf_TiEsFi,    		efn.Esf_ExpCif,    efn.Esf_Moneda,      efn.Esf_PerNum,     efn.Esf_Solici,      
+		  efn.Esf_EsEsFi,    	    efn.Esf_ValInp,    efn.Esf_AplIca,    	efn.Esf_Icap,       efn.Esf_CapNet,      
+		  efn.Esf_AcSuRi,    	    efn.Esf_TipSol,    efn.Esf_TipLiq,    	efn.Esf_TipEfi,     Esf_Rango = convert(int, Esf_MesFin) - convert(int, Esf_MesIni) + @Ent_Uno,
+		  Esf_Mayor = @Ent_Cero,	efn.Esf_NomCon,	   efn.Esf_NuCePr,      efn.Esf_DesDic,     efn.NumTransac,	   
+		  efn.Transaccio,           efn.Usuario,       efn.FechaSis,        efn.SucOrigen,      efn.SucDestino
 	 into #EstadoGobiernoAnterior
      from SOESTFIN efn noholdlock
 	 where efn.Esf_PerNum = @Esf_PerNum
@@ -449,12 +444,11 @@ end else if @Tip_ConCon = @Str_Siete begin		/* C7*/  /*obtiene el estado financi
 		
 	select
           efn.Esf_Numero,    		efn.Esf_TipFor,    efn.Esf_Anio,    	efn.Esf_MesIni,    	efn.Esf_MesFin, 
-          efn.Esf_TiEsFi,    		efn.Esf_ExpCif,    efn.Esf_Moneda,    	efn.Esf_NomCon,	    efn.Esf_NuCePr,
-		  efn.Esf_DesDic,			efn.Esf_PerNum,    efn.Esf_Solici,      efn.Esf_EsEsFi,    	efn.Esf_ValInp,    
-		  efn.Esf_AplIca,    		efn.Esf_Icap,      efn.Esf_CapNet,      efn.Esf_AcSuRi,    	efn.Esf_TipSol,    
-		  efn.Esf_TipLiq,    	    efn.Esf_TipEfi,    Esf_Rango = convert(int, Esf_MesFin) - convert(int, Esf_MesIni) + @Ent_Uno, 
-		  Esf_Mayor = @Ent_Cero,	efn.NumTransac,	   efn.Transaccio,      efn.Usuario,    	efn.FechaSis,    	
-		  efn.SucOrigen,     		efn.SucDestino 
+          efn.Esf_TiEsFi,    		efn.Esf_ExpCif,    efn.Esf_Moneda,    	efn.Esf_PerNum,     efn.Esf_Solici,      
+		  efn.Esf_EsEsFi,    	    efn.Esf_ValInp,    efn.Esf_AplIca,    	efn.Esf_Icap,       efn.Esf_CapNet,      
+		  efn.Esf_AcSuRi,    	    efn.Esf_TipSol,    efn.Esf_TipLiq,    	efn.Esf_TipEfi,     Esf_Rango = convert(int, Esf_MesFin) - convert(int, Esf_MesIni) + @Ent_Uno, 
+		  Esf_Mayor = @Ent_Cero,	efn.Esf_NomCon,	   efn.Esf_NuCePr,      efn.Esf_DesDic,     efn.NumTransac,	   
+		  efn.Transaccio,           efn.Usuario,       efn.FechaSis,    	efn.SucOrigen,      efn.SucDestino 
 	 into #RangosEstadosFinancieros
 		 from SOESTFIN efn noholdlock
 		 where efn.Esf_PerNum = @Esf_PerNum
@@ -551,10 +545,10 @@ end else begin
    if @Tip_ConCon = @Str_Uno begin		/* L1 */
      select 
           Esf_Numero,    Esf_TipFor,    Esf_Anio,      Esf_MesIni,    Esf_MesFin, 
-          Esf_TiEsFi,    Esf_ExpCif,    Esf_Moneda,    Esf_NomCon,	  Esf_NuCePr,
-		  Esf_DesDic,	 Esf_PerNum,    Esf_Solici,	   Esf_EsEsFi,    Esf_ValInp,    
-		  Esf_AplIca,    Esf_Icap,      Esf_CapNet,    Esf_AcSuRi,    Esf_TipSol,    
-		  Esf_TipLiq,    Esf_TipEfi,    NumTransac,    Transaccio,    Usuario,    	
+          Esf_TiEsFi,    Esf_ExpCif,    Esf_Moneda,    Esf_PerNum,    Esf_Solici,	   
+		  Esf_EsEsFi,    Esf_ValInp,    Esf_AplIca,    Esf_Icap,      Esf_CapNet,    
+		  Esf_AcSuRi,    Esf_TipSol,    Esf_TipLiq,    Esf_TipEfi,    Esf_NomCon,	  
+		  Esf_NuCePr,    Esf_DesDic,    NumTransac,    Transaccio,    Usuario,    	
 		  FechaSis,      SucOrigen,     SucDestino 
      from SOESTFIN noholdlock   
      where Esf_Status = @Ent_Uno
@@ -583,12 +577,12 @@ end else begin
 
 	select
 		efn.Esf_Numero,    		efn.Esf_TipFor,    efn.Esf_Anio,    	efn.Esf_MesIni,    	efn.Esf_MesFin,
-		efn.Esf_TiEsFi,    		efn.Esf_ExpCif,    efn.Esf_Moneda,    	efn.Esf_NomCon,	    efn.Esf_NuCePr,
-		efn.Esf_DesDic,			efn.Esf_PerNum,    efn.Esf_Solici,      efn.Esf_EsEsFi,    	efn.Esf_ValInp,    
-		efn.Esf_AplIca,    	    efn.Esf_Icap,      efn.Esf_CapNet,      efn.Esf_AcSuRi,    	efn.Esf_TipSol,    
-		efn.Esf_TipLiq,    	    efn.Esf_TipEfi,    Esf_Rango = convert(int, Esf_MesFin) - convert(int, Esf_MesIni) + @Ent_Uno,
-		Esf_Mayor = @Ent_Cero,	Esf_Filtro = @Esf_Filtro, 				efn.NumTransac,	    efn.Transaccio,      
-		efn.Usuario,    	    efn.FechaSis,      efn.SucOrigen,       efn.SucDestino
+		efn.Esf_TiEsFi,    		efn.Esf_ExpCif,    efn.Esf_Moneda,    	efn.Esf_PerNum,     efn.Esf_Solici,      
+		efn.Esf_EsEsFi,    	    efn.Esf_ValInp,    efn.Esf_AplIca,    	efn.Esf_Icap,       efn.Esf_CapNet,      
+		efn.Esf_AcSuRi,    	    efn.Esf_TipSol,    efn.Esf_TipLiq,    	efn.Esf_TipEfi,     Esf_Rango = convert(int, Esf_MesFin) - convert(int, Esf_MesIni) + @Ent_Uno,
+		Esf_Mayor = @Ent_Cero,	Esf_Filtro = @Esf_Filtro, 				efn.Esf_NomCon,	    efn.Esf_NuCePr,
+		efn.Esf_DesDic,         efn.NumTransac,	   efn.Transaccio,      efn.Usuario,    	efn.FechaSis,      
+		efn.SucOrigen,          efn.SucDestino
 	 into #ListadoRangos
      from SOESTFIN efn noholdlock
 	 where efn.Esf_PerNum = @Esf_PerNum
@@ -617,10 +611,10 @@ end else begin
 
 	select TOP 3
           efn.Esf_Numero,    		efn.Esf_TipFor,    efn.Esf_Anio,    	efn.Esf_MesIni,    	efn.Esf_MesFin, 
-          efn.Esf_TiEsFi,    		efn.Esf_ExpCif,    efn.Esf_Moneda,    	efn.Esf_NomCon,	    efn.Esf_NuCePr,
-		  efn.Esf_DesDic,           efn.Esf_PerNum,    efn.Esf_Solici,      efn.Esf_EsEsFi,     efn.Esf_ValInp,    
-		  efn.Esf_AplIca,    	    efn.Esf_Icap,      efn.Esf_CapNet,      efn.Esf_AcSuRi,     efn.Esf_TipSol,    
-		  efn.Esf_TipLiq,    	    efn.Esf_TipEfi,    efn.NumTransac,      efn.Transaccio,     efn.Usuario,       
+          efn.Esf_TiEsFi,    		efn.Esf_ExpCif,    efn.Esf_Moneda,      efn.Esf_PerNum,     efn.Esf_Solici,      
+		  efn.Esf_EsEsFi,           efn.Esf_ValInp,    efn.Esf_AplIca,    	efn.Esf_Icap,       efn.Esf_CapNet,      
+		  efn.Esf_AcSuRi,           efn.Esf_TipSol,    efn.Esf_TipLiq,    	efn.Esf_TipEfi,     efn.Esf_NomCon,	    
+		  efn.Esf_NuCePr,           efn.Esf_DesDic,    efn.NumTransac,      efn.Transaccio,     efn.Usuario,       
 		  efn.FechaSis,    	        efn.SucOrigen,     efn.SucDestino
 	 into #UltimosTres
      from #ListadoRangos efn 
@@ -630,10 +624,10 @@ end else begin
 	 order by efn.Esf_Anio desc
 
 	 select Esf_Numero,    		Esf_TipFor,    Esf_Anio,    	Esf_MesIni,    	Esf_MesFin,
-          Esf_TiEsFi,    		Esf_ExpCif,    Esf_Moneda,    	Esf_NomCon,	    Esf_NuCePr,
-		  Esf_DesDic,			Esf_PerNum,    Esf_Solici,      Esf_EsEsFi,     Esf_ValInp,    
-		  Esf_AplIca,    	    Esf_Icap,      Esf_CapNet,      Esf_AcSuRi,    	Esf_TipSol,    
-		  Esf_TipLiq,    		Esf_TipEfi,    NumTransac,      Transaccio,     Usuario,       
+          Esf_TiEsFi,    		Esf_ExpCif,    Esf_Moneda,      Esf_PerNum,     Esf_Solici,      
+		  Esf_EsEsFi,           Esf_ValInp,    Esf_AplIca,    	Esf_Icap,       Esf_CapNet,      
+		  Esf_AcSuRi,    	    Esf_TipSol,    Esf_TipLiq,      Esf_TipEfi,     Esf_NomCon,	    
+		  Esf_NuCePr,           Esf_DesDic,    NumTransac,      Transaccio,     Usuario,       
 		  FechaSis,    	        SucOrigen,     SucDestino
 	from #UltimosTres efi
 	order by Esf_Anio asc
@@ -643,10 +637,10 @@ end else begin
    end else if @Tip_ConCon = @Str_Tres begin		/* L3 obtiene los estados financieros activos de la persona*/
 		select
 			Esf_Numero,    Esf_TipFor,    Esf_Anio,      Esf_MesIni,    Esf_MesFin,
-			Esf_TiEsFi,    Esf_ExpCif,    Esf_Moneda,    Esf_NomCon,	Esf_NuCePr,
-		    Esf_DesDic,    Esf_PerNum,    Esf_Solici,    Esf_EsEsFi,    Esf_ValInp,    
-		    Esf_AplIca,    Esf_Icap,      Esf_CapNet,    Esf_AcSuRi,    Esf_TipSol,    
-		    Esf_TipLiq,    Esf_TipEfi,    NumTransac,    Transaccio,    Usuario,    	
+			Esf_TiEsFi,    Esf_ExpCif,    Esf_Moneda,    Esf_PerNum,    Esf_Solici,    
+			Esf_EsEsFi,    Esf_ValInp,    Esf_AplIca,    Esf_Icap,      Esf_CapNet,    
+			Esf_AcSuRi,    Esf_TipSol,    Esf_TipLiq,    Esf_TipEfi,    Esf_NomCon,	
+			Esf_NuCePr,    Esf_DesDic,    NumTransac,    Transaccio,    Usuario,    	
 			FechaSis,      SucOrigen,     SucDestino
 		from SOESTFIN noholdlock
 		where Esf_PerNum = @Esf_PerNum
@@ -656,11 +650,11 @@ end else begin
 	end else if @Tip_ConCon = @Str_Cuatro begin		/* L4 obtiene todos los estados financieros de la persona*/
 		select
 			Esf_Numero,		Esf_TipFor,		Esf_Anio,		Esf_MesIni,		Esf_MesFin,
-			Esf_TiEsFi,		Esf_ExpCif,		Esf_Moneda,		Esf_NomCon,	    Esf_NuCePr,
-		    Esf_DesDic,     Esf_PerNum,		Esf_Solici,     Esf_EsEsFi,		Esf_ValInp,		
-		    Esf_AplIca,		Esf_Icap,		Esf_CapNet,     Esf_AcSuRi,		Esf_TipSol,		
-		    Esf_TipLiq,		Esf_TipEfi,		Esf_Status,     NumTransac,		Transaccio,		
-		    Usuario,		FechaSis,		SucOrigen,      SucDestino 
+			Esf_TiEsFi,		Esf_ExpCif,		Esf_Moneda,		Esf_PerNum,		Esf_Solici,     
+			Esf_EsEsFi,		Esf_ValInp,		Esf_AplIca,		Esf_Icap,		Esf_CapNet,     
+			Esf_AcSuRi,		Esf_TipSol,		Esf_TipLiq,		Esf_TipEfi,		Esf_Status,     
+			Esf_NomCon,	    Esf_NuCePr,     Esf_DesDic,     NumTransac,		Transaccio,		
+			Usuario,		FechaSis,		SucOrigen,      SucDestino 
 		from SOESTFIN noholdlock   
 		where Esf_PerNum = @Esf_PerNum
 		  and (Esf_Solici = @Esf_Solici or @Esf_Solici = @Ent_Cero)
@@ -689,12 +683,11 @@ end else begin
 
 	select
 		efn.Esf_Numero,    		efn.Esf_TipFor,    efn.Esf_Anio,    	efn.Esf_MesIni,    	efn.Esf_MesFin,
-		efn.Esf_TiEsFi,    		efn.Esf_ExpCif,    efn.Esf_Moneda,    	efn.Esf_NomCon,	    efn.Esf_NuCePr,
-		efn.Esf_DesDic,			efn.Esf_PerNum,    efn.Esf_Solici,      efn.Esf_EsEsFi,     efn.Esf_ValInp,    
-		efn.Esf_AplIca,    	    efn.Esf_Icap,      efn.Esf_CapNet,      efn.Esf_AcSuRi,     efn.Esf_TipSol,    
-		efn.Esf_TipLiq,    	    efn.Esf_TipEfi,    Esf_Rango = convert(int, Esf_MesFin) - convert(int, Esf_MesIni) + @Ent_Uno,
-		Esf_Mayor = @Ent_Cero,	efn.NumTransac,	   efn.Transaccio,      efn.Usuario,    	efn.FechaSis,
-		efn.SucOrigen,     		efn.SucDestino
+		efn.Esf_TiEsFi,    		efn.Esf_ExpCif,    efn.Esf_Moneda,    	efn.Esf_PerNum,     efn.Esf_Solici,      
+		efn.Esf_EsEsFi,         efn.Esf_ValInp,    efn.Esf_AplIca,    	efn.Esf_Icap,       efn.Esf_CapNet,      
+		efn.Esf_AcSuRi,         efn.Esf_TipSol,    efn.Esf_TipLiq,    	efn.Esf_TipEfi,     Esf_Rango = convert(int, Esf_MesFin) - convert(int, Esf_MesIni) + @Ent_Uno,
+		Esf_Mayor = @Ent_Cero,	efn.Esf_NomCon,	   efn.Esf_NuCePr,      efn.Esf_DesDic,     efn.NumTransac,	   
+		efn.Transaccio,         efn.Usuario,       efn.FechaSis,        efn.SucOrigen,      efn.SucDestino
 	 into #RazonesRangos
      from SOESTFIN efn noholdlock
 	 where efn.Esf_PerNum = @Esf_PerNum
@@ -721,10 +714,10 @@ end else begin
 
 	select TOP 4
           efn.Esf_Numero,    		efn.Esf_TipFor,    efn.Esf_Anio,    	efn.Esf_MesIni,    	efn.Esf_MesFin, 
-          efn.Esf_TiEsFi,    		efn.Esf_ExpCif,    efn.Esf_Moneda,    	efn.Esf_NomCon,	    efn.Esf_NuCePr,
-		  efn.Esf_DesDic,			efn.Esf_PerNum,    efn.Esf_Solici,      efn.Esf_EsEsFi,    	efn.Esf_ValInp,    
-		  efn.Esf_AplIca,    		efn.Esf_Icap,      efn.Esf_CapNet,      efn.Esf_AcSuRi,    	efn.Esf_TipSol,    
-		  efn.Esf_TipLiq,    		efn.Esf_TipEfi,    efn.NumTransac,      efn.Transaccio,     efn.Usuario,       
+          efn.Esf_TiEsFi,    		efn.Esf_ExpCif,    efn.Esf_Moneda,    	efn.Esf_PerNum,     efn.Esf_Solici,      
+		  efn.Esf_EsEsFi,    	    efn.Esf_ValInp,    efn.Esf_AplIca,      efn.Esf_Icap,       efn.Esf_CapNet,      
+		  efn.Esf_AcSuRi,    	    efn.Esf_TipSol,    efn.Esf_TipLiq,      efn.Esf_TipEfi,     efn.Esf_NomCon,	    
+		  efn.Esf_NuCePr,           efn.Esf_DesDic,    efn.NumTransac,      efn.Transaccio,     efn.Usuario,       
 		  efn.FechaSis,    			efn.SucOrigen,     efn.SucDestino
 	 into #RazonesUltimos
      from #RazonesRangos efn 
@@ -734,11 +727,11 @@ end else begin
 	 order by efn.Esf_Anio desc
 
 	 select Esf_Numero,    		Esf_TipFor,    Esf_Anio,    	Esf_MesIni,    	Esf_MesFin,
-          Esf_TiEsFi,    		Esf_ExpCif,    Esf_Moneda,    	Esf_NomCon,	    Esf_NuCePr,
-		  Esf_DesDic,			Esf_PerNum,    Esf_Solici,		Esf_EsEsFi,    	Esf_ValInp,    
-		  Esf_AplIca,    		Esf_Icap,      Esf_CapNet,		Esf_AcSuRi,    	Esf_TipSol,    
-		  Esf_TipLiq,    		Esf_TipEfi,    NumTransac,      Transaccio,     Usuario,       
-		  FechaSis,    	SucOrigen,      SucDestino
+          Esf_TiEsFi,    		Esf_ExpCif,    Esf_Moneda,    	Esf_PerNum,     Esf_Solici,		
+		  Esf_EsEsFi,    	    Esf_ValInp,    Esf_AplIca,      Esf_Icap,       Esf_CapNet,		
+		  Esf_AcSuRi,    	    Esf_TipSol,    Esf_TipLiq,      Esf_TipEfi,     Esf_NomCon,	    
+		  Esf_NuCePr,           Esf_DesDic,    NumTransac,      Transaccio,     Usuario,       
+		  FechaSis,    	        SucOrigen,     SucDestino
 	from #RazonesUltimos efi
 	order by Esf_Anio asc
 
@@ -772,10 +765,10 @@ end else begin
 	
 			select
 				top 1 Esf_Numero,	Esf_TipFor,    Esf_Anio,    	Esf_MesIni,    	Esf_MesFin,
-				Esf_TiEsFi,    		Esf_ExpCif,    Esf_Moneda,    	Esf_NomCon,	    Esf_NuCePr,
-				Esf_DesDic,			Esf_PerNum,    Esf_Solici, 		Esf_EsEsFi,    	Esf_ValInp,    
-				Esf_AplIca,    		Esf_Icap,      Esf_CapNet,      Esf_AcSuRi,    	Esf_TipSol,    
-				Esf_TipLiq,    		Esf_TipEfi,    NumTransac,      Transaccio,     Usuario,       
+				Esf_TiEsFi,    		Esf_ExpCif,    Esf_Moneda,    	Esf_PerNum,     Esf_Solici, 		
+				Esf_EsEsFi,    	    Esf_ValInp,    Esf_AplIca,    	Esf_Icap,       Esf_CapNet,      
+				Esf_AcSuRi,    	    Esf_TipSol,    Esf_TipLiq,      Esf_TipEfi,     Esf_NomCon,	    
+				Esf_NuCePr,         Esf_DesDic,    NumTransac,      Transaccio,     Usuario,       
 				FechaSis,    		SucOrigen,     SucDestino
 				from SOESTFIN noholdlock   
 			where Esf_PerNum = @Esf_PerNum
@@ -785,10 +778,10 @@ end else begin
 		else begin
 			select
 				top 1 Esf_Numero,   Esf_TipFor,    Esf_Anio,    	Esf_MesIni,    	Esf_MesFin,
-				Esf_TiEsFi,    		Esf_ExpCif,    Esf_Moneda,    	Esf_NomCon,	    Esf_NuCePr,
-				Esf_DesDic,			Esf_PerNum,    Esf_Solici,      Esf_EsEsFi,    	Esf_ValInp,    
-				Esf_AplIca,    		Esf_Icap,      Esf_CapNet,      Esf_AcSuRi,    	Esf_TipSol,    
-				Esf_TipLiq,    		Esf_TipEfi,    NumTransac,      Transaccio,     Usuario,       
+				Esf_TiEsFi,    		Esf_ExpCif,    Esf_Moneda,    	Esf_PerNum,     Esf_Solici,      
+				Esf_EsEsFi,    	    Esf_ValInp,    Esf_AplIca,      Esf_Icap,       Esf_CapNet,      
+				Esf_AcSuRi,    	    Esf_TipSol,    Esf_TipLiq,      Esf_TipEfi,     Esf_NomCon,	    
+				Esf_NuCePr,         Esf_DesDic,    NumTransac,      Transaccio,     Usuario,       
 				FechaSis,    		SucOrigen,     SucDestino
 			from SOESTFIN noholdlock   
 			where Esf_PerNum = @Esf_PerNum

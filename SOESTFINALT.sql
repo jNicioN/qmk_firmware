@@ -7,9 +7,6 @@ create procedure SOESTFINALT (
    @Esf_TiEsFi int,
    @Esf_ExpCif int,
    @Esf_Moneda varchar(2),
-   @Esf_NomCon varchar(180),
-   @Esf_NuCePr varchar(180),
-   @Esf_DesDic varchar(180),
    @Esf_PerNum int,
    @Esf_Solici int,
    @Esf_EsEsFi int,
@@ -23,6 +20,9 @@ create procedure SOESTFINALT (
    @Esf_TipLiq int,
    @Esf_TipEfi int,
    @Esf_Status bit,
+   @Esf_NomCon varchar(180),
+   @Esf_NuCePr varchar(180),
+   @Esf_DesDic varchar(180),
    @NumTransac char(10),
    @Transaccio char(3),
    @Usuario char(6),
@@ -59,19 +59,19 @@ select  @Int_Uno = 1
 
 insert into SOESTFIN 
 	(Esf_TipFor,	Esf_Anio,		Esf_MesIni,		Esf_MesFin,		Esf_TiEsFi, 
-    Esf_ExpCif,		Esf_Moneda,		Esf_NomCon,     Esf_NuCePr,     Esf_DesDic,
-	Esf_PerNum,		Esf_Solici,		Esf_EsEsFi,     Esf_ValInp,		Esf_AplIca,		
-	Esf_Icap,		Esf_CapNet,		Esf_AcSuRi,		Esf_TipSol,		Esf_TipLiq,		
-	Esf_TipEfi,		Esf_Status,		Esf_ConAct ,	Esf_UsuCre,		Esf_FecCre,		
-	Esf_UsuMod,		Esf_FecMod,		NumTransac,		Transaccio,		Usuario,		
+    Esf_ExpCif,		Esf_Moneda,		Esf_PerNum,		Esf_Solici,		Esf_EsEsFi,     
+	Esf_ValInp,		Esf_AplIca,		Esf_Icap,		Esf_CapNet,		Esf_AcSuRi,		
+	Esf_TipSol,		Esf_TipLiq,		Esf_TipEfi,		Esf_Status,		Esf_ConAct ,	
+	Esf_UsuCre,		Esf_FecCre,		Esf_UsuMod,		Esf_FecMod,		Esf_NomCon,    
+	Esf_NuCePr,     Esf_DesDic,     NumTransac,		Transaccio,		Usuario,		
 	FechaSis,		SucOrigen,		SucDestino)
 values (
 	@Esf_TipFor,	@Esf_Anio,		@Esf_MesIni,	@Esf_MesFin,	@Esf_TiEsFi,
-    @Esf_ExpCif,    @Esf_Moneda,	@Esf_NomCon,    @Esf_NuCePr,	@Esf_DesDic,
-	@Esf_PerNum,	@Esf_Solici,	@Esf_EsEsFi, 	@Esf_ValInp,    @Esf_AplIca,	
-	@Esf_Icap,		@Esf_CapNet,	@Esf_AcSuRi,	@Esf_TipSol,    @Esf_TipLiq,	
-	@Esf_TipEfi,    @Esf_Status,	@Esf_ConAct ,	@Usuario,		@FechaSis,		
-	@Usuario,		@FechaSis,		@NumTransac,    @Transaccio,	@Usuario,		
+    @Esf_ExpCif,    @Esf_Moneda,	@Esf_PerNum,	@Esf_Solici,	@Esf_EsEsFi, 	
+	@Esf_ValInp,    @Esf_AplIca,	@Esf_Icap,		@Esf_CapNet,	@Esf_AcSuRi,	
+	@Esf_TipSol,    @Esf_TipLiq,	@Esf_TipEfi,    @Esf_Status,	@Esf_ConAct ,	
+	@Usuario,		@FechaSis,		@Usuario,		@FechaSis,		@Esf_NomCon,    
+	@Esf_NuCePr,	@Esf_DesDic,    @NumTransac,    @Transaccio,	@Usuario,		
 	@FechaSis,		@SucOrigen,		@SucDestino)
 
 select @Esf_Numero = @@IDENTITY
