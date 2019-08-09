@@ -12,13 +12,13 @@ as
 *** REFERENCIAS: 														****
 ****************************************************************************
 ** Creo:	Pedro de los Reyes											****
-** Fecha:		17/Marzo/2019											****
+** Fecha:		05/AGOSTO/2019											****
 ****************************************************************************/
 
 declare	@Agente 	int, /* Declaracion de Variables */
      	@Id_Agente 	int /* Declaracion de Variables */
      	
-select @Id_Agente=SoAgenteID from SOREAGAS where SoUsuariID = @Bia_IdAsesor
+select @Id_Agente=SoAgenteID from SOREAGCA where SoUsuariID = @Bia_IdAsesor
 
 if @Id_Agente is null begin
 	select @Id_Agente=0

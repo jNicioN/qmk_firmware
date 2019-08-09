@@ -1,4 +1,4 @@
-create procedure SOREAGASBAJ (
+create procedure SOREAGCABAJ (
 	@Tip_Consul int,
 	
 	@NumTransac	char(10),
@@ -13,11 +13,13 @@ as
 *** REFERENCIAS: 														****
 ****************************************************************************
 ** Creo:	Pedro de los Reyes											****
-** Fecha:		17/Marzo/2019											****
+** Descripcion:	Baja de Agentes											****
+** Fecha:		05/AGOSTO/2019  										****
 ****************************************************************************/
 declare	@Ent_Uno 	int				/* Declaracion de constantes*/
+
 select @Ent_Uno		= 1				/* Entero en Uno*/
 
 if @Tip_Consul = @Ent_Uno	begin
-	delete from SOREAGAS
+	delete from SOREAGCA
 end

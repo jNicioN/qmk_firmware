@@ -11,8 +11,9 @@ as
 *** REFERENCIAS: 														****
 ****************************************************************************
 ** Creo:	Pedro de los Reyes											****
-** Fecha:		17/Marzo/2019											****
+** Descripcion:	Busqueda de asesor call center							****
+** Fecha:		05/AGOSTO/2019											****
 ****************************************************************************/
 
-select SoAgenteID,Usu_Clave,Usu_Nombre from SOREAGAS
-inner join SOUSUARI on SOREAGAS.SoUsuariID= SOUSUARI.SoUsuariID
+select SoAgenteID,Usu_Clave,Usu_Nombre from SOREAGCA
+inner join SOUSUARI on SOREAGCA.SoUsuariID= SOUSUARI.SoUsuariID

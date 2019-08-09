@@ -1,4 +1,4 @@
-create procedure SOREAGASALT (
+create procedure SOREAGCAALT (
 	@Raa_NumAge int,
 	@Raa_BrmAse	char(8),
 	
@@ -14,7 +14,8 @@ as
 *** REFERENCIAS: 														****
 ****************************************************************************
 ** Creo:	Pedro de los Reyes											****
-** Fecha:		17/Marzo/2019											****
+** Descripcion:	Alta de Agentes											****
+** Fecha:		05/AGOSTO/2019											****
 ****************************************************************************/
 declare	@Asesor 	int, /* Declaracion de Variables */
      	@Id_Asesor  int
@@ -37,6 +38,6 @@ if isnull(rtrim(ltrim(convert(char, @Id_Asesor))), @Str_Vacio) = @Str_Vacio	begi
 end
 
 
-insert into SOREAGAS (SoAgenteID,SoUsuariID,NumTransac,Transaccio,Usuario,FechaSis,SucOrigen,SucDestino,Modulo)
+insert into SOREAGCA (SoAgenteID,SoUsuariID,NumTransac,Transaccio,Usuario,FechaSis,SucOrigen,SucDestino,Modulo)
 	values (@Raa_NumAge,@Id_Asesor,@NumTransac,@Transaccio,@Usuario,@FechaSis,@SucOrigen,@SucDestino,@Modulo)
 	select @Id_Asesor as Asesor
