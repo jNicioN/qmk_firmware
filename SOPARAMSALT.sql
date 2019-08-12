@@ -1,9 +1,10 @@
-create procedure SOPARAMSALT (
+﻿create procedure SOPARAMSALT (
 	@Par_Sucurs	char(3),	
 	@Par_CheCaj	int,			
 	@Par_IVA	smallmoney,
  	@Par_ISR	smallmoney,	
  	@Par_DiBaIn	int, 			
+ 	@Par_DiBISR	int, 			
  	@Par_DiBaCr	int, 
 	@Par_DiBaCh	int,		
 	@Par_ChLey1	varchar(80),	
@@ -52,6 +53,71 @@ create procedure SOPARAMSALT (
 
 as
 
+/***************************************************************************
+** DESCRIPCION: ** Alta de Parametros  de Soporte 								****
+****************************************************************************
+** REFERENCIAS: 														****
+****************************************************************************
+** Modificó:		Ricardo Rivas 						****
+** Fecha:		12/Julio/2019								****
+** Help Desk:	00726428									****
+** Descripcion: Se agrega Par_DiBISR para caculo de ISR en inversiones**
+****************************************************************************
+** Modificó:		Eugenio Salazar Orta						****
+** Fecha:		12/Abril/2010								****
+** Help Desk:	00066738									****
+** Descripcion:	Se agrega Par_TiCaDi vacio al insert			****
+****************************************************************************
+** Modificó:		Francisco Javier Cordero Guzman				****
+** Fecha:		01/Junio/2009								****
+** Help Desk:	00129420									****
+** Descripcion:	Se agrega Par_Messen a insert				****
+****************************************************************************
+** Modificó:		Sergio Treviño Jasso							****
+** Fecha:		11/Junio/2008								****
+** Help Desk:	75587										****
+** Descripcion:	Se quito el mensaje 'Registro agregado'		****
+****************************************************************************
+** Modificó:		Fernando Marcos Esquivel Velazquez			****
+** Fecha:		11/Enero/2007								****
+** Help:		      00016121									****
+** Descripción:	Se quitaron validaciones para los campos		****
+**				Par_SPEUA, Par_SIAC y Par_CobInm			****
+****************************************************************************
+** Modificó:		Adrian Labastida								****
+** Fecha:		03/Enero/2007								****
+** HD:			SISTEMA									****
+** Descripción:	Agregar Parámetro de Par_Compan			****
+****************************************************************************
+** Modificó:		Fernando Marcos Esquivel Velazquez			****
+** Fecha:		28/Diciembre/2006							****
+** Help:		      00003613									****
+** Descripción:	Se agrego un if @@nestlevel = 1				****
+**************************************************************************** 
+** Modificó:		Gerardo Flores Martinez						****
+** Fecha:		22/Noviembre/2006							****
+** HD:			9482										****
+** Descripción:	Agregar Campo de Par_HoEnSp				****
+****************************************************************************
+** Modificó:		Gabriela Alonso   							****
+** Fecha:		04/Oct/05									****
+** Descripción:	Modifique para que al dar de alta se actualice ****
+**				el iva tambien en la sucursal					****
+****************************************************************************
+** Modificó:		Sandra Almaguer   							****
+** Fecha:		26/Sep/00									****
+** Descripción:	Agregue Cue_Compan cuando se selecciona	****
+**				info de COCUENTA							****
+****************************************************************************
+** Modificó:		Ruth Alemán	  							****
+** Fecha:		28/Julio/98									****
+** Descripción:	Campo Par_LinSob char(20), antes char(5)	****
+****************************************************************************
+** Modificó:		Ing. Laura Elena Cervantes D. 				****
+** Fecha:		01/Jul/98									****
+** Descripción:	Agregar Parámetros         					****
+****************************************************************************/
+
 /* Declaración de Variables */
 declare	@Status		int,
 		@Par_HorEnv smalldatetime
@@ -65,6 +131,7 @@ declare	@Cue_Compan	char(3),
 		@Str_Vacio	char(1),
 		@Ent_Cero	int,
 		@Ent_Anio	int,
+		@Ent_365	int,
 		@Fec_MilNov	smalldatetime
 
 /* Asignación de Constantes */
@@ -76,6 +143,7 @@ select	@Cue_Compan	= '001',			/* Compañia Contable BANREGIO */
 		@Str_Vacio	= '',				/* String Vacio				  */
 		@Ent_Cero	= 0,				/* Entero en Cero			  */
 		@Ent_Anio	= 360,				/* Anio */
+		@Ent_365	= 365,				/* 365 Dias del anio */
 		@Fec_MilNov	= '1990-01-01'		/* Fecha 1990 */
 
 select @Par_HorEnv	= Par_HorEnv
@@ -347,20 +415,27 @@ end else if not exists (select	Cue_Descri
 			Err_Variab	= 'Par_InsISR'
 	rollback 
 	return 1
+
+end else if @Par_DiBISR < @Ent_365 begin
+	select	Err_Codigo	= '000034', 
+			Err_Mensaj	= 'Número de días base de ISR incorrecto', 
+			Err_Variab	= 'Par_DiBISR'
+	rollback 
+	return 1	
 	
 end else begin
 	insert into SOPARAMS values (
-		@Par_Sucurs,	@Par_CheCaj,	@Par_IVA,		@Par_ISR,		@Par_DiBaIn,
-		@Par_DiBaCr, 	@Par_DiBaCh,	@Par_ChLey1,	@Par_ChLey2,	@Par_ChLey3,
-		@Par_CheCer,	@Par_DiaRem,	@Par_LimAut,	@Par_TranBR,	@Par_CliInd,
-		@Par_BanFol,	@Par_FecAct,	@Par_CoCoIn,	@Par_CoReme,	@Par_OpeBan,
-		@Par_ConPap,	@Par_MonCom,	@Par_LinSob,	@Par_EnvSPE,	@Par_Banco,
-		@Par_ComRem,	@Par_IvaRem,	@Par_RemExt,	@Par_IVAREX,	@Par_GiBaEx,
-	 	@Par_GiBaNa,	@Par_IVAGBN,	@Par_IVAGBE,	@Par_ComSPE,	@Par_IVASPE,
-	 	@Par_NumTes,	@Par_IncISR,	@Par_InsISR,	@Par_SPEUA,		@Par_SIAC,
-	 	@Par_CobInm,	@Par_FecAct,	@Par_IntBan,	@Par_HorEnv,	@Par_Compan,
-	 	@Par_Messen,	@Str_Vacio,		@NumTransac, 	@Transaccio,	@Usuario,
-	 	@FechaSis,	 	@SucOrigen, 	@SucDestino )
+		@Par_Sucurs,	@Par_CheCaj,	@Par_IVA,		@Par_ISR,		@Par_DiBaIn, 
+		@Par_DiBISR,	@Par_DiBaCr, 	@Par_DiBaCh,	@Par_ChLey1,	@Par_ChLey2,	
+		@Par_ChLey3,	@Par_CheCer,	@Par_DiaRem,	@Par_LimAut,	@Par_TranBR,	
+		@Par_CliInd,	@Par_BanFol,	@Par_FecAct,	@Par_CoCoIn,	@Par_CoReme,	
+		@Par_OpeBan,	@Par_ConPap,	@Par_MonCom,	@Par_LinSob,	@Par_EnvSPE,	
+		@Par_Banco,	@Par_ComRem,	@Par_IvaRem,	@Par_RemExt,	@Par_IVAREX,	
+	 	@Par_GiBaEx,	@Par_GiBaNa,	@Par_IVAGBN,	@Par_IVAGBE,	@Par_ComSPE,	
+		@Par_IVASPE,	@Par_NumTes,	@Par_IncISR,	@Par_InsISR,	@Par_SPEUA,		
+	 	@Par_SIAC,	@Par_CobInm,	@Par_FecAct,	@Par_IntBan,	@Par_HorEnv,	
+	 	@Par_Compan,	@Par_Messen,	@Str_Vacio,		@NumTransac, 	@Transaccio,	
+	 	@Usuario,	@FechaSis,	 	@SucOrigen, 	@SucDestino )
 
 	exec @Status = SOSUCURSACT
 		@Par_Sucurs,	@Par_IVA,	@Tip_Actual,	@NumTransac,	@Transaccio,	@Usuario,

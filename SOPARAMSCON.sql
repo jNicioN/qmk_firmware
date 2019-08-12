@@ -1,4 +1,4 @@
-create procedure SOPARAMSCON (
+﻿create procedure SOPARAMSCON (
 	@Par_Sucurs	char(3),
 	@Tip_Consul	char(2),
 
@@ -11,6 +11,81 @@ create procedure SOPARAMSCON (
 	@Modulo char(2))
 
 as
+
+/***************************************************************************
+** DESCRIPCION: ** Consulta de Parametros  de Soporte 						****
+****************************************************************************
+** REFERENCIAS: 														****
+****************************************************************************
+** Modificó:		Ricardo Rivas 						****
+** Fecha:		12/Julio/2019								****
+** Help Desk:	00726428									****
+** Descripcion: Se agrega campo Par_DiBISR en la consulta  igual a 	****
+**Descripcion: 	vacio para caculo de ISR en inversiones 						****
+****************************************************************************
+** Modificó:		Víctor Manuel Díaz Colonia					****
+** Fecha:		03/Enero/2012								****
+** Help:			00422746									****
+** Descripción:	Se agregó tipo de consulta C4.				****
+****************************************************************************
+** Modificó:		Eugenio Salazar Orta						****
+** Fecha:		12/Abril/2010								****
+** Help Desk:	00066738									****
+** Descripcion:	Agregar Consulta C3		 					****
+****************************************************************************
+** Modificó:		Andrés Grande Díaz							****
+** Fecha:		28/Diciembre/2009							****
+** Help:		      00231062									****
+** Descripción:	Agregar Campo Par_FecSis a C1				****
+****************************************************************************
+** Modificó:		Fernando Martinez Miramontes				****
+** Fecha:		11/mayo2007								****
+** Help:		      24673										****
+** Descripción:	Agregar Campo Par_FecAct a la C1			****
+****************************************************************************
+** 				STORE CONVERTIDO						****
+** Convirtió:		Karina Chavarría Tovar						****
+** Fecha:		04/Enero/2007								****
+**************************************************************************** 
+Modificó:		Adrian Labastida 							****
+** Fecha:		03/Enero/2007								****
+** HD:			SISTEMA									****
+** Descripción:	Agregar Campo de Par_Compan				****
+****************************************************************************
+** 				STORE CONVERTIDO						****
+** Convirtió:		Karina Chavarría Tovar						****
+** Fecha:		27/Dic/2006								****
+****************************************************************************
+** Modificó:		Gerardo Flores Martinez						****
+** Fecha:		14/Diciembre/2006							****
+** HD:			9482										****
+** Modificacion:	Agregar C2									****
+****************************************************************************
+** 				STORE CONVERTIDO						****
+** Convirtió:		Eduardo Salazar Gtz.						****
+** Fecha:		27/Febrero/2006							****
+****************************************************************************
+** Modificó:		Eduardo Salazar Gtz.						****
+** Fecha:		27/Febrero/2006							****
+** Modificacion:	Agregar Par_DiBaCR	 a C1					****
+****************************************************************************
+** 				STORE CONVERTIDO						****
+** Convirtió:		Perla J. Abundis Orozco						****
+** Fecha:		26/Sep/05									****
+****************************************************************************
+** Modificó:		Gerardo Flores	Martinez					****
+** Fecha:		09/Septiembre/2005							****
+** Modificacion:	Calculo de Iva de acuerdo a la sucursal del Cte***
+** HD:			97418.013		 							****
+****************************************************************************
+** 				STORE CONVERTIDO						****
+** Convirtió:		Eduardo Salazar Gtz.						****
+** Fecha:		16/Nov/04									****
+****************************************************************************
+** Modificó:		Mayra Estrada       							****
+** Fecha:		03/May/2002								****
+** Descripción:	Estandarización y quite * a select SOPARAMS	****
+****************************************************************************/
 
 declare @Fecha_Val 	smalldatetime,		/* Declaración de variables */
 		@Dia_Actual smalldatetime, 
@@ -58,7 +133,7 @@ else
 	select	@Tip_Fecha	= @Fec_LetI
 
 if isnull(@Tip_Consul, @Str_Vacio) = @Str_Vacio begin		/* Cliente:  FoxPro */
-	select	Par_Sucurs,	Par_CheCaj,	Par_IVA,	Par_ISR,	Par_DiBaIn,
+	select	Par_Sucurs,	Par_CheCaj,	Par_IVA,	Par_ISR,	Par_DiBaIn,	 Par_DiBISR ,
 			Par_DiBaCr,	Par_DiBaCh,	Par_ChLey1,	Par_ChLey2,	Par_ChLey3,
 			Par_CheCer,	Par_DiaRem,	Par_LimAut,	Par_TranBR,	Par_CliInd,
 			Par_BanFol,	Par_FecAct,	Par_CoCoIn,	Par_CoReme,	Par_OpeBan,
@@ -99,7 +174,7 @@ end else begin
 				  and	Par_TiCaDi	= @Par_TiCaDi
 		end
 		if @Tip_ConCon = @Str_Cuatro begin
-			select	Par_Sucurs,	Par_CheCaj,	Par_IVA,	Par_ISR,	Par_DiBaIn,
+			select	Par_Sucurs,	Par_CheCaj,	Par_IVA,	Par_ISR,	Par_DiBaIn,	 Par_DiBISR ,
 				Par_DiBaCr,	Par_DiBaCh,	Par_ChLey1,	Par_ChLey2,	Par_ChLey3,
 				Par_CheCer,	Par_DiaRem,	Par_LimAut,	Par_TranBR,	Par_CliInd,
 				Par_BanFol,	Par_FecAct,	Par_CoCoIn,	Par_CoReme,	Par_OpeBan,
