@@ -1,4 +1,4 @@
-create procedure SOPERSONPRO (
+﻿create procedure SOPERSONPRO (
 	@Per_Numero	char(8),
 	@Per_CURP	varchar(18),
 	@Peu_Grupo	char(8),
@@ -13,6 +13,7 @@ create procedure SOPERSONPRO (
 	@DaP_PaiNac	char(3),
 	@Adi_FeVeId	smalldatetime,
 	@Per_Email	varchar(50),
+	@Adi_NacExt	char(1),	
 	@Tip_Proces	char(1),
 
 	@NumTransac	char(10),
@@ -29,6 +30,12 @@ as
 /* DESCRIPCION: Personas (Proceso)						  		   */
 /*******************************************************************/
 /** REFERENCIAS:
+********************************************************************
+** Modificó:	Francisco Javier Carrillo Rojas					****
+** Fecha:		18/Jul/2019										****
+** Help:		01202239										****
+** Descripción:	Recibir Adi_NacExt como campo de entrada,		****
+** 				No actualizar entidad de nacimiento para extranj.***
 ********************************************************************
 ** Modificó:	Angel Cisneros               					****
 ** Fecha:		04/Ene/2019										****
@@ -96,8 +103,7 @@ declare	@Status		int,					/*	Declaracion de Variables	*/
 		@Bit_Giro	char(30),
 		@Bit_Sector	char(3),
 		@Bit_Activi	char(10),
-		@Bit_ActINE	varchar(10),
-		@Adi_NacExt char(1)
+		@Bit_ActINE	varchar(10)
 	
 declare	@Str_Vacio	char(1),				/*	Declaracion de Constantes	*/
 		@Ent_Cero	int,
@@ -127,6 +133,13 @@ if @Tip_Proces = @Tip_Renapo begin
 	if len(rtrim(ltrim(@Per_CURP))) <> @Ent_LonCur begin
 		select	Err_Codigo	= '000001',
 				Err_Mensaj	= 'La CURP no es válido'
+		rollback
+		return 1
+	end
+	
+	if isnull(@Adi_NacExt, @Str_Vacio) = @Str_Vacio  or (@Adi_NacExt != @Nac_Nacion and  @Adi_NacExt!= @Nac_Extran) begin
+		select	Err_Codigo	= '000002',
+				Err_Mensaj	= 'La nacionalidad enviada es un valor inválido'
 		rollback
 		return 1
 	end
@@ -193,8 +206,7 @@ if @Tip_Proces = @Tip_Renapo begin
 	where	Peu_Grupo	= @Peu_Grupo
 	
 	/* Se considera la nacionalidad	que será asignada para no sobreescribir el tipo, el número, la fecha de expedición y vencimiento de la identificación usada en la captura de la persona cuando es extranjero */
-	if @DaP_PaiNac = @Pai_Mexico begin
-		select	@Adi_NacExt	= @Nac_Nacion
+	if @Adi_NacExt = @Nac_Nacion begin
 		
 		update SOPERADI set
 			Adi_FecNac	= @Adi_FecNac,
@@ -216,7 +228,6 @@ if @Tip_Proces = @Tip_Renapo begin
 		where	Peu_Grupo	= @Peu_Grupo
 		
 	end else begin
-		select	@Adi_NacExt	= @Nac_Extran
 		
 		update SOPERADI set
 			Adi_FecNac	= @Adi_FecNac,
@@ -253,8 +264,8 @@ if @Tip_Proces = @Tip_Renapo begin
 	where	Peu_Grupo	= @Peu_Grupo
 	  and	DaP_Person is null
 
-	--Exranjero, no actualizamos información ligada al INE/IFE
-	if @DaP_PaiNac = @Pai_Mexico begin
+	--Exranjero, no actualizamos información ligada al INE/IFE ni la entidad de nacimiento
+	if @Adi_NacExt = @Nac_Nacion begin
 		update SOPEDACO set
 			DaP_PaiNac	= @DaP_PaiNac,
 			DaP_EntNac	= @DaP_EntNac,
@@ -273,7 +284,6 @@ if @Tip_Proces = @Tip_Renapo begin
 	end else begin
 		update SOPEDACO set
 			DaP_PaiNac	= @DaP_PaiNac,
-			DaP_EntNac	= @DaP_EntNac,
 
 			NumTransac	= @NumTransac,
 			Transaccio	= @Transaccio,
