@@ -32,6 +32,12 @@ as
 /** REFERENCIAS:
 ********************************************************************
 ** Modificó:	Francisco Javier Carrillo Rojas					****
+** Fecha:		19/Jul/2019										****
+** Help:		01278846										****
+** Descripción:	Actualizar estado de nacimiento para extranjeros****
+** 				en Tip_Proces = A								****
+********************************************************************
+** Modificó:	Francisco Javier Carrillo Rojas					****
 ** Fecha:		18/Jul/2019										****
 ** Help:		01202239										****
 ** Descripción:	Recibir Adi_NacExt como campo de entrada,		****
@@ -264,7 +270,7 @@ if @Tip_Proces = @Tip_Renapo begin
 	where	Peu_Grupo	= @Peu_Grupo
 	  and	DaP_Person is null
 
-	--Exranjero, no actualizamos información ligada al INE/IFE ni la entidad de nacimiento
+	--Exranjero, no actualizamos información ligada al INE/IFE
 	if @Adi_NacExt = @Nac_Nacion begin
 		update SOPEDACO set
 			DaP_PaiNac	= @DaP_PaiNac,
@@ -284,6 +290,7 @@ if @Tip_Proces = @Tip_Renapo begin
 	end else begin
 		update SOPEDACO set
 			DaP_PaiNac	= @DaP_PaiNac,
+			DaP_EntNac	= @DaP_EntNac,
 
 			NumTransac	= @NumTransac,
 			Transaccio	= @Transaccio,
