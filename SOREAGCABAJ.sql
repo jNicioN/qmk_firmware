@@ -14,6 +14,7 @@ as
 ****************************************************************************
 ** Creo:	Pedro de los Reyes											****
 ** Descripcion:	Baja de Agentes											****
+** Folio:		1230668													****
 ** Fecha:		05/AGOSTO/2019  										****
 ****************************************************************************/
 declare	@Ent_Uno 	int				/* Declaracion de constantes*/
