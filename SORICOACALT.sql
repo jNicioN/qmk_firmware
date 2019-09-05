@@ -14,6 +14,7 @@ create procedure SORICOACALT (
    @Rca_CuExPr int,
    @Rca_EdFiAu int,
    @Rca_PrExBa int,
+   @Rca_EnCuEm int,
    @Rca_ExPoPr int,
    @Rca_InArRi int,
 
@@ -28,6 +29,11 @@ create procedure SORICOACALT (
 /****************************************************************/
 /* DESCRIPCION: Alta de registros de Composicion Accionaria de	*/
 /*				RIB												*/
+/****************************************************************/
+/** Modifico:	Jose Rodriguez									*/
+/** Fecha:		07/06/2019                               		*/
+/** Help:		1229452					 						*/
+/** Descripcion: Se agrega un campo     						*/
 /****************************************************************/
 /** Modifico:	Edwin Dennis									*/
 /** Fecha:		01/11/2018                               		*/
@@ -67,6 +73,10 @@ if (@Rca_CoPaGP = @Int_Menos1) begin
 	select @Rca_CoPaGP=null
 end
 
+if(@Rca_EnCuEm = @Int_Menos1) begin
+	select @Rca_EnCuEm = null
+end
+
 if (@Rca_ExPoPr = @Int_Menos1) begin
 	select @Rca_ExPoPr=null
 end
@@ -78,15 +88,15 @@ end
 Insert Into SORICOAC 
 	(Rca_NumRib,	Rca_CoPaGP,		Rca_TipAdm,		Rca_NuCoTo,		Rca_NuCoIn, 
 	Rca_TiAdUn,		Rca_PlaSuc,		Rca_OrAdSe,		Rca_ArACIn,		Rca_PrCuAd,
-	Rca_CuExBa,		Rca_CuExPr,		Rca_EdFiAu,		Rca_PrExBa,		Rca_ExPoPr,
-	Rca_InArRi,		NumTransac,		Transaccio,		Usuario,		FechaSis,
-	SucOrigen,		SucDestino) 
+	Rca_CuExBa,		Rca_CuExPr,		Rca_EdFiAu,		Rca_PrExBa,		Rca_EnCuEm,
+	Rca_ExPoPr,		Rca_InArRi,		NumTransac,		Transaccio,		Usuario,		
+	FechaSis,       SucOrigen,		SucDestino) 
 	values(
 	@Rca_NumRib,    @Rca_CoPaGP,    @Rca_TipAdm,    @Rca_NuCoTo,    @Rca_NuCoIn,
 	@Rca_TiAdUn,	@Rca_PlaSuc,	@Rca_OrAdSe,	@Rca_ArACIn,	@Rca_PrCuAd,
-	@Rca_CuExBa,	@Rca_CuExPr,	@Rca_EdFiAu,	@Rca_PrExBa,	@Rca_ExPoPr,
-	@Rca_InArRi,	@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,
-	@SucOrigen,		@SucDestino) 
+	@Rca_CuExBa,	@Rca_CuExPr,	@Rca_EdFiAu,	@Rca_PrExBa,	@Rca_EnCuEm,
+	@Rca_ExPoPr,	@Rca_InArRi,	@NumTransac,	@Transaccio,	@Usuario,		
+	@FechaSis,		@SucOrigen,		@SucDestino) 
 
 select @Rca_Numero = @@IDENTITY 
 

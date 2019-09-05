@@ -1,4 +1,4 @@
-create procedure SOUSUREGCON (
+﻿create procedure SOUSUREGCON (
 	@Usr_Usuari	char(6),
 	@Usu_Clave	char(15),
 	@Usr_Region	int,
@@ -16,6 +16,17 @@ create procedure SOUSUREGCON (
 as
 /******************************************************************/
 /* DESCRIPCION: Usuario por regiones							  */
+/******************************************************************/
+/* Modifica:	Edwin Dennis Santiago							****
+** Fecha:		04/07/2019										****
+** Help:		1267901  										****
+** Modifica:	Se corrige consulta L3							***/
+/******************************************************************/
+/* Modifica:	Edwin Dennis Santiago							****
+** Fecha:		19/06/2019										****
+** Help:		1212881  										****
+** Modifica:	Se agrega consulta L7 para solo traer regiones 	****
+**				activas											***/
 /******************************************************************/
 /* Modifica:	Jaret Guanajuato Ruvalcaba						****
 ** Fecha:		06/05/2019										****
@@ -40,12 +51,13 @@ as
 ** Fecha:		03/10/2016										****
 ** Help:		903360 											****
 ********************************************************************/
-/* Declaracion de Variables */
-declare	@Tip_ConTip	char(1),
-		@Tip_ConCon	char(1),
-		@Int_Index int
 
-/* Asignacion de Constantes */
+/* Declaracion de Variables */
+declare	@Tip_ConTip	char(1),		/* Tipo de Consulta*/
+		@Tip_ConCon	char(1),		/* Numero de consulta*/
+		@Int_Index int				/* Entero Indice*/
+
+/* declaracion de Constantes */
 declare	@Str_Vacio	char(1),
 		@Str_Activo	char(1),
 		@Str_Cero	char(1),
@@ -56,28 +68,31 @@ declare	@Str_Vacio	char(1),
 		@Str_Cuatro	char(1),
 		@Str_Cinco	char(1),
 		@Str_Seis	char(1),
+		@Str_Siete	char(1),
 		@Str_Coma	char(1),
 		@Int_Uno	int,
 		@Tip_Lista	char(1)
-
-select	@Str_Vacio	= '',			/* Caracter Vacio			*/
-		@Str_Activo	= 'A',
-		@Str_Cero	= '0',
-		@Int_Cero	= 0,
-		@Str_Uno	= '1',
-		@Str_Dos	= '2',
-		@Str_Tres	= '3',
-		@Str_Cuatro	= '4',
-		@Str_Cinco	= '5',
-		@Str_Seis	= '6',
-		@Str_Coma   = ',',
-		@Int_Uno	= 1,
-		@Tip_Lista  = 'L'
+		
+/* Asignacion de constantes*/
+select	@Str_Vacio	= '',			/* Caracter Vacio*/
+		@Str_Activo	= 'A',			/* Estatus A*/
+		@Str_Cero	= '0',			/* Caracter Cero*/
+		@Int_Cero	= 0,			/* Entero Cero*/
+		@Str_Uno	= '1',			/* Caracter Uno*/
+		@Str_Dos	= '2',			/* Caracter Dos*/
+		@Str_Tres	= '3',			/* Caracter Tres*/
+		@Str_Cuatro	= '4',			/* Caracter Cuatro*/
+		@Str_Cinco	= '5',			/* Caracter Cinco*/
+		@Str_Seis	= '6',			/* Caracter Seis*/
+		@Str_Siete	= '7',			/* Caracter Siete*/
+		@Str_Coma   = ',',			/* Caracter Coma*/
+		@Int_Uno	= 1,			/* Entero uno */
+		@Tip_Lista  = 'L'			/* Caracter L */
 
 select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
 		@Tip_ConCon	= substring(@Tip_Consul, 2, 1)
 
-if @Tip_ConTip	= @Tip_Lista begin			/* 'L': Listas */
+if @Tip_ConTip	= @Tip_Lista begin					/* 'L': Listas */
 	if @Tip_ConCon	= @Str_Uno begin		/* L1 Usuarios por Region */
 		select	Usr_Region,	Reg_Descri,	Usr_Usuari,	Usu_Clave,	Usu_Nombre
 			from SOUSUREG noholdlock
@@ -159,5 +174,14 @@ if @Tip_ConTip	= @Tip_Lista begin			/* 'L': Listas */
 			  and	Upe_Perfil	= @Usr_Perfil
 			  and	Usr_Usuari	= @Usr_Usuari
 			order by Usu_Nombre
+	end
+	if @Tip_ConCon	= @Str_Siete begin /* L7 Regiones activas por numero de usuario */
+		select	Usr_Region,	Reg_Descri,	Usr_Usuari,	Usu_Clave,	Usu_Nombre
+			from SOUSUREG noholdlock
+			inner join SOUSUARI noholdlock on Usu_Numero = Usr_Usuari
+			inner join SOREGION noholdlock on Reg_Numero = Usr_Region
+			where	Usr_Usuari = @Usr_Usuari 
+			  and  Reg_Status = @Str_Activo
+			order by Reg_Descri
 	end
 end

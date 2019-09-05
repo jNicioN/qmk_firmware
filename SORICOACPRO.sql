@@ -16,23 +16,28 @@ as
 	/**					Accionaria de Aspectos de Calificacion asociados	*/
 	/**					a RIB												*/
 	/************************************************************************/
+	/** Modifico:	Jose Rodriguez											*/
+	/** Fecha:		07/06/2019                               				*/
+	/** Help:		1229452					 								*/
+	/** Descripcion: Se agrega un campo     								*/
+	/************************************************************************/
 	/** Creo:     		Victor Osorio										*/
 	/** Fecha:    		03/05/2017											*/
 	/** Help:			929417												*/
 	/************************************************************************/
 	/* declaracion de constantes */
-	declare	@Str_A		char(1),
-			@Int_Cero	int,
-			@Int_Uno	int
+	declare	@Str_A		char(1),        /* Constante tipo A*/
+			@Int_Cero	int,			/* Constante Entero Cero*/
+			@Int_Uno	int				/* Constante Entero Uno*/
 
 	select	@Str_A		= 'A',
 			@Int_Cero	= 0,
 			@Int_Uno	= 1
 
 	/* declaracion de variables */
-	declare	@Int_RibBas	int,
-			@Str_NumPer	char(8),
-			@Int_NumSol int
+	declare	@Int_RibBas	int,			/* Variable Entero RIB Base*/
+			@Str_NumPer	char(8),		/* Variable Numero Persona*/
+			@Int_NumSol int				/* Variable Numero Solicitud*/
 	
 	if @Tip_Proces = @Str_A begin
 
@@ -50,15 +55,15 @@ as
 						Rca_NumRib,		Rca_CoPaGP,		Rca_TipAdm,		Rca_NuCoTo,
 						Rca_NuCoIn,		Rca_TiAdUn,		Rca_PlaSuc,		Rca_OrAdSe,
 						Rca_ArACIn,		Rca_PrCuAd,		Rca_CuExBa,		Rca_CuExPr,
-						Rca_EdFiAu,		Rca_PrExBa,		Rca_ExPoPr,		Rca_InArRi,
-						NumTransac,		Transaccio,		Usuario,		FechaSis,
-						SucOrigen,		SucDestino)
+						Rca_EdFiAu,		Rca_PrExBa,		Rca_EnCuEm,		Rca_ExPoPr,		
+						Rca_InArRi,		NumTransac,		Transaccio,		Usuario,		
+						FechaSis,		SucOrigen,		SucDestino)
 				select	@Int_RibBas,	Rca_CoPaGP,		Rca_TipAdm,		Rca_NuCoTo,
 						Rca_NuCoIn,		Rca_TiAdUn,		Rca_PlaSuc,		Rca_OrAdSe,
 						Rca_ArACIn,		Rca_PrCuAd,		Rca_CuExBa,		Rca_CuExPr,
-						Rca_EdFiAu,		Rca_PrExBa,		Rca_ExPoPr,		Rca_InArRi,
-						@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,
-						@SucOrigen,		@SucDestino
+						Rca_EdFiAu,		Rca_PrExBa,		Rca_EnCuEm,		Rca_ExPoPr,		
+						Rca_InArRi,		@NumTransac,	@Transaccio,	@Usuario,		
+						@FechaSis,		@SucOrigen,		@SucDestino
 				from SORICOAC noholdlock
 				where Rca_NumRib = @Rca_NumRib
 			end

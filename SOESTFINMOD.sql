@@ -1,7 +1,7 @@
 create procedure SOESTFINMOD (
    @Esf_Numero int,
    @Esf_TipFor int,
-   @Esf_Anio int,
+   @Esf_Anio   int,
    @Esf_MesIni int,
    @Esf_MesFin int,
    @Esf_TiEsFi int,
@@ -11,6 +11,9 @@ create procedure SOESTFINMOD (
    @Esf_Solici int,
    @Esf_EsEsFi int,
    @Esf_ValInp float,
+   @Esf_NomCon varchar(180),
+   @Esf_NuCePr varchar(180),
+   @Esf_DesDic varchar(180),
    @NumTransac char(10),
    @Transaccio char(3),
    @Usuario char(6),
@@ -22,6 +25,12 @@ create procedure SOESTFINMOD (
  
 /****************************************************************/
 /* DESCRIPCION: Modifica registros de estado financiero			*/
+/****************************************************************/
+/** Modifico:    Jose Rodriguez									*/
+/** Fecha:		 16/07/2019                               		*/
+/** Descripcion: Se agregan campos Esf_NomCon, Esf_NuCePr y     */
+/**				 Esf_DesDic  									*/
+/** Help:		 1264694				 						*/
 /****************************************************************/
 /** Creo:		Felipe Castillo									*/
 /** Fecha:		19/05/2017                               		*/
@@ -40,6 +49,9 @@ update SOESTFIN set
    Esf_ValInp	= @Esf_ValInp,
    Esf_UsuMod	= @Usuario,
    Esf_FecMod	= @FechaSis,
+   Esf_NomCon	= @Esf_NomCon,
+   Esf_NuCePr	= @Esf_NuCePr,	
+   Esf_DesDic	= @Esf_DesDic,
    NumTransac	= @NumTransac,
    Transaccio	= @Transaccio,
    Usuario		= @Usuario,
