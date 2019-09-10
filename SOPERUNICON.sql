@@ -641,8 +641,8 @@ end else begin
 	end
 
 	if @Tip_ConCon	= @Str_Siete begin /* L7 - Busqueda por nombre de personas que representan la persona única*/
-		--Obligar a que se capturen más de 5 caracteres
-		if len(isnull(rtrim(@Per_Comple), @Str_Vacio)) < @Ent_Cuatro begin
+		--Obligar a que se capturen más de 4 caracteres
+		if len(isnull(rtrim(ltrim(@Per_Comple)), @Str_Vacio)) < @Ent_Cuatro begin
 			select	Err_Codigo	= '000004',
 					Err_Mensaj	= 'Especifique al menos 4 caracteres para realizar la búsqueda de personas'
 			return @Ent_Uno
