@@ -20,6 +20,12 @@ as
 /*******************************************************************
 ** DESCRIPCION: Consulta de Persona Unica						****
 ********************************************************************
+** Modificó:	Francisco Javier Carrillo Rojas					****
+** Fecha:		26/Ago/2019										****
+** Help:		01289832										****
+** Descripcion:	Obligar el uso de 4 caracteres en la lista 		****
+**				 L7 											****
+********************************************************************
 ** Modifico:	Armando Alexis Sepúlveda Cruz					****
 ** Fecha:		04/06/2019										****
 ** Help:		1258812											****
@@ -139,7 +145,9 @@ declare	@Str_Vacio	char(1), /* Vacio */
 		@Str_Ocho   char(1), /* Tipo 8*/
 		@Str_Nueve	char(1), /* Tipo 9*/
 		@Len_RFCOrd	int,
-		@Len_RFCHom int
+		@Len_RFCHom int,
+		@Ent_Cuatro	int,		/*	Entero en cuatro */
+		@Ent_Uno	int			/*	Entero en uno */
 
 /* Asignacion de Constantes */
 select	@Str_Vacio	= '',
@@ -160,7 +168,9 @@ select	@Str_Vacio	= '',
 		@Str_Ocho	= '8',
 		@Str_Nueve  = '9',
 		@Len_RFCOrd	= 10,								/* Longitud de rfc ordinario*/
-		@Len_RFCHom = 13								/* Longitud de rfc con homoclave*/
+		@Len_RFCHom = 13,								/* Longitud de rfc con homoclave*/
+		@Ent_Cuatro	= 4,
+		@Ent_Uno	= 1
 
 select	@Str_PerRFC = ltrim(rtrim(@Per_RFC)),
 		@Str_PeuNom	= ltrim(rtrim(@Per_Comple)) + @Str_Porcen
@@ -631,6 +641,13 @@ end else begin
 	end
 
 	if @Tip_ConCon	= @Str_Siete begin /* L7 - Busqueda por nombre de personas que representan la persona única*/
+		--Obligar a que se capturen más de 4 caracteres
+		if len(isnull(rtrim(ltrim(@Per_Comple)), @Str_Vacio)) < @Ent_Cuatro begin
+			select	Err_Codigo	= '000004',
+					Err_Mensaj	= 'Especifique al menos 4 caracteres para realizar la búsqueda de personas'
+			return @Ent_Uno
+		end	
+	
 		create table #PersonasUnicas(
 			Per_Person	char(8) not null,
 			Per_Grupo	char(8) not null)
