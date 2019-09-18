@@ -22,10 +22,16 @@ as
 
 /*
 ****************************************************************************
-** Modifico:	Francisco Mora											****
-** Fecha:		11/Oct/18												****
-** HelpDesk:	1071093													****
-** Descripcion:	Agrega consulta monedas tradair L8						****
+** Modifico:	Joel Barcenas													****
+** Fecha:		18/Sep/19												    	****
+** HelpDesk:	1201224														****
+** Descripcion:	Agrega consulta de Tipo de cambio para   	****
+						Pantallas de Sucursal en L9							****
+****************************************************************************
+** Modifico:	Francisco Mora												****
+** Fecha:		11/Oct/18														****
+** HelpDesk:	1071093														****
+** Descripcion:	Agrega consulta monedas tradair L8			****
 ****************************************************************************
 ** Modifico:	Felipe Castillo Rendon									****
 ** Fecha:		12/Abr/18												****
@@ -278,7 +284,8 @@ declare	@Str_Vacio	char(1),
 		@Ent_Tres	int,			/*	Constante entero tres	*/
 		@Str_N		char(1),		/*	Cadena con valor N	*/
 		@Con_LisTra	char(1),
-		@Mon_NumMxn	char(2)
+		@Mon_NumMxn	char(2),
+		@Tip_CamSuc   char(1) 
 
 /* Asignacion de valores a constantes */
 select	@Str_Vacio	= '',				/* String Vacio */
@@ -325,7 +332,8 @@ select	@Str_Vacio	= '',				/* String Vacio */
 		@Ent_Tres	= 3,
 		@Str_N		= 'N',
 		@Con_LisTra	= '8',				/* Consulta de lista de monedas de cambio de tradair */
-		@Mon_NumMxn	= '01'				/*	Numero de moneda para pesos */
+		@Mon_NumMxn	= '01',				/*	Numero de moneda para pesos */
+		@Tip_CamSuc = '9'			/*Tipo de cambio para pantallas de sucursal. L9*/
 		
 		
 select	@Par_FecAct	= Par_FecAct
@@ -623,6 +631,11 @@ end else begin			/* Cliente:  Visual Basic */
 				  and	Mon_OpeCam	= @Ope_MonCam 
 				  or	Mon_Numero	= @Mon_NumMxn
 				order by Mon_Numero
+		end else if @Tip_ConCon = @Tip_CamSuc begin
+			select Mon_Numero, Mon_Descri,	Mon_EfeCom,	Mon_EfeVen, Mon_Simbol
+			from SOMONEDA noholdlock
+			where  Mon_OpeCam = @Ope_MonCam
+			and Mon_Numero in (@Mon_Dolar,@Mon_Euro)
 		end
 	end
 end
