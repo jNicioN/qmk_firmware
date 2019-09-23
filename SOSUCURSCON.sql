@@ -506,19 +506,19 @@ end else begin													/* Cliente:  Visual Basic */
 							@Ban_Banner = @Str_Vacio
 										 
 					update #TextoBan
-					set  Par_Texto = 		CASE WHEN Par_TiCaDi = @Ban_Grupo
-											  THEN 
+					set  Par_Texto = 	case when Par_TiCaDi = @Ban_Grupo
+											  then
 												  @Ban_Banner +  Par_Texto  + @Ban_Separa
-											  ELSE 
+											  else
 												  Par_Texto 
-											  END,
+											  end,
 					
-					@Ban_Banner = CASE WHEN Par_TiCaDi = @Ban_Grupo
-											  THEN 
+					@Ban_Banner = case when Par_TiCaDi = @Ban_Grupo
+											  then
 													@Ban_Banner + Par_Texto  + @Ban_Separa
 											  else 
 													Par_Texto + @Ban_Separa
-											  END,
+											  end,
 					@Ban_Banner = Par_TiCaDi
 												 
 										 
