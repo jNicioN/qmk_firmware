@@ -24,7 +24,7 @@ as
 ****************************************************************************
 ** Modifico:	Joel Barcenas													****
 ** Fecha:		18/Sep/19												    	****
-** HelpDesk:	1201224														****
+** HelpDesk:	1184558														****
 ** Descripcion:	Agrega consulta de Tipo de cambio para   	****
 						Pantallas de Sucursal en L9							****
 ****************************************************************************

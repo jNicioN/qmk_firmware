@@ -20,9 +20,14 @@ as
 ****************************************************************************
 ** Modifico:	Joel Barcenas													****
 ** Fecha:		18/Sep/19												    	****
-** HelpDesk:	1201224														****
+** HelpDesk:	1184558														****
 ** Descripcion:	Agrega consulta de sucusarles de Tipo de cambio****
 					Pantallas de Sucursal en L9								****
+****************************************************************************
+** Modifico:	Marcelo Bautista Hernandez								****
+** Fecha:		24/Julio/2019											****
+** Descripcion:	Se agrega consulta C8									****
+** Help Desk:	01202239 												****
 ****************************************************************************
 ** Modifico:	Melissa Sepulveda										****
 ** Fecha:		08/Feb/2018												****
@@ -176,7 +181,9 @@ as
 
 declare	@Tip_ConTip	char(1),		/* Declaracion de Variables */
 		@Tip_ConCon	char(1),
-		@Suc_Cerrad char(1)
+		@Suc_Cerrad char(1),
+		@Ban_Grupo char(3),
+		@Ban_Banner varchar(500)
 		
 declare	@Str_Vacio	char(1),		/* Declaracion de Constantes */
 		@Sta_Proces	char(1),
@@ -209,8 +216,6 @@ declare	@Str_Vacio	char(1),		/* Declaracion de Constantes */
 		@Con_SucZon	char(1),
 		@Cat_Sucurs	char(1),
 		@Lis_BanLey  char(1),
-		@Ban_Grupo char(3),
-		@Ban_Banner varchar(500),
 		@Ban_Separa char(3)
 		
 /* Asignacion de Constantes */
@@ -459,7 +464,7 @@ end else begin													/* Cliente:  Visual Basic */
 				where	Suc_Catego	= @Cat_Sucurs
 				order by Suc_Nombre						
 		end else if @Tip_ConCon = @Lis_BanLey begin		
-				create Table #sucursalesBanner(
+				create Table #SucursalesBan(
 					SoSucursID  int not null,
 					Suc_Numero char(3) not null,
 					Suc_Nombre varchar(50) not null,
@@ -470,25 +475,25 @@ end else begin													/* Cliente:  Visual Basic */
 					Suc_FecAct smalldatetime
 				)
 				
-				insert into #sucursalesBanner
+				insert into #SucursalesBan
 				select suc.SoSucursID, suc.Suc_Numero, Suc_Nombre, Par_TiCaDi, ciu.Ciu_Nombre, space(1000), space(1000),convert(datetime,getdate(), 2)
 				from SOSUCURS suc noholdlock
 				inner join SOPARAMS par noholdlock on  par.Par_Sucurs  =  suc.Suc_Numero 
 				inner join SOCIUDAD ciu noholdlock on suc.SoCiudadID  = ciu.SoCiudadID 
 				
-				create table #textoBanner(
+				create table #TextoBan(
 					Par_id 		int identity,
 					Par_TiCaDi char(3),
 					Par_Texto   varchar(500)
 				)
 				
-				create table #textoBannerFinal(
+				create table #TextoBanFin(
 					Par_id 		int identity,
 					Par_TiCaDi char(3),
 					Par_Texto   varchar(500)
 				)
 										 
-					insert into #textoBanner
+					insert into #TextoBan
 					select Bag_Grupo, Bas_Texto
 					from ITBANGRU bang noholdlock
 					inner join ITBANSUC ban noholdlock on bang.Bag_Banner  = ban.Bas_NumReg 
@@ -500,7 +505,7 @@ end else begin													/* Cliente:  Visual Basic */
 					select @Ban_Grupo = @Str_Vacio,
 							@Ban_Banner = @Str_Vacio
 										 
-					update #textoBanner
+					update #TextoBan
 					set  Par_Texto = 		CASE WHEN Par_TiCaDi = @Ban_Grupo
 											  THEN 
 												  @Ban_Banner +  Par_Texto  + @Ban_Separa
@@ -517,32 +522,32 @@ end else begin													/* Cliente:  Visual Basic */
 					@Ban_Banner = Par_TiCaDi
 												 
 										 
-					  insert into #textoBannerFinal				  
+					  insert into #TextoBanFin				  
 					  SELECT Par_TiCaDi,max(Par_Texto)
-					  FROM #textoBanner
+					  FROM #TextoBan
 					  GROUP BY Par_TiCaDi
 			  
 			
 										 
-					update #sucursalesBanner
-					set 	#sucursalesBanner.Ban_Texto = ban.Par_Texto
-					from #textoBannerFinal	ban noholdlock
-					where #sucursalesBanner.Par_TiCaDi = ban.Par_TiCaDi
+					update #SucursalesBan
+					set 	#SucursalesBan.Ban_Texto = ban.Par_Texto
+					from #TextoBanFin	ban noholdlock
+					where #SucursalesBan.Par_TiCaDi = ban.Par_TiCaDi
 						
-					update #sucursalesBanner
-					set 	#sucursalesBanner.Ley_Texto = ley.Les_Texto 
+					update #SucursalesBan
+					set 	#SucursalesBan.Ley_Texto = ley.Les_Texto 
 					from ITLEYGRU leyg noholdlock
 					inner join ITLEYSUC ley noholdlock on leyg.Leg_Leyend = ley.Les_NumReg   
-					where leyg.Leg_Grupo  = #sucursalesBanner.Par_TiCaDi
+					where leyg.Leg_Grupo  = #SucursalesBan.Par_TiCaDi
 					and leyg.Leg_Status  = @Str_Status
 					and ley.Les_Status  = @Str_Status
 				
-					select #sucursalesBanner.SoSucursID, #sucursalesBanner.Suc_Nombre, cast(#sucursalesBanner.Par_TiCaDi as int) as Par_TiCaDi, 
-							#sucursalesBanner.Ciu_Nombre, #sucursalesBanner.Ban_Texto, #sucursalesBanner.Ley_Texto
-					 from #sucursalesBanner
-					drop table #sucursalesBanner
-					drop table #textoBanner
-					drop table #textoBannerFinal
+					select #SucursalesBan.SoSucursID, #SucursalesBan.Suc_Nombre, cast(#SucursalesBan.Par_TiCaDi as int) as Par_TiCaDi, 
+							#SucursalesBan.Ciu_Nombre, #SucursalesBan.Ban_Texto, #SucursalesBan.Ley_Texto
+					 from #SucursalesBan
+					drop table #SucursalesBan
+					drop table #TextoBan
+					drop table #TextoBanFin
 				
 		end	
 	end
