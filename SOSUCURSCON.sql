@@ -523,9 +523,9 @@ end else begin													/* Cliente:  Visual Basic */
 												 
 										 
 					  insert into #TextoBanFin				  
-					  SELECT Par_TiCaDi,max(Par_Texto)
-					  FROM #TextoBan
-					  GROUP BY Par_TiCaDi
+					  select Par_TiCaDi,max(Par_Texto)
+					  from #TextoBan
+					  group by Par_TiCaDi
 			  
 			
 										 
