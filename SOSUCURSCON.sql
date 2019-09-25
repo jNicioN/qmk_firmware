@@ -215,6 +215,7 @@ declare	@Str_Vacio	char(1),		/* Declaracion de Constantes */
 		@Con_SucFab	char(1),
 		@Con_SucZon	char(1),
 		@Cat_Sucurs	char(1),
+		@Str_Ocho	char(1),
 		@Lis_BanLey  char(1),
 		@Ban_Separa char(3)
 		
@@ -249,6 +250,7 @@ select	@Str_Vacio	= '',			/*	String Vacio 		*/
 		@Con_SucFab	= 'F',			/*	Consulta: Sucursal, plaza y parametros		*/
 		@Con_SucZon	= 'Z',			/*	Consulta: Sucursal, zona y ciudad			*/
 		@Cat_Sucurs = 'S',			/*	Consulta: Categoria Sucursal				*/
+		@Str_Ocho	= '8',
 		@Lis_BanLey = '9',
 		@Ban_Separa = ' | '
 			
@@ -406,8 +408,13 @@ end else begin													/* Cliente:  Visual Basic */
 				from SOSUCURS noholdlock
 					inner join SOPLAZAS noholdlock on Suc_Plaza = Pla_Numero
 				where	Suc_Numero	= @Suc_Numero
+		end else if @Tip_ConCon = @Str_Ocho begin
+			select Suc_Numero,Suc_Nombre,Ciu_Nombre,Est_Abrevi,Est_Nombre,Suc_Gerent,Suc_SubGer
+				from SOSUCURS suc noholdlock
+				inner join SOCIUDAD ciu noholdlock on suc.SoCiudadID = ciu.SoCiudadID
+				inner join SOESTADO est noholdlock on ciu.Ciu_Estado = est.Est_Numero
+				where	Suc_Numero	= @Suc_Numero
 		end
-		
 	end else begin												/* 'L':  Lista */
 		select	@Suc_Nombre	= ltrim(rtrim(@Suc_Nombre)) + @Str_Porcen
 		
