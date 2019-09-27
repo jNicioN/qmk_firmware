@@ -18,6 +18,12 @@ as
 ****************************************************************************
 **                           Store CONVERTIDO 							****
 ****************************************************************************
+** Modifico:	Joel Barcenas													****
+** Fecha:		18/Sep/19												    	****
+** HelpDesk:	1184558														****
+** Descripcion:	Agrega consulta de sucusarles de Tipo de cambio****
+					Pantallas de Sucursal en L9								****
+****************************************************************************
 ** Modifico:	Marcelo Bautista Hernandez								****
 ** Fecha:		24/Julio/2019											****
 ** Descripcion:	Se agrega consulta C8									****
@@ -61,7 +67,6 @@ as
 ** Help Desk:	749260													****
 ****************************************************************************
 ** Modifico:	Ignacio Ordaz Valtierra									****
-
 ** Fecha:		03/Abril/2013											****
 ** Descripcion:	Se elimina el filtro de consulta a Estado de cuenta		****
 ** Help Desk:	533483													****
@@ -176,7 +181,9 @@ as
 
 declare	@Tip_ConTip	char(1),		/* Declaracion de Variables */
 		@Tip_ConCon	char(1),
-		@Suc_Cerrad char(1)
+		@Suc_Cerrad char(1),
+		@Ban_Grupo char(3),
+		@Ban_Banner varchar(500)
 		
 declare	@Str_Vacio	char(1),		/* Declaracion de Constantes */
 		@Sta_Proces	char(1),
@@ -208,7 +215,9 @@ declare	@Str_Vacio	char(1),		/* Declaracion de Constantes */
 		@Con_SucFab	char(1),
 		@Con_SucZon	char(1),
 		@Cat_Sucurs	char(1),
-		@Str_Ocho	char(1)
+		@Str_Ocho	char(1),
+		@Lis_BanLey  char(1),
+		@Ban_Separa char(3)
 		
 /* Asignacion de Constantes */
 select	@Str_Vacio	= '',			/*	String Vacio 		*/
@@ -241,8 +250,9 @@ select	@Str_Vacio	= '',			/*	String Vacio 		*/
 		@Con_SucFab	= 'F',			/*	Consulta: Sucursal, plaza y parametros		*/
 		@Con_SucZon	= 'Z',			/*	Consulta: Sucursal, zona y ciudad			*/
 		@Cat_Sucurs = 'S',			/*	Consulta: Categoria Sucursal				*/
-		@Str_Ocho	= '8'
-
+		@Str_Ocho	= '8',
+		@Lis_BanLey = '9',
+		@Ban_Separa = ' | '
 			
 if isnull(@Tip_Consul, @Str_Vacio) = @Str_Vacio begin	/* Cliente:  FoxPro */
 	if isnull(@Suc_Nombre, @Str_Vacio) = @Str_Vacio and isnull(@Suc_Numero, @Str_Vacio) = @Str_Vacio
@@ -405,7 +415,6 @@ end else begin													/* Cliente:  Visual Basic */
 				inner join SOESTADO est noholdlock on ciu.Ciu_Estado = est.Est_Numero
 				where	Suc_Numero	= @Suc_Numero
 		end
-		
 	end else begin												/* 'L':  Lista */
 		select	@Suc_Nombre	= ltrim(rtrim(@Suc_Nombre)) + @Str_Porcen
 		
@@ -461,6 +470,92 @@ end else begin													/* Cliente:  Visual Basic */
 				from SOSUCURS noholdlock				
 				where	Suc_Catego	= @Cat_Sucurs
 				order by Suc_Nombre						
-		end
+		end else if @Tip_ConCon = @Lis_BanLey begin		
+				create Table #SucursalesBan(
+					SoSucursID  int not null,
+					Suc_Numero char(3) not null,
+					Suc_Nombre varchar(50) not null,
+					Par_TiCaDi  char(3) not null,
+					Ciu_Nombre  varchar(50) not null,
+					Ban_Texto   varchar(1000) not null,
+					Ley_Texto   varchar(100) not null,
+					Suc_FecAct smalldatetime
+				)
+				
+				insert into #SucursalesBan
+				select suc.SoSucursID, suc.Suc_Numero, Suc_Nombre, Par_TiCaDi, ciu.Ciu_Nombre, space(1000), space(1000),convert(datetime,getdate(), 2)
+				from SOSUCURS suc noholdlock
+				inner join SOPARAMS par noholdlock on  par.Par_Sucurs  =  suc.Suc_Numero 
+				inner join SOCIUDAD ciu noholdlock on suc.SoCiudadID  = ciu.SoCiudadID 
+				
+				create table #TextoBan(
+					Par_id 		int identity,
+					Par_TiCaDi char(3),
+					Par_Texto   varchar(500)
+				)
+				
+				create table #TextoBanFin(
+					Par_id 		int identity,
+					Par_TiCaDi char(3),
+					Par_Texto   varchar(500)
+				)
+										 
+					insert into #TextoBan
+					select Bag_Grupo, Bas_Texto
+					from ITBANGRU bang noholdlock
+					inner join ITBANSUC ban noholdlock on bang.Bag_Banner  = ban.Bas_NumReg 
+					where  bang.Bag_Status = @Str_Status
+					and ban.Bas_Status = 	@Str_Status
+					and ban.Bas_Activo = 	@Cat_Sucurs
+					order by Bag_Grupo desc
+		
+					select @Ban_Grupo = @Str_Vacio,
+							@Ban_Banner = @Str_Vacio
+										 
+					update #TextoBan
+					set  Par_Texto = 	case when Par_TiCaDi = @Ban_Grupo
+											  then
+												  @Ban_Banner +  Par_Texto  + @Ban_Separa
+											  else
+												  Par_Texto 
+											  end,
+					
+					@Ban_Banner = case when Par_TiCaDi = @Ban_Grupo
+											  then
+													@Ban_Banner + Par_Texto  + @Ban_Separa
+											  else 
+													Par_Texto + @Ban_Separa
+											  end,
+					@Ban_Banner = Par_TiCaDi
+												 
+										 
+					  insert into #TextoBanFin				  
+					  select Par_TiCaDi,max(Par_Texto)
+					  from #TextoBan
+					  group by Par_TiCaDi
+			  
+			
+										 
+					update #SucursalesBan
+					set 	#SucursalesBan.Ban_Texto = ban.Par_Texto
+					from #TextoBanFin	ban noholdlock
+					where #SucursalesBan.Par_TiCaDi = ban.Par_TiCaDi
+						
+					update #SucursalesBan
+					set 	#SucursalesBan.Ley_Texto = ley.Les_Texto 
+					from ITLEYGRU leyg noholdlock
+					inner join ITLEYSUC ley noholdlock on leyg.Leg_Leyend = ley.Les_NumReg   
+					where leyg.Leg_Grupo  = #SucursalesBan.Par_TiCaDi
+					and leyg.Leg_Status  = @Str_Status
+					and ley.Les_Status  = @Str_Status
+				
+					select #SucursalesBan.SoSucursID, #SucursalesBan.Suc_Nombre, cast(#SucursalesBan.Par_TiCaDi as int) as Par_TiCaDi, 
+							#SucursalesBan.Ciu_Nombre, #SucursalesBan.Ban_Texto, #SucursalesBan.Ley_Texto
+					 from #SucursalesBan
+					drop table #SucursalesBan
+					drop table #TextoBan
+					drop table #TextoBanFin
+				
+		end	
 	end
 end
