@@ -1,4 +1,4 @@
-﻿create procedure SODIAFESPRO (
+create procedure SODIAFESPRO (
 	@Dfe_Fecha	smalldatetime,
 	@Dfe_Coment	varchar(255),
 	
@@ -308,7 +308,8 @@ declare	@Ent_Cero	int,
 		@Tab_TASALV	char(8),
 		@Tab_SGSEGT	char(8),
 		@Tab_SGDOSE	char(8),
-		@Tab_BEFADO	char(8)
+		@Tab_BEFADO	char(8),
+		@Ent_CieOch	smallint
 
 -- Asignación de Constantes
 select	@Ent_Cero	= 0,				-- Entero Cero
@@ -574,7 +575,8 @@ select	@Ent_Cero	= 0,				-- Entero Cero
 		@Cam_DocPol	= 'Doc_Poliza',
 		@Cam_DocDoc	= 'Doc_Docume',
 		@Cam_DocCon = 'Doc_Contra',
-		@Cam_DocNum	= 'Doc_Numero'
+		@Cam_DocNum	= 'Doc_Numero',
+		@Ent_CieOch = 108
 
 select	@Fec_IniPro	= getdate(),
 		@Fec_SiDiHa	= @Dfe_Fecha
@@ -596,7 +598,7 @@ if @Status <> @Ent_Cero begin
 end
 
 if @Var_Contin = @Sta_Si begin
-	select	@Pro_Descri	= @Des_IniPro + @Str_Espaci + ltrim(rtrim(convert(char,getdate(),108))),
+	select	@Pro_Descri	= @Des_IniPro + @Str_Espaci + ltrim(rtrim(convert(char,getdate(),@Ent_CieOch))),
 			@Fec_Sistem	= getdate(),
 			@Pro_Tiempo	= convert(int, datediff(ss, @Fec_IniPro, getdate()))
 
