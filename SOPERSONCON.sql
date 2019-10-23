@@ -1,4 +1,4 @@
-create procedure SOPERSONCON (
+﻿create procedure SOPERSONCON (
 	@Per_Numero	char(8),
 	@Per_Comple	varchar(181),
 	@Per_Tipo	char(1),
@@ -22,7 +22,7 @@ as
 *********************************************************************
 ** Modifico:		Armando Alexis Sepúlveda Cruz				****
 ** Fecha:			26/Septiembre/2019							****
-** Help:			1285508	 									****
+** Help:			1277318	 									****
 ** Descripcion:		Se modifica la consulta L8 para retornar	****
 **					La CURP										****
 ********************************************************************

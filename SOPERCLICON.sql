@@ -1,4 +1,4 @@
-create procedure SOPERCLICON(
+﻿create procedure SOPERCLICON(
 	@PerPersoID		int output,
 	@ClClientID		int output,
 	@Per_Numero 	char(8),
