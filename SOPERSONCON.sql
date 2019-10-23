@@ -20,6 +20,13 @@ as
 ********************************************************************
 ** REFERENCIAS:													****
 ********************************************************************
+** Modifico:		Carlos Ramirez								****
+** Fecha:			04/Octubre/2019								****
+** Help:			1179955 									****
+** Descripcion:		Se crea C10, consulta para busqueda de   	****
+**					personas que puedan ser integradas como un 	****
+**					tercero autorizado de internacional			****
+********************************************************************
 ** Modifico:		Armando Alexis Sepúlveda Cruz				****
 ** Fecha:			31/Julio/2019								****
 ** Help:			1202239	 									****
@@ -629,6 +636,14 @@ if @Tip_ConTip = 'C' begin
 		  from SOPERSON noholdlock
 		  join SOUNIPER noholdlock on Per_Numero = Peu_Person 
 		  where Per_Comple like @Per_Comple + '%'
+	end else if @Tip_ConCon = 'C' begin /*Consulta por persona registrada en internacional para tercero autorizado*/
+		 select	sp.Per_Numero,	sp.Per_Tipo,	sp.Per_Benefi,	sp.Per_NuSeFi,	sp.Per_Titulo,
+				sp.Per_Nombre,	sp.Per_ApePat,	sp.Per_ApeMat,	sp.Per_RazSoc,	sp.Per_Comple,
+				sp.Per_ComOrd,	sp.Per_RFC,		sp.Per_CURP
+			from SOPERSON sp noholdlock
+			inner join ITPERSON pe noholdlock on sp.PerPersoID = pe.Per_PerId 
+			where Per_Tipo in (@Tip_Fisica,@Tip_FisAE)
+			  and Per_RFC = @Per_RFC
 	end
 end else begin
 	select	@Per_Comple	= ltrim(rtrim(@Per_Comple)) + @Str_Porcen
