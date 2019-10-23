@@ -13,10 +13,18 @@ create procedure SOPERCLICON(
 	@SucDestino		char(3),
 	@Modulo			char(2))
 
+
 as
+
 
 /***************************************************************************
 ** Descripción:	 Consulta Persona y Cliente								****
+****************************************************************************
+** Modificó:	Armando Alexis Sepúlveda Cruz							****
+** Fecha:		11/Octubre/2019											****
+** Help Desk:	1277318													****
+** Descripción:	Se agrega consulta C7 que retorna las personas Empleado	****
+**				relacionado al número de Persona						****
 ****************************************************************************
 ** Modificó:	Josue Leal Ramirez										****
 ** Fecha:		03/Diciembre/2018										****
@@ -46,9 +54,11 @@ declare	@Tip_ConTip	char(1),
 										/* Asignación de constantes */
 select	@Str_Vacio	= ''				/* String vacío */		
 
+
 select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
 		@Tip_ConCon	= substring(@Tip_Consul, 2, 1)
 		
+
 
 if @Tip_ConTip = 'C' begin							/* 'C':  Consulta */
 	if @Tip_ConCon = '1' begin						/* Consulta by Cli_Numero  */	
@@ -107,6 +117,12 @@ if @Tip_ConTip = 'C' begin							/* 'C':  Consulta */
 			from SOPERSON  
 				 left join CLADICIO on  Per_Numero  =  Adi_NumPer 
 			where @Per_Numero != @Str_Vacio and Per_Numero = @Per_Numero	
+	end else	if @Tip_ConCon = '7' begin						/* Consulta unificada por Cli_Numero o Per_Numero*/	
+		select ClClientID,  PerPersoID ,  Adi_Client as Cli_Numero, Per_Numero
+		  from CLADICIO 	noholdlock
+    inner join SOPERSON 	noholdlock on	Per_Numero	=	Adi_NumPer
+    inner join RHEMPLEA		noholdlock on   Emp_Client	=	Adi_Client 
+    	 where Per_Numero  = @Per_Numero
 	end
-	
 end
+
