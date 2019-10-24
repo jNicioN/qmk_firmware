@@ -22,7 +22,7 @@ as
 ****************************************************************************
 ** Modificó:	Armando Alexis Sepúlveda Cruz							****
 ** Fecha:		11/Octubre/2019											****
-** Help Desk:	1277318													****
+** Help Desk:	1285508													****
 ** Descripción:	Se agrega consulta C7 que retorna las personas Empleado	****
 **				relacionado al número de Persona						****
 ****************************************************************************

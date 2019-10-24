@@ -22,7 +22,7 @@ as
 *********************************************************************
 ** Modifico:		Armando Alexis Sepúlveda Cruz				****
 ** Fecha:			26/Septiembre/2019							****
-** Help:			1277318	 									****
+** Help:			1285508	 									****
 ** Descripcion:		Se modifica la consulta L8 para retornar	****
 **					La CURP										****
 ********************************************************************
