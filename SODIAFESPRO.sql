@@ -19,6 +19,11 @@ as
 /* REFERENCIAS:
 ****************************************************************************
 ****************************************************************************
+** Modificó:	Juan Jose Sandoval Marin								****
+** Fecha:		02/Oct/2019												****
+** Help:		1306640													****
+** Descripcion:	Se agrega tabla BEFADOCU								****
+****************************************************************************
 ** Creó:		Andrea Ramirez M.										****
 ** Fecha:		30/Dic/2017												****
 ** Help:		1038263													****
@@ -144,6 +149,8 @@ declare	@Ent_Cero	int,
 		@Tip_Resp41	char(3),
 		@Tip_SGDOSE	char(3),
 		@Tip_Resp42	char(3),
+		@Tip_Resp43	char(3),
+		@Tip_BEFADO char(3),
 		@Tip_SODIFE	char(3),
 		
 		@Des_SODIFE	varchar(33),
@@ -261,6 +268,8 @@ declare	@Ent_Cero	int,
 		@Cam_DoFeVe	char(10),
 		@Cam_DocPol	char(10),
 		@Cam_DocDoc	char(10),
+		@Cam_DocCon	char(10),
+		@Cam_DocNum	char(10),
 		
 		@Tab_FAFACT	char(8),
 		@Tab_FADOCU	char(8),
@@ -298,7 +307,9 @@ declare	@Ent_Cero	int,
 		@Tab_TACORT	char(8),
 		@Tab_TASALV	char(8),
 		@Tab_SGSEGT	char(8),
-		@Tab_SGDOSE	char(8)
+		@Tab_SGDOSE	char(8),
+		@Tab_BEFADO	char(8),
+		@Ent_CieOch	smallint
 
 -- Asignación de Constantes
 select	@Ent_Cero	= 0,				-- Entero Cero
@@ -408,7 +419,9 @@ select	@Ent_Cero	= 0,				-- Entero Cero
 		@Tip_Resp41	= '080',			-- Respaldo SGSEGTEL
 		@Tip_SGSEGT	= '081',			-- Actualización SGSEGTEL
 		@Tip_Resp42	= '082',			-- Respaldo SGDOSETE
-		@Tip_SGDOSE	= '083',			-- Actualización SGDOSETE		
+		@Tip_SGDOSE	= '083',			-- Actualización SGDOSETE	
+		@Tip_Resp43	= '084',			-- Respaldo BEFADOCU
+		@Tip_BEFADO	= '085',			-- Actualización BEFADOCU		
 		
 		@Tab_CHREME	= 'CHREMESA',
 		@Tab_ABAMOR	= 'ABAMORTI',
@@ -451,6 +464,7 @@ select	@Ent_Cero	= 0,				-- Entero Cero
 		@Tab_TASALV	= 'TASALVEN',
 		@Tab_SGSEGT	= 'SGSEGTEL',
 		@Tab_SGDOSE	= 'SGDOSETE',
+		@Tab_BEFADO	= 'BEFADOCU',
 		@Tab_SODIFE	= 'SODIAFES',
 		
 		@Cam_FePaFi	= 'Rem_FePaFi',
@@ -559,7 +573,10 @@ select	@Ent_Cero	= 0,				-- Entero Cero
 		@Cam_SeFeFi	= 'Seg_FecFin',
 		@Cam_DoFeVe	= 'Doc_FecVen',
 		@Cam_DocPol	= 'Doc_Poliza',
-		@Cam_DocDoc	= 'Doc_Docume'
+		@Cam_DocDoc	= 'Doc_Docume',
+		@Cam_DocCon = 'Doc_Contra',
+		@Cam_DocNum	= 'Doc_Numero',
+		@Ent_CieOch = 108
 
 select	@Fec_IniPro	= getdate(),
 		@Fec_SiDiHa	= @Dfe_Fecha
@@ -577,11 +594,11 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin
-	select	@Pro_Descri	= @Des_IniPro + @Str_Espaci + ltrim(rtrim(convert(char,getdate(),108))),
+	select	@Pro_Descri	= @Des_IniPro + @Str_Espaci + ltrim(rtrim(convert(char,getdate(),@Ent_CieOch))),
 			@Fec_Sistem	= getdate(),
 			@Pro_Tiempo	= convert(int, datediff(ss, @Fec_IniPro, getdate()))
 
@@ -591,7 +608,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 end
 
@@ -601,7 +618,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -644,7 +661,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -655,7 +672,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -680,7 +697,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -692,7 +709,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -721,7 +738,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -733,7 +750,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -758,7 +775,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -770,7 +787,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -799,7 +816,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -811,7 +828,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -837,7 +854,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -849,7 +866,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -880,7 +897,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -892,7 +909,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -917,7 +934,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -929,7 +946,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -958,7 +975,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -970,7 +987,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -995,7 +1012,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -1007,7 +1024,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -1036,7 +1053,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -1048,7 +1065,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -1073,7 +1090,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -1085,7 +1102,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -1114,7 +1131,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -1126,7 +1143,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -1152,7 +1169,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -1164,7 +1181,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -1195,7 +1212,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -1207,7 +1224,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -1231,7 +1248,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -1243,7 +1260,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -1271,7 +1288,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -1283,7 +1300,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -1308,7 +1325,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -1320,7 +1337,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -1349,7 +1366,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -1361,7 +1378,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -1386,7 +1403,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -1398,7 +1415,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -1427,7 +1444,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -1439,7 +1456,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -1463,7 +1480,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -1475,7 +1492,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -1503,7 +1520,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -1515,7 +1532,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -1549,7 +1566,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -1561,7 +1578,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -1603,7 +1620,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -1615,7 +1632,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -1649,7 +1666,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -1661,7 +1678,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -1703,7 +1720,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -1715,7 +1732,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -1739,7 +1756,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -1751,7 +1768,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -1779,7 +1796,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -1791,7 +1808,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -1815,7 +1832,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -1827,7 +1844,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -1855,7 +1872,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -1866,7 +1883,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -1891,7 +1908,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -1903,7 +1920,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -1932,7 +1949,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -1944,7 +1961,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -1987,7 +2004,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -1999,7 +2016,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -2054,7 +2071,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -2066,7 +2083,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -2106,7 +2123,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -2118,7 +2135,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -2170,7 +2187,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -2182,7 +2199,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -2225,7 +2242,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -2237,7 +2254,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -2292,7 +2309,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -2304,7 +2321,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -2344,7 +2361,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -2356,7 +2373,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -2408,7 +2425,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -2420,7 +2437,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -2444,7 +2461,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -2456,7 +2473,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -2484,7 +2501,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -2496,7 +2513,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -2536,7 +2553,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -2548,7 +2565,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -2600,7 +2617,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -2612,7 +2629,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -2644,7 +2661,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -2656,7 +2673,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -2696,7 +2713,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -2708,7 +2725,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -2742,7 +2759,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -2754,7 +2771,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -2796,7 +2813,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -2808,7 +2825,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -2851,7 +2868,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -2863,7 +2880,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -2918,7 +2935,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -2930,7 +2947,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -2954,7 +2971,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -2966,7 +2983,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -2994,7 +3011,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -3006,7 +3023,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -3030,7 +3047,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -3042,7 +3059,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -3070,7 +3087,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -3082,7 +3099,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -3116,7 +3133,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -3128,7 +3145,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -3170,7 +3187,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -3182,7 +3199,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -3225,7 +3242,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -3237,7 +3254,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -3292,7 +3309,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -3304,7 +3321,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -3329,7 +3346,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -3341,7 +3358,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -3370,7 +3387,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -3382,7 +3399,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -3407,7 +3424,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -3419,7 +3436,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -3448,7 +3465,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -3460,7 +3477,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -3484,7 +3501,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -3496,7 +3513,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -3524,7 +3541,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -3536,7 +3553,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -3560,7 +3577,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -3572,7 +3589,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -3600,7 +3617,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -3612,7 +3629,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -3650,7 +3667,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -3662,7 +3679,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -3714,7 +3731,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -3726,7 +3743,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -3751,7 +3768,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -3763,7 +3780,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -3792,7 +3809,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -3804,7 +3821,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -3829,7 +3846,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -3841,7 +3858,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -3870,7 +3887,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -3882,7 +3899,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -3916,7 +3933,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -3928,7 +3945,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -3970,7 +3987,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	
 	commit
@@ -3982,7 +3999,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -4006,7 +4023,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	commit
 end
@@ -4017,7 +4034,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -4045,7 +4062,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	commit
 end
@@ -4056,7 +4073,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -4080,7 +4097,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	commit
 end
@@ -4091,7 +4108,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -4119,7 +4136,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	commit
 end
@@ -4130,7 +4147,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -4154,7 +4171,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	commit
 end
@@ -4165,7 +4182,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -4193,7 +4210,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	commit
 end
@@ -4204,7 +4221,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -4238,7 +4255,7 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 	commit
 end
@@ -4249,7 +4266,7 @@ exec @Status = SOBIDIFECON
 	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 if @Status <> @Ent_Cero begin
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Var_Contin = @Sta_Si begin	
@@ -4291,7 +4308,106 @@ if @Var_Contin = @Sta_Si begin
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
+	end
+	
+	commit
+end
+
+/** Respaldamos de BEFADOCU **/
+exec @Status = SOBIDIFECON
+	@Tip_Resp43,	@Dfe_Fecha,		@Var_Contin output,	@NumTransac,	@Transaccio,
+	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
+if @Status <> @Ent_Cero begin
+	rollback
+	return @Ent_Uno
+end
+
+if @Var_Contin = @Sta_Si begin	
+	begin transaction
+	select	@Pro_Descri	= @Des_Respal + @Str_Espaci + @Tab_BEFADO,
+			@Fec_IniPro	= getdate()
+
+	-- Respaldo
+	insert into SOREDIFE
+	select	@Tab_BEFADO, 	@Cam_DocCon,	Doc_Contra,		@Cam_DocNum,	convert(varchar, Doc_Numero),
+			@Cam_DoFePa,	Doc_FecPag, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
+			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
+	from BEFADOCU noholdlock
+	where Doc_FecPag = @Dfe_Fecha
+	  and Doc_Status = @Sta_N
+
+	-- Respaldo
+	insert into SOREDIFE
+	select	@Tab_BEFADO, 	@Cam_DocCon,	Doc_Contra,		@Cam_DocNum,	convert(varchar, Doc_Numero),
+			@Cam_DoFeVe,	Doc_FecVen, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
+			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
+	from BEFADOCU noholdlock
+	where Doc_FecVen = @Dfe_Fecha
+	  and Doc_Status = @Sta_N
+
+	select	@Pro_Tiempo	= convert(int, datediff(ss, @Fec_IniPro, getdate()))
+
+	exec @Status = SOBIDIFEALT
+		@Tip_Resp43,	@Pro_Descri,	@Pro_Tiempo,	@Dfe_Fecha,		@Fec_IniPro,
+		@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,	
+		@SucDestino,	@Modulo
+	if @Status <> @Ent_Cero begin
+		rollback
+		return @Ent_Uno
+	end
+	commit
+end
+
+/** Actualización de BEFADOCU **/
+exec @Status = SOBIDIFECON
+	@Tip_BEFADO,	@Dfe_Fecha,		@Var_Contin output,	@NumTransac,	@Transaccio,
+	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
+if @Status <> @Ent_Cero begin
+	rollback
+	return @Ent_Uno
+end
+
+if @Var_Contin = @Sta_Si begin	
+	begin transaction
+	select	@Pro_Descri	= @Des_Actual + @Str_Espaci + @Tab_BEFADO,
+			@Fec_IniPro	= getdate()
+
+	-- Actualizamos
+	Update BEFADOCU set
+		Doc_FecPag	= @Fec_SiDiHa,
+		
+		NumTransac	= @NumTransac,
+		Transaccio	= @Transaccio,
+		Usuario		= @Usuario,
+		FechaSis	= @FechaSis,
+		SucOrigen	= @SucOrigen,
+		SucDestino	= @SucDestino
+	where Doc_FecPag = @Dfe_Fecha
+	  and Doc_Status = @Sta_N
+
+	-- Actualizamos
+	Update BEFADOCU set
+		Doc_FecVen	= @Fec_SiDiHa,
+		
+		NumTransac	= @NumTransac,
+		Transaccio	= @Transaccio,
+		Usuario		= @Usuario,
+		FechaSis	= @FechaSis,
+		SucOrigen	= @SucOrigen,
+		SucDestino	= @SucDestino
+	where Doc_FecVen = @Dfe_Fecha
+	  and Doc_Status = @Sta_N
+
+	select	@Pro_Tiempo	= convert(int, datediff(ss, @Fec_IniPro, getdate()))
+
+	exec @Status = SOBIDIFEALT
+		@Tip_BEFADO,	@Pro_Descri,	@Pro_Tiempo,	@Dfe_Fecha,		@Fec_IniPro,
+		@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,	
+		@SucDestino,	@Modulo
+	if @Status <> @Ent_Cero begin
+		rollback
+		return @Ent_Uno
 	end
 	
 	commit
