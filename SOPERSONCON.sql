@@ -1,4 +1,4 @@
-create procedure SOPERSONCON (
+﻿create procedure SOPERSONCON (
 	@Per_Numero	char(8),
 	@Per_Comple	varchar(181),
 	@Per_Tipo	char(1),
@@ -19,6 +19,12 @@ as
 ** DESCRIPCION:  ** Consulta de Personas **						****
 ********************************************************************
 ** REFERENCIAS:													****
+*********************************************************************
+** Modifico:		Armando Alexis Sepúlveda Cruz				****
+** Fecha:			26/Septiembre/2019							****
+** Help:			1285508	 									****
+** Descripcion:		Se modifica la consulta L8 para retornar	****
+**					La CURP										****
 ********************************************************************
 ** Modifico:		Armando Alexis Sepúlveda Cruz				****
 ** Fecha:			31/Julio/2019								****
@@ -259,7 +265,6 @@ as
 /* Declaracion de Variables */
 declare	@Tip_ConTip	char(1),
 		@Tip_ConCon	char(1),
-		@Rpp_PerRel	char(8),
 		@Ent_PreCom	int,
 		@Loc_Pais	char(3),
 		@Busqueda	varchar(100),
@@ -352,6 +357,7 @@ if @Tip_ConTip = 'C' begin
 	if @Tip_ConCon	= '2' begin
 		select	Per_Numero,	Per_Tipo,	Per_Titulo,	Per_Nombre,	Per_ApePat,
 				Per_ApeMat,	Per_RazSoc,	Per_Comple,	Per_ComOrd,	Per_RFC,
+
 				Per_CURP,	Per_Calle,	Per_CalNum,	Per_Coloni,	Per_Entida,
 				Per_Locali,	Per_CodPos,	Per_ApaPos,	Per_Telefo,	Per_EstCiv,
 				Per_Nacion,	Per_ActEmp,	Per_Giro,	Per_Sector,	Per_Activi,
@@ -880,7 +886,6 @@ end else begin
 					from SOPERSON noholdlock
 					where	Per_RFC		= @Per_RFC
 					  and	Per_Numero	<> @Per_Numero
-			print 'entre 1'
 		end
 
 		if @Per_Tipo <> @Tip_Moral begin /* SE BUSCA POR RFC CORTO Y NOMBRES */
@@ -895,7 +900,6 @@ end else begin
 					  and	Per_Numero	<> @Per_Numero
 					  and	Per_Numero	not in (select Per_Numero from #PersonasExis)
 			
-			print 'entre 2'
 		end
 
 		select	Per_Numero,	Per_Comple,	Per_Nombre,	Per_ApePat,	Per_ApeMat,
@@ -945,8 +949,10 @@ end else begin
 						cla.Adi_FecNac
 					end as Adi_FecNac,
 					con.Con_TipIde as Adi_TipIde,
+
 					con.Con_NumIde as Adi_NumIde,
-					cla.Adi_NumPer as Per_NumPer
+					cla.Adi_NumPer as Per_NumPer,
+					Cli_CURP as Per_CURP
 					into #ClientesPorNumero
 			from CLCLIENT clc noholdlock
 					left join CLADICIO cla noholdlock on Cli_Numero = Adi_Client
@@ -966,11 +972,12 @@ end else begin
 					(CASE when (Per_Calle <> @Str_Vacio and  Per_CalNum <> @Str_Vacio and Per_Coloni <> @Str_Vacio) THEN 
 					rtrim(ltrim(Per_Calle)) + @Str_Coma + space(1) + Per_CalNum 
 					+ @Str_Coma + space(1) + Per_Coloni + @Str_Coma + space(1) +
-					Loc_Nombre + @Str_Coma + space(1) + Ent_Nombre ELSE @Sin_Direcc END) as Per_Calle ,
+					Loc_Nombre + @Str_Coma + space(1) + Ent_Nombre ELSE @Sin_Direcc END) as Per_Calle,
 					
 					Per_Coloni,		Per_Locali,	Per_Entida,	Per_Tipo,	Per_ActEmp,
 					Per_Nombre,		Per_ApePat,	Per_ApeMat,	Adi_FecNac,	Adi_TipIde,
-					Adi_NumIde,		@Str_Vacio as Clp_TipSoc, @Str_Vacio as Clp_NomSoc,  per.Per_Nacion
+					Adi_NumIde,		@Str_Vacio as Clp_TipSoc, @Str_Vacio as Clp_NomSoc,  per.Per_Nacion,
+					Per_CURP
 				into #PersonaPorNumero
 				from #PersonasPorNumeroRecientes per
 					inner join SOPERSON spe noholdlock on per.Per_Comple = spe.Per_Comple and per.Per_RFC = spe.Per_RFC and per.FechaSis = spe.FechaSis
@@ -982,24 +989,24 @@ end else begin
 					Per_Coloni,		Per_Locali,	Per_Entida,	Per_Tipo,	Per_ActEmp,
 					Per_Nombre,		Per_ApePat,	Per_ApeMat,	Adi_FecNac,	Adi_TipIde,
 					Adi_NumIde,		Clp_TipSoc,  Clp_NomSoc,  Per_Nacion,
-					DaP_CoVeDi 
+					DaP_CoVeDi,		Per_CURP
 				into #PersonaNumero
 				from #PersonaPorNumero
 					left join SOPEDACO noholdlock on DaP_Person = Per_Numero
 
 			--Agrupar Clientes y Personas por numero 			
 			select	Per_Numero, Per_NumTra, Per_Titulo, Per_ComOrd, Per_RFC, 
-			Per_Calle, Per_Tipo, Per_Nombre, Per_ApePat, Per_ApeMat, 
-			Per_RazSoc, Adi_FecNac, Adi_TipIde, Adi_NumIde, Per_Nacion,
-			Per_NumPer
-			from  #ClientesPorNumero
+					Per_Calle, Per_Tipo, Per_Nombre, Per_ApePat, Per_ApeMat, 
+					Per_RazSoc, Adi_FecNac, Adi_TipIde, Adi_NumIde, Per_Nacion,
+					Per_NumPer, Per_CURP
+			  from  #ClientesPorNumero
 			union all
 			select distinct Per_Numero, case when DaP_CoVeDi=@Sta_Termin then @Str_Usuari else @Str_Prospe 	end as Per_NumTra, 
-			@Tip_Fisica as Per_Titulo, 
-			Per_ComOrd, Per_RFC, Per_Calle, Per_Tipo, Per_Nombre, 
-			Per_ApePat, Per_ApeMat, @Str_Vacio as Per_RazSoc, Adi_FecNac, 
-			Adi_TipIde, Adi_NumIde, Per_Nacion, Per_Numero as Per_NumPer
-			from  #PersonaNumero
+					@Tip_Fisica as Per_Titulo, 
+					Per_ComOrd, Per_RFC, Per_Calle, Per_Tipo, Per_Nombre, 
+					Per_ApePat, Per_ApeMat, @Str_Vacio as Per_RazSoc, Adi_FecNac, 
+					Adi_TipIde, Adi_NumIde, Per_Nacion, Per_Numero as Per_NumPer, Per_CURP
+			  from  #PersonaNumero
 				
 					
 			drop table #PersonasPorNumeroRecientes
@@ -1019,7 +1026,8 @@ end else begin
 			select	Cli_Numero,	Cli_ComOrd,	Cli_RFC,	Cli_Calle,	Cli_CalNum,
 					Cli_Coloni,	Cli_Locali,	Cli_Entida,	Cli_Tipo,	Cli_ActEmp,
 					Cli_Nombre,	Cli_ApePat,	Cli_ApeMat,	Adi_FecNac,	Con_NomSoc,
-					Con_TipSoc,	Con_FeEsCl,	Con_TipIde,	Con_NumIde, Adi_NumPer as Per_NumPer
+					Con_TipSoc,	Con_FeEsCl,	Con_TipIde,	Con_NumIde, Adi_NumPer as Per_NumPer,
+					Cli_CURP
 				into #Clientes
 				from CLCLIENT clc noholdlock
 					left join CLADICIO cla noholdlock on Cli_Numero = Adi_Client
@@ -1032,6 +1040,7 @@ end else begin
 					Cli_ComOrd as Per_ComOrd,
 					space(3) as Per_Nacion, 
 					Cli_RFC as Per_RFC,
+
 					(CASE when (Cli_Calle <> @Str_Vacio and  Cli_CalNum <> @Str_Vacio and Cli_Coloni <> @Str_Vacio) THEN 
 					rtrim(ltrim(Cli_Calle)) + @Str_Coma + space(1) + Cli_CalNum + @Str_Coma + space(1) + Cli_Coloni + @Str_Coma + space(1) +
 					Loc_Nombre + @Str_Coma + space(1) + Ent_Nombre ELSE @Sin_Direcc END) as Per_Calle ,
@@ -1055,7 +1064,8 @@ end else begin
 					end as Adi_FecNac,
 					Con_TipIde as Adi_TipIde,
 					Con_NumIde as Adi_NumIde,
-					cli.Per_NumPer
+					cli.Per_NumPer,
+					cli.Cli_CURP as Per_CURP
 				into #ClientesProspectos
 				from #Clientes cli
 					inner join CLLOCALI noholdlock on Cli_Locali = Loc_Numero
@@ -1073,7 +1083,7 @@ end else begin
 			select	spe.Per_Numero,	Per_ComOrd,	spe.Per_RFC,	Per_Calle,	Per_CalNum,
 					Per_Coloni,		Per_Locali,	Per_Entida,	Per_Tipo,	Per_ActEmp,
 					Per_Nombre,		Per_ApePat,	Per_ApeMat,	Adi_FecNac,	Adi_TipIde,
-					Adi_NumIde,		Clp_TipSoc, Clp_NomSoc,  per.Per_Nacion 
+					Adi_NumIde,		Clp_TipSoc, Clp_NomSoc,  per.Per_Nacion, Per_CURP 
 				into #Persona
 				from #PersonasRecientes per
 					inner join SOPERSON spe noholdlock on per.Per_Comple = spe.Per_Comple and per.Per_RFC = spe.Per_RFC and per.FechaSis = spe.FechaSis
@@ -1108,7 +1118,8 @@ end else begin
 					Adi_FecNac,
 					Adi_TipIde,
 					Adi_NumIde,
-					Per_Numero as Per_NumPer
+					Per_Numero as Per_NumPer,
+					Per_CURP
 				from #Persona
 					left join CLLOCALI noholdlock on Per_Locali = Loc_Numero
 					left join CLENTIDA noholdlock on Per_Entida = Ent_Numero
@@ -1142,7 +1153,8 @@ end else begin
 					Adi_FecNac,
 					Adi_TipIde,
 					Adi_NumIde,
-					Per_Numero as Per_NumPer
+					Per_Numero as Per_NumPer,
+					Per_CURP
 				from #Persona
 					left join CLLOCALI noholdlock on Per_Locali = Loc_Numero
 					left join CLENTIDA noholdlock on Per_Entida = Ent_Numero
@@ -1153,7 +1165,7 @@ end else begin
 					Per_Numero,	Per_NumTra,	Per_Titulo,	Per_ComOrd,	Per_RFC,
 					Per_Calle,	Per_Tipo,	Per_Nombre,	Per_ApePat,	Per_ApeMat,
 					Per_RazSoc,	Adi_FecNac,	Adi_TipIde,	Adi_NumIde, Per_Nacion, 
-					Per_NumPer
+					Per_NumPer, Per_CURP
 				from #ClientesProspectos
 				
 			drop table #ClientesProspectos
