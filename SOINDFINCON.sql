@@ -14,6 +14,11 @@ as
 /* DESCRIPCION: consulta para monitoreo de inversiones y metales  */
 /*******************************************************************
 ** Modifico:	Marco Pardo										****
+** Fecha:		21/10/2019										****
+** Help:		1184558  										****
+** Descripción:	Se Optimiza L1 para grupos en 0.0				****
+********************************************************************
+** Modifico:	Marco Pardo										****
 ** Fecha:		08/08/2018										****
 ** Help:		1143879  										****
 ** Descripción:	Lista de tipo de cambio por sucursal (region)	****
@@ -218,14 +223,12 @@ if @Tip_ConTip = @Tip_Lista begin		/* 'L':  Consulta */
 				PAR.Par_TiCaDi
 		from SOPARAMS PAR noholdlock 
 		inner join SOSUCURS SUC noholdlock on PAR.Par_Sucurs = SUC.Suc_Numero 
-		left join ITDETICA DTC noholdlock on DTC.Dtc_Numero = PAR.Par_TiCaDi
+		inner join ITTICADI TCD noholdlock on TCD.Tcd_Numero = PAR.Par_TiCaDi
+		left join ITDETICA DTC noholdlock on DTC.Dtc_Numero = PAR.Par_TiCaDi and  Dtc_Moneda = @Mon_Dolar
 		where PAR.Par_TiCaDi <> @Str_Vacio
-		order by PAR.Par_Sucurs
+		order by PAR.Par_Sucurs		
 		
-		delete from #ListaMonitorFinanciero
-			where Ind_Moneda = @Mon_Euro		
-		
-		-- Inserto Euros que estan en sucursal
+		-- Inserta Euros que estan en sucursal
 		insert into #ListaMonitorFinanciero
 			select 
 				Ind_Nombre = NUE.Ind_Nombre,
@@ -240,7 +243,7 @@ if @Tip_ConTip = @Tip_Lista begin		/* 'L':  Consulta */
 				Ind_TiCaDi = NUE.Ind_TiCaDi
 			from #ListaMonitorFinanciero NUE
 		
-		-- Insertar Sucusal con Tipo de Cambio
+		-- Actualiza tipo de cambio por Sucusal
 		update #ListaMonitorFinanciero set
 				Ind_DocCom = round(convert(decimal(7, 2), Mon_EfeCom) + 
 					convert(decimal(7, 2), isnull(DTC.Dtc_Compra, @Mon_Cero)), @Ent_Dos),
