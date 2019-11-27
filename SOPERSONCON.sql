@@ -19,12 +19,6 @@ as
 ** DESCRIPCION:  ** Consulta de Personas **						****
 ********************************************************************
 ** REFERENCIAS:													****
-*********************************************************************
-** Modifico:		Armando Alexis Sepúlveda Cruz				****
-** Fecha:			26/Septiembre/2019							****
-** Help:			1285508	 									****
-** Descripcion:		Se modifica la consulta L8 para retornar	****
-**					La CURP										****
 ********************************************************************
 ** Modifico:		Carlos Ramirez								****
 ** Fecha:			04/Octubre/2019								****
@@ -32,6 +26,12 @@ as
 ** Descripcion:		Se crea C10, consulta para busqueda de   	****
 **					personas que puedan ser integradas como un 	****
 **					tercero autorizado de internacional			****
+********************************************************************
+** Modifico:		Armando Alexis Sepúlveda Cruz				****
+** Fecha:			26/Septiembre/2019							****
+** Help:			1277318	 									****
+** Descripcion:		Se modifica la consulta L8 para retornar	****
+**					La CURP										****
 ********************************************************************
 ** Modifico:		Armando Alexis Sepúlveda Cruz				****
 ** Fecha:			31/Julio/2019								****
@@ -272,6 +272,7 @@ as
 /* Declaracion de Variables */
 declare	@Tip_ConTip	char(1),
 		@Tip_ConCon	char(1),
+		@Rpp_PerRel	char(8),
 		@Ent_PreCom	int,
 		@Loc_Pais	char(3),
 		@Busqueda	varchar(100),
