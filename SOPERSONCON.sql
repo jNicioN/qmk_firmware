@@ -29,7 +29,7 @@ as
 ********************************************************************
 ** Modifico:		Armando Alexis Sepúlveda Cruz				****
 ** Fecha:			26/Septiembre/2019							****
-** Help:			1277318	 									****
+** Help:			1202239	 									****
 ** Descripcion:		Se modifica la consulta L8 para retornar	****
 **					La CURP										****
 ********************************************************************
@@ -272,7 +272,6 @@ as
 /* Declaracion de Variables */
 declare	@Tip_ConTip	char(1),
 		@Tip_ConCon	char(1),
-		@Rpp_PerRel	char(8),
 		@Ent_PreCom	int,
 		@Loc_Pais	char(3),
 		@Busqueda	varchar(100),
