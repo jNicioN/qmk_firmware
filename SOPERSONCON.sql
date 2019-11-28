@@ -23,7 +23,7 @@ as
 ** Modifico:		Carlos Ramirez								****
 ** Fecha:			04/Octubre/2019								****
 ** Help:			1179955 									****
-** Descripcion:		Se crea C10, consulta para busqueda de   	****
+** Descripcion:		Se crea CC, consulta para busqueda de   	****
 **					personas que puedan ser integradas como un 	****
 **					tercero autorizado de internacional			****
 ********************************************************************
