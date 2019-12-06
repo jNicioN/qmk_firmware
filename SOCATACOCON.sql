@@ -69,6 +69,7 @@ if @TipConTip = @Chr_Lista begin						/* Consultar lista */
 	if @TipConCon = @Chr_Uno begin						/* Consulta lista general */
 		select	Ctc_Numero,	Ctc_TasNum,	Ctc_Status
 		from	SOCATACO noholdlock
+		where	Ctc_Status	= @Chr_StaAct
 	end
 
 	if @TipConCon = @Chr_Dos begin						/* Consulta lista por status */
