@@ -1,4 +1,4 @@
-create procedure SORENTASPRO (
+﻿create procedure SORENTASPRO (
 	@Amo_MonFin	double precision,	-- Monto a Financiar
 	@Amo_IVAFac	smallmoney,			-- Porcentaje de I.V.A. de Factura
 	@Amo_OpcCom	double precision,	-- opción de Compra
@@ -37,6 +37,12 @@ DESCRIPCION:	**Procedimiento que genera las Rentas en la cotización
 **************************************************************************
 REFERENCIAS:
 ****************************************************************************
+** Modifico:		Oscar Fabrizio Cruz Flores							****
+** Fecha:			10/Junio/2019		  								****
+** Help:			1097178												****
+** Descripcion:		Se hacen validaciones de si la cotizacion es 		****
+					exento de IVA.										****
+****************************************************************************** 
 ** Modifico:		Heber Arango										****
 ** Fecha:			25/Enero/2019		  								****
 ** Help:			1205034												****
@@ -114,7 +120,8 @@ declare	@Ren_ResCap	double precision,		/*Resultado capital*/
 		@Amo_FecIni	smalldatetime,			/*Fecha de inicio*/
 		@Amo_FecVen	smalldatetime,			/*Fecha de vencimiento*/
 		@Ban_PaExCe	char(1),				/*Pago exigible*/
-		@Zon_IVA	smallmoney				/*IVA de la zona interior de la republica o zona fronteriza segun la cotizacion*/
+		@Zon_IVA	smallmoney,				/*IVA de la zona interior de la republica o zona fronteriza segun la cotizacion*/
+		@Cot_ExeIVA char(1),				/*Cotización exento de iva (si, no) */
 
 declare	@Mon_Cero	smallint,				/*	Declaración de Constantes	*/
 		@Mon_Uno	smallint,
@@ -158,7 +165,9 @@ declare	@Mon_Cero	smallint,				/*	Declaración de Constantes	*/
 		@Uni_ArrMex	int,
 		@Uni_Especi	int,
 		@Con_LeaVIP char(1),		
-		@Ent_Tres	int
+		@Ent_Dos	int,
+		@Ent_Tres	int,
+		@Ent_Cuatro	int,
 
 /*	Asignación de Constantes	*/
 select	@Mon_Cero	= 0.00,			/*	Moneda Cero																	*/
@@ -202,8 +211,10 @@ select	@Mon_Cero	= 0.00,			/*	Moneda Cero																	*/
 		@Cad_No		= 'N', 			/*	Cadena No																	*/
 		@Uni_ArrMex	= 3,			/*	Unidad de Negocio Arrendamiento Mexico										*/
 		@Uni_Especi	= 1,			/*	Unidad de Negocio Especializado												*/
-		@Con_LeaVIP	= '5',			/* Tipo de contrato Auto Leasing Plus*/
-		@Ent_Tres	= 3				/* Entero tres */
+		@Con_LeaVIP	= '5',			/* Tipo de contrato Auto Leasing Plus											*/
+		@Ent_Dos	= 2,			/* Entero dos 																	*/
+		@Ent_Tres	= 3,			/* Entero tres 																	*/
+		@Ent_Cuatro	= 4,			/* Entero cuatro																*/
 		
 create table #Rentas (
 	Ren_Consec	smallint not null,
@@ -224,18 +235,21 @@ select	@Par_DiBaCr	= Par_DiBaCr,
 		@Par_IVA	= Par_IVA
 	from SOPARAMS noholdlock
 	where	Par_Sucurs	= @SucOrigen
-
+	
 /*PROM-37*/		
-select	@Zon_IVA	= Zon_IVA  --Se obtiene el IVA en base a la zona de la cotizacion, 01 interior de la republica o 02 frontera 
+select	@Zon_IVA	= Zon_IVA,  --Se obtiene el IVA en base a la zona de la cotizacion, 01 interior de la republica o 02 frontera 
+		@Cot_ExeIVA	= Caa_ExeIVA 
 	from ABCOTIZA noholdlock
 	inner join SOZONAS noholdlock on Cot_Zona = Zon_Numero
+	inner join ABCOADAR noholdlock on Cot_Numero = Caa_Cotiza
 	where	Cot_Numero	= @Num_Cotiza
 
 select	@Zon_IVA	= isnull(@Zon_IVA, @Mon_Cero)
 
 if @Amo_RenExt > @Mon_Cero begin
-	select	@Mon_CapREx	= round(@Amo_RenExt / (@Mon_Uno + (@Amo_IVAFac/@Mon_Cien) ), 2),
-			@Mon_IvaREx	= @Amo_RenExt - round(@Amo_RenExt / (@Mon_Uno + (@Amo_IVAFac/@Mon_Cien) ), 2)
+	
+	select	@Mon_CapREx	= round(@Amo_RenExt / (@Mon_Uno + (@Zon_IVA) ), @Ent_Dos),
+			@Mon_IvaREx	= @Amo_RenExt - round(@Amo_RenExt / (@Mon_Uno + (@Zon_IVA) ), @Ent_Dos)
 
 	insert into #Rentas 
 		values(	@Mon_Cero,	@Str_RenExt,	@Mon_CapREx,	@Mon_Cero,	@Mon_CapREx,
@@ -292,7 +306,7 @@ end
 
 if @Amo_MonCer = @Cad_No begin
 	select	@Ren_ResCap	= @Amo_MonFin,
-			@Res_IvaFac	= round((@Amo_MonFin * @Amo_IVAFac) / @Mon_Cien, 2)
+			@Res_IvaFac	= round((@Amo_MonFin * @Amo_IVAFac) / @Mon_Cien, @Ent_Dos)
 	
 	/*	Para calcular la Tasa Nominal - El monto no se debe de redondear	*/
 	select	@Mon_Intere	= case @Amo_Frecue
@@ -325,10 +339,10 @@ if @Amo_MonCer = @Cad_No begin
 				from ABTMPPEC noholdlock
 				where	Pae_NumCot	= @Num_Cotiza) > @Ent_Cero begin 
 	
-			select	@Mon_InAPag	= round((@Amo_MonFin - (@SumCaPaEx/ (@Ent_Uno + (@Amo_IVAFac/@Mon_Cien))))/(@Amo_Plazo - @Amo_PerGra - @NumPagExt), 2)
+			select	@Mon_InAPag	= round((@Amo_MonFin - (@SumCaPaEx/ (@Ent_Uno + (@Amo_IVAFac/@Mon_Cien))))/(@Amo_Plazo - @Amo_PerGra - @NumPagExt), @Ent_Dos)
 	
 		end else begin
-			select	@Mon_InAPag	= round(@Amo_MonFin / (@Amo_Plazo - @Amo_PerGra) ,2)
+			select	@Mon_InAPag	= round(@Amo_MonFin / (@Amo_Plazo - @Amo_PerGra), @Ent_Dos)
 		end
 	
 	end else begin
@@ -351,11 +365,11 @@ if @Amo_MonCer = @Cad_No begin
 			
 		end else begin
 			if @Amo_TipArr in (@Arr_Financ, @Arr_CreSim) begin
-				select	@Mon_InAPag	= round(@Amo_MonFin * @Mon_Intere * power((@Mon_Uno + @Mon_Intere), (@Amo_Plazo - @Amo_PerGra)) / (power((@Mon_Uno + @Mon_Intere), (@Amo_Plazo - @Amo_PerGra)) - @Mon_Uno) ,2)
+				select	@Mon_InAPag	= round(@Amo_MonFin * @Mon_Intere * power((@Mon_Uno + @Mon_Intere), (@Amo_Plazo - @Amo_PerGra)) / (power((@Mon_Uno + @Mon_Intere), (@Amo_Plazo - @Amo_PerGra)) - @Mon_Uno), @Ent_Dos)
 	
 				end
 			else
-				select	@Mon_InAPag	= round((@Amo_MonFin - (@Amo_OpcCom * power((@Mon_Uno + @Mon_Intere), (- @Amo_Plazo + @Amo_PerGra)))) * @Mon_Intere * power((@Mon_Uno + @Mon_Intere), (@Amo_Plazo - @Amo_PerGra)) / (power((@Mon_Uno + @Mon_Intere), (@Amo_Plazo - @Amo_PerGra)) - @Mon_Uno) ,2)
+				select	@Mon_InAPag	= round((@Amo_MonFin - (@Amo_OpcCom * power((@Mon_Uno + @Mon_Intere), (- @Amo_Plazo + @Amo_PerGra)))) * @Mon_Intere * power((@Mon_Uno + @Mon_Intere), (@Amo_Plazo - @Amo_PerGra)) / (power((@Mon_Uno + @Mon_Intere), (@Amo_Plazo - @Amo_PerGra)) - @Mon_Uno), @Ent_Dos)
 	
 		end
 	end
@@ -399,12 +413,12 @@ if @Amo_MonCer = @Cad_No begin
 			   exists (select	Pae_Amorti
 						from ABTMPPEC noholdlock
 						where	Pae_NumCot	= @Num_Cotiza
-						  and	Pae_Amorti	= right(@Str_3Ceros + ltrim(rtrim(convert(char(3), @Ren_Consec))), 3)) begin
+						  and	Pae_Amorti	= right(@Str_3Ceros + ltrim(rtrim(convert(char(3), @Ren_Consec))), @Ent_Tres)) begin
 	
 				select	@Pae_Cantid	= Pae_Cantid
 					from ABTMPPEC noholdlock
 					where Pae_NumCot	= @Num_Cotiza
-					  and	Pae_Amorti	= right(@Str_3Ceros + ltrim(rtrim(convert(char(3), @Ren_Consec))), 3)
+					  and	Pae_Amorti	= right(@Str_3Ceros + ltrim(rtrim(convert(char(3), @Ren_Consec))), @Ent_Tres)
 
 				if @Pae_Cantid = @Mon_Cero begin
 					select	@Ren_Capita	= @Mon_Cero,
@@ -412,11 +426,11 @@ if @Amo_MonCer = @Cad_No begin
 				end else begin
 					if @Amo_UniNeg = @Uni_ArrMex begin
 						if @Amo_TipAmo = @Amo_Nivela
-							select	@Ren_Capita	= round((@Pae_Cantid / (@Ent_Uno + @Amo_IVA)) - (@Ren_ResCap * (@Amo_TasBas / @Mon_Cien) * (@Par_DiaMes * @Frecuencia) / @Par_DiBaCr), 4)
+							select	@Ren_Capita	= round((@Pae_Cantid / (@Ent_Uno + @Amo_IVA)) - (@Ren_ResCap * (@Amo_TasBas / @Mon_Cien) * (@Par_DiaMes * @Frecuencia) / @Par_DiBaCr), @Ent_Cuatro)
 						else
-							select	@Ren_Capita	= round((@Pae_Cantid / (@Ent_Uno + @Amo_IVA)) - (@Amo_MonFin * (@Amo_TasBas / @Mon_Cien) * (@Par_DiaMes * @Frecuencia) / @Par_DiBaCr), 4)
+							select	@Ren_Capita	= round((@Pae_Cantid / (@Ent_Uno + @Amo_IVA)) - (@Amo_MonFin * (@Amo_TasBas / @Mon_Cien) * (@Par_DiaMes * @Frecuencia) / @Par_DiBaCr), @Ent_Cuatro)
 					end else begin
-						select	@Ren_Capita	= round((@Pae_Cantid / (@Ent_Uno + @Amo_IVA)) - (@Ren_ResCap * (@Amo_TasBas / @Mon_Cien) * (@Par_DiaMes * @Frecuencia) / @Par_DiBaCr), 4)				
+						select	@Ren_Capita	= round((@Pae_Cantid / (@Ent_Uno + @Amo_IVA)) - (@Ren_ResCap * (@Amo_TasBas / @Mon_Cien) * (@Par_DiaMes * @Frecuencia) / @Par_DiBaCr), @Ent_Cuatro)				
 					end
 					
 					select	@Ban_PaExCe	= @Cad_No
@@ -424,16 +438,16 @@ if @Amo_MonCer = @Cad_No begin
 
 			end else begin
 				if @Amo_TipAmo = @Amo_Nivela begin
-					select	@Ren_Capita	= round(@Mon_InAPag - @Ren_ResCap * @Mon_Intere, 4)
+					select	@Ren_Capita	= round(@Mon_InAPag - @Ren_ResCap * @Mon_Intere, @Ent_Cuatro)
 				end else begin
-					select	@Ren_Capita	= round(@Amo_MonFin / (@Amo_Plazo - @Amo_PerGra), 4)
+					select	@Ren_Capita	= round(@Amo_MonFin / (@Amo_Plazo - @Amo_PerGra), @Ent_Cuatro)
 				end
 
 				select	@Ban_PaExCe	= @Cad_No
 			end	
 		end
 
-		select	@Ren_Intere	= round(@Ren_ResCap * (@Amo_TasBas / @Mon_Cien) * (@Par_DiaMes * @Frecuencia) / @Par_DiBaCr, 4)
+		select	@Ren_Intere	= round(@Ren_ResCap * (@Amo_TasBas / @Mon_Cien) * (@Par_DiaMes * @Frecuencia) / @Par_DiBaCr, @Ent_Cuatro)
 
 		if @Ban_PaExCe	= @Cad_No begin
 			select	@Ren_TtCaIn	= @Ren_Capita + @Ren_Intere
@@ -442,15 +456,15 @@ if @Amo_MonCer = @Cad_No begin
 		end
 
 		select	@Ren_IvaInt	= case @Amo_CobIVA 
-								when @Str_Si then round(@Ren_Intere * @Amo_IVA, 4) 
+								when @Str_Si then round(@Ren_Intere * @Amo_IVA, @Ent_Cuatro) 
 								else @Mon_Cero
 							  end
-		select	@Ren_IvaInt	= round(@Ren_IvaInt * (@Par_PorIVA/@Mon_Cien),4)
-		select	@Ren_IvaFac	= round((@Ren_Capita * @Amo_IVAFac) / @Mon_Cien, 4)
+		select	@Ren_IvaInt	= round(@Ren_IvaInt * (@Par_PorIVA/@Mon_Cien),@Ent_Cuatro)
+		select	@Ren_IvaFac	= round((@Ren_Capita * @Zon_IVA), @Ent_Cuatro)
 		select	@Ren_IvaRen	= @Ren_IvaInt + @Ren_IvaFac
 
 		if @Ban_PaExCe	= @Cad_No begin
-			select	@Ren_Total	= round((@Ren_Capita + @Ren_Intere + @Ren_IvaInt + @Ren_IvaFac),2)
+			select	@Ren_Total	= round((@Ren_Capita + @Ren_Intere + @Ren_IvaInt + @Ren_IvaFac), @Ent_Dos)
 		end else begin
 			select	@Ren_Total	= @Mon_Cero
 		end
@@ -467,15 +481,15 @@ if @Amo_MonCer = @Cad_No begin
 				Ren_Total	= @Amo_RenMen + (@Amo_RenMen * @Zon_IVA)
 				where	Ren_Consec	= @Ren_Consec
 	
-		end else begin /*Arrendamiento-comercial puro-credito*/
+		 end else begin /*Arrendamiento-comercial puro-credito*/
 	
 			update #Rentas set
 				Ren_Capita	= @Ren_Capita,
 				Ren_Intere	= @Ren_Intere,
 				Ren_TtCaIn	= @Ren_TtCaIn,
-				Ren_IvaInt	= @Ren_IvaInt,
+				Ren_IvaInt	= (@Ren_Intere * @Zon_IVA),
 				Ren_IvaFac	= @Ren_IvaFac,
-				Ren_IvaRen	= @Ren_IvaRen, 
+				Ren_IvaRen	= (@Ren_TtCaIn * @Zon_IVA), 
 				Ren_Total	= @Ren_Total
 				where	Ren_Consec	= @Ren_Consec
 		end
@@ -494,32 +508,32 @@ if @Amo_MonCer = @Cad_No begin
 		from #Rentas
 	
 	/*Cuando la suma de capitales de las amortizaciones no es igual al monto a financiar por cuestion de redondeo*/
-	if round(@Tot_Capita,2) > round(@Amo_MonFin  ,2)begin
+	if round(@Tot_Capita,@Ent_Dos) > round(@Amo_MonFin  ,@Ent_Dos)begin
 		if @Amo_TipArr in (@Arr_Financ, @Arr_CreSim) begin
-			select	@Ren_Capita	= @Ren_Capita - (round(@Tot_Capita,2) - round(@Amo_MonFin,2))
+			select	@Ren_Capita	= @Ren_Capita - (round(@Tot_Capita,@Ent_Dos) - round(@Amo_MonFin,@Ent_Dos))
 		end else begin
-			select	@Ren_Capita	= @Ren_Capita - (round(@Tot_Capita,2) - (round(@Amo_MonFin,2) - round(@Amo_OpcCom,2)))
+			select	@Ren_Capita	= @Ren_Capita - (round(@Tot_Capita,@Ent_Dos) - (round(@Amo_MonFin,@Ent_Dos) - round(@Amo_OpcCom,@Ent_Dos)))
 		end
 	end else begin
-		if round(@Tot_Capita,2) < round(@Amo_MonFin,2) begin
+		if round(@Tot_Capita,@Ent_Dos) < round(@Amo_MonFin,@Ent_Dos) begin
 			if @Amo_TipArr in (@Arr_Financ, @Arr_CreSim) begin
-				select	@Ren_Capita	= @Ren_Capita + (round(@Amo_MonFin,2) - round(@Tot_Capita,2))
+				select	@Ren_Capita	= @Ren_Capita + (round(@Amo_MonFin,@Ent_Dos) - round(@Tot_Capita,@Ent_Dos))
 			end else begin
 				select	@Ren_TtCaIn	= @Ren_TtCaIn-@Ren_Capita
-				select	@Ren_Capita	= @Ren_Capita + ((round(@Amo_MonFin,2) - round(@Amo_OpcCom,2)) - round(@Tot_Capita,2))
+				select	@Ren_Capita	= @Ren_Capita + ((round(@Amo_MonFin,@Ent_Dos) - round(@Amo_OpcCom,@Ent_Dos)) - round(@Tot_Capita,@Ent_Dos))
 				select	@Ren_TtCaIn	= @Ren_TtCaIn+@Ren_Capita
 			end
 		end
 	end
 
 	/*Cuando la suma de los IVA's de la factura no es igual al IVA de la factura por cuestion de redondeo*/
-	if @Tot_IvaFac > @Res_IvaFac  begin
+	/*if @Tot_IvaFac > @Res_IvaFac  begin
 		select	@Ren_IvaFac	= @Ren_IvaFac - (@Tot_IvaFac - @Res_IvaFac)
 	end else begin 
 		if @Tot_IvaFac < @Mon_IvaFac  begin
 			select	@Ren_IvaFac	= @Ren_IvaFac + (@Res_IvaFac -@Tot_IvaFac)
 		end
-	end
+	end*/
 
 	if @Mon_Intere > @Mon_Cero begin
 		if @Amo_TipAmo = @Amo_Nivela begin
@@ -529,16 +543,16 @@ if @Amo_MonCer = @Cad_No begin
 			el tipo de tasa es a 360 dias (utiliza como valor de @Par_DiaMes un 30) o si es 365 (en el while donde se realizan los calculos 
 			se llena esta variable con la diferencia entre FecIni y FecVen de cada una de las rentas pero al final la diferencia que queda guardada
 			en la variable es la de la ultima renta) el @Par_DiaMes trae un valor correcto dependiendo de la tasa elegida */
-			select	@Ren_Intere	= round(@Ren_Capita * (@Amo_TasBas / @Mon_Cien) * (@Par_DiaMes * @Frecuencia) / @Par_DiBaCr, 2)
+			select	@Ren_Intere	= round(@Ren_Capita * (@Amo_TasBas / @Mon_Cien) * (@Par_DiaMes * @Frecuencia) / @Par_DiBaCr, @Ent_Dos)
 		end
 	end
 
 	select	@Ren_TtCaIn	= @Ren_Capita + @Ren_Intere
 	select	@Ren_IvaInt	= case @Amo_CobIVA 
-							when @Str_Si then round(@Ren_Intere * @Amo_IVA, 2)
+							when @Str_Si then round(@Ren_Intere * @Amo_IVA, @Ent_Dos)
 							else @Mon_Cero
 						  end
-	select	@Ren_IvaInt	= round(@Ren_IvaInt * (@Par_PorIVA/@Mon_Cien),2)
+	select	@Ren_IvaInt	= round(@Ren_IvaInt * (@Par_PorIVA/@Mon_Cien),@Ent_Dos)
 	select	@Ren_IvaRen	= @Ren_IvaInt + @Ren_IvaFac 
 	select	@Ren_Total	= @Ren_Capita + @Ren_Intere + @Ren_IvaInt + @Ren_IvaFac
 	
@@ -565,8 +579,8 @@ if @Amo_MonCer = @Cad_No begin
 				where	Ren_Consec	= @Amo_Plazo
 		
 			update #Rentas set
-				Ren_IvaInt	= round(Ren_TtCaIn * (@Amo_IVAFac/@Mon_Cien) * (@Mon_Cien/@Mon_Cien) ,2),
-				Ren_IvaRen	= round(Ren_TtCaIn * (@Amo_IVAFac/@Mon_Cien) * (@Mon_Cien/@Mon_Cien) ,2),
+				Ren_IvaInt	= round(Ren_TtCaIn * (@Amo_IVA) * (@Mon_Cien/@Mon_Cien) ,@Ent_Dos),
+				Ren_IvaRen	= round(Ren_TtCaIn * (@Amo_IVA) * (@Mon_Cien/@Mon_Cien) ,@Ent_Dos),
 				Ren_IvaFac	= @Mon_Cero
 				where	Ren_Consec > @Ent_Cero
 
@@ -589,7 +603,6 @@ if @Amo_MonCer = @Cad_No begin
 				where	Ren_Consec	= @Amo_Plazo
 		end
 	end
-
 	if @Amo_TipCal = @Cal_ConEsp begin
 		-- Salida para la pantalla de contrato especifico
 		update #RenMen
