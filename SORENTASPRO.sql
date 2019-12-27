@@ -121,7 +121,7 @@ declare	@Ren_ResCap	double precision,		/*Resultado capital*/
 		@Amo_FecVen	smalldatetime,			/*Fecha de vencimiento*/
 		@Ban_PaExCe	char(1),				/*Pago exigible*/
 		@Zon_IVA	smallmoney,				/*IVA de la zona interior de la republica o zona fronteriza segun la cotizacion*/
-		@Cot_ExeIVA char(1),				/*Cotización exento de iva (si, no) */
+		@Cot_ExeIVA char(1)					/*Cotización exento de iva (si, no) */
 
 declare	@Mon_Cero	smallint,				/*	Declaración de Constantes	*/
 		@Mon_Uno	smallint,
@@ -167,7 +167,7 @@ declare	@Mon_Cero	smallint,				/*	Declaración de Constantes	*/
 		@Con_LeaVIP char(1),		
 		@Ent_Dos	int,
 		@Ent_Tres	int,
-		@Ent_Cuatro	int,
+		@Ent_Cuatro	int
 
 /*	Asignación de Constantes	*/
 select	@Mon_Cero	= 0.00,			/*	Moneda Cero																	*/
@@ -214,7 +214,7 @@ select	@Mon_Cero	= 0.00,			/*	Moneda Cero																	*/
 		@Con_LeaVIP	= '5',			/* Tipo de contrato Auto Leasing Plus											*/
 		@Ent_Dos	= 2,			/* Entero dos 																	*/
 		@Ent_Tres	= 3,			/* Entero tres 																	*/
-		@Ent_Cuatro	= 4,			/* Entero cuatro																*/
+		@Ent_Cuatro	= 4			/* Entero cuatro																*/
 		
 create table #Rentas (
 	Ren_Consec	smallint not null,
