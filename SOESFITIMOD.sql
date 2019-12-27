@@ -2,7 +2,7 @@ create procedure SOESFITIMOD (
    @Eft_Numero int,
    @Eft_EstFin int,
    @Eft_TipCue int,
-   @Eft_Valor numeric(13,4),
+   @Eft_Valor numeric(17,4),
    @Eft_Porcen numeric(10,2),
    @NumTransac char(10),
    @Transaccio char(3),
@@ -17,9 +17,15 @@ create procedure SOESFITIMOD (
 /** DESCRIPCION: Modificacion de los registros de estado		*/
 /**				financiero tipo cuenta en la tabla SOESFITI		*/
 /****************************************************************/
-/** Creo:		Felipe Castillo									*/
-/** Fecha:		19/05/2017                               		*/
-/** Help:		929417 					 						*/
+/** Modifico:		Raul Muniz									*/
+/** Fecha:			12/12/2019                             		*/
+/** Help:			1318047				 						*/
+/** Descripcion:	Se modifico parametro @Eft_Valor a numeric	*/
+/**					(17,4)										*/
+/****************************************************************/
+/** Creo:			Felipe Castillo								*/
+/** Fecha:			19/05/2017                             		*/
+/** Help:			929417 				 						*/
 /****************************************************************/
 
 update SOESFITI set 
