@@ -13,20 +13,19 @@ create procedure SOPEAPTICON (
 as
 
 /****************************************************************************
-** Descripción:	** Consulta a Periocidades de aplicaciones de movimiento ****
+** DescripciÃ³n:	** Consulta a Periocidades de aplicaciones de movimiento ****
 *****************************************************************************
 *****************************************************************************
-** Creó:		Eliezer Xul                                       		 ****
+** CreÃ³:		CODE4U Eliezer Xul                                 		 ****
 ** Fecha:		02-12-2019									             ****
-** Help:		feature/										         ****
+** Help:		1286068 										         ****
 ****************************************************************************/
 
-										/* Declaración de variables */
-declare	@Status		int,
-		@Tip_ConTip	char(1),
+										/* DeclaraciÃ³n de variables */
+declare	@Tip_ConTip	char(1),
 		@Tip_ConCon	char(1)
 
-										/* Declaración de constantes */
+										/* DeclaraciÃ³n de constantes */
 declare	@Str_Vacio	char(1),
 		@Fec_Vacia	smalldatetime,
 		@Ent_Cero	int,
@@ -35,9 +34,9 @@ declare	@Str_Vacio	char(1),
 		@Con_Listas	char(1),
 		@Por_LlaPri	char(1)
 
-										/* Asignación de constantes */
-select	@Str_Vacio	= '',				/* String vacío */
-		@Fec_Vacia	= '1900-01-01',		/* Fecha vacía */
+										/* AsignaciÃ³n de constantes */
+select	@Str_Vacio	= '',				/* String vacÃ­o */
+		@Fec_Vacia	= '1900-01-01',		/* Fecha vacÃ­a */
 		@Ent_Cero	= 0,				/* Entero en cero */
 		@Ent_Uno	= 1,				/* Entero en uno */
 		@Con_Consul	= 'C',				/* Tipo: Consulta */
