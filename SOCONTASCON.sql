@@ -73,7 +73,7 @@ if @TipConTip = @Chr_Lista begin						/* Consultar lista */
 	if @TipConCon = @Chr_Uno begin						/* Consulta lista general */
 		select	Cot_Numero,	Cot_TasNum,	Cot_Descri,	Cot_Abrevi,	Cot_Valor,
 				Cot_Fecha,	Cot_Moneda,	Cot_Extemp,	Cot_SelPar,	Cot_StaAct,
-				'Cot_UsuMov'	= Usu_Numero,
+				Cot_UsuMov	= Usu_Numero,
 				Cot_FecMov,	Cot_Status,	Cot_Coment
 		from	SOCONTAS noholdlock
 		inner join SOUSUARI noholdlock
@@ -101,7 +101,7 @@ if @TipConTip = @Chr_Lista begin						/* Consultar lista */
 
 		select	Cot_Numero,	Cot_TasNum,	Cot_Descri,	Cot_Abrevi,	Cot_Valor,
 				Cot_Fecha,	Cot_Moneda,	Cot_Extemp,	Cot_SelPar,	Cot_StaAct,
-				'Cot_UsuMov'	= Usu_Numero,
+				Cot_UsuMov	= Usu_Numero,
 				Cot_FecMov,	Cot_Status,	Cot_Coment
 		from	SOCONTAS noholdlock
 		inner join SOUSUARI noholdlock
@@ -115,7 +115,7 @@ if @TipConTip = @Chr_Lista begin						/* Consultar lista */
 
 		select	Cot_Numero,	Cot_TasNum,	Cot_Descri,	Cot_Abrevi,	Cot_Valor,
 				Cot_Fecha,	Cot_Moneda,	Cot_Extemp,	Cot_SelPar,	Cot_StaAct,
-				'Cot_UsuMov'	= Usu_Numero,
+				Cot_UsuMov	= Usu_Numero,
 				Cot_FecMov,	Cot_Status,	Cot_Coment
 		from	SOCONTAS noholdlock
 		inner join SOUSUARI noholdlock
@@ -138,7 +138,7 @@ if @TipConTip = @Chr_Consul begin						/* Consulta específica */
 
 		select	Cot_Numero,	Cot_TasNum,	Cot_Descri,	Cot_Abrevi,	Cot_Valor,
 				Cot_Fecha,	Cot_Moneda,	Cot_Extemp,	Cot_SelPar,	Cot_StaAct,
-				'Cot_UsuMov'	= Usu_Numero,
+				Cot_UsuMov	= Usu_Numero,
 				Cot_FecMov,	Cot_Status,	Cot_Coment
 		from	SOCONTAS noholdlock
 		inner join SOUSUARI noholdlock
@@ -158,7 +158,7 @@ if @TipConTip = @Chr_Consul begin						/* Consulta específica */
 
 		select	Cot_Numero,	Cot_TasNum,	Cot_Descri,	Cot_Abrevi,	Cot_Valor,
 				Cot_Fecha,	Cot_Moneda,	Cot_Extemp,	Cot_SelPar,	Cot_StaAct,
-				'Cot_UsuMov'	= Usu_Numero,
+				Cot_UsuMov	= Usu_Numero,
 				Cot_FecMov,	Cot_Status,	Cot_Coment
 		from	SOCONTAS noholdlock
 		inner join SOUSUARI noholdlock
