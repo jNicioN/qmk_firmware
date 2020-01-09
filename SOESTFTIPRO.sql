@@ -6,10 +6,10 @@ create procedure SOESTFTIPRO (
 	@Eft_EstFi3	int,
 	@Eft_EstFi4	int,
 	@Eft_TipCue	int,
-	@Eft_Valor1	numeric(14,4),
-	@Eft_Valor2	numeric(14,4),
-	@Eft_Valor3	numeric(14,4),
-	@Eft_Valor4	numeric(14,4),
+	@Eft_Valor1	numeric(17,4),
+	@Eft_Valor2	numeric(17,4),
+	@Eft_Valor3	numeric(17,4),
+	@Eft_Valor4	numeric(17,4),
 	@Eft_Porce1	numeric(10,2),
 	@Eft_Porce2	numeric(10,2),
 	@Eft_Porce3	numeric(10,2),
@@ -34,9 +34,15 @@ as
 /****************************************************************/
 /** DESCRIPCION: Proceso de guardado de estados financieros		*/
 /****************************************************************/
-/** Creo:		Felipe Castillo									*/
-/** Fecha:		19/05/2017                               		*/
-/** Help:		929417 					 						*/
+/** Modifico:		Raul Muniz									*/
+/** Fecha:			12/12/2019                             		*/
+/** Help:			1318047				 						*/
+/** Descripcion:	Se modificaron parametros @Eft_Valor1,		*/
+/**					@Eft_Valor2, @Eft_Valor3 y @Eft_Valor1(17,4)*/
+/****************************************************************/
+/** Creo:			Felipe Castillo								*/
+/** Fecha:			19/05/2017                             		*/
+/** Help:			929417 				 						*/
 /****************************************************************/
 
 declare @Tip_ProA char(1),
