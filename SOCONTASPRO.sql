@@ -31,6 +31,11 @@ as
 ****************************************************************************
 ** REFERENCIAS:															****
 ****************************************************************************
+** Modificó:	Manuel Adrián Flores Félix								****
+** Fecha:		28/Enero/2020											****
+** Help:		1149607													****
+** Descripción:	Se corrige el origen de fecha de movimiento a SOPARAMS	****
+****************************************************************************
 ** Creó:		Manuel Adrián Flores Félix								****
 ** Fecha:		05/Noviembre/2019										****
 ** Help:		1149607													****
