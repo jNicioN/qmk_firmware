@@ -177,8 +177,9 @@ if @Cot_Status not in(@Sta_ConAlt, @Sta_ConCon, @Sta_ConRec) begin
 	return 1
 end
 
-select	@FechaMov	= Par_Fecha
-from	DEPARAMS noholdlock
+select	@FechaMov	= Par_FecAct
+from	SOPARAMS noholdlock
+where	Par_Sucurs = @SucOrigen
 
 select	@UsuarioMov	= SoUsuariID
 from	SOUSUARI noholdlock
@@ -283,11 +284,24 @@ if @Tip_Proces = @Tip_Regist begin
 			if (select	count(0)
 				from	SOCONTAS noholdlock
 				where	Cot_TasNum	=	@Cot_TasNum
-					and	Cot_Status	!=	@Sta_ConAlt
+					and	Cot_Status	=	@Sta_ConCon
 					and	Cot_FecMov	=	@FechaMov) > @Int_Cero begin
 
 				select	Err_Codigo	= '000015',
-						Err_Mensaj	= 'Tasa '+@Cot_TasNum+' no es un registro nuevo'
+						Err_Mensaj	= 'Tasa '+@Cot_TasNum+' ya ha sido confirmada'
+				rollback
+
+				return 1
+			end
+
+			if (select	count(0)
+				from	SOCONTAS noholdlock
+				where	Cot_TasNum	=	@Cot_TasNum
+					and	Cot_Status	=	@Sta_ConRec
+					and	Cot_FecMov	=	@FechaMov) > @Int_Cero begin
+
+				select	Err_Codigo	= '000016',
+						Err_Mensaj	= 'Tasa '+@Cot_TasNum+' ya ha sido rechazada'
 				rollback
 
 				return 1
@@ -315,7 +329,7 @@ if @Tip_Proces = @Tip_Regist begin
 										@Modulo
 
 			if @Status	!= @Int_Cero begin
-				select	Err_Codigo	= '000016',
+				select	Err_Codigo	= '000017',
 						Err_Mensaj	= 'No fué posible realizar la confirmación de la tasa'
 				rollback
 
@@ -331,7 +345,7 @@ if @Tip_Proces = @Tip_Regist begin
 											@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
 
 				if @Status	!= @Int_Cero begin
-					select	Err_Codigo	= '000017',
+					select	Err_Codigo	= '000018',
 							Err_Mensaj	= 'No fué posible realizar el alta de tasa'
 					rollback
 
@@ -347,7 +361,7 @@ if @Tip_Proces = @Tip_Regist begin
 											@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
 
 				if @Status	!= @Int_Cero begin
-					select	Err_Codigo	= '000018',
+					select	Err_Codigo	= '000019',
 							Err_Mensaj	= 'No fué posible realizar la actualización de tasa'
 					rollback
 
@@ -360,10 +374,23 @@ if @Tip_Proces = @Tip_Regist begin
 			if (select	count(0)
 				from	SOCONTAS noholdlock
 				where	Cot_TasNum	=	@Cot_TasNum
-					and	Cot_Status	!=	@Sta_ConAlt
+					and	Cot_Status	=	@Sta_ConCon
 					and	Cot_FecMov	=	@FechaMov) > @Int_Cero begin
 
-				select	Err_Codigo	= '000019',
+				select	Err_Codigo	= '000020',
+						Err_Mensaj	= 'Tasa '+@Cot_TasNum+' ya ha sido confirmada'
+				rollback
+
+				return 1
+			end
+
+			if (select	count(0)
+				from	SOCONTAS noholdlock
+				where	Cot_TasNum	=	@Cot_TasNum
+					and	Cot_Status	=	@Sta_ConRec
+					and	Cot_FecMov	=	@FechaMov) > @Int_Cero begin
+
+				select	Err_Codigo	= '000021',
 						Err_Mensaj	= 'Tasa '+@Cot_TasNum+' ya ha sido rechazada'
 				rollback
 
@@ -371,7 +398,7 @@ if @Tip_Proces = @Tip_Regist begin
 			end
 
 			if isnull(@Cot_Coment, @Chr_Vacio)	= @Chr_Vacio begin
-				select	Err_Codigo	= '000020',
+				select	Err_Codigo	= '000022',
 						Err_Mensaj	= 'Comentario obligatorio al rechazar tasa',
 						Err_Variab	= 'Cot_Coment'
 				rollback
@@ -401,7 +428,7 @@ if @Tip_Proces = @Tip_Regist begin
 										@Modulo
 
 			if @Status	!= @Int_Cero begin
-				select	Err_Codigo	= '000021',
+				select	Err_Codigo	= '000023',
 						Err_Mensaj	= 'No fué posible realizar la confirmación de la tasa'
 				rollback
 
@@ -416,7 +443,7 @@ if @Tip_Proces = @Tip_Regist begin
 								@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
 
 	if @Status	!= @Int_Cero begin
-		select	Err_Codigo	= '000022',
+		select	Err_Codigo	= '000024',
 				Err_Mensaj	= 'No fué posible realizar el alta de bitácora'
 		rollback
 
