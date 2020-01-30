@@ -23,6 +23,11 @@ as
 ****************************************************************************
 ** REFERENCIAS:															****
 ****************************************************************************
+** Modificó:	Manuel Adrián Flores Félix								****
+** Fecha:		28/ENero/2020											****
+** Help:		1149607													****
+** Descripción:	Se agrega ValDos a resultset.							****
+****************************************************************************
 ** Creó:		Manuel Adrián Flores Félix								****
 ** Fecha:		06/Noviembre/2019										****
 ** Help:		1149607													****
@@ -72,7 +77,8 @@ select	@TipConTip	= substring(@Tip_Consul, 1, 1),
 if @TipConTip = @Chr_Lista begin						/* Consultar lista */
 	if @TipConCon = @Chr_Uno begin						/* Consulta lista general */
 		select	Cot_Numero,	Cot_TasNum,	Cot_Descri,	Cot_Abrevi,	Cot_Valor,
-				Cot_Fecha,	Cot_Moneda,	Cot_Extemp,	Cot_SelPar,	Cot_StaAct,
+				Cot_ValDos,	Cot_Fecha,	Cot_Moneda,	Cot_Extemp,	Cot_SelPar,
+				Cot_StaAct,
 				Cot_UsuMov	= Usu_Numero,
 				Cot_FecMov,	Cot_Status,	Cot_Coment
 		from	SOCONTAS noholdlock
@@ -100,7 +106,8 @@ if @TipConTip = @Chr_Lista begin						/* Consultar lista */
 		end
 
 		select	Cot_Numero,	Cot_TasNum,	Cot_Descri,	Cot_Abrevi,	Cot_Valor,
-				Cot_Fecha,	Cot_Moneda,	Cot_Extemp,	Cot_SelPar,	Cot_StaAct,
+				Cot_ValDos,	Cot_Fecha,	Cot_Moneda,	Cot_Extemp,	Cot_SelPar,
+				Cot_StaAct,
 				Cot_UsuMov	= Usu_Numero,
 				Cot_FecMov,	Cot_Status,	Cot_Coment
 		from	SOCONTAS noholdlock
@@ -114,7 +121,8 @@ if @TipConTip = @Chr_Lista begin						/* Consultar lista */
 		from DEPARAMS noholdlock
 
 		select	Cot_Numero,	Cot_TasNum,	Cot_Descri,	Cot_Abrevi,	Cot_Valor,
-				Cot_Fecha,	Cot_Moneda,	Cot_Extemp,	Cot_SelPar,	Cot_StaAct,
+				Cot_ValDos,	Cot_Fecha,	Cot_Moneda,	Cot_Extemp,	Cot_SelPar,
+				Cot_StaAct,
 				Cot_UsuMov	= Usu_Numero,
 				Cot_FecMov,	Cot_Status,	Cot_Coment
 		from	SOCONTAS noholdlock
@@ -137,7 +145,8 @@ if @TipConTip = @Chr_Consul begin						/* Consulta específica */
 		end
 
 		select	Cot_Numero,	Cot_TasNum,	Cot_Descri,	Cot_Abrevi,	Cot_Valor,
-				Cot_Fecha,	Cot_Moneda,	Cot_Extemp,	Cot_SelPar,	Cot_StaAct,
+				Cot_ValDos,	Cot_Fecha,	Cot_Moneda,	Cot_Extemp,	Cot_SelPar,
+				Cot_StaAct,
 				Cot_UsuMov	= Usu_Numero,
 				Cot_FecMov,	Cot_Status,	Cot_Coment
 		from	SOCONTAS noholdlock
@@ -157,7 +166,8 @@ if @TipConTip = @Chr_Consul begin						/* Consulta específica */
 		end
 
 		select	Cot_Numero,	Cot_TasNum,	Cot_Descri,	Cot_Abrevi,	Cot_Valor,
-				Cot_Fecha,	Cot_Moneda,	Cot_Extemp,	Cot_SelPar,	Cot_StaAct,
+				Cot_ValDos,	Cot_Fecha,	Cot_Moneda,	Cot_Extemp,	Cot_SelPar,
+				Cot_StaAct,
 				Cot_UsuMov	= Usu_Numero,
 				Cot_FecMov,	Cot_Status,	Cot_Coment
 		from	SOCONTAS noholdlock
