@@ -3,7 +3,7 @@ create procedure SOCONTASPRO (
 	@Cot_Descri	varchar(80),
 	@Cot_Abrevi	varchar(10),
 	@Cot_Valor	double precision,
-	@Cot_ValDos	double precision,
+	@Cot_PaCaVa	double precision,
 	@Cot_Fecha	smalldatetime,
 	@Cot_Moneda	char(2),
 	@Cot_SelPar	char(1),
@@ -36,7 +36,7 @@ as
 ** Fecha:		28/Enero/2020											****
 ** Help:		1149607													****
 ** Descripción:	Se corrige el origen de fecha de movimiento a SOPARAMS	****
-** 				y se guarda el ValDos desde pantalla.					****
+** 				y se guarda el PaCaVa desde pantalla.					****
 ****************************************************************************
 ** Creó:		Manuel Adrián Flores Félix								****
 ** Fecha:		05/Noviembre/2019										****
@@ -133,10 +133,10 @@ if @Cot_Valor <= @Mon_Cero begin
 	return 1
 end
 
-if @Cot_ValDos < @Mon_Cero begin
+if @Cot_PaCaVa < @Mon_Cero begin
 	select	Err_Codigo	= '000005',
 			Err_Mensaj	= 'Valor 2 incorrecto de la tasa',
-			Err_Variab	= 'Cot_ValDos'
+			Err_Variab	= 'Cot_PaCaVa'
 	rollback
 
 	return 1
@@ -228,7 +228,7 @@ if @Tip_Proces = @Tip_Regist begin
 				@BitStatus	= @Sta_ConAlt,
 				@BitComent	= @Chr_Vacio
 
-		exec @Status = SOCONTASALT	@Cot_TasNum,	@Cot_Descri,	@Cot_Abrevi,	@Cot_Valor,		@Cot_ValDos,
+		exec @Status = SOCONTASALT	@Cot_TasNum,	@Cot_Descri,	@Cot_Abrevi,	@Cot_Valor,		@Cot_PaCaVa,
 									@Cot_Fecha,		@Cot_Moneda,	@Cot_NoExt,		@Cot_SelPar,	@Sta_TasAct,
 									@UsuarioMov,	@FechaMov,		@Sta_ConAlt,	@Chr_Vacio,		@NumTransac,
 									@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino,
@@ -282,7 +282,7 @@ if @Tip_Proces = @Tip_Regist begin
 					@BitStatus	= @Cot_Status,
 					@BitComent	= @Chr_Vacio
 
-			exec @Status = SOCONTASACT	@Cot_TasNum,	@Cot_Descri,	@Cot_Abrevi,	@Cot_Valor,		@Cot_ValDos,
+			exec @Status = SOCONTASACT	@Cot_TasNum,	@Cot_Descri,	@Cot_Abrevi,	@Cot_Valor,		@Cot_PaCaVa,
 										@Cot_Fecha,		@Cot_Moneda,	@Cot_NoExt,		@Cot_SelPar,	@Sta_TasAct,
 										@UsuarioMov,	@FechaMov,		@Cot_Status,	@Chr_Vacio,		@Chr_Uno,
 										@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,
@@ -369,7 +369,7 @@ if @Tip_Proces = @Tip_Regist begin
 					return 1
 				end
 			end else begin
-				exec @Status = SOTASASMOD	@Cot_TasNum,	@BitDescri,		@BitAbrevi,		@BitValor,		@Cot_ValDos,
+				exec @Status = SOTASASMOD	@Cot_TasNum,	@BitDescri,		@BitAbrevi,		@BitValor,		@Cot_PaCaVa,
 											@BitFecha,		@BitMoneda,		@BitSelPar,		@NumTransac,	@Transaccio,
 											@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
 

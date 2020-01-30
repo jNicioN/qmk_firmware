@@ -3,7 +3,7 @@ create procedure SOCONTASACT (
 	@Cot_Descri	varchar(80),
 	@Cot_Abrevi	varchar(10),
 	@Cot_Valor	double precision,
-	@Cot_ValDos	double precision,
+	@Cot_PaCaVa	double precision,
 	@Cot_Fecha	smalldatetime,
 	@Cot_Moneda	char(2),
 	@Cot_Extemp	char(1),
@@ -129,10 +129,10 @@ if @Tip_Actual = @Act_Genera begin
 		return 1
 	end
 
-	if @Cot_ValDos < @Mon_Cero begin
+	if @Cot_PaCaVa < @Mon_Cero begin
 		select	Err_Codigo	= '000006',
 				Err_Mensaj	= 'Valor 2 incorrecto de la tasa',
-				Err_Variab	= 'Cot_ValDos'
+				Err_Variab	= 'Cot_PaCaVa'
 		rollback
 
 		return 1
@@ -220,7 +220,7 @@ if @Tip_Actual = @Act_Genera begin
 		Cot_Descri	= @Cot_Descri,
 		Cot_Abrevi	= @Cot_Abrevi,
 		Cot_Valor	= @Cot_Valor,
-		Cot_ValDos	= @Cot_ValDos,
+		Cot_PaCaVa	= @Cot_PaCaVa,
 		Cot_Fecha	= @Cot_Fecha,
 		Cot_Moneda	= @Cot_Moneda,
 		Cot_Extemp	= @Cot_Extemp,

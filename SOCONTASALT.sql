@@ -3,7 +3,7 @@ create procedure SOCONTASALT (
 	@Cot_Descri	varchar(80),
 	@Cot_Abrevi	varchar(10),
 	@Cot_Valor	double precision,
-	@Cot_ValDos	double precision,
+	@Cot_PaCaVa	double precision,
 	@Cot_Fecha	smalldatetime,
 	@Cot_Moneda	char(2),
 	@Cot_Extemp	char(1),
@@ -111,10 +111,10 @@ if @Cot_Valor <= @Mon_Cero begin
 	return 1
 end
 
-if @Cot_ValDos < @Mon_Cero begin
+if @Cot_PaCaVa < @Mon_Cero begin
 	select	Err_Codigo	= '000005',
 			Err_Mensaj	= 'Valor 2 incorrecto de la tasa',
-			Err_Variab	= 'Cot_ValDos'
+			Err_Variab	= 'Cot_PaCaVa'
 	rollback
 
 	return 1
@@ -199,12 +199,12 @@ if @Cot_Status not in(@Sta_ConAlt, @Sta_ConCon, @Sta_ConRec) begin
 end
 
 insert into SOCONTAS (
-				Cot_TasNum,		Cot_Descri,		Cot_Abrevi,		Cot_Valor,		Cot_ValDos,
+				Cot_TasNum,		Cot_Descri,		Cot_Abrevi,		Cot_Valor,		Cot_PaCaVa,
 				Cot_Fecha,		Cot_Moneda,		Cot_Extemp,		Cot_SelPar,		Cot_StaAct,
 				Cot_UsuMov,		Cot_FecMov,		Cot_Status,		Cot_Coment,		NumTransac,
 				Transaccio,		Usuario,		FechaSis,		SucOrigen,		SucDestino
 			) values (
-				@Cot_TasNum,	@Cot_Descri,	@Cot_Abrevi,	@Cot_Valor,		@Cot_ValDos,
+				@Cot_TasNum,	@Cot_Descri,	@Cot_Abrevi,	@Cot_Valor,		@Cot_PaCaVa,
 				@Cot_Fecha,		@Cot_Moneda,	@Cot_Extemp,	@Cot_SelPar,	@Sta_TasAct,
 				@Cot_UsuMov,	@Cot_FecMov,	@Sta_ConAlt,	@Chr_Vacio,		@NumTransac,
 				@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
