@@ -1,4 +1,4 @@
-﻿create procedure SORENTASPRO (
+create procedure SORENTASPRO (
 	@Amo_MonFin	double precision,	-- Monto a Financiar
 	@Amo_IVAFac	smallmoney,			-- Porcentaje de I.V.A. de Factura
 	@Amo_OpcCom	double precision,	-- opción de Compra
@@ -31,18 +31,24 @@
 as
 
 /*
-**************************************************************************
-DESCRIPCION:	**Procedimiento que genera las Rentas en la cotización
-				de ArrendaRegio**
-**************************************************************************
-REFERENCIAS:
+****************************************************************************
+** DESCRIPCION:	**Procedimiento que genera las Rentas en la cotización	****
+**				de ArrendaRegio**										****
+****************************************************************************
+** REFERENCIAS:															****
+****************************************************************************
+** Modifico:		Cristina Rodriguez									****
+** Fecha:			03/Diciembre/2019		  							****
+** Help:			1319161												****
+** Descripcion:		Se excluyo el iva en la generacion de las rentas	****
+**					cuando la cotizacion sea de apoyo al campo			****
 ****************************************************************************
 ** Modifico:		Oscar Fabrizio Cruz Flores							****
 ** Fecha:			10/Junio/2019		  								****
 ** Help:			1097178												****
 ** Descripcion:		Se hacen validaciones de si la cotizacion es 		****
 					exento de IVA.										****
-****************************************************************************** 
+**************************************************************************** 
 ** Modifico:		Heber Arango										****
 ** Fecha:			25/Enero/2019		  								****
 ** Help:			1205034												****
@@ -55,35 +61,35 @@ REFERENCIAS:
 ** Help:			830922												****
 ** Descripcion:		Se agregan validaciones para Auto Leasing Plus		****
 ****************************************************************************
-** Modifico:		David Amaya								****
-** Fecha:		30/Junio/2015								****
-** Help:	   		00782754									****
-** Descripción:	Se ajusto para que se considere el IVA de	****
-**				la sucursal para las rentas de B2B Puro			****
-**				y no el IVA de Factura							****
+** Modifico:		David Amaya											****
+** Fecha:		30/Junio/2015											****
+** Help:	   		00782754											****
+** Descripción:	Se ajusto para que se considere el IVA de				****
+**				la sucursal para las rentas de B2B Puro					****
+**				y no el IVA de Factura									****
 ****************************************************************************
-** Modifico:		David Amaya								****
-** Fecha:		10/Marzo/2015								****
-** Help:	   		00692112									****
-** Descripción:	Se agrego la funcionalidad par manejar los	****
-**				pagos extraordinarios con monto cero			****
+** Modifico:		David Amaya											****
+** Fecha:		10/Marzo/2015											****
+** Help:	   		00692112											****
+** Descripción:	Se agrego la funcionalidad par manejar los				****
+**				pagos extraordinarios con monto cero					****
 ****************************************************************************
-** Modifico:		David Amaya								****
-** Fecha:		13/Octubre/2014							****
-** Help:	   		00692112									****
-** Descripción:	Se agregaron los parametros @Amo_TipTas y	****
-**				@Amo_TipRen,@Amo_MonCer,@Ren_UniNeg	****
-**				Se agrego funcionalidad para que se realicen	****
-**				los calculos sobre 360 dias o 365 dias		****
-**				Se adecuo store para considerar la nueva		****
-**				clasificacion de contrato 3(Credito Simple)	****
+** Modifico:		David Amaya											****
+** Fecha:		13/Octubre/2014											****
+** Help:	   		00692112											****
+** Descripción:	Se agregaron los parametros @Amo_TipTas y				****
+**				@Amo_TipRen,@Amo_MonCer,@Ren_UniNeg						****	
+**				Se agrego funcionalidad para que se realicen			****
+**				los calculos sobre 360 dias o 365 dias					****
+**				Se adecuo store para considerar la nueva				****
+**				clasificacion de contrato 3(Credito Simple)				****
 ****************************************************************************
-** 				STORE CONVERTIDO						****
-** Creó:			Luis Saldivar								****
-** Fecha:		09/Agosto/2012								****
-** Help:	   		00444009									****
-** Descripción:	Procedimiento que genera las Rentas en la	****
-**				cotización de ArrendaRegio					****
+** 				STORE CONVERTIDO										****
+** Creó:			Luis Saldivar										****
+** Fecha:		09/Agosto/2012											****
+** Help:	   		00444009											****
+** Descripción:	Procedimiento que genera las Rentas en la				****
+**				cotización de ArrendaRegio								****
 ****************************************************************************
 */
 /*	Declaración de Variables	*/
@@ -121,7 +127,11 @@ declare	@Ren_ResCap	double precision,		/*Resultado capital*/
 		@Amo_FecVen	smalldatetime,			/*Fecha de vencimiento*/
 		@Ban_PaExCe	char(1),				/*Pago exigible*/
 		@Zon_IVA	smallmoney,				/*IVA de la zona interior de la republica o zona fronteriza segun la cotizacion*/
-		@Cot_ExeIVA char(1)					/*Cotización exento de iva (si, no) */
+		@Cot_ExeIVA char(1),				/*Cotización exento de iva (si, no) */
+		@Tip_CobIVA	char(1),				/*Cobro de IVA S- SI N- NO	*/
+		@Coa_UniNeg	smallint,				/*Unidad de negocio	*/
+		@Adi_Tipo	char(2),				/*Tipo de Bien	*/
+		@Coa_ActFij	int						/*Tipo de activo fijo	*/
 
 declare	@Mon_Cero	smallint,				/*	Declaración de Constantes	*/
 		@Mon_Uno	smallint,
@@ -167,7 +177,11 @@ declare	@Mon_Cero	smallint,				/*	Declaración de Constantes	*/
 		@Con_LeaVIP char(1),		
 		@Ent_Dos	int,
 		@Ent_Tres	int,
-		@Ent_Cuatro	int
+		@Ent_Cuatro	int,
+		@Uni_B2B	smallint,
+		@Uni_TCC	smallint,
+		@Cob_NoIVA	char(1),
+		@Cob_SiIVA	char(1)
 
 /*	Asignación de Constantes	*/
 select	@Mon_Cero	= 0.00,			/*	Moneda Cero																	*/
@@ -214,7 +228,11 @@ select	@Mon_Cero	= 0.00,			/*	Moneda Cero																	*/
 		@Con_LeaVIP	= '5',			/* Tipo de contrato Auto Leasing Plus											*/
 		@Ent_Dos	= 2,			/* Entero dos 																	*/
 		@Ent_Tres	= 3,			/* Entero tres 																	*/
-		@Ent_Cuatro	= 4			/* Entero cuatro																*/
+		@Ent_Cuatro	= 4,			/* Entero cuatro																*/
+		@Uni_B2B	= 2,			/*	Unidad de negocios b2b														*/
+		@Uni_TCC	= 3,			/*	Unidad de negocios TCC														*/
+		@Cob_NoIVA	= 'N',			/*	No cobro de IVA																*/
+		@Cob_SiIVA	= 'S'			/*	Si cobro de IVA																*/																					 
 		
 create table #Rentas (
 	Ren_Consec	smallint not null,
@@ -245,6 +263,31 @@ select	@Zon_IVA	= Zon_IVA,  --Se obtiene el IVA en base a la zona de la cotizaci
 	where	Cot_Numero	= @Num_Cotiza
 
 select	@Zon_IVA	= isnull(@Zon_IVA, @Mon_Cero)
+
+select @Coa_UniNeg	= Coa_UniNeg,
+	   @Coa_ActFij	= Coa_ActFij
+	from ABCOTADI noholdlock
+	where Coa_Numero	= @Num_Cotiza
+
+select @Coa_UniNeg	= isnull(@Coa_UniNeg,@Ent_Cero)
+select @Coa_UniNeg	= isnull(@Coa_UniNeg,@Ent_Cero)
+
+select @Adi_Tipo	= Adi_Tipo
+	from ABADICIO noholdlock
+	where Adi_Cotiza	= @Num_Cotiza
+
+select @Adi_Tipo	= isnull(@Adi_Tipo,@Str_Vacio)
+
+/*En caso de que no exista la combinacion del activo fijo (cotizacion)/tipo (orden de compra) se le cobrara IVA*/
+select @Tip_CobIVA	= Tip_CobIVA
+	from ABTIPOS noholdlock
+	where Tip_AcFiNu	= @Coa_ActFij
+	  and (Tip_Numero	= @Adi_Tipo)
+
+select @Tip_CobIVA	= isnull(@Tip_CobIVA,@Cob_SiIVA)
+if (@Coa_UniNeg	= @Uni_B2B or @Coa_UniNeg	= @Uni_TCC) and (@Tip_CobIVA	= @Cob_NoIVA) begin
+	select @Zon_IVA	= @Mon_Cero
+end	
 
 if @Amo_RenExt > @Mon_Cero begin
 	
