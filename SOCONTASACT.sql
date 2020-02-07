@@ -3,6 +3,7 @@ create procedure SOCONTASACT (
 	@Cot_Descri	varchar(80),
 	@Cot_Abrevi	varchar(10),
 	@Cot_Valor	double precision,
+	@Cot_PaCaVa	double precision,
 	@Cot_Fecha	smalldatetime,
 	@Cot_Moneda	char(2),
 	@Cot_Extemp	char(1),
@@ -32,6 +33,11 @@ as
 ****************************************************************************
 ****************************************************************************
 ** REFERENCIAS:															****
+****************************************************************************
+** Modificó:	Manuel Adrián Flores Félix								****
+** Fecha:		28/ENero/2020											****
+** Help:		1149607													****
+** Descripción:	Se guarda ValDos desde pantalla.						****
 ****************************************************************************
 ** Creó:		Manuel Adrián Flores Félix								****
 ** Fecha:		11/Noviembre/2019										****
@@ -123,8 +129,17 @@ if @Tip_Actual = @Act_Genera begin
 		return 1
 	end
 
-	if @Cot_Fecha <= @Fec_Vacia begin
+	if @Cot_PaCaVa < @Mon_Cero begin
 		select	Err_Codigo	= '000006',
+				Err_Mensaj	= 'Valor 2 incorrecto de la tasa',
+				Err_Variab	= 'Cot_PaCaVa'
+		rollback
+
+		return 1
+	end
+
+	if @Cot_Fecha <= @Fec_Vacia begin
+		select	Err_Codigo	= '000007',
 				Err_Mensaj	= 'Fecha incorrecta de la tasa',
 				Err_Variab	= 'Cot_Fecha'
 		rollback
@@ -136,7 +151,7 @@ if @Tip_Actual = @Act_Genera begin
 		from	SOMONEDA noholdlock
 		where	Mon_Numero	= @Cot_Moneda) = @Int_Cero begin
 
-		select	Err_Codigo	= '000007',
+		select	Err_Codigo	= '000008',
 				Err_Mensaj	= 'Moneda '+@Cot_Moneda+' no existe',
 				Err_Variab	= 'Cot_Moneda'
 		rollback
@@ -145,7 +160,7 @@ if @Tip_Actual = @Act_Genera begin
 	end
 
 	if @Cot_Extemp not in(@Tas_SiExte, @Tas_NoExte) begin
-		select	Err_Codigo	= '000008',
+		select	Err_Codigo	= '000009',
 				Err_Mensaj	= 'Valor extemporaneo de tasa incorrecto',
 				Err_Variab	= 'Cot_SelPar'
 		rollback
@@ -154,7 +169,7 @@ if @Tip_Actual = @Act_Genera begin
 	end
 
 	if @Cot_SelPar not in(@Tas_NoSePa, @Tas_SiSePa) begin
-		select	Err_Codigo	= '000009',
+		select	Err_Codigo	= '000010',
 				Err_Mensaj	= 'Tipo de selección incorrecta',
 				Err_Variab	= 'Cot_SelPar'
 		rollback
@@ -163,7 +178,7 @@ if @Tip_Actual = @Act_Genera begin
 	end
 
 	if @Cot_StaAct not in(@Sta_TasAct, @Sta_TasIna) begin
-		select	Err_Codigo	= '000010',
+		select	Err_Codigo	= '000011',
 				Err_Mensaj	= 'Status de tasa incorrecto',
 				Err_Variab	= 'Cot_StaAct'
 		rollback
@@ -175,7 +190,7 @@ if @Tip_Actual = @Act_Genera begin
 		from	SOUSUARI noholdlock
 		where	SoUsuariID	= @Cot_UsuMov) = @Int_Cero begin
 
-		select	Err_Codigo	= '000011',
+		select	Err_Codigo	= '000012',
 				Err_Mensaj	= 'Usuario '+convert(varchar, @Cot_UsuMov)+' no existe',
 				Err_Variab	= 'Cot_UsuMov'
 		rollback
@@ -184,7 +199,7 @@ if @Tip_Actual = @Act_Genera begin
 	end
 
 	if @Cot_FecMov <= @Fec_Vacia begin
-		select	Err_Codigo	= '000012',
+		select	Err_Codigo	= '000013',
 				Err_Mensaj	= 'Fecha incorrecta de de movimiento',
 				Err_Variab	= 'Cot_FecMov'
 		rollback
@@ -193,7 +208,7 @@ if @Tip_Actual = @Act_Genera begin
 	end
 
 	if @Cot_Status not in(@Sta_ConAlt, @Sta_ConCon, @Sta_ConRec) begin
-		select	Err_Codigo	= '000013',
+		select	Err_Codigo	= '000014',
 				Err_Mensaj	= 'Status deconfirmación incorrecto',
 				Err_Variab	= 'Cot_Status'
 		rollback
@@ -205,6 +220,7 @@ if @Tip_Actual = @Act_Genera begin
 		Cot_Descri	= @Cot_Descri,
 		Cot_Abrevi	= @Cot_Abrevi,
 		Cot_Valor	= @Cot_Valor,
+		Cot_PaCaVa	= @Cot_PaCaVa,
 		Cot_Fecha	= @Cot_Fecha,
 		Cot_Moneda	= @Cot_Moneda,
 		Cot_Extemp	= @Cot_Extemp,
@@ -229,7 +245,7 @@ if @Tip_Actual = @Act_StaCon begin
 		from	SOUSUARI noholdlock
 		where	SoUsuariID	= @Cot_UsuMov) = @Int_Cero begin
 
-		select	Err_Codigo	= '000014',
+		select	Err_Codigo	= '000015',
 				Err_Mensaj	= 'Usuario '+convert(varchar, @Cot_UsuMov)+' no existe',
 				Err_Variab	= 'Cot_UsuMov'
 		rollback
@@ -238,7 +254,7 @@ if @Tip_Actual = @Act_StaCon begin
 	end
 
 	if @Cot_FecMov <= @Fec_Vacia begin
-		select	Err_Codigo	= '000015',
+		select	Err_Codigo	= '000016',
 				Err_Mensaj	= 'Fecha incorrecta de de movimiento',
 				Err_Variab	= 'Cot_FecMov'
 		rollback
@@ -247,7 +263,7 @@ if @Tip_Actual = @Act_StaCon begin
 	end
 
 	if @Cot_Status not in(@Sta_ConAlt, @Sta_ConCon, @Sta_ConRec) begin
-		select	Err_Codigo	= '000016',
+		select	Err_Codigo	= '000017',
 				Err_Mensaj	= 'Status deconfirmación incorrecto',
 				Err_Variab	= 'Cot_Status'
 		rollback
