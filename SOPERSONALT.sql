@@ -48,7 +48,16 @@ as
 /***************************************************************************/
 /** REFERENCIAS:
 ****************************************************************************
-** Modifico:		Armando Alexis Sepúlveda Cruz							****
+** Modifico:	CODE4U-Eliezer Catalino Xul Canche						****
+** Fecha:		06/Febrero/2020											****
+** Help:		1343720													****
+** Descripcion: Se agrega indentity para el campo PerPersoID			****
+/***************************************************************************/
+/* DESCRIPCION: ** Altas de Apoderados **						  		   */
+/***************************************************************************/
+/** REFERENCIAS:
+****************************************************************************
+** Modifico:		Armando Alexis Sepúlveda Cruz						****
 ** Fecha:		26/Junio/2017											****
 ** Help:		991811													****
 ** Descripcion: Se elimina la concatenación de Per_Titulo en Per_ComOrd	****
@@ -569,17 +578,6 @@ end else begin
 	select	@Per_ComOrd	= LTrim(RTrim(@Per_Nombre)) + ' ' + LTrim(RTrim(@Per_ApePat)) + ' ' + LTrim(RTrim(@Per_ApeMat))
 end
 
-execute @Status = SOFOLIOSACT
-	@Fol_Tabla  = @Tab_Nombre,
-	@Fol_Numero = @PerPersoID output
-
-if @Status <> @Ent_Cero begin
-	rollback
-	return 1
-end
-
-select	@Per_Numero	= right('00000000' + ltrim(rtrim(convert(char, @PerPersoID))), 8)
-
 if @Cob_Tipo = @Tip_Benefi begin
 	select	@Per_Benefi	= @Str_Si
 end else begin
@@ -591,15 +589,31 @@ if isnull(@Per_NumTra, @Str_Vacio) = @Str_Vacio begin
 			@Per_NumTra	= @NumTransac
 end
 
-insert into SOPERSON values	(
-	@PerPersoID,	@Per_Numero,	@Per_Fecha,		@Per_NumTra,	@Per_Tipo,
-	@Per_Benefi,	@Per_NuSeFi,	@Per_Titulo,	@Per_Nombre,	@Per_ApePat,
-	@Per_ApeMat,	@Per_RazSoc,	@Per_Comple,	@Per_ComOrd,	@Per_RFC,
-	@Per_CURP,		@Per_Calle,		@Per_CalNum,	@Per_Coloni,	@Per_Entida,
-	@Per_Locali,	@Per_CodPos,	@Per_ApaPos,	@Per_LadTel,	@Per_Telefo,
-	@Per_Email,		@Per_ComDom,	@Per_EstCiv,	@Per_Nacion,	@Per_ActEmp,
-	@Per_Giro,		@Per_Sector,	@Per_Activi,	@Per_ActINE,	@NumTransac,
-	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino)
+insert into SOPERSON (
+	Per_Numero, Per_Fecha,  Per_NumTra, Per_Tipo,   Per_Benefi,
+	Per_NuSeFi, Per_Titulo, Per_Nombre, Per_ApePat, Per_ApeMat,
+	Per_RazSoc, Per_Comple, Per_ComOrd, Per_RFC,    Per_CURP,
+	Per_Calle,  Per_CalNum, Per_Coloni, Per_Entida, Per_Locali,
+	Per_CodPos, Per_ApaPos, Per_LadTel, Per_Telefo, Per_Email,
+	Per_ComDom, Per_EstCiv, Per_Nacion, Per_ActEmp, Per_Giro,
+	Per_Sector, Per_Activi, Per_ActINE, NumTransac, Transaccio,
+	Usuario,	FechaSis,   SucOrigen,  SucDestino) 
+	values	(
+	@Per_Numero,	@Per_Fecha,		@Per_NumTra,	@Per_Tipo,		@Per_Benefi,	
+	@Per_NuSeFi,	@Per_Titulo,	@Per_Nombre,	@Per_ApePat,	@Per_ApeMat,
+	@Per_RazSoc,	@Per_Comple,	@Per_ComOrd,	@Per_RFC,		@Per_CURP,
+	@Per_Calle,		@Per_CalNum,	@Per_Coloni,	@Per_Entida,	@Per_Locali,	
+	@Per_CodPos,	@Per_ApaPos,	@Per_LadTel,	@Per_Telefo,	@Per_Email,		
+	@Per_ComDom,	@Per_EstCiv,	@Per_Nacion,	@Per_ActEmp,	@Per_Giro,		
+	@Per_Sector,	@Per_Activi,	@Per_ActINE,	@NumTransac,	@Transaccio,
+	@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino)
+
+select @PerPersoID = @@identity
+
+select	@Per_Numero	= right('00000000' + ltrim(rtrim(convert(char, @PerPersoID))), 8)
+
+update SOPERSON set Per_Numero = @Per_Numero
+	where PerPersoID = @PerPersoID
 
 exec SOUNIPERPRO
 	@Per_Numero,	@NumTransac,	@Transaccio,	@Usuario,	@FechaSis,
