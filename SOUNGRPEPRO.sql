@@ -1,4 +1,4 @@
-﻿create procedure SOUNGRPEPRO (
+create procedure SOUNGRPEPRO (
 	@Gpc_Person char(8),
 	@Gpc_Grupo  char(8),
 	@Gpc_Nombre char(40),
@@ -26,6 +26,12 @@ as
 ** DESCRIPCION: ** Proceso de unificación de grupos de Persona			****
 ****************************************************************************
 ** REFERENCIAS: 														****
+****************************************************************************
+** Modifico:	Armando Alexis Sepulveda Cruz							****
+** Fecha:		23/Enero/2020											****
+** Help:		1344189													****
+** Descripcion:	Se modifica la validación de espacios para que sustituya****
+**				los apellidos maternos vacios como espacios.			****
 ****************************************************************************
 ** Modifico:	Armando Alexis Sepulveda Cruz							****
 ** Fecha:		28/Mayo/2019											****
@@ -95,6 +101,7 @@ declare	@Reg_Existe	int,					/*Existe Registro*/
 		@Bit_Ocupac	varchar(50),			/* Bitacora Ocupacion */
 		@Bit_AntLab	int,					/* Bitacora Antiguedad laboral  */
 		@Bit_LugTra	varchar(50),			/* Bitacora Lugar trabajo */
+
 		@Bit_TelTra	varchar(20),			/* Bitacora Telefono trabajo */
 		@Bit_CalTra	varchar(20),			/* Bitacora Calle de Trabajo */
 		@Bit_NuCaTr	varchar(30),			/* Bitacora Numero de calle del  Trabajo*/
@@ -138,17 +145,18 @@ select	@Ent_Uno	= 1,
 		@Pro_DesAgr = '2',
 		@Pro_GruMin	= '3',
 		@Pro_GrClUn = '4',
-		@Str_Vacio	= ''
+		@Str_Vacio	= '',
+		@Str_Punto	= '.'
 		
 if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
-	select @Gpc_Nombre	= isnull(@Gpc_Nombre, @Str_Vacio)
-	select @Gpc_ApePat	= isnull(@Gpc_ApePat, @Str_Vacio)
-	select @Gpc_ApeMat	= isnull(@Gpc_ApeMat, @Str_Vacio)
-	select @Gpc_FecNac	= isnull(@Gpc_FecNac, @Str_Vacio)
-	select @Gpc_Sexo	= isnull(@Gpc_Sexo, @Str_Vacio)
-	select @Gpc_EntNac	= isnull(@Gpc_EntNac, @Str_Vacio)
-	select @Gpc_RFC		= isnull(@Gpc_RFC, @Str_Vacio)
-	select @Gpc_CURP	= isnull(@Gpc_CURP, @Str_Vacio)
+	select @Gpc_Nombre	= isnull(ltrim(rtrim(@Gpc_Nombre)), @Str_Vacio)
+	select @Gpc_ApePat	= isnull(ltrim(rtrim(@Gpc_ApePat)), @Str_Vacio)
+	select @Gpc_ApeMat	= isnull(ltrim(rtrim(@Gpc_ApeMat)), @Str_Punto)
+	select @Gpc_FecNac	= isnull(ltrim(rtrim(@Gpc_FecNac)), @Str_Vacio)
+	select @Gpc_Sexo	= isnull(ltrim(rtrim(@Gpc_Sexo)), @Str_Vacio)
+	select @Gpc_EntNac	= isnull(ltrim(rtrim(@Gpc_EntNac)), @Str_Vacio)
+	select @Gpc_RFC		= isnull(ltrim(rtrim(@Gpc_RFC)), @Str_Vacio)
+	select @Gpc_CURP	= isnull(ltrim(rtrim(@Gpc_CURP)), @Str_Vacio)
 
 	select	@Bit_Fecha	= Per_Fecha,
 			@Bit_NumTra	= Per_NumTra,
@@ -174,6 +182,7 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 			@Bit_ApaPos	= Per_ApaPos,
 			@Bit_LadTel	= Per_LadTel,
 			@Bit_Telefo	= Per_Email,
+
 			@Bit_Email	= Per_Email,
 			@Bit_ComDom	= Per_ComDom,
 			@Bit_EstCiv	= Per_EstCiv,
@@ -266,8 +275,8 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 		end
 
 
-	select	@Gpc_Comple = ltrim(rtrim(@Gpc_ApePat)) + ' ' + ltrim(rtrim(@Gpc_ApeMat)) + ' ' + ltrim(rtrim(@Gpc_Nombre)),
-			@Gpc_ComOrd = ltrim(rtrim(@Gpc_Nombre)) + ' ' + ltrim(rtrim(@Gpc_ApePat)) + ' ' + ltrim(rtrim(@Gpc_ApeMat))
+	select	@Gpc_Comple = @Gpc_ApePat + ' ' + @Gpc_ApeMat + ' ' + @Gpc_Nombre,
+			@Gpc_ComOrd = @Gpc_Nombre + ' ' + @Gpc_ApePat + ' ' + @Gpc_ApeMat
 			
 	select @Per_Entida = Ent_Numero 
 	  from CLENTIDA noholdlock
@@ -275,15 +284,16 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 	   and Ent_Status = @Sta_Activo
 			
 	update SOPERSON set
-		Per_Nombre	= ltrim(rtrim(@Gpc_Nombre)),
-		Per_ApePat	= ltrim(rtrim(@Gpc_ApePat)),
-		Per_ApeMat	= ltrim(rtrim(@Gpc_ApeMat)),
-		Per_Comple	= ltrim(rtrim(@Gpc_Comple)),
-		Per_ComOrd	= ltrim(rtrim(@Gpc_ComOrd)),
-		Per_Entida	= ltrim(rtrim(@Per_Entida)),
-		Per_RFC		= ltrim(rtrim(@Gpc_RFC)),
-		Per_CURP	= ltrim(rtrim(@Gpc_CURP)),
+		Per_Nombre	= @Gpc_Nombre,
+		Per_ApePat	= @Gpc_ApePat,
+		Per_ApeMat	= @Gpc_ApeMat,
+		Per_Comple	= @Gpc_Comple,
+		Per_ComOrd	= @Gpc_ComOrd,
+		Per_Entida	= @Per_Entida,
+		Per_RFC		= @Gpc_RFC,
+		Per_CURP	= @Gpc_CURP,
 		
+
 		NumTransac	= @NumTransac,
 		Transaccio	= @Transaccio,
 		Usuario		= @Usuario,
@@ -291,10 +301,10 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 		SucOrigen	= @SucOrigen,
 		SucDestino	= @SucDestino
 	where Per_Numero = @Gpc_Person
-	
+
 	update SOPERADI set
-		Adi_FecNac	= ltrim(rtrim(@Gpc_FecNac)),
-		Adi_Sexo	= ltrim(rtrim(@Gpc_Sexo)),
+		Adi_FecNac	= @Gpc_FecNac,
+		Adi_Sexo	= @Gpc_Sexo,
 		
 		NumTransac	= @NumTransac,
 		Transaccio	= @Transaccio,
@@ -401,3 +411,4 @@ end	else if @Tip_Proces = @Pro_GruMin or @Tip_Proces = @Pro_GrClUn begin		/*Agru
 	/*Salida: Notificación cambio Persona IDE*/
 	select @Gpc_GrpAnt as Gpc_Person, @Gpc_Grupo as Gpc_Grupo
 end
+
