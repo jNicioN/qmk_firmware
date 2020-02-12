@@ -130,7 +130,8 @@ declare	@Reg_Existe	int,					/*Existe Registro*/
 		@Bit_NuIdFi	varchar(20),			/* Bitacora Numero de Identificacion Fiscal */
 		@Bit_EntPri char(40), 				/* Bitacora Entre Calle Primera */
 		@Bit_EntSeg char(40),				/* Bitacora Entre Calle Segunda */
-		@Exi_Regist int						/* Variable de control de existencia de registro*/
+		@Exi_Regist int,					/* Variable de control de existencia de registro*/
+		@Str_Punto	char(1)					/* String para punto para apellidos vacios */
 
 /* Declaracion de Constantes */
 declare	@Ent_Uno	int,					/*Entero: Uno*/
