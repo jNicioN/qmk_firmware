@@ -1,9 +1,9 @@
 create procedure SOUNGRPEPRO (
 	@Gpc_Person char(8),
 	@Gpc_Grupo  char(8),
-	@Gpc_Nombre char(40),
-	@Gpc_ApePat char(40),
-	@Gpc_ApeMat char(40),
+	@Gpc_Nombre varchar(40),
+	@Gpc_ApePat varchar(40),
+	@Gpc_ApeMat varchar(40),
 	@Gpc_FecNac datetime,
 	@Gpc_Sexo	char(1),
 	@Gpc_EntNac char(2),
@@ -28,6 +28,12 @@ as
 ** REFERENCIAS: 														****
 ****************************************************************************
 ** Modifico:	Armando Alexis Sepulveda Cruz							****
+** Fecha:		13/Febrero/2020											****
+** Help:		1359784													****
+** Descripcion:	Se modifica el tipo de dato char a varchar para evitar	****
+**				que la construcción de nombres se llene con espacios    ****
+****************************************************************************
+** Modifico:	Armando Alexis Sepulveda Cruz							****
 ** Fecha:		23/Enero/2020											****
 ** Help:		1344189													****
 ** Descripcion:	Se modifica la validación de espacios para que sustituya****
@@ -49,8 +55,8 @@ declare	@Reg_Existe	int,					/*Existe Registro*/
 		@Status		int,					/*Estatus de Procedimiento*/
 		@Peu_Person char(8),				/*Persona*/
 		@Gpc_GrpAnt	char(8),				/*Grupo Anterior*/
-		@Gpc_Comple char(120),				/*Nombre Completo*/
-		@Gpc_ComOrd char(120),				/*Nombre Completo Ordenado*/
+		@Gpc_Comple varchar(120),				/*Nombre Completo*/
+		@Gpc_ComOrd varchar(120),				/*Nombre Completo Ordenado*/
 		@Gpc_PrClUn char(8),				/*Persona del Cliente Único*/
 		@Per_Entida char(3),				/*Entidad*/
 		@Pro_Datos	char(1),				/*Proceso de actualización de Datos*/
