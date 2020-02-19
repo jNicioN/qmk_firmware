@@ -1,4 +1,4 @@
-create procedure SOPEDACOACT (
+﻿create procedure SOPEDACOACT (
 	@DaP_Person	char(8),
 	@DaP_Firma	char(1),
 	@DaP_CaNuIn	varchar(10),
@@ -37,6 +37,11 @@ as
 ** DESCRIPCION: Modificación de Datos Complementarios de Persona		****
 ****************************************************************************
 ** REFERENCIAS:															****
+****************************************************************************
+** Moidfico:	Victor Osorio											****
+** Fecha:		19/02/2020												****
+** Help:		1312389													****
+** Descripcion: Se agrega campo DaP_PaiNac a tipo de actualizacion A	****
 ****************************************************************************
 ** Moidfico:	Esthepny Aguilar										****
 ** Fecha:		18/09/2018												****
@@ -88,10 +93,11 @@ if @Tip_Actual = @Tip_ClvNum begin	/* Modificar Clave Elector y Número de Emisi
 		SucDestino	= @SucDestino
 	 where	DaP_Person	= @DaP_Person
 end
-if @Tip_Actual = @Tip_AcualA begin /* A Modifica  Clave Elector, Número de Emision y Entidad de Nacimiento */
+if @Tip_Actual = @Tip_AcualA begin /* A Modifica  Clave Elector, Número de Emision, Entidad de Nacimiento y Pais de Nacimiento */
 	update SOPEDACO set
 		DaP_ClvEle	= @DaP_ClvEle,	
 		DaP_NumEmi	= @DaP_NumEmi,
-		DaP_EntNac  = @DaP_EntNac
+		DaP_EntNac  = @DaP_EntNac,
+		DaP_PaiNac  = @DaP_PaiNac
 	where	DaP_Person	= @DaP_Person
 end
