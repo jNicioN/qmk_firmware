@@ -1,4 +1,4 @@
-﻿create procedure SOPEDACOACT (
+create procedure SOPEDACOACT (
 	@DaP_Person	char(8),
 	@DaP_Firma	char(1),
 	@DaP_CaNuIn	varchar(10),
