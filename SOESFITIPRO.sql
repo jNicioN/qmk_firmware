@@ -19,6 +19,11 @@ as
 /****************************************************************/
 /* DESCRIPCION: Proceso de Estados Financieros Tipo Cuenta		*/
 /****************************************************************
+** Modifica:		Jose Rodriguez                     	        **
+** Fecha:			17/02/2020                               	**
+** Descripcion:		Se modifica Proceso G						**
+** Help:			1299649 					 				*/
+/****************************************************************
 ** Modifica:		Edwin Santiago                     	        **
 ** Fecha:			27/11/2018                               	**
 ** Descripcion:		Se agrega TIPO H							**
@@ -53,6 +58,8 @@ declare	@Ent_Cuenta	int,		/* Entero numero partida */
 		@Esf_MesFin2 int,		/* Entero mes final 2 */
 		@Esf_MesIni3 int,		/* Entero mes inicial 3 */
 		@Esf_MesFin3 int,		/* Entero mes final 3 */
+		@Esf_ValDep1 int,       /* Entero valor depreciacion 1*/
+		@Esf_ValDep2 int,       /* Entero valor depreciacion 2*/
 		@Status		 int		/* Entero estatus */
 
 /* Declaracion de Constantes */
@@ -67,7 +74,7 @@ declare	@Tip_ProA char(1),		/* Caracter A */
 		@Tip_A char(1),			/* Caracter tipo A */
 		@Tip_E char(1),			/* Caracter tipo E */
 		@Ent_Cero	int,		/* Entero Cero */
-		@Ent_Uno	int,		/* Entero Uno */
+		@Ent_Uno	int,		/* Entero Uno */	
 		@Bit_Si		bit,		/* Bit valor 1 */
 		@Bit_No		bit,		/* Bit valor 0 */
 		@Ent_Max	int,		/* Entero contador maximo a 200*/
@@ -76,7 +83,9 @@ declare	@Tip_ProA char(1),		/* Caracter A */
 		@Tip_C2		char(2),	/* Char C2 */
 		@Tip_C4 	char(2),	/* Char C4 */
 		@Tip_C6		char(2),	/* Char C6 */
-		@Tip_C7		char(2)		/* Char C7 */
+		@Tip_C7		char(2),	/* Char C7 */
+		@Tip_Depres int	,		/* Depreciacion*/
+		@Tip_CueDep int			/* Cuenta Depreciacion*/
 
 /* Asignacion de Constantes */
 select	@Ent_Cero	= 0,
@@ -110,7 +119,9 @@ select	@Ent_Cero	= 0,
 		@Tip_C2 = 'C2',
 		@Tip_C4 = 'C4',
 		@Tip_C6 = 'C6',
-		@Tip_C7 = 'C7'
+		@Tip_C7 = 'C7',
+		@Tip_Depres = 196,
+		@Tip_CueDep = 345
 			
 		
 select	@Ent_Cuenta = @Ent_Uno,
@@ -834,6 +845,16 @@ end	else if @Tip_Proces = @Tip_ProG begin
 		left join SOESFITI noholdlock
 		on	Eft_TipCue = Tot_NumCue
 		and Eft_EstFin = @Eft_EsFin1
+		
+	select @Esf_ValDep1 = Eft_Valor
+		from SOESFITI noholdlock
+		where Eft_EstFin = @Eft_EsFin1
+		and SOESFITI.Eft_TipCue = @Tip_CueDep
+		
+	select @Esf_ValDep2 = Eft_Valor
+		from SOESFITI noholdlock
+		where Eft_EstFin = @Eft_EsFin2
+		and SOESFITI.Eft_TipCue = @Tip_CueDep
 
 	update #CuentaValorEeff set
 		Eft_Valor2	= Eft_Valor,
@@ -841,7 +862,12 @@ end	else if @Tip_Proces = @Tip_ProG begin
 		from SOESFITI noholdlock
 		where Eft_EstFin = @Eft_EsFin2
 		  and SOESFITI.Eft_TipCue = #CuentaValorEeff.Eft_TipCue
-
+	
+	update #CuentaValorEeff set
+		Eft_Valor1 = @Esf_ValDep1,
+		Eft_Valor2 = @Esf_ValDep2
+		where #CuentaValorEeff.Eft_TipCue = @Tip_Depres
+	
 	select	Eft_TipCue,
 			Eft_DesRep AS Eft_Descri,
 			Eft_Numero,
