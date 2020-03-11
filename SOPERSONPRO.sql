@@ -31,6 +31,12 @@ as
 /*******************************************************************/
 /** REFERENCIAS:
 ********************************************************************
+** Modifico:	CODE4U-Eliezer Catalino Xul Canche				****
+** Fecha:		11/Marzo/2020									****
+** Help:		1343720											****
+** Descripcion: Se agrega proceso para actualizar 				****
+				folio de persona								****
+********************************************************************
 ** Modificó:	Francisco Javier Carrillo Rojas					****
 ** Fecha:		19/Jul/2019										****
 ** Help:		01278846										****
@@ -117,6 +123,7 @@ declare	@Str_Vacio	char(1),				/*	Declaracion de Constantes	*/
 		@Tip_Renapo	char(1),
 		@Tip_ProIne	char(1),
 		@Tip_Email	char(1),
+		@Tip_PerNum char(1),
 		@Ent_LonCur	smallint,
 		@Pai_Mexico	char(3),
 		@Nac_Nacion	char(1),
@@ -129,6 +136,7 @@ select	@Str_Vacio	= '',					/*	String Vacio				*/
 		@Tip_Renapo	= 'A',					/*	Tipo proceso para actualizar datos requeridos para RENAPO */
 		@Tip_ProIne	= 'I',					/*	Tipo proceso para actualizar datos INE	*/
 		@Tip_Email	= 'C',					/*	Tipo proceso para actualizar email  */
+		@Tip_PerNum = 'F',					/*  Tipo proceso para actualizar el numero de folio*/
 		@Ent_LonCur	= 18,					/*	Longitud CURP	*/
 		@Pai_Mexico	= '001',				/*	País de nacimiento México */
 		@Nac_Nacion	= 'N',					/*	Nacionalidad: Nacional */
@@ -553,6 +561,18 @@ if @Tip_Proces = 'D' begin        /*Actualizacion de doctos para autenticacion d
 			rollback
 			return 1
 		end	
+	end 
+
+	if @Tip_Proces = @Tip_PerNum begin
+
+		if @Per_Numero = @Str_Vacio begin
+			rollback
+			return 1
+		end
+
+	update SOPERSON set Per_Numero = @Per_Numero
+	where PerPersoID = convert(int,  @Per_Numero)
+
 	end 
 
 end

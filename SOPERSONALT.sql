@@ -225,7 +225,8 @@ declare	@Str_Vacio	char(1),		/*	Declaracion de Constantes	*/
 		@Mod_FabCon char(2),
 		@Sta_Inacti	char(1),
 		@Loc_Pais 	char(3),
-		@Mod_AplOnl char(2)
+		@Mod_AplOnl char(2),
+		@Tip_PerNum char(1)
 
 
 select	@Str_Vacio	= '',			/*	String Vacio	*/
@@ -257,7 +258,8 @@ select	@Str_Vacio	= '',			/*	String Vacio	*/
 	 	@Str_23		= '[23]',
 	 	@Mod_FabCon = 'FB',			/* Modulo de Fabrica de Crédito al Consumo */
 	 	@Sta_Inacti	= 'I',			/* Status Inactivo para validar localidad y entidad */
-		@Mod_AplOnl	= 'OL'			/* Modulo de Aplicaciones Online*/			
+		@Mod_AplOnl	= 'OL',			/* Modulo de Aplicaciones Online*/		
+		@Tip_PerNum = 'F'			/*  Tipo proceso para actualizar el numero de folio*/
 
 if @Modulo in (@Mod_AplOnl) begin
 
@@ -612,8 +614,17 @@ select @PerPersoID = @@identity
 
 select	@Per_Numero	= right('00000000' + ltrim(rtrim(convert(char, @PerPersoID))), 8)
 
-update SOPERSON set Per_Numero = @Per_Numero
-	where PerPersoID = @PerPersoID
+exec @Status = SOPERSONPRO		
+			@Per_Numero, @Str_Vacio,  @Str_Vacio,  @Str_Vacio, @Str_Vacio,
+			@Fec_Vacia,  @Str_Vacio,  @Str_Vacio,  @Fec_Vacia, @Str_Vacio,
+			@Str_Vacio,  @Str_Vacio,  @Fec_Vacia,  @Str_Vacio, @Str_Vacio,
+			@Tip_PerNum, @NumTransac, @Transaccio, @Usuario,   @FechaSis,
+			@SucOrigen,  @SucDestino, @Modulo
+	
+	if @Status <> @Ent_Cero begin
+		rollback
+		return 1
+	end
 
 exec SOUNIPERPRO
 	@Per_Numero,	@NumTransac,	@Transaccio,	@Usuario,	@FechaSis,
