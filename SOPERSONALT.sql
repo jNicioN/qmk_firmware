@@ -44,18 +44,14 @@ as
 /* TABLAS AFECTADAS: */
 /*SoPerson*/
 /***************************************************************************/
-/* DESCRIPCION: ** Altas de Apoderados **						  		   */
+/** DESCRIPCION: ** Altas de Apoderados **						  		   */
 /***************************************************************************/
-/** REFERENCIAS:
-****************************************************************************
+/** REFERENCIAS:														   */
+/***************************************************************************
 ** Modifico:	CODE4U-Eliezer Catalino Xul Canche						****
 ** Fecha:		06/Febrero/2020											****
 ** Help:		1343720													****
 ** Descripcion: Se agrega indentity para el campo PerPersoID			****
-/***************************************************************************/
-/* DESCRIPCION: ** Altas de Apoderados **						  		   */
-/***************************************************************************/
-/** REFERENCIAS:
 ****************************************************************************
 ** Modifico:		Armando Alexis Sepúlveda Cruz						****
 ** Fecha:		26/Junio/2017											****
@@ -195,7 +191,8 @@ declare	@Per_Comple	varchar(180),	/*	Declaracion de Variables	*/
 		@Sta_Entida	char(1),
 		@Per_Pais	char(3)
 
-declare	@Str_Vacio	char(1),		/*	Declaracion de Constantes	*/
+declare	@Fec_Vacia	smalldatetime,   /*	Declaracion de Constantes	*/
+        @Str_Vacio	char(1),		
 		@Str_Espaci	char(1),
 		@Per_Moral	char(1),
 		@Per_Fisica	char(1),
@@ -229,7 +226,8 @@ declare	@Str_Vacio	char(1),		/*	Declaracion de Constantes	*/
 		@Tip_PerNum char(1)
 
 
-select	@Str_Vacio	= '',			/*	String Vacio	*/
+select	@Fec_Vacia	= '1900-01-01',	/*	Fecha Vacía*/
+		@Str_Vacio	= '',			/*	String Vacio	*/
 		@Str_Espaci	= ' ',			/*	String Espacio	*/
 		@Per_Moral	= '1',			/* Persona Moral */
 		@Per_Fisica	= '2',			/* Persona Fisica */
@@ -601,7 +599,7 @@ insert into SOPERSON (
 	Per_Sector, Per_Activi, Per_ActINE, NumTransac, Transaccio,
 	Usuario,	FechaSis,   SucOrigen,  SucDestino) 
 	values	(
-	@Per_Numero,	@Per_Fecha,		@Per_NumTra,	@Per_Tipo,		@Per_Benefi,	
+	@Str_Vacio,	    @Per_Fecha,		@Per_NumTra,	@Per_Tipo,		@Per_Benefi,	
 	@Per_NuSeFi,	@Per_Titulo,	@Per_Nombre,	@Per_ApePat,	@Per_ApeMat,
 	@Per_RazSoc,	@Per_Comple,	@Per_ComOrd,	@Per_RFC,		@Per_CURP,
 	@Per_Calle,		@Per_CalNum,	@Per_Coloni,	@Per_Entida,	@Per_Locali,	

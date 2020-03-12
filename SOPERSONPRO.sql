@@ -563,7 +563,8 @@ if @Tip_Proces = 'D' begin        /*Actualizacion de doctos para autenticacion d
 		end	
 	end 
 
-	if @Tip_Proces = @Tip_PerNum begin
+end
+if @Tip_Proces = @Tip_PerNum begin
 
 		if @Per_Numero = @Str_Vacio begin
 			rollback
@@ -574,8 +575,6 @@ if @Tip_Proces = 'D' begin        /*Actualizacion de doctos para autenticacion d
 	where PerPersoID = convert(int,  @Per_Numero)
 
 	end 
-
-end
 
 if @@nestlevel = @Ent_Uno
 	select	Err_Codigo	= '000000',
