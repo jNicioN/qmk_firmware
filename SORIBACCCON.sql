@@ -16,7 +16,13 @@ as
 /****************************************************************/
 /* DESCRIPCION: Consulta de registros de Accionistas RIB		*/
 /****************************************************************/
-/** Modifico:		Ricardo Garcýa								*/
+/** Modifico:		Esthepny Aguilar							*/
+/** Fecha:			25/02/2020                               	*/
+/** Descripcion:	Se ordena desc por el campo Ria_PorPar en la*/
+/** 				consulta L2               					*/
+/** Help:			1355065					 					*/
+/****************************************************************/
+/** Modifico:		Ricardo García								*/
 /** Fecha:			22/09/2017                               	*/
 /** Descripcion:	Se agrega constante de Activo             	*/
 /** Help:			929417 					 					*/
@@ -71,5 +77,6 @@ end else begin
 		from SORIBACC noholdlock
 		where Ria_NumRib = @Ria_NumRib
 		  and Ria_Activo = @Raa_Activo
+		  order by Ria_PorPar desc
 	end
 end

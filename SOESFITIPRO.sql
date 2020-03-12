@@ -20,7 +20,12 @@ as
 /* DESCRIPCION: Proceso de Estados Financieros Tipo Cuenta		*/
 /****************************************************************
 ** Modifica:		Jose Rodriguez                     	        **
-** Fecha:			17/02/2020                               	**
+** Fecha:			28/02/2020                               	**
+** Descripcion:		Se modifica Proceso G						**
+** Help:			1355065 					 				*/
+/****************************************************************
+** Modifica:		Jose Rodriguez                     	        **
+** Fecha:			14/05/2020                               	**
 ** Descripcion:		Se modifica Proceso G						**
 ** Help:			1299649 					 				*/
 /****************************************************************
@@ -815,16 +820,18 @@ end	else if @Tip_Proces = @Tip_ProG begin
 		Eft_EsFin2	int,
 		Eft_Valor2	money,
 		Eft_Porce2	money,
-		Eft_Indice	int null
+		Eft_Indice	int null,
+		Eft_Estilo  int null,
 	)
 	create table #CuentaReporte (
 		Tot_NumCue	int not null,
 		Tot_DesRep	varchar(150) null,
-		Tot_Indice	int null
+		Tot_Indice	int null,
+		Tot_Estilo  int null
 	)
 
 	insert into #CuentaReporte
-		select	Tic_Numero, Tic_DesRep, Tfc_IndRep
+		select	Tic_Numero, Tic_DesRep, Tfc_IndRep, Tfc_Estilo
 		from SOTICUEF tc noholdlock
 			inner join SOTFOTCU tf noholdlock
 				 on Tfc_Cuenta = Tic_Numero
@@ -840,7 +847,7 @@ end	else if @Tip_Proces = @Tip_ProG begin
 		select	Tot_NumCue,		Tot_DesRep,		isnull(Eft_Numero, @Ent_Cero),
 				@Eft_EsFin1,	isnull(Eft_Valor, @Mon_Cero),	isnull(Eft_Porcen, @Mon_Cero),
 				@Eft_EsFin2,	@Mon_Cero,		@Mon_Cero,
-				Tot_Indice
+				Tot_Indice, Tot_Estilo
 		from #CuentaReporte
 		left join SOESFITI noholdlock
 		on	Eft_TipCue = Tot_NumCue
@@ -877,7 +884,8 @@ end	else if @Tip_Proces = @Tip_ProG begin
 			Eft_EsFin2,
 			Eft_Valor2,
 			Eft_Porce2,
-			Eft_Indice
+			Eft_Indice,
+			Eft_Estilo
 		from #CuentaValorEeff
 		order by Eft_Indice
 
