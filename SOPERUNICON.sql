@@ -20,6 +20,12 @@ as
 /*******************************************************************
 ** DESCRIPCION: Consulta de Persona Unica						****
 ********************************************************************
+** Modifico:	Victor Osorio									****
+** Fecha:		19/02/2020										****
+** Help:		1312389 										****
+** Descripcion:	Se modifica consulta C1 se agregan los campos   ****
+** SOPEDACO(DaP_PaiNac)											****
+********************************************************************
 ** Modificó:	Francisco Javier Carrillo Rojas					****
 ** Fecha:		26/Ago/2019										****
 ** Help:		01289832										****
@@ -197,7 +203,7 @@ if @Tip_ConTip = @Str_C begin
 				Adi.Adi_LocExt,	Adi.Adi_EntExt,	Adi.Adi_PaiExt,	Adi.Adi_CoPoEx,	Adi_TelExt,
 				LTRIM(RTRIM(Adi_TipIde)) as Adi_TipIde,		Adi_OtrIde,		Adi_NumIde,		Adi_FeExId,		Adi_FeVeId,
 				Adi_NuIdFi,		Adi.Adi_EntPri,	Adi.Adi_EntSeg,	Per_Client = Adi_Client,	DaP_ClvEle,
-				DaP_NumEmi,		DaP_EntNac
+				DaP_NumEmi,		DaP_EntNac,		DaP_PaiNac
 			from SOPERSON noholdlock
 			join SOPERADI Adi noholdlock  on Adi_PerNum = Per_Numero
 			left join SOPEDACO noholdlock on DaP_Person = Per_Numero
