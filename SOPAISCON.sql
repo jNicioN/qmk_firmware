@@ -77,8 +77,8 @@ end else begin								/*	L I S T A S	*/
 	end	
 	if @Tip_ConCon = '3' begin	/* Lista de paises filtrados por paises sancionados swift */	
 		select p.Pai_Numero,	p.Pai_Nombre,	p.Pai_Abrevi,	p.Pai_ISR, p.Pai_Gentil, p.Pai_IdeBMX, p.Pai_IdCNBV
-		from SOPAIS p
-		left  join ITPAISAN ps on p.Pai_IdCNBV = ps.Pas_ClaPai
+		from SOPAIS p noholdlock
+		left  join ITPAISAN ps noholdlock on p.Pai_IdCNBV = ps.Pas_ClaPai
 		where ps.Pas_Numero  is null
 		and	Pai_Nombre	like @Pai_Nombre
 		order by Pai_Nombre
