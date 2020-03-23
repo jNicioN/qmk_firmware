@@ -20,6 +20,11 @@ as
 /* DESCRIPCION: Proceso de Estados Financieros Tipo Cuenta		*/
 /****************************************************************
 ** Modifica:		Jose Rodriguez                     	        **
+** Fecha:			09/03/2020                               	**
+** Descripcion:		Se modifica agrega Proceso I    			**
+** Help:			1370378 					 				*/
+/****************************************************************
+** Modifica:		Jose Rodriguez                     	        **
 ** Fecha:			28/02/2020                               	**
 ** Descripcion:		Se modifica Proceso G						**
 ** Help:			1355065 					 				*/
@@ -76,6 +81,7 @@ declare	@Tip_ProA char(1),		/* Caracter A */
 		@Tip_ProF char(1),		/* Caracter F */
 		@Tip_ProG char(1),		/* Caracter G */
 		@Tip_ProH char(1),		/* Caracter H */
+		@Tip_ProI char(1),		/* Caracter I*/
 		@Tip_A char(1),			/* Caracter tipo A */
 		@Tip_E char(1),			/* Caracter tipo E */
 		@Ent_Cero	int,		/* Entero Cero */
@@ -90,8 +96,11 @@ declare	@Tip_ProA char(1),		/* Caracter A */
 		@Tip_C6		char(2),	/* Char C6 */
 		@Tip_C7		char(2),	/* Char C7 */
 		@Tip_Depres int	,		/* Depreciacion*/
-		@Tip_CueDep int			/* Cuenta Depreciacion*/
-
+		@Tip_CueDep int ,		/* Cuenta Depreciacion*/
+		@Tip_Uafir  int ,		/* Tipo Cuenta UAFIR */
+		@Tip_Uafirda int ,		/* Tipo Cuenta UAFIRDA */
+		@Cue_Depres int			/* Tipo Cuenta Depreciacion*/
+		
 /* Asignacion de Constantes */
 select	@Ent_Cero	= 0,
 		@Ent_Uno	= 1,
@@ -107,6 +116,7 @@ select	@Ent_Cero	= 0,
 		@Tip_ProF	= 'F',
 		@Tip_ProG	= 'G',
 		@Tip_ProH	= 'H',
+		@Tip_ProI   = 'I',
 		@Cha_Vacio	= '',
 		@Esf_EfiNu1 = 0,
 		@Esf_EfiNu2 = 0,
@@ -126,7 +136,10 @@ select	@Ent_Cero	= 0,
 		@Tip_C6 = 'C6',
 		@Tip_C7 = 'C7',
 		@Tip_Depres = 196,
-		@Tip_CueDep = 345
+		@Tip_CueDep = 345,
+		@Tip_Uafir  = 702,
+		@Tip_Uafirda = 703,
+		@Cue_Depres = 79
 			
 		
 select	@Ent_Cuenta = @Ent_Uno,
@@ -956,5 +969,73 @@ end	else if @Tip_Proces = @Tip_ProH begin /*busca el estado financiero anterior 
 		rollback
 		return @Ent_Uno
 	end
+	
+end else if @Tip_Proces = @Tip_ProI begin
+	create table #CuentaValorEF (
+		Eft_TipCue	int not null,
+		Eft_DesRep	varchar(150) null,
+		Eft_Numero	int,
+		Eft_EsFin1	int,
+		Eft_Valor1	money,
+		Eft_Porce1	money,
+		Eft_EsFin2	int,
+		Eft_Valor2	money,
+		Eft_Porce2	money,
+		Eft_Indice	int null,
+		Eft_Estilo  int null,
+	)
+	create table #CuentaReporteEF (
+		Tot_NumCue	int not null,
+		Tot_DesRep	varchar(150) null,
+		Tot_Indice	int null,
+		Tot_Estilo  int null
+	)
+	
+	insert into #CuentaReporteEF
+	select	Tic_Numero, Tic_DesRep, Tfc_IndRep, Tfc_Estilo
+	from SOTICUEF tc noholdlock
+	inner join SOTFOTCU ft noholdlock on Tfc_Cuenta = Tic_Numero
+	inner join SOTICUCL cl noholdlock on Tcc_TipCue = Tic_Numero
+	where Tfc_Stock <> @Bit_Si and Tfc_Report = @Bit_Si and  Tic_Numero in (@Tip_Uafirda,@Tip_Uafir)
+	
+	insert into #CuentaReporteEF
+	select	Tic_Numero, Tic_DesRep, Tfc_IndRep, Tfc_Estilo
+	from SOTICUEF tc noholdlock
+	inner join SOTFOTCU ft noholdlock on Tfc_Cuenta = Tic_Numero
+	inner join SOTICUCL cl noholdlock on Tcc_TipCue = Tic_Numero
+	where Tic_Numero = @Cue_Depres
+	
+	insert into #CuentaValorEF
+	select	Tot_NumCue,		Tot_DesRep,		isnull(Eft_Numero, @Ent_Cero),
+				@Eft_EsFin1,	isnull(Eft_Valor, @Mon_Cero),	isnull(Eft_Porcen, @Mon_Cero),
+				@Eft_EsFin2,	@Mon_Cero,		@Mon_Cero,
+				Tot_Indice, Tot_Estilo
+	from #CuentaReporteEF
+	left join SOESFITI noholdlock
+	on	Eft_TipCue = Tot_NumCue
+	and Eft_EstFin = @Eft_EsFin1
+	
+	update #CuentaValorEF set
+	Eft_Valor2	= Eft_Valor,
+	Eft_Porce2	= Eft_Porcen
+	from SOESFITI noholdlock
+	where Eft_EstFin = @Eft_EsFin2
+    and SOESFITI.Eft_TipCue = #CuentaValorEF.Eft_TipCue
+	
+	select	Eft_TipCue,
+			Eft_DesRep AS Eft_Descri,
+			Eft_Numero,
+			Eft_EsFin1,
+			Eft_Valor1,
+			Eft_Porce1,
+			Eft_EsFin2,
+			Eft_Valor2,
+			Eft_Porce2,
+			Eft_Indice,
+			Eft_Estilo
+		from #CuentaValorEF
+		order by Eft_Indice
+
+	drop table #CuentaValorEF, #CuentaReporteEF
 	
 end
