@@ -612,6 +612,11 @@ select @PerPersoID = @@identity
 
 select	@Per_Numero	= right('00000000' + ltrim(rtrim(convert(char, @PerPersoID))), 8)
 
+if @Per_Numero = @Str_Vacio begin
+		rollback
+		return 1
+end
+
 exec @Status = SOPERSONPRO		
 			@Per_Numero, @Str_Vacio,  @Str_Vacio,  @Str_Vacio, @Str_Vacio,
 			@Fec_Vacia,  @Str_Vacio,  @Str_Vacio,  @Fec_Vacia, @Str_Vacio,
