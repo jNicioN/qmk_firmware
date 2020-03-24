@@ -1,4 +1,4 @@
-﻿create procedure SOUNGRPECON (
+create procedure SOUNGRPECON (
 	@Gpc_Person char(8),
 	@Gpc_Comple char(180),
 	@Gpc_RFC	varchar(15),
@@ -20,6 +20,12 @@ as
 ** DESCRIPCION: ** Consulta Unificacion Grupo de Persona				****
 ****************************************************************************
 ** REFERENCIAS: 														****
+****************************************************************************
+** Modifico:	Armando Alexis Sepulveda Cruz							****
+** Fecha:		24/Marzo/2020											****
+** Help:		1370878													****
+** Descripcion:	Se valida si el campo retornado esta nulo entonces 		****
+**				regresa por defecto el valor de vacio					****
 ****************************************************************************
 ** Modifico: Armando Alexis Sepúlveda Cruz								****
 ** Fecha:	 29/Mayo/2019												****
@@ -94,7 +100,7 @@ create table #Grupo (
 	Gpc_Grupo	char(8),
 	Gpc_Person	char(8),
 ) create index Grupo on #Grupo(Gpc_Grupo)
-
+	
 create table #InfoPer (
 	Gpc_Id		int identity,
 	Gpc_CliUni	char(8),
@@ -211,9 +217,18 @@ if @Tip_ConTip = 'L' begin
 				  		  		  	
 		/*Salida de información relacionada a la busqueda y grupos*/
 		insert into #InfoPer
-		select Gpc_CliUni as Gpc_CliUni, Gpc_Client as Gpc_Client, Gpc_Grupo  as Gpc_Grupo,  Gpc_Person as Gpc_Person, Per_Nombre as Gpc_Nombre, 
-			   Per_ApePat as Gpc_ApePat, Per_ApeMat as Gpc_ApeMat, Adi_FecNac as Gpc_FecNac, Adi_Sexo   as Gpc_Sexo,   isnull(Ent_Abrevi, @Str_Vacio) as Gpc_EntNac, 
-			   Per_RFC    as Gpc_RFC,	 Per_CURP   as Gpc_CURP
+		select isnull(Gpc_CliUni, @Str_Vacio) as Gpc_CliUni,
+			   isnull(Gpc_Client, @Str_Vacio) as Gpc_Client,
+			   isnull(Gpc_Grupo, @Str_Vacio)  as Gpc_Grupo,
+			   isnull(Gpc_Person, @Str_Vacio) as Gpc_Person,
+			   isnull(Per_Nombre, @Str_Vacio) as Gpc_Nombre,
+			   isnull(Per_ApePat, @Str_Vacio) as Gpc_ApePat,
+			   isnull(Per_ApeMat, @Str_Vacio) as Gpc_ApeMat,
+			   isnull(Adi_FecNac, @Str_Vacio) as Gpc_FecNac,
+			   isnull(Adi_Sexo, @Str_Vacio)   as Gpc_Sexo,
+			   isnull(Ent_Abrevi, @Str_Vacio) as Gpc_EntNac,
+			   isnull(Per_RFC, @Str_Vacio)    as Gpc_RFC,
+			   isnull(Per_CURP, @Str_Vacio)   as Gpc_CURP
 		  from #Grupo
 		 inner join SOPERSON noholdlock on Per_Numero = Gpc_Person
 		 left join SOPERADI noholdlock on Adi_PerNum = Per_Numero
