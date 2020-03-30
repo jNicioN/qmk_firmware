@@ -745,16 +745,16 @@ end else begin
 	end 
 
 	if @Tip_ConCon = @Str_A begin /* LA - Busqueda persona unica por RFC*/
-		create table #Personas (
+		create table #PersonasRFC (
 			Per_Numero	char(8)
 		)
 		if isnull(@Str_PerRFC, @Str_Vacio) <> @Str_Vacio and len(@Str_PerRFC) = @Len_RFCHom begin
-			insert into #Personas
+			insert into #PersonasRFC
 			select Per_Numero
 			from	SOPERSON noholdlock
 			 where Per_RFC = @Str_PerRFC
 		end else if isnull(@Str_PerRFC, @Str_Vacio) <> @Str_Vacio and len(@Str_PerRFC) >= @Len_RFCOrd begin
-			insert into #Personas
+			insert into #PersonasRFC
 			select Per_Numero
 			from	SOPERSON noholdlock
 			 where Per_RFC like @Str_PerRFC + @Str_Porcen
@@ -764,11 +764,11 @@ end else begin
 			   Per_Nombre
 		  from (
 		  	select SOUNIPER.Peu_Grupo 
-			  from #Personas
-			 inner join SOUNIPER noholdlock on #Personas.Per_Numero = SOUNIPER.Peu_Person
+			  from #PersonasRFC
+			 inner join SOUNIPER noholdlock on #PersonasRFC.Per_Numero = SOUNIPER.Peu_Person
 		  ) as personasUnicas
 		 inner join SOPERSON on personasUnicas.Peu_Grupo = SOPERSON.Per_Numero
 
-		drop table #Personas
+		drop table #PersonasRFC
 	end
 end
