@@ -15,7 +15,7 @@ as
 ****************************************************************************
 ** REFERENCIAS:															****
 ****************************************************************************
-** Creó:		Code4u Joel Gonzalez									****
+** Modifico:	Code4u Joel Gonzalez									****
 ** Fecha:		31/01/2020											    ****
 ** Help:														    	****
 ** Descripcion:	Creacion del procedimiento							    ****
@@ -106,6 +106,7 @@ begin
 	--Eliminar registros de tablas de Tipos De Movimientos.
 	truncate table SOTIMOCU
 	truncate table SOTIMOIM
+	truncate table SOEXAPCA
 	
 	--Eliminar registros de tablas de Historia. Para casos de reproceso.
 	delete SOHISTMC
@@ -119,6 +120,15 @@ begin
 	
 	delete SOHISTMI
 		where Tmi_Fecha = @Fec_Actual
+	--En caso de error hacer rollback
+	if @@error <> 0
+	begin
+		--rollback
+		return 1
+	end
+	
+	delete SOHISEAC
+		where Eac_Fecha = @Fec_Actual
 	--En caso de error hacer rollback
 	if @@error <> 0
 	begin
@@ -640,7 +650,7 @@ begin
 					Prp_TipMov, Cuc_CoTiMo, Prp_TiMoCa, Ctm_NivEnt,	Ctm_Vigenc,	
 					Ppt_Priori
 			from CHCUENTA noholdlock
-			inner join CLCLIENT noholdlock			
+			inner join CLCLIENT (index CLCLIENT) noholdlock			
 					on Cli_Numero	=	Cue_Client
 			inner join SOTMPPRP noholdlock
 					on Prp_TiCuCa	=	Cue_Tipo
@@ -696,56 +706,6 @@ begin
 			return 1
 		end
 		
-		
-		--insert into SOTMPCCN 
-			--(Ccn_Cuenta,	Ccn_TipMov,	Ccn_NivEnt,	Ccn_Vigenc,	Ccn_Produc,
-			--Ccn_PerFis, 	Ccn_Elemen, Ccn_TiMoAs,	Ccn_Aplica, Ccn_Termin, 
-			--Ccn_Priori, 	Ccn_AplCal, Ccn_Activo)
-			--select	Cue_Numero,	Prp_TiMoCa,					Ctm_NivEnt,	convert(tinyint, Ctm_Vigenc),	Prp_Produc, 
-					--Prp_PerFis, Prp_Produc as Ele_Numero,	Tma_Numero,	Tma_Aplica, 					Tma_Termin, 
-					--Ppt_Priori, @Bit_Si, 					@Bit_Si
-			--from CHCUENTA noholdlock
-			--inner join CLCLIENT noholdlock			
-					--on Cli_Numero	=	Cue_Client
-			--inner join SOTMPPRP noholdlock
-					--on Prp_TiCuCa	=	Cue_Tipo
-					--and Prp_MonCar	=	Cue_Moneda
-					--and Prp_NuPeCl	=	Cli_Tipo		--- Condición por Personalidad Fiscal del Cliente
-					--and Prp_ActEmp	=	Cli_ActEmp		--- Condición por Personalidad Fiscal del Cliente
-					--and Prp_TiMoCa	=	@Pro_TipMov		--- Filtrado por Tipo de Movimiento
-			--inner join SOTMPCUC noholdlock				-- Configuraciones de todas las Cuentas en todos los Niveles.
-					--on Cuc_Cuenta	=	Cue_Numero
-			--inner join SOCOTIMO noholdlock
-					--on Ctm_Numero 	=	Cuc_CoTiMo
-			--inner join SOPRPEFI noholdlock			--Personalidades Fiscales de cada Producto
-					--on Ppf_Produc	=	Prp_Produc
-					--and Ppf_PerFis	=	Prp_PerFis
-					--and Ppf_Activo	=	@Bit_Si
-			--inner join SOPRPECO noholdlock			--Productos/Personalidades Fiscales asignadas a Configuraciones
-					--on Ppc_CoTiMo	=	Ctm_Numero
-					--and Ppc_PrPeFi	=	Ppf_Numero
-					--and Ppc_Activo	=	@Bit_Si
-			--inner join SOPRTIMO noholdlock			--Obtener el Tipo de Movimiento de la Configuración
-					--on Ptm_PrPeFi	=	Ppf_Numero
-					--and Ptm_TipMov	=	Prp_TipMov	--Tipo o Tipos de Movimientos seleccionados en SOTMPPRP
-					--and Ptm_Activo	=	@Bit_Si
-			--inner join SOPRPETI	noholdlock			--Obtener Prioridad de Nivel del Tipo de Movimiento en el Producto/PersonalidadFiscal
-					--on Ppt_PrTiMo	=	Ptm_Numero
-					--and Ppt_NivEnt	=	Ctm_NivEnt
-					--and Ppt_Activo	=	@Bit_Si
-			--inner join SOTIMOAS noholdlock			--Tipos de Movimientos en cada Prod/PerFis dentro de cada Configuración
-					--on Tma_PrPeCo	=	Ppc_Numero
-					--and Tma_PrTiMo	=	Ptm_Numero
-					--and Tma_Activo	=	@Bit_Si
-			--where	Cue_Status = @Sta_Activo
-			
-		--En caso de error hacer rollback
-		--if @@error <> 0
-		--begin
-			----rollback
-			--return 1
-		--end
-				
 		--MODALIDADES----------------------------------------------------------------------------
 		--Eliminar las Configuraciones de Cuentas que hayan obtenido el Tipo de Movimiento como Beneficio en Modalidades.
 		update SOTMPCCN
@@ -765,11 +725,11 @@ begin
 	
 		--Obtener la Configuracion que se utilizara en cada Cuenta, considerando Nivel y Terminal.--
 		--En este momento, para cada Cuenta, en todos los niveles, se tienen las Configuraciones sin vigencia,
-		--y Configuraciones con Vigencia y que en cuya vigencia se encuentre la Fecha Actual de proceso.
-		--Por lo tanto se tiene hasta dos Configuraciones por Nivel en cada Cuenta.
-		--Solo la Configuracion sin Vigencia.
-		--O Solo la Configuracion con Vigencia.
-		--O Configuracion sin Vigencia y Configuracion con Vigencia.
+		--y Configuraciones con Vigencia y que la vigencia se encuentre la Fecha Actual de proceso.
+		--Por lo tanto se tiene hasta dos Configuraciones por Nivel en cada Cuenta:
+		--A: Solo la Configuracion sin Vigencia.
+		--B: O Solo la Configuracion con Vigencia.
+		--C: O Configuracion sin Vigencia y Configuracion con Vigencia.
 		
 		--Eliminar las Configuraciones con Vigencia cuando se tenga una Configuracion sin Vigencia en el mismo Nivel
 		--Y que la Configuración Sin Vigencia sea Terminal.
@@ -875,6 +835,46 @@ begin
 			inner join SOTMPCTA
 					on Cta_Cuenta = Ccn_Cuenta
 					and Cta_Priori > Ccn_Priori
+			where	Ccn_TipMov = @Pro_TipMov
+			  and	Ccn_Activo = @Bit_Si
+		--En caso de error hacer rollback
+		if @@error <> 0
+		begin
+			rollback
+			return 1
+		end
+		
+		--Es posible que en un Nivel, una Cuenta pueda pertenecer a mas de un Elemento.
+		--Por ejemplo en Nivel de Grupo de Cuenta, una Cuenta puede pertenecer a mas de un Grupo.
+		--Si ese Nivel es el seleccionado para aplicar a la Cuenta, se debe utilizar solo una 
+		--  de las Configuraciones.
+		--Podria ser que se asignen prioridades entre Elementos del Mismo Nivel, para que
+		--  aquí se pueda determinar la Configuracion seleccionada utilizando esas Prioridades.
+		--** Inicialmente se utilizara la ultima Configuracion asignada a la Cuenta.
+		
+		delete SOTMPCTA
+		
+		insert into SOTMPCTA 
+			(Cta_Cuenta,	Cta_Priori)
+			select Ccn_Cuenta, max(Ccn_TiMoAs)
+			from 	SOTMPCCN noholdlock
+			where 	Ccn_TipMov = @Pro_TipMov
+			  and	Ccn_Activo = @Bit_Si
+			group by	Ccn_Cuenta
+			having count(*) > 1		--Solo para los casos en que se tenga mas de una Configuracion aun Activas
+		--En caso de error hacer rollback
+		if @@error <> 0
+		begin
+			rollback
+			return 1
+		end
+				
+		update SOTMPCCN
+			set Ccn_Activo = @Bit_No
+			from SOTMPCCN
+			inner join SOTMPCTA
+					on Cta_Cuenta = Ccn_Cuenta
+					and Cta_Priori <> Ccn_TiMoAs
 			where	Ccn_TipMov = @Pro_TipMov
 			  and	Ccn_Activo = @Bit_Si
 		--En caso de error hacer rollback
