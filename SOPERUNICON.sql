@@ -20,6 +20,12 @@ as
 /*******************************************************************
 ** DESCRIPCION: Consulta de Persona Unica						****
 ********************************************************************
+** Modifico:	Armando Alexis Sepúlveda Cruz					****
+** Fecha:		04/06/2019										****
+** Help:		1370878											****
+** Descripcion:	Se agrega la consulta LA para busquedas de 		****
+**				Pesonas Unicas en función al RFC 				****
+********************************************************************
 ** Modifico:	Victor Osorio									****
 ** Fecha:		19/02/2020										****
 ** Help:		1312389 										****
@@ -29,6 +35,7 @@ as
 ** Modificó:	Francisco Javier Carrillo Rojas					****
 ** Fecha:		26/Ago/2019										****
 ** Help:		01289832										****
+
 ** Descripcion:	Obligar el uso de 4 caracteres en la lista 		****
 **				 L7 											****
 ********************************************************************
@@ -74,6 +81,7 @@ as
 ** Descripcion:	Agregar salida de a Per_Email, Per_Tipo,		****
 **				Per_Nombre,	Per_ApePat y Per_ApeMat a C5		****
 ********************************************************************
+
 ** Modifico:	Francisco Javier Carrillo Rojas					****
 ** Fecha:		29/10/2018										****
 ** Help:		1147468											****
@@ -153,7 +161,8 @@ declare	@Str_Vacio	char(1), /* Vacio */
 		@Len_RFCOrd	int,
 		@Len_RFCHom int,
 		@Ent_Cuatro	int,		/*	Entero en cuatro */
-		@Ent_Uno	int			/*	Entero en uno */
+		@Ent_Uno	int,		/*	Entero en uno */
+		@Str_A      char(1)	/* Tipo A*/
 
 /* Asignacion de Constantes */
 select	@Str_Vacio	= '',
@@ -176,7 +185,8 @@ select	@Str_Vacio	= '',
 		@Len_RFCOrd	= 10,								/* Longitud de rfc ordinario*/
 		@Len_RFCHom = 13,								/* Longitud de rfc con homoclave*/
 		@Ent_Cuatro	= 4,
-		@Ent_Uno	= 1
+		@Ent_Uno	= 1,
+		@Str_A 		= 'A'
 
 select	@Str_PerRFC = ltrim(rtrim(@Per_RFC)),
 		@Str_PeuNom	= ltrim(rtrim(@Per_Comple)) + @Str_Porcen
@@ -733,4 +743,32 @@ end else begin
 			
 		drop table #Personas
 	end 
+
+	if @Tip_ConCon = @Str_A begin /* LA - Busqueda persona unica por RFC*/
+		create table #PersonasRFC (
+			Per_Numero	char(8)
+		)
+		if isnull(@Str_PerRFC, @Str_Vacio) <> @Str_Vacio and len(@Str_PerRFC) = @Len_RFCHom begin
+			insert into #PersonasRFC
+			select Per_Numero
+			from	SOPERSON noholdlock
+			 where Per_RFC = @Str_PerRFC
+		end else if isnull(@Str_PerRFC, @Str_Vacio) <> @Str_Vacio and len(@Str_PerRFC) >= @Len_RFCOrd begin
+			insert into #PersonasRFC
+			select Per_Numero
+			from	SOPERSON noholdlock
+			 where Per_RFC like @Str_PerRFC + @Str_Porcen
+		end
+
+		select Per_Numero, Per_ComOrd, Per_Comple,	Per_RFC, Per_CURP,
+			   Per_Nombre
+		  from (
+		  	select SOUNIPER.Peu_Grupo 
+			  from #PersonasRFC
+			 inner join SOUNIPER noholdlock on #PersonasRFC.Per_Numero = SOUNIPER.Peu_Person
+		  ) as personasUnicas
+		 inner join SOPERSON on personasUnicas.Peu_Grupo = SOPERSON.Per_Numero
+
+		drop table #PersonasRFC
+	end
 end
