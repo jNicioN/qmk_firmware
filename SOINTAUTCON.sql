@@ -130,7 +130,7 @@ create table #PersonasDuplicadas(
 	Ped_Tipo	char(1))
 
 create table #Terceros(
-	Ter_Numero	char(8)  not null)
+	Ter_Grupo	char(8)  not null)
 	
 create table #PersonasAutorizadas(
 	Per_Numero	char(8)  not null,
@@ -207,18 +207,12 @@ if isnull(@Opi_TipOpe, @Ent_Cero) != @Ent_Cero and isnull(@Cio_Status, @Str_Vaci
 				group by Ped_Numero
 		
 		insert into #Terceros 
-			select Ped_Numero
+			select Peu_Grupo
 				from #PersonasDuplicadas as duplicadas
+					 inner join SOUNIPER on Ped_Numero = Peu_Person
 				where	Ped_Tipo	= @Tip_Tercer
 				  and	ltrim(Ped_Numero) is not null
-				group by Ped_Numero
-		/*Debido a que las reglas de intervinientes requeridos PI, PS, PM incluyen tanto titulares/cotitulares y terceros, se requiere
-		conservar el rastro de si previo a la agrupación, la persona también era un tercero, esto con la finalidad de obtener
-		el tipo de firma inferido del nombre del interviniente cuando el número de persona es vacío en CHPEFOFI */
-		update #PersonasAutorizadas set
-			Cob_EsTerc	= @Ent_Uno
-			from #Terceros
-			where Ter_Numero	= Per_Numero			
+				group by Peu_Grupo
 				
 		/*Excepto para configuraciones de terceros-mancomunado, insertar de forma manual al titular como tercero autorizado cuando no haya 
 		ni un tercero autorizado ligado a la cuenta, para considerarlo como firma A (ver update de tabla #Personas de más abajo)
@@ -253,6 +247,14 @@ if @Tip_ConTip = @Str_C begin
 			Per_Grupo = Peu_Grupo
 			from SOUNIPER noholdlock
 			where	Peu_Person = Per_Person
+
+		/*Debido a que las reglas de intervinientes requeridos PI, PS, PM incluyen tanto titulares/cotitulares y terceros, se requiere
+		conservar el rastro de si previo a la agrupación, la persona también era un tercero, esto con la finalidad de obtener
+		el tipo de firma inferido del nombre del interviniente cuando el número de persona es vacío en CHPEFOFI */
+		update #Personas set
+			Per_EsTerc	= @Ent_Uno
+			from #Terceros
+			where Ter_Grupo	= Per_Grupo			
 
 		/*Solo para operaciones ligadas a cuentas, se actualiza su nivel de firma de los terceros autorizados*/
 		if @Opi_BasOpe	= @Tip_BasCue begin
@@ -312,6 +314,7 @@ if @Tip_ConTip = @Str_C begin
 				 inner join SOPERSON noholdlock on Per_Numero = Per_Grupo
 				 left outer join SOPERADI noholdlock on Adi_PerNum	= Per_Numero
 			where	Per_Grupo	= @Per_Numero
+			order by Per_CobTip asc
 	end	
 end else begin
 	if @Tip_ConCon	= @Str_Uno begin /* L1 - Búsqueda de personas autorizadas ligadas a configuración por nombre completo*/
@@ -335,6 +338,14 @@ end else begin
 			Per_Grupo = Peu_Grupo
 			from SOUNIPER noholdlock
 			where	Peu_Person = Per_Person
+			
+		/*Debido a que las reglas de intervinientes requeridos PI, PS, PM incluyen tanto titulares/cotitulares y terceros, se requiere
+		conservar el rastro de si previo a la agrupación, la persona también era un tercero, esto con la finalidad de obtener
+		el tipo de firma inferido del nombre del interviniente cuando el número de persona es vacío en CHPEFOFI */
+		update #Personas set
+			Per_EsTerc	= @Ent_Uno
+			from #Terceros
+			where Ter_Grupo	= Per_Grupo				
 			
 		/*Solo para operaciones ligadas a cuentas, se actualiza su nivel de firma de los terceros autorizados*/
 		if @Opi_BasOpe	= @Tip_BasCue begin
@@ -393,6 +404,7 @@ end else begin
 			from #Personas
 				 inner join SOPERSON noholdlock on Per_Numero = Per_Grupo
 				 left outer join SOPERADI noholdlock on Adi_PerNum	= Per_Numero
+			order by Per_CobTip,	Per_ComOrd asc
 	end
 end
 
