@@ -40,18 +40,16 @@ begin
 			@Peu_Grupo  char(8)  /* Grupo al que pertenece la persona*/
 			
 	/* Declaracion de Constantes*/
-	declare	@Str_Vacio	char(1),  /* String Vacio*/
-			@Str_Porcen	char(1),  /* Caracter porcentaje*/
+	declare	@Str_Porcen	char(1),  /* Caracter porcentaje*/
 			@Str_Uno	char(1),  /* Caracter Uno*/
 			@Str_Dos    char(1),  /* Caracter Dos*/ 
 			@Str_Tres    char(1), /* Caracter Tres*/ 
 			@Str_LetraC char(1),  /* Caracter C*/
-            @Tip_ConTip	char(1),  /* Tipo de consulta*/
-			@Tip_ConCon	char(1)   /* Tipo de consulta a explitear*/
+            @Tip_ConTip	char(1),
+			@Tip_ConCon	char(1)
 						
 	/* Asignación de valores a Constantes */
-	select	@Str_Vacio	= '',			
-			@Str_Porcen	= '%',
+	select	@Str_Porcen	= '%',
 			@Str_Uno	= '1',			
 			@Str_Dos    = '2', 			
 			@Str_Tres   = '3',
