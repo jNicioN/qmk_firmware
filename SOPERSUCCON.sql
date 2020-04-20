@@ -12,37 +12,44 @@ create procedure SOPERSUCCON (
 as 
 
 /***************************************************************************/
-/* DESCRIPCION: Consulta de relacion de perfiles con sucursales 	  	   */
+/* DESCRIPCION: Sp para consulta de relacion de perfiles con sucursales    */
 /***************************************************************************/ 
 /* REFERENCIAS:					                           				   */
 /****************************************************************************
-** Creo:		Angel Gonzalez Hernandez								*****
+** Creo:		Angel Gonzalez Hernandez								 ****
 ** Fecha:		20/Marzo/2020											 ****
-** Descripcion:	2018-056 Gobierno de Identidades		        		 ****
-** Help Desk:	20200309420002						 					 ****
+** Descripcion:	Se agrega sp para consulta de perfiles y				 ****
+                sucursales asignadas de usuarios en Sibamex3             ****
+** Help Desk:	1205794     						 					 ****
 ****************************************************************************/
 
+/* Declaracion de Variables */
 declare @Tip_ConTip	char(1), 			
 		@Tip_ConCon char(1),
 		@Row_ConCli char(1),			
-		@Row_ConPer	int				
+		@Row_ConPer	int				/* Variable para el contador de registros de perfiles  del usuario*/		
 
-declare	@Int_Uno        	int,
+/* Declaracion de constantes */
+declare	@Int_Uno        int,
 		@Int_Dos        int,
-		@Tip_ConLis	char(1)	
+		@Tip_ConLis		char(1)	
 
+/* Declaracion de Constantes */
 declare	@Str_Consul char(1),
 		@Ent_Dos 	smallint,
 		@Ent_Uno 	smallint,
 		@Tra_TipCon	char(1)
 
-select	@Str_Consul	 = 'C',				
-		@Ent_Uno = 1,					
-		@Ent_Dos = 2		
+/* Asignacion de Constantes */
+select	@Str_Consul	 = 'C',				/* String de Consulta */
+		@Ent_Uno = 1,					/* Entero Uno */
+		@Ent_Dos = 2					/* Entero Dos */
 
-select	@Row_ConPer		=   1,		
-		@Row_ConCli	=  '1',		
-		@Tip_ConLis	=  'L'		
+/* Asignacion de valores a variables*/		
+select	@Row_ConPer	=  	1,				/* Contador de grupos inicia en uno */
+		@Row_ConCli	=  '1',				/* Contador de clientes inicia en uno */
+		@Tip_ConLis	=  'L'				/* Tipo Consulta  */
+
 
 select	@Tip_ConTip	= substring(@Tip_Consul,@Ent_Uno,@Ent_Uno),
 		@Tip_ConCon	= substring(@Tip_Consul,@Ent_Dos,@Ent_Uno)
@@ -88,7 +95,8 @@ if @Tip_ConTip = @Tip_ConLis begin  	/* Consultas*/
 			select  Usl_Usuari, Usl_Sucurs
 				from SOUSUSUC noholdlock
 				order by Usl_Usuari
-				
+
+	/*Consulta de perfiles asignados a usuarios */
 	DECLARE @Per_Id     		INT,
 			@Per_max	INT,
 			@Per_Numusu 	char(10),
@@ -141,7 +149,8 @@ if @Tip_ConTip = @Tip_ConLis begin  	/* Consultas*/
 		IF @Per_Id > 100000
 			BREAK
 	END
-			
+
+	/*Consulta de sucursales asignadas a usuarios*/
 	DECLARE @Suc_Idsuc			INT,
 			@Suc_Maxsuc 		INT,
 			@Suc_Idusu  		char(10),
@@ -196,6 +205,7 @@ if @Tip_ConTip = @Tip_ConLis begin  	/* Consultas*/
 			BREAK
 	END
 	
+		/*Se hace el join de las 2 consultas*/
 		SELECT #Perfiles.Usu_Id, #Perfiles.Usu_Perfiles, #Sucursales.Usu_Sucursales 
 			FROM #Perfiles LEFT JOIN #Sucursales ON #Sucursales.Usu_Id =  #Perfiles.Usu_Id 
 			WHERE #Sucursales.Usu_Sucursales  > ''
