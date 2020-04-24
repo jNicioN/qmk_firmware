@@ -17,6 +17,11 @@ as
 /*****************************************************************************/
 /** REFERENCIAS: 
 ****************************************************************************
+** Modifico:	Juan Pablo Mendez Cabrales								****
+** Fecha:		24 de Abril del 2020									****
+** Help:		01352603												****
+** Descripcion:	Se agrega C3 para dart salida a Direccion copleta		****
+****************************************************************************
 ** Modifico:	Jaret Guanajuato Ruvalcaba								****
 ** Fecha:		11/Diciembre/2013											****
 ** Help:		00591890													****
@@ -103,6 +108,20 @@ if @Tip_ConTip = @Tra_Consul begin
 			  and	Com_Estado	= Est_Numero
 			  and	Ciu_Estado	= Est_Numero
 	end
+	if @Tip_ConCon = '3' begin				/* Consulta de llave Principal */
+		select	distinct
+				Com_Numero,	Com_Descri,	Com_RFC,	Com_Calle,	Com_CalNum,
+				Com_Coloni,	Com_CodPos,	Com_Ciudad,	Com_Estado,	Com_Pais,
+				Com_Abrevi,	Com_ClaIns, Com_FolEle,	Com_CorEle, Ciu_Nombre,	
+				Ciu_Estado,	Est_Nombre, Ent_Nombre
+			from SOCOMPAN noholdlock
+			inner join SOESTADO noholdlock 	 on Est_Numero	= Com_Estado
+			inner join CLENTIDA	noholdlock	 on Est_ClaABM  = Ent_Inegi
+			inner join SOCIUDAD noholdlock 	 on Ciu_Numero	= Com_Ciudad 
+											and Ciu_Estado	= Est_Numero
+			where	Com_Numero	= @Com_Numero
+	end
+	
 end else if @Tip_ConTip = @Tra_Lista begin
 	if @Tip_ConCon = '1' begin				
 		select	Com_Numero,	Com_Descri
