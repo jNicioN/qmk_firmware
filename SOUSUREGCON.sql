@@ -3,7 +3,7 @@
 	@Usu_Clave	char(15),
 	@Usr_Region	int,
 	@Usr_Perfil	char(3),
-	@Usr_MulReg varchar(100),
+	@Usr_MulReg varchar(400),
 	@Tip_Consul	char(2),
 
 	@NumTransac	char(10),
@@ -16,6 +16,11 @@
 as
 /******************************************************************/
 /* DESCRIPCION: Usuario por regiones							  */
+/******************************************************************/
+/* Modifica:	Gerardo Gomez Garcia							****
+** Fecha:		28/04/2020										****
+** Help:		1384228  										****
+** Modifica:	Se modifica longitud de la variable @Usr_MulReg	***/
 /******************************************************************/
 /* Modifica:	Edwin Dennis Santiago							****
 ** Fecha:		04/07/2019										****
