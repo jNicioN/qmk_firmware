@@ -1,5 +1,4 @@
 create procedure SOPERSUCCON (
-	@Tip_Consul char(2),
 	
 	@NumTransac	char(10),
 	@Transaccio	char(3),
@@ -12,204 +11,150 @@ create procedure SOPERSUCCON (
 as 
 
 /***************************************************************************/
-/* DESCRIPCION: Sp para consulta de relacion de perfiles con sucursales    */
+ /* DESCRIPCION: Consulta de relacion de perfiles con sucursales  		   */
 /***************************************************************************/ 
-/* REFERENCIAS:					                           				   */
+/* REFERENCIAS:															   */
 /****************************************************************************
-** Creo:		Angel Gonzalez Hernandez								 ****
+** Creo:		Angel Gonzalez Hernandez								*****
 ** Fecha:		20/Marzo/2020											 ****
-** Descripcion:	Se agrega sp para consulta de perfiles y				 ****
-                sucursales asignadas de usuarios en Sibamex3             ****
-** Help Desk:	1205794     						 					 ****
-****************************************************************************/
+** Descripcion:	2018-056 Gobierno de Identidades						 ****
+** Help Desk:	2020030942000273									     ****
+*****************************************************************************/
 
-/* Declaracion de Variables */
-declare @Tip_ConTip	char(1), 			
+declare @Tip_ConTip	char(1), 	/* Declaracion de Variables */		
 		@Tip_ConCon char(1),
 		@Row_ConCli char(1),			
-		@Row_ConPer	int				/* Variable para el contador de registros de perfiles  del usuario*/		
+		@Row_ConPer	int,
+		@Contador 	int,
+		@ContAct	int,
+		@Usu_Actual	char(6),  
+		@Per_Actual char(256),
+		@Con_PerAct int,
+		@Ent_PerTot int,
+		@Ent_Zero 	int		
 
-/* Declaracion de constantes */
-declare	@Int_Uno        int,
-		@Int_Dos        int,
-		@Tip_ConLis		char(1)	
-
-/* Declaracion de Constantes */
-declare	@Str_Consul char(1),
+declare	@Int_Uno    int,	/* Declaracion de Constantes */
+		@Int_Dos    int,
+		@Tip_ConLis	char(1),	
+		@Str_Consul char(1),
 		@Ent_Dos 	smallint,
 		@Ent_Uno 	smallint,
-		@Tra_TipCon	char(1)
+		@Tra_TipCon	char(1),
+		@StrVacio	char(1)
 
-/* Asignacion de Constantes */
-select	@Str_Consul	 = 'C',				/* String de Consulta */
-		@Ent_Uno = 1,					/* Entero Uno */
-		@Ent_Dos = 2					/* Entero Dos */
+select	@Str_Consul	= 'C',				
+		@Ent_Uno  = 1,					
+		@Ent_Dos  = 2,
+		@StrVacio = '',
+		@Ent_Zero = 0		
 
-/* Asignacion de valores a variables*/		
-select	@Row_ConPer	=  	1,				/* Contador de grupos inicia en uno */
-		@Row_ConCli	=  '1',				/* Contador de clientes inicia en uno */
-		@Tip_ConLis	=  'L'				/* Tipo Consulta  */
+select	@Row_ConPer	=  	1,		
+		@Row_ConCli	=  '1',		
+		@Tip_ConLis	=  'L'		
 
-
-select	@Tip_ConTip	= substring(@Tip_Consul,@Ent_Uno,@Ent_Uno),
-		@Tip_ConCon	= substring(@Tip_Consul,@Ent_Dos,@Ent_Uno)
-
-
-if @Tip_ConTip = @Tip_ConLis begin  	/* Consultas*/
-	if @Tip_ConCon = '1'	begin 		/* Consulta  todos los usuarios con su perfil y su sucursal asignada */
-		
+	/* Consulta  todos los usuarios con su perfil y su sucursal asignada */
+			
 		set @Row_ConPer	= @Int_Uno
 
 		create table #PerUsu(
 			Usu_Identi	int identity,
-			Usu_Id	    char(10),
-			Usu_Perfil	char(10)
+			Usu_Numero	    char(6),
+			Usu_Clave	 	char(20),
+			Usu_Perfil	varchar(500),
+			Suc_Id		varchar(500)
 		)
-		
-		create table #SucUsu(
-			Usu_Identi		int identity,
-			Usu_Id	    	char(10),
-			Usu_Sucursal	char(10)
-		)
-		
-		create table #Perfiles(
-			Usu_Identi		int identity,
-			Usu_Id	    	char(10),
-			Usu_Perfiles	varchar(256)
-		)
-		
-		create table #Sucursales(
-			Usu_Identi		int identity,
-			Usu_Id	    	char(10),
-			Usu_Sucursales	varchar(256),
-		)   
-		
-		insert into #PerUsu	(
-					    Usu_Id, Usu_Perfil)	 
-			select  Upe_Usuari, Upe_Perfil
-				from SAUSUPER noholdlock
-				order by Upe_Usuari
+		create unique nonclustered index #PerUsu on #PerUsu ( Usu_Numero ASC)
+			
+		insert into #PerUsu 
+			 select Usu_Numero , Usu_Clave, "" ,"" from SOUSUARI noholdlock
+			 group by Usu_Numero 
+			 
+			 select @ContAct = @Ent_Uno
+			 select @Contador = count (Usu_Perfil) from #PerUsu
+			 while @Contador >= @ContAct begin
+			
+				create table #PerfilesActuales(
+					Usu_Identi	int identity,
+					Usu_Perfil	char(3)
+				)
+				create unique nonclustered index #PerfilesActuales on #PerfilesActuales ( Usu_Identi ASC)	
+
+				create table #SucursalesActuales(
+					Usu_Identi		int identity,
+					Usu_Sucursales	char(3)
+	
+				)
+				create unique nonclustered index #SucursalesActuales on #SucursalesActuales ( Usu_Identi ASC)
+				 
+				select @Usu_Actual  = Usu_Numero
+				from #PerUsu where Usu_Identi = @ContAct
+			 	 
+				Insert into #PerfilesActuales
+				select Upe_Perfil from SAUSUPER
+				where  Upe_Usuari = @Usu_Actual  
+			 
+				select @Con_PerAct = @Ent_Uno
+				select @Ent_PerTot = count (Usu_Perfil)
+				from #PerfilesActuales
+
+				select @Per_Actual = @StrVacio
+				if @Ent_PerTot  > @Ent_Zero begin
+				while  @Ent_PerTot >= @Con_PerAct begin
 				
-		insert into #SucUsu	(
-					    Usu_Id, Usu_Sucursal)	 
-			select  Usl_Usuari, Usl_Sucurs
-				from SOUSUSUC noholdlock
-				order by Usl_Usuari
-
-	/*Consulta de perfiles asignados a usuarios */
-	DECLARE @Per_Id     		INT,
-			@Per_max	INT,
-			@Per_Numusu 	char(10),
-			@Per_All  	VARCHAR(255),
-			@Per_Usuant 	char(10)
-			
-	
-	SELECT  @Per_Id = @Ent_Uno,
-			@Per_max = MAX(Usu_Identi)
-	FROM    #PerUsu
-	
-	WHILE (@Ent_Uno = @Ent_Uno)
-	BEGIN
-	
-		SELECT  @Per_Numusu = Usu_Id
-		FROM    #PerUsu
-		WHERE   Usu_Identi = @Per_Id
-	
-		IF @Per_Numusu IS NULL
-		BEGIN
-			SELECT  @Per_Id = @Per_Id + @Ent_Uno
-	
-			IF @Per_Id > @Per_max
-				BREAK
-			ELSE
-				CONTINUE
-		END
-	
-		UPDATE  #PerUsu
-		SET     @Per_All = @Per_All + ',' + CONVERT(VARCHAR, Usu_Perfil) 
-		WHERE   Usu_Id = @Per_Numusu
-	
-		select  @Per_All = RIGHT(@Per_All, LEN(@Per_All)-@Ent_Uno)
-				
-		IF NOT  @Per_Numusu = @Per_Usuant
-
-		BEGIN
-			insert into #Perfiles (Usu_Id, Usu_Perfiles) values(@Per_Numusu, @Per_All)
-			SET @Per_Usuant = @Per_Numusu 
-		END
-			
-		SELECT  @Per_Numusu   = NULL,
-				@Per_All = NULL
-	
-		SELECT  @Per_Id = @Per_Id + @Ent_Uno
-	
-		IF @Per_Id > @Per_max
-			BREAK
-	
-		IF @Per_Id > 100000
-			BREAK
-	END
-
-	/*Consulta de sucursales asignadas a usuarios*/
-	DECLARE @Suc_Idsuc			INT,
-			@Suc_Maxsuc 		INT,
-			@Suc_Idusu  		char(10),
-			@Suc_All 	 	VARCHAR(255),
-			@Suc_Ultusu 		char(10)
-	
-	SELECT  @Suc_Idsuc = @Ent_Uno,
-			@Suc_Maxsuc = MAX(Usu_Identi)
-	FROM    #SucUsu
-			
-	WHILE (@Ent_Uno = @Ent_Uno)
-	BEGIN
-	
-		SELECT  @Suc_Idusu = Usu_Id
-		FROM    #SucUsu
-		WHERE   Usu_Identi = @Suc_Idsuc		    
-			
-		IF @Suc_Idusu IS NULL
 		
-		BEGIN
-						
-			SELECT  @Suc_Idsuc = @Suc_Idsuc + @Ent_Uno
+					select @Per_Actual = ltrim (rtrim (@Per_Actual)) + "," + rtrim (ltrim (Usu_Perfil))
+					from #PerfilesActuales
+					where Usu_Identi = @Con_PerAct
 					
-			IF @Suc_Idsuc > @Suc_Maxsuc
-				BREAK
-			ELSE
-				CONTINUE
-		END
-		
-		UPDATE  #SucUsu
-		SET     @Suc_All  = @Suc_All + ',' + CONVERT(VARCHAR, Usu_Sucursal) 
-		WHERE   Usu_Id = @Suc_Idusu
+					select  @Per_Actual = RIGHT(@Per_Actual, LEN(@Per_Actual)-1)
+					where 	@Per_Actual LIKE ',%'
+								
+					select @Con_PerAct = @Con_PerAct + @Ent_Uno 
+						
+				end
+			 	
+			 	update #PerUsu set Usu_Perfil = @Per_Actual
+			 	where Usu_Numero = @Usu_Actual
+			 	
+			 	end
+			 	
+			 	/*Sucursales*/
+			 	Insert into #SucursalesActuales
+				 select Usl_Sucurs  from SOUSUSUC
+				 where  Usl_Usuari  = @Usu_Actual
+			 
+				select @Con_PerAct = @Ent_Uno
+				select @Ent_PerTot = count (Usu_Sucursales)
+				from #SucursalesActuales
+
+				select @Per_Actual = @StrVacio
+				if @Ent_PerTot  > @Ent_Zero begin
+				while  @Ent_PerTot >= @Con_PerAct begin
+					
+					select @Per_Actual = ltrim (rtrim (@Per_Actual)) + "," + rtrim (ltrim (Usu_Sucursales))
+
+					from #SucursalesActuales
+					where Usu_Identi = @Con_PerAct
+				
+				    select  @Per_Actual = RIGHT(@Per_Actual, LEN(@Per_Actual)-1)
+					where 	@Per_Actual LIKE ',%'
+					
+					select @Con_PerAct = @Con_PerAct + @Ent_Uno 
+						
+				end
+			 	
+			 	update #PerUsu set Suc_Id = @Per_Actual
+			 	where Usu_Numero = @Usu_Actual
+			 	
+			 	end
+			 	
+			 	select @ContAct = @ContAct + @Ent_Uno
+			 	
+			 	 drop table  #PerfilesActuales
+				 drop table  #SucursalesActuales
+			 end	
 	
-		select  @Suc_All = RIGHT(@Suc_All, LEN(@Suc_All)-@Ent_Uno)
+		SELECT Usu_Numero , Usu_Clave , Usu_Perfil , Suc_Id
+			FROM #PerUsu WHERE Usu_Perfil > '' OR Suc_Id > ''
 			
-		IF NOT  @Suc_Idusu = @Suc_Ultusu
-	
-			BEGIN
-				insert into #Sucursales (Usu_Id, Usu_Sucursales) values (@Suc_Idusu, @Suc_All)
-				SET @Suc_Ultusu = @Suc_Idusu 
-			END
-	
-		SELECT  @Suc_Idusu   = NULL,
-				@Suc_All = NULL
-	
-		SELECT  @Suc_Idsuc = @Suc_Idsuc + @Ent_Uno
-			
-		IF @Suc_Idsuc > @Suc_Maxsuc
-			BREAK
-	
-		IF @Suc_Idsuc > 100000
-			BREAK
-	END
-	
-		/*Se hace el join de las 2 consultas*/
-		SELECT #Perfiles.Usu_Id, #Perfiles.Usu_Perfiles, #Sucursales.Usu_Sucursales 
-			FROM #Perfiles LEFT JOIN #Sucursales ON #Sucursales.Usu_Id =  #Perfiles.Usu_Id 
-			WHERE #Sucursales.Usu_Sucursales  > ''
-			
-		DROP TABLE #PerUsu, #SucUsu, #Perfiles, #Sucursales	
-	end
-end
+		DROP TABLE #PerUsu		
