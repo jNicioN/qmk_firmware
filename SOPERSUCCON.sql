@@ -35,23 +35,17 @@ declare @Tip_ConTip	char(1), 	/* Declaracion de Variables */
 
 declare	@Int_Uno    int,	/* Declaracion de Constantes */
 		@Int_Dos    int,
-		@Tip_ConLis	char(1),	
-		@Str_Consul char(1),
 		@Ent_Dos 	smallint,
 		@Ent_Uno 	smallint,
-		@Tra_TipCon	char(1),
 		@StrVacio	char(1)
 
-select	@Str_Consul	= 'C',				
-		@Ent_Uno  = 1,					
-		@Ent_Dos  = 2,
-		@StrVacio = '',
-		@Ent_Zero = 0		
-
-select	@Row_ConPer	=  	1,		
-		@Row_ConCli	=  '1',		
-		@Tip_ConLis	=  'L'		
-
+select	@Ent_Uno  	 =  1,					
+		@Ent_Dos 	 =  2,
+		@StrVacio 	 =  '',
+		@Ent_Zero 	 =  0,		
+		@Row_ConPer	 =  1
+		
+				
 	/* Consulta  todos los usuarios con su perfil y su sucursal asignada */
 			
 		set @Row_ConPer	= @Int_Uno
@@ -63,10 +57,10 @@ select	@Row_ConPer	=  	1,
 			Usu_Perfil	varchar(500),
 			Suc_Id		varchar(500)
 		)
-		create unique nonclustered index #PerUsu on #PerUsu ( Usu_Numero ASC)
+		create unique nonclustered index #PerUsu on #PerUsu ( Usu_Numero ASC )
 			
 		insert into #PerUsu 
-			 select Usu_Numero , Usu_Clave, "" ,"" from SOUSUARI noholdlock
+			 select Usu_Numero , Usu_Clave, '','' from SOUSUARI noholdlock
 			 group by Usu_Numero 
 			 
 			 select @ContAct = @Ent_Uno
@@ -77,14 +71,14 @@ select	@Row_ConPer	=  	1,
 					Usu_Identi	int identity,
 					Usu_Perfil	char(3)
 				)
-				create unique nonclustered index #PerfilesActuales on #PerfilesActuales ( Usu_Identi ASC)	
+				create unique nonclustered index #PerfilesActuales on #PerfilesActuales ( Usu_Identi ASC )	
 
 				create table #SucursalesActuales(
 					Usu_Identi		int identity,
 					Usu_Sucursales	char(3)
 	
 				)
-				create unique nonclustered index #SucursalesActuales on #SucursalesActuales ( Usu_Identi ASC)
+				create unique nonclustered index #SucursalesActuales on #SucursalesActuales ( Usu_Identi ASC )
 				 
 				select @Usu_Actual  = Usu_Numero
 				from #PerUsu where Usu_Identi = @ContAct
@@ -102,7 +96,7 @@ select	@Row_ConPer	=  	1,
 				while  @Ent_PerTot >= @Con_PerAct begin
 				
 		
-					select @Per_Actual = ltrim (rtrim (@Per_Actual)) + "," + rtrim (ltrim (Usu_Perfil))
+					select @Per_Actual = ltrim (rtrim (@Per_Actual)) + ',' + rtrim (ltrim (Usu_Perfil))
 					from #PerfilesActuales
 					where Usu_Identi = @Con_PerAct
 					
@@ -131,7 +125,7 @@ select	@Row_ConPer	=  	1,
 				if @Ent_PerTot  > @Ent_Zero begin
 				while  @Ent_PerTot >= @Con_PerAct begin
 					
-					select @Per_Actual = ltrim (rtrim (@Per_Actual)) + "," + rtrim (ltrim (Usu_Sucursales))
+					select @Per_Actual = ltrim (rtrim (@Per_Actual)) + ',' + rtrim (ltrim (Usu_Sucursales))
 
 					from #SucursalesActuales
 					where Usu_Identi = @Con_PerAct
