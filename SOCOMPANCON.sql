@@ -17,6 +17,11 @@ as
 /*****************************************************************************/
 /** REFERENCIAS: 
 ****************************************************************************
+** Modifico:	Juan Pablo Mendez Cabrales								****
+** Fecha:		24 de Abril del 2020									****
+** Help:		01352603												****
+** Descripcion:	Se agrega C3 para dart salida a Direccion copleta		****
+****************************************************************************
 ** Modifico:	Jaret Guanajuato Ruvalcaba								****
 ** Fecha:		11/Diciembre/2013											****
 ** Help:		00591890													****
@@ -72,17 +77,23 @@ declare @Tip_ConTip char(1),				/* Declaración de Variables */
 		@Tip_ConCon char(1)
 
 declare	@Tra_Consul	char(1),				/* Declaración de Constantes */
-		@Tra_Lista	char(1)
+		@Tra_Lista	char(1),
+		@Str_Uno    char(1),
+		@Str_Dos    char(1),
+		@Str_Tres	char(1)
 
 /* Asignación de Constantes */
 select	@Tra_Consul	= 'C',					/* Transacción Tipo Consulta */
-		@Tra_Lista	= 'L'					/* Transacción Tipo Lista */
-
+		@Tra_Lista	= 'L',					/* Transacción Tipo Lista */
+		@Str_Uno    = '1',
+		@Str_Dos    = '2',
+		@Str_Tres   = '3'
+		
 select 	@Tip_ConTip = substring(@Tip_Consul,1,1),
 		@Tip_ConCon = substring(@Tip_Consul,2,1)
 
 if @Tip_ConTip = @Tra_Consul begin
-	if @Tip_ConCon = '1' begin				/* Consulta de llave Principal */
+	if @Tip_ConCon = @Str_Uno begin				/* Consulta de llave Principal */
 
 		select	Com_Numero,	Com_Descri,	Com_RFC,	Com_Calle,	Com_CalNum,
 				Com_Coloni,	Com_CodPos,	Com_Ciudad,	Com_Estado,	Com_Pais,
@@ -91,7 +102,7 @@ if @Tip_ConTip = @Tra_Consul begin
 			where	Com_Numero	= @Com_Numero
 	end
 
-	if @Tip_ConCon = '2' begin				/* Consulta Nombre de Ciudad */
+	if @Tip_ConCon = @Str_Dos begin				/* Consulta Nombre de Ciudad */
 	
 		select	Com_Numero,	Com_Descri,	Ciu_Nombre,	Ciu_Estado,	Est_Nombre,
 				Est_Abrevi,	Com_ClaIns	
@@ -103,8 +114,22 @@ if @Tip_ConTip = @Tra_Consul begin
 			  and	Com_Estado	= Est_Numero
 			  and	Ciu_Estado	= Est_Numero
 	end
+	if @Tip_ConCon = @Str_Tres begin				/* Consulta de llave Principal */
+		select	distinct
+				Com_Numero,	Com_Descri,	Com_RFC,	Com_Calle,	Com_CalNum,
+				Com_Coloni,	Com_CodPos,	Com_Ciudad,	Com_Estado,	Com_Pais,
+				Com_Abrevi,	Com_ClaIns, Com_FolEle,	Com_CorEle, Ciu_Nombre,	
+				Ciu_Estado,	Est_Nombre, Ent_Nombre
+			from SOCOMPAN noholdlock
+			inner join SOESTADO noholdlock 	 on Est_Numero	= Com_Estado
+			inner join CLENTIDA	noholdlock	 on Est_ClaABM  = Ent_Inegi
+			inner join SOCIUDAD noholdlock 	 on Ciu_Numero	= Com_Ciudad 
+											and Ciu_Estado	= Est_Numero
+			where	Com_Numero	= @Com_Numero
+	end
+	
 end else if @Tip_ConTip = @Tra_Lista begin
-	if @Tip_ConCon = '1' begin				
+	if @Tip_ConCon = @Str_Uno begin				
 		select	Com_Numero,	Com_Descri
 			from SOCOMPAN noholdlock
 			order by Com_Numero
