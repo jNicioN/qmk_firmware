@@ -21,8 +21,8 @@ as
 ****************************************************************************
 ** Creó:		Code4u Joel Gonzalez									****
 ** Fecha:		31/01/2020											    ****
-** Help:														    	****
-** Descripcion:	Creacion de la funcion							    	****
+** Help:			1286068											    ****
+** Descripcion:	Creacion de la funcion									****
 ****************************************************************************/
 
 -- Declaración de Variables
