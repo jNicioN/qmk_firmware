@@ -22,7 +22,7 @@ as
 /*********************************************************************************/
 /*** Nombre: Code4U Joel Gonzalez						   						**/
 /**  Fecha: 30/Enero/2020										   				**/
-/**  Help: 												   				  		**/
+/**  Help: 	1286068											   				  		**/
 /**  Descripcion: Registros de Tiempos de la ejecución de Cálculo de Comisiones	**/
 /**               por cada Comision.											**/
 /*********************************************************************************/

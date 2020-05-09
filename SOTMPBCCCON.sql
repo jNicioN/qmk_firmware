@@ -19,7 +19,7 @@ as
 /*********************************************************************************/
 /*** Nombre: Code4U Joel Gonzalez						   						**/
 /**  Fecha: 30/Enero/2020										   				**/
-/**  Help: 												   				  		**/
+/**  Help: 	1286068											   				  		**/
 /**  Descripcion: Consulta a la tabla de Bitacora del proceso de Calculo de 	**/
 /**               Comisiones, para determinar si el proceso que esta por        **/
 /**               ejecutarse ya fue previamente ejecuta.                        **/

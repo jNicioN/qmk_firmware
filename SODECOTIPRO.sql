@@ -17,7 +17,7 @@ as
 ****************************************************************************
 ** Modifico:	Code4u Joel Gonzalez									****
 ** Fecha:		31/01/2020											    ****
-** Help:														    	****
+** Help:			1286068											    	****
 ** Descripcion:	Creacion del procedimiento							    ****
 ****************************************************************************/
 
@@ -25,8 +25,8 @@ as
 declare	@Fec_Actual	smalldatetime,						/* Fecha */
 		@Fec_FecIni	smalldatetime,						/* Fecha Inicio */
 		@Fec_FecFin	smalldatetime,						/* Fecha Fin */		
-		@Reg_ContTM	int,								/* Contador de Registros de Tipos de Movimientos */ 
-		@Reg_TotTM	int,								/* Total de Registros de Tipos de Movimientos */
+		@Reg_CoTiMo	int,								/* Contador de Registros de Tipos de Movimientos */ 
+		@Reg_TipMov	int,								/* Total de Registros de Tipos de Movimientos */
 		@Pro_TipMov	char(6),							/* Tipo de Movimiento a Procesar */
 		@Var_Contin bit,								/* Continuar con proceso que esta por ejecutarse */
 		@Str_Descri char(50),							/* Descripcion del proceso ejecutado */
@@ -78,9 +78,6 @@ end
 
 select	@Fec_FecIni		= dateadd(dd, 1, dateadd(dd, - datepart(dd, @Fec_Actual), @Fec_Actual))
 select	@Fec_FecFin		= dateadd(dd, -1, dateadd(mm, 1, @Fec_FecIni))
-
---CAMBIAR a CHCIEMESPRO******
---truncate table SOTMPBCC
 
 --Codigo para ejecucion de Proceso de Preparacion de Productos y Cuentas
 select
@@ -411,8 +408,6 @@ begin
 		from CHCUENTA noholdlock
 		inner join SOSUCURS noholdlock
 				on Suc_Numero = Cue_Sucurs
-		--inner join SOPLAZAS noholdlock
-				--on Pla_Numero = Suc_Plaza
 		inner join SOCOTIPL noholdlock
 				on Ctp_Plazas = SoPlazaID
 				and Ctp_Activo = @Bit_Si
@@ -609,15 +604,15 @@ begin
 	return 1
 end
 
-select	@Reg_ContTM	=	min(Tmp_Numero),	@Reg_TotTM	=	max(Tmp_Numero)
+select	@Reg_CoTiMo	=	min(Tmp_Numero),	@Reg_TipMov	=	max(Tmp_Numero)
 	from @Tab_TiMoPr
 	
-while (@Reg_ContTM <= @Reg_TotTM) --Ejecutar cada Comision
+while (@Reg_CoTiMo <= @Reg_TipMov) --Ejecutar cada Comision
 begin
 	--Obtener siguiente Comision
 	select	@Pro_TipMov = Tmp_TipMov
 		from	@Tab_TiMoPr
-		where 	Tmp_Numero = @Reg_ContTM
+		where 	Tmp_Numero = @Reg_CoTiMo
 
 	--Determinar si la Comision ya fue ejecutada
 	exec SOTMPBCCCON 
@@ -955,7 +950,7 @@ begin
 	end 
 		
 	--Incrementar contador de Tipos de Movimientos
-	select	@Reg_ContTM	=	@Reg_ContTM	+	@Ent_Uno
+	select	@Reg_CoTiMo	=	@Reg_CoTiMo	+	@Ent_Uno
 end 
 
 return 0
