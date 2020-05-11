@@ -20,7 +20,7 @@ as
 /* Modifica:	Gerardo Gomez Garcia							****
 ** Fecha:		28/04/2020										****
 ** Help:		1384228  										****
-** Modifica:	Se modifica longitud de la variable @Usr_MulReg	***/
+** Modifica:	Se modifica longitud del parametro @Usr_MulReg	***/
 /******************************************************************/
 /* Modifica:	Edwin Dennis Santiago							****
 ** Fecha:		04/07/2019										****
