@@ -23,6 +23,13 @@ create procedure SOPERDIRCON (
 ****************************************************************************
 ** REFERENCIAS:															****
 ****************************************************************************
+** Modifico: 	Edwin Santiago											  **
+** Fecha:		27/04/2020						                    	  **
+** HelpDesk:	1299445						                    	      **
+** Descripcion:	Se modifican consultas para contemplar mas inforamcion de **
+**              colonias, tambien se agrega consulta L4 para consultar    **
+**              relacion entre parametros de datos geograficos			  **
+****************************************************************************
 ** Creó: 		Edwin Santiago											  **
 ** Fecha:		02/04/2020						                    	  **
 ** HelpDesk:	1299445						                    	      **
@@ -36,6 +43,7 @@ begin
 	/* Declaracion de Variables */
 	declare @Ent_Nombre char(30), /* Nombre de la Entidad*/
 			@Loc_Nombre char(40), /* Nombre de la Localidad*/
+			@Col_Nombre char(60), /* Nombre de la Colonia*/
 			@Adi_Client char(8),  /* Numero de cliente */
 			@Peu_Grupo  char(8)  /* Grupo al que pertenece la persona*/
 			
@@ -43,21 +51,24 @@ begin
 	declare	@Str_Porcen	char(1),  /* Caracter porcentaje*/
 			@Str_Uno	char(1),  /* Caracter Uno*/
 			@Str_Dos    char(1),  /* Caracter Dos*/ 
-			@Str_Tres    char(1), /* Caracter Tres*/ 
+			@Str_Tres   char(1), /* Caracter Tres*/ 
+			@Str_Cuatro char(1), /* Caracter Cuatro*/ 
 			@Str_LetraC char(1),  /* Caracter C*/
-            @Tip_ConTip	char(1),
-			@Tip_ConCon	char(1)
+            @Tip_ConTip	char(1),  /* Tipo Consulta*/
+			@Tip_ConCon	char(1)   /* Numero de consulta*/
 						
 	/* Asignación de valores a Constantes */
 	select	@Str_Porcen	= '%',
 			@Str_Uno	= '1',			
 			@Str_Dos    = '2', 			
 			@Str_Tres   = '3',
+			@Str_Cuatro = '4',
 			@Str_LetraC = 'C'
 	
 	/* Asignación de valores a Variables */	
 	select  @Ent_Nombre = '',
 			@Loc_Nombre = '',
+			@Col_Nombre = '',
 			@Adi_Client = ''
 			
 
@@ -96,10 +107,11 @@ begin
 			
 			-- Se obtiene la persona Base de acuerdo al grupo
 			select	
-				s.Per_Numero,	Per_Comple,	Per_RFC,	Per_Calle,	Per_CalNum,
-				Per_Coloni,	Per_Entida,	@Ent_Nombre as Ent_Nombre ,	Per_Locali,
-				@Loc_Nombre as Loc_Nombre ,Per_CodPos, Per_Tipo, 	Adi_Client,
-				Per_Email
+				s.Per_Numero,	Per_Nombre,	Per_ApePat,	Per_ApeMat,	Per_Comple,
+				Per_RFC,		Per_RazSoc,	Per_Calle,	Per_CalNum,	Per_Coloni, @Col_Nombre as Col_Nombre,
+				Per_Entida,		@Ent_Nombre as Ent_Nombre,			Per_Locali,
+				@Loc_Nombre as Loc_Nombre,	Per_CodPos, Per_Tipo, 	Adi_Client,
+				Per_Email , 	Per_LadTel, Per_Telefo, Adi_FecCon, Adi.Adi_FecNac
 			into #SOTMPDPE
 			from #SOTMPNUM tmp
 			inner join SOPERSON s noholdlock on s.Per_Numero = tmp.Peu_Grupo
@@ -121,12 +133,17 @@ begin
 			update #SOTMPDPE  set Loc_Nombre = c.Loc_Nombre
 			from CLLOCALI c  
 			where Per_Locali = Loc_Numero 
+			
+			update #SOTMPDPE set Per_Coloni = Cpc_Numero, Col_Nombre = Cpc_Nombre
+			from CLCODPOS where Cpc_Nombre = Per_Coloni
 		 
 		 
-			select 	Per_Numero,	Per_Comple,	Per_RFC,	Per_Calle,	Per_CalNum,
-					Per_Coloni,	Per_Entida,	rtrim(Ent_Nombre) as Ent_Nombre,	
-					Per_Locali,	rtrim(Loc_Nombre) as Loc_Nombre,
-					Per_CodPos,	Adi_Client, Per_Tipo,	Per_Email
+			select 	Per_Numero,	rtrim(Per_Nombre) as Per_Nombre,	rtrim(Per_ApePat) as Per_ApePat,
+					rtrim(Per_ApeMat) as Per_ApeMat, Per_Comple,	Per_RFC,	rtrim(Per_Calle) as Per_Calle,
+					Per_CalNum,	Per_RazSoc,			 Per_Coloni,	rtrim(Col_Nombre) as Col_Nombre,Per_Entida,
+					rtrim(Ent_Nombre) as Ent_Nombre, Per_Locali,	rtrim(Loc_Nombre) as Loc_Nombre,
+					Per_CodPos,			 Adi_Client, Per_Tipo,		Per_Email,
+					Per_LadTel , 		 Per_Telefo, Adi_FecCon, 	Adi_FecNac
 			from #SOTMPDPE
 				
 			drop table #SOTMPNUM,#SOTMPDPE,#SOTMPCPU,#SOTMPCPS
@@ -166,10 +183,11 @@ begin
 			
 			-- Se obtiene la persona Base de acuerdo al grupo
 			select	
-				s.Per_Numero,	Per_Comple,	Per_RFC,	Per_Calle,	Per_CalNum,
-				Per_Coloni,	Per_Entida,	@Ent_Nombre as Ent_Nombre ,	Per_Locali,
-				@Loc_Nombre as Loc_Nombre ,Per_CodPos, Per_Tipo, 	Adi_Client,
-				Per_Email
+				s.Per_Numero,	Per_Nombre,	Per_ApePat,	Per_ApeMat,	Per_Comple,
+				Per_RFC,		Per_RazSoc,	Per_Calle,	Per_CalNum,	Per_Coloni, @Col_Nombre as Col_Nombre,
+				Per_Entida,		@Ent_Nombre as Ent_Nombre,			Per_Locali,
+				@Loc_Nombre as Loc_Nombre,	Per_CodPos, Per_Tipo, 	Adi_Client,
+				Per_Email , 	Per_LadTel, Per_Telefo, Adi_FecCon, Adi.Adi_FecNac
 			into #SOTMPPRR
 			from #SOTMPPER tmp
 			inner join SOPERSON s noholdlock on s.Per_Numero = tmp.Peu_Grupo
@@ -191,12 +209,17 @@ begin
 			update #SOTMPPRR  set Loc_Nombre = c.Loc_Nombre
 			from CLLOCALI c  
 			where Per_Locali = Loc_Numero 
+			
+			update #SOTMPPRR set Per_Coloni = Cpc_Numero, Col_Nombre = Cpc_Nombre
+			from CLCODPOS where Cpc_Nombre = Per_Coloni
 		 
 		 
-			select 	Per_Numero,	Per_Comple,	Per_RFC,	Per_Calle,	Per_CalNum,
-					Per_Coloni,	Per_Entida,	rtrim(Ent_Nombre) as Ent_Nombre,	
-					Per_Locali,	rtrim(Loc_Nombre) as Loc_Nombre,
-					Per_CodPos,	Adi_Client, Per_Tipo,	Per_Email
+			select 	Per_Numero,	rtrim(Per_Nombre) as Per_Nombre,	rtrim(Per_ApePat) as Per_ApePat,
+					rtrim(Per_ApeMat) as Per_ApeMat, Per_Comple,	Per_RFC,	rtrim(Per_Calle) as Per_Calle,
+					Per_CalNum,	Per_RazSoc,			 Per_Coloni,	rtrim(Col_Nombre) as Col_Nombre,Per_Entida,
+					rtrim(Ent_Nombre) as Ent_Nombre, Per_Locali,	rtrim(Loc_Nombre) as Loc_Nombre,
+					Per_CodPos,			 Adi_Client, Per_Tipo,		Per_Email,
+					Per_LadTel , 		 Per_Telefo, Adi_FecCon, 	Adi_FecNac
 			from #SOTMPPRR
 				
 			drop table #SOTMPPER,#SOTMPPRR,#SOTMPCLI,#SOTMPCLP
@@ -234,10 +257,11 @@ begin
 			
 			-- Se obtiene la persona Base de acuerdo al grupo
 			select	
-				s.Per_Numero,	Per_Comple,	Per_RFC,	Per_Calle,	Per_CalNum,
-				Per_Coloni,	Per_Entida,	@Ent_Nombre as Ent_Nombre ,	Per_Locali,
-				@Loc_Nombre as Loc_Nombre ,Per_CodPos, Per_Tipo, 	Adi_Client,
-				Per_Email
+				s.Per_Numero,	Per_Nombre,	Per_ApePat,	Per_ApeMat,	Per_Comple,
+				Per_RFC,		Per_RazSoc,	Per_Calle,	Per_CalNum,	Per_Coloni, @Col_Nombre as Col_Nombre,
+				Per_Entida,		@Ent_Nombre as Ent_Nombre,			Per_Locali,
+				@Loc_Nombre as Loc_Nombre,	Per_CodPos, Per_Tipo, 	Adi_Client,
+				Per_Email , 	Per_LadTel, Per_Telefo, Adi_FecCon, Adi.Adi_FecNac
 			into #SOTMPDAT
 			from #SOTMPRFC tmp
 			inner join SOPERSON s noholdlock on s.Per_Numero = tmp.Peu_Grupo
@@ -258,12 +282,17 @@ begin
 			update #SOTMPDAT  set Loc_Nombre = c.Loc_Nombre
 			from CLLOCALI c  
 			where Per_Locali = Loc_Numero 
+			
+			update #SOTMPDAT set Per_Coloni = Cpc_Numero, Col_Nombre = Cpc_Nombre
+			from CLCODPOS where Cpc_Nombre = Per_Coloni
 		 
 		 
-			select 	Per_Numero,	Per_Comple,	Per_RFC,	Per_Calle,	Per_CalNum,
-					Per_Coloni,	Per_Entida,	rtrim(Ent_Nombre) as Ent_Nombre,	
-					Per_Locali,	rtrim(Loc_Nombre) as Loc_Nombre,
-					Per_CodPos,	Adi_Client, Per_Tipo,	Per_Email
+			select 	Per_Numero,	rtrim(Per_Nombre) as Per_Nombre,	rtrim(Per_ApePat) as Per_ApePat,
+					rtrim(Per_ApeMat) as Per_ApeMat, Per_Comple,	Per_RFC,	rtrim(Per_Calle) as Per_Calle,
+					Per_CalNum,	Per_RazSoc,			 Per_Coloni,	rtrim(Col_Nombre) as Col_Nombre,Per_Entida,
+					rtrim(Ent_Nombre) as Ent_Nombre, Per_Locali,	rtrim(Loc_Nombre) as Loc_Nombre,
+					Per_CodPos,			 Adi_Client, Per_Tipo,		Per_Email,
+					Per_LadTel , 		 Per_Telefo, Adi_FecCon, 	Adi_FecNac
 			from #SOTMPDAT
 				
 			drop table #SOTMPRFC,#SOTMPCLF,#SOTMPCLR,#SOTMPDAT
@@ -299,10 +328,11 @@ begin
 			
 			-- Se obtiene la persona Base de acuerdo al grupo
 			select	
-				s.Per_Numero,	Per_Comple,	Per_RFC,	Per_Calle,	Per_CalNum,
-				Per_Coloni,	Per_Entida,	@Ent_Nombre as Ent_Nombre ,	Per_Locali,
-				@Loc_Nombre as Loc_Nombre ,Per_CodPos, Per_Tipo, 	Adi_Client,
-				Per_Email
+				s.Per_Numero,	Per_Nombre,	Per_ApePat,	Per_ApeMat,	Per_Comple,
+				Per_RFC,		Per_RazSoc,	Per_Calle,	Per_CalNum,	Per_Coloni, @Col_Nombre as Col_Nombre,
+				Per_Entida,		@Ent_Nombre as Ent_Nombre,			Per_Locali,
+				@Loc_Nombre as Loc_Nombre,	Per_CodPos, Per_Tipo, 	Adi_Client,
+				Per_Email , 	Per_LadTel, Per_Telefo, Adi_FecCon, Adi.Adi_FecNac
 			into #SOTMPPCO
 			from #SOTMPNOM tmp
 			inner join SOPERSON s noholdlock on s.Per_Numero = tmp.Peu_Grupo
@@ -323,16 +353,33 @@ begin
 			update #SOTMPPCO  set Loc_Nombre = c.Loc_Nombre
 			from CLLOCALI c  
 			where Per_Locali = Loc_Numero 
+			
+			update #SOTMPPCO set Per_Coloni = Cpc_Numero, Col_Nombre = Cpc_Nombre
+			from CLCODPOS where Cpc_Nombre = Per_Coloni
 		 
 		 
-			select 	Per_Numero,	Per_Comple,	Per_RFC,	Per_Calle,	Per_CalNum,
-					Per_Coloni,	Per_Entida,	rtrim(Ent_Nombre) as Ent_Nombre,	
-					Per_Locali,	rtrim(Loc_Nombre) as Loc_Nombre,
-					Per_CodPos,	Adi_Client, Per_Tipo,	Per_Email
+			select 	Per_Numero,	rtrim(Per_Nombre) as Per_Nombre,	rtrim(Per_ApePat) as Per_ApePat,
+					rtrim(Per_ApeMat) as Per_ApeMat, Per_Comple,	Per_RFC,	rtrim(Per_Calle) as Per_Calle,
+					Per_CalNum,	Per_RazSoc,			 Per_Coloni,	rtrim(Col_Nombre) as Col_Nombre,Per_Entida,
+					rtrim(Ent_Nombre) as Ent_Nombre, Per_Locali,	rtrim(Loc_Nombre) as Loc_Nombre,
+					Per_CodPos,			 Adi_Client, Per_Tipo,		Per_Email,
+					Per_LadTel , 		 Per_Telefo, Adi_FecCon, 	Adi_FecNac
 			from #SOTMPPCO
 				
 			drop table #SOTMPNOM,#SOTMPCPE,#SOTMPCUN,#SOTMPPCO
 
+		end else if @Tip_ConCon = @Str_Cuatro begin /*Busqueda de colonias por parametros de entidad,estado y codigo postal*/
+			
+			select Cpc_Numero as Per_Coloni, Cpc_Nombre as Col_Nombre
+			from CLENTIDA  
+			inner join CLLOCALI 
+			on Ent_Numero = Loc_Entida
+			inner join CLCODPOS
+			on Loc_Numero = Cpc_Locali
+			where  Ent_Numero  = @Per_Entida
+			and  Loc_Numero = @Per_Locali
+			and  Cpc_CodPos  = @Per_CodPos
+			
 		end
 	end
 end

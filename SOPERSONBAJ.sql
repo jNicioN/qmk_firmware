@@ -10,6 +10,16 @@ create procedure SOPERSONBAJ (
 	@Modulo		char(2))
 
 as
+/* NOTA: Las TABLAS AFECTADAS deben ejecutarse antes compilar el stored procedure*/
+/* TABLAS AFECTADAS: */
+/*SOPERSON*/
+/***************************************************************************/
+/** REFERENCIAS:
+****************************************************************************
+** Modifico:	CODE4U-Eliezer Catalino Xul Canche						****
+** Fecha:		06/Febrero/2020											****
+** Help:		1343720													****
+** Descripcion: Se remueve actualizacion de SOFOLIO para SOPERSON		*****/
 
 if @Per_Numero <> ''
 	if exists (select	Per_Numero
@@ -17,11 +27,7 @@ if @Per_Numero <> ''
 					where	Per_Numero	= @Per_Numero) begin
 		delete SOPERSON
 			where	Per_Numero	= @Per_Numero
-		
-		update SOFOLIOS set
-			Fol_Numero	= Fol_Numero - 1
-			where	Fol_Tabla	= 'SOPERSON'
-		
+			
 		if exists ( select	Pes_Person
 						from SOPEESPU noholdlock
 						where	Pes_Person	= @Per_Numero ) 
