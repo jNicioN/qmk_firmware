@@ -20,12 +20,25 @@ create procedure SOUNGRPEPRO (
 	@Modulo		char(2)
 )
 
+
+
+
 as
+
+
+
 
 /***************************************************************************
 ** DESCRIPCION: ** Proceso de unificación de grupos de Persona			****
 ****************************************************************************
 ** REFERENCIAS: 														****
+****************************************************************************
+** Modifico:	Armando Alexis Sepulveda Cruz							****
+** Fecha:		24/Marzo/2020											****
+** Help:		1370878													****
+** Descripcion:	Se modifica la actualizacíon de datos para permitir     ****
+**				entidades de tipo NE en la actualizacíon de datos para	****
+**				personas con nacionalidad extranjera.					****
 ****************************************************************************
 ** Modifico:	Armando Alexis Sepulveda Cruz							****
 ** Fecha:		13/Febrero/2020											****
@@ -50,6 +63,9 @@ as
 ** Help:	1214398														****
 ****************************************************************************/
 
+
+
+
 /* Declaracion de variables */
 declare	@Reg_Existe	int,					/*Existe Registro*/
 		@Status		int,					/*Estatus de Procedimiento*/
@@ -69,6 +85,8 @@ declare	@Reg_Existe	int,					/*Existe Registro*/
 		@Bit_Tipo	char(1),				/* Bitacora tipo */
 		@Bit_NuSeFi	varchar(30),			/* Bitacora Numero de serie de la Firma Electronica Avanzada */
 		@Bit_Titulo	varchar(10),			/* Bitacora titulo */
+
+
 		@Bit_Nombre	varchar(40),			/* Bitacora Nombre */
 		@Bit_ApePat	varchar(40),			/* Bitacora apellido paterno */
 		@Bit_ApeMat	varchar(40),			/* Bitacora Apellido Materno */
@@ -107,7 +125,6 @@ declare	@Reg_Existe	int,					/*Existe Registro*/
 		@Bit_Ocupac	varchar(50),			/* Bitacora Ocupacion */
 		@Bit_AntLab	int,					/* Bitacora Antiguedad laboral  */
 		@Bit_LugTra	varchar(50),			/* Bitacora Lugar trabajo */
-
 		@Bit_TelTra	varchar(20),			/* Bitacora Telefono trabajo */
 		@Bit_CalTra	varchar(20),			/* Bitacora Calle de Trabajo */
 		@Bit_NuCaTr	varchar(30),			/* Bitacora Numero de calle del  Trabajo*/
@@ -137,13 +154,16 @@ declare	@Reg_Existe	int,					/*Existe Registro*/
 		@Bit_EntPri char(40), 				/* Bitacora Entre Calle Primera */
 		@Bit_EntSeg char(40),				/* Bitacora Entre Calle Segunda */
 		@Exi_Regist int,					/* Variable de control de existencia de registro*/
-		@Str_Punto	char(1)					/* String para punto para apellidos vacios */
+		@Str_Punto	char(1)				/* String para punto para apellidos vacios */
 
 /* Declaracion de Constantes */
 declare	@Ent_Uno	int,					/*Entero: Uno*/
 		@Sta_Activo	char(1),				/*Estatus: Activo*/
 		@Ent_Cero	int,					/*Numero entero 0 */
-		@Str_Vacio	char(1)					/*String: vacio*/
+		@Str_Vacio	char(1),				/*String: vacio*/
+		@Str_NacMex	char(1),				/*String nacionalidad mexicana*/
+		@Str_NacExt char(1),				/*String nacionalidad extranjera*/
+		@Str_EntExt char(2)					/*String Entidad en el extranjero*/
 
 select	@Ent_Uno	= 1,
 		@Sta_Activo	= 'A',
@@ -153,7 +173,10 @@ select	@Ent_Uno	= 1,
 		@Pro_GruMin	= '3',
 		@Pro_GrClUn = '4',
 		@Str_Vacio	= '',
-		@Str_Punto	= '.'
+		@Str_Punto	= '.',
+		@Str_NacMex = 'M',
+		@Str_NacExt = 'E',
+		@Str_EntExt = 'NE'
 		
 if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 	select @Gpc_Nombre	= isnull(ltrim(rtrim(@Gpc_Nombre)), @Str_Vacio)
@@ -184,11 +207,15 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 			@Bit_Coloni	= Per_Coloni,
 			@Bit_Entida	= Per_Entida,
 			@Bit_Locali	= Per_Locali,
+
 			@Bit_CodPos	= Per_CodPos,
 			
 			@Bit_ApaPos	= Per_ApaPos,
 			@Bit_LadTel	= Per_LadTel,
 			@Bit_Telefo	= Per_Email,
+
+
+
 
 			@Bit_Email	= Per_Email,
 			@Bit_ComDom	= Per_ComDom,
@@ -281,14 +308,17 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 			return 1
 		end
 
-
 	select	@Gpc_Comple = @Gpc_ApePat + ' ' + @Gpc_ApeMat + ' ' + @Gpc_Nombre,
 			@Gpc_ComOrd = @Gpc_Nombre + ' ' + @Gpc_ApePat + ' ' + @Gpc_ApeMat
-			
-	select @Per_Entida = Ent_Numero 
-	  from CLENTIDA noholdlock
-	 where Ent_Abrevi = @Gpc_EntNac
-	   and Ent_Status = @Sta_Activo
+	
+	if @Gpc_EntNac = @Str_EntExt begin
+		select @Per_Entida = @Str_Vacio
+	end else begin
+		select @Per_Entida = Ent_Numero 
+		  from CLENTIDA noholdlock
+		 where Ent_Abrevi = @Gpc_EntNac
+		   and Ent_Status = @Sta_Activo
+	end
 			
 	update SOPERSON set
 		Per_Nombre	= @Gpc_Nombre,
@@ -300,7 +330,6 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 		Per_RFC		= @Gpc_RFC,
 		Per_CURP	= @Gpc_CURP,
 		
-
 		NumTransac	= @NumTransac,
 		Transaccio	= @Transaccio,
 		Usuario		= @Usuario,
@@ -352,7 +381,6 @@ end	else if @Tip_Proces = @Pro_DesAgr begin		/*Desagrupacion de Registros*/
 	select @Gpc_GrpAnt as Gpc_Person, @Gpc_Grupo as Gpc_Grupo
 	
 end	else if @Tip_Proces = @Pro_GruMin or @Tip_Proces = @Pro_GrClUn begin		/*Agrupacion de Registros*/
-
 	if @Tip_Proces = @Pro_GrClUn begin 
 		/*Consulta de la persona del Cliente Unico ligada a la persona consultada*/
 		select @Gpc_PrClUn = Adi_NumPer
@@ -391,6 +419,7 @@ end	else if @Tip_Proces = @Pro_GruMin or @Tip_Proces = @Pro_GrClUn begin		/*Agru
 	select @Exi_Regist = @Ent_Uno 
 	  from SOUNIPER noholdlock
 	 where Peu_Grupo = @Gpc_Grupo 
+
 	   and Peu_Person = @Gpc_Person
 	 
 	if isnull(@Gpc_GrpAnt, @Str_Vacio) = @Str_Vacio and isnull(@Exi_Regist, @Ent_Cero) = @Ent_Cero begin
@@ -418,4 +447,3 @@ end	else if @Tip_Proces = @Pro_GruMin or @Tip_Proces = @Pro_GrClUn begin		/*Agru
 	/*Salida: Notificación cambio Persona IDE*/
 	select @Gpc_GrpAnt as Gpc_Person, @Gpc_Grupo as Gpc_Grupo
 end
-

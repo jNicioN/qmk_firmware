@@ -9,6 +9,7 @@ create procedure SOPERUNICON (
 	@Per_Modulo	char(1),
 	@Tip_Consul	char(2),
 
+
 	@NumTransac	char(10),
 	@Transaccio	char(3),
 	@Usuario	char(6),
@@ -20,6 +21,19 @@ as
 /*******************************************************************
 ** DESCRIPCION: Consulta de Persona Unica						****
 ********************************************************************
+** Modifico:	Armando Alexis Sepúlveda Cruz					****
+** Fecha:		16/04/2020  									****
+** Help:		1379522											****
+** Descripcion:	Se modifica consulta LA para busquedas de 		****
+**				Pesonas Unicas en función al RFC para devolver	****
+**				campos adicionales								****
+********************************************************************
+** Modifico:	Armando Alexis Sepúlveda Cruz					****
+** Fecha:		04/06/2019										****
+** Help:		1370878											****
+** Descripcion:	Se agrega la consulta LA para busquedas de 		****
+**				Pesonas Unicas en función al RFC 				****
+********************************************************************
 ** Modifico:	Victor Osorio									****
 ** Fecha:		19/02/2020										****
 ** Help:		1312389 										****
@@ -29,6 +43,8 @@ as
 ** Modificó:	Francisco Javier Carrillo Rojas					****
 ** Fecha:		26/Ago/2019										****
 ** Help:		01289832										****
+
+
 ** Descripcion:	Obligar el uso de 4 caracteres en la lista 		****
 **				 L7 											****
 ********************************************************************
@@ -74,6 +90,8 @@ as
 ** Descripcion:	Agregar salida de a Per_Email, Per_Tipo,		****
 **				Per_Nombre,	Per_ApePat y Per_ApeMat a C5		****
 ********************************************************************
+
+
 ** Modifico:	Francisco Javier Carrillo Rojas					****
 ** Fecha:		29/10/2018										****
 ** Help:		1147468											****
@@ -121,6 +139,7 @@ as
 ** Descripcion:	Consulta de Persona Unica						****
 *******************************************************************/
 
+
 /* Declaracion de Variables */
 declare	@Tip_ConTip	char(1), /* Consulta Tipo C/L*/
 		@Tip_ConCon	char(1), /* Tipo Consecutivo */
@@ -131,6 +150,7 @@ declare	@Tip_ConTip	char(1), /* Consulta Tipo C/L*/
 		@Int_Existe	int,     /* Existe */
 		@Str_PeuNom	varchar(150), /* Persona unica Nombre */
 		@Str_PerRFC	varchar(15) /*RFC persona*/
+
 
 /* Declaracion de Constantes */
 declare	@Str_Vacio	char(1), /* Vacio */
@@ -153,7 +173,9 @@ declare	@Str_Vacio	char(1), /* Vacio */
 		@Len_RFCOrd	int,
 		@Len_RFCHom int,
 		@Ent_Cuatro	int,		/*	Entero en cuatro */
-		@Ent_Uno	int			/*	Entero en uno */
+		@Ent_Uno	int,		/*	Entero en uno */
+		@Str_A      char(1)	/* Tipo A*/
+
 
 /* Asignacion de Constantes */
 select	@Str_Vacio	= '',
@@ -176,15 +198,20 @@ select	@Str_Vacio	= '',
 		@Len_RFCOrd	= 10,								/* Longitud de rfc ordinario*/
 		@Len_RFCHom = 13,								/* Longitud de rfc con homoclave*/
 		@Ent_Cuatro	= 4,
-		@Ent_Uno	= 1
+		@Ent_Uno	= 1,
+		@Str_A 		= 'A'
+
 
 select	@Str_PerRFC = ltrim(rtrim(@Per_RFC)),
 		@Str_PeuNom	= ltrim(rtrim(@Per_Comple)) + @Str_Porcen
 
+
 select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
 		@Tip_ConCon	= substring(@Tip_Consul, 2, 1)
 
+
 if @Tip_ConTip = @Str_C begin
+
 
 	if @Tip_ConCon	= @Str_Uno begin
 		select	Per_Numero,		Per_Fecha,		Per_NumTra,		Per_Tipo,		Per_Benefi,
@@ -211,12 +238,15 @@ if @Tip_ConTip = @Str_C begin
 			where	Per_Numero	= @Per_Numero
 	end
 
+
 	if @Tip_ConCon	= @Str_Dos begin /* C2 - Consulta de Persona Base de una persona a consultar*/
 		select	@Per_Grupo = @Per_Numero
+
 
 		select	@Per_Grupo = Peu_Grupo
 			from SOUNIPER noholdlock
 			where	Peu_Person = @Per_Numero
+
 
 		select	Per_Numero,	Per_Comple,	Per_RFC,	P.Adi_FecNac,	Adi_FecCon,
 				Per_Client = Adi_Client
@@ -226,16 +256,19 @@ if @Tip_ConTip = @Str_C begin
 			where	Per_Numero = @Per_Grupo
 	end
 
+
 	if @Tip_ConCon	= @Str_Tres begin /* C3 - Consulta de Persona Base por Cliente */
 		select Per_Person = Adi_NumPer, Per_Grupo = Adi_NumPer
 			into #tmpPerso03
 			from CLADICIO noholdlock
 			where  Adi_Client = @Per_Client
 
+
 		update #tmpPerso03 set
 			Per_Grupo = Peu_Grupo
 			from SOUNIPER noholdlock
 			where	Peu_Person = Per_Person
+
 
 		select	distinct
 				Per_Numero,	Per_Comple,	Per_RFC,	Adi_FecNac,	Adi_FecCon,
@@ -244,33 +277,42 @@ if @Tip_ConTip = @Str_C begin
 			inner join SOPERSON noholdlock on Per_Numero = Per_Grupo
 			inner join SOPERADI noholdlock on Adi_PerNum = Per_Numero
 
+
 		drop table #tmpPerso03
 	end
+
 
 	if @Tip_ConCon	= @Str_Cuatro begin
 		select	@Cli_Numero	= Cli_Numero
 			from CLCLIENT noholdlock
 			where	Cli_RFC	= @Per_RFC
 
+
 		select	@Cli_Numero	= isnull(@Cli_Numero, @Str_Vacio)
+
 
 		select	@Adi_NumPer	= Adi_NumPer
 			from CLADICIO noholdlock
 			where	Adi_Client	= @Cli_Numero
 
+
 		select	@Adi_NumPer	= isnull(@Adi_NumPer, @Str_Vacio)
+
 
 		select	isnull(Peu_Grupo, @Str_Vacio) as Per_Numero
 			from SOUNIPER noholdlock
 			where	Peu_Person	= @Adi_NumPer
 	end
 
+
 	if @Tip_ConCon	= @Str_Cinco begin /* C5 - Consulta de Persona con base al registro en persona unica*/
 		select	@Per_Grupo = @Per_Numero
+
 
 		select	@Per_Grupo = Peu_Grupo
 			from SOUNIPER noholdlock
 			where	Peu_Person = @Per_Numero
+
 
 		select	Per_Numero, Per_ComOrd, Per_Comple,	Per_RFC, Per_CURP,
 				Per_Nombre,	Per_ApePat,	Per_ApeMat,	Adi_TipIde,	Adi_NumIde,
@@ -293,6 +335,8 @@ if @Tip_ConTip = @Str_C begin
 	end
 end else begin
 
+
+
 	if @Tip_ConCon	= @Str_Uno begin /* L1 - Consulta de Personas Base por RFC */
 		select	P.Per_Numero,	P.Per_Tipo,		P.Per_Benefi,	P.Per_NuSeFi,	P.Per_Titulo,
 				P.Per_Nombre,	P.Per_ApePat,	P.Per_ApeMat,	P.Per_RazSoc,	P.Per_Comple,
@@ -305,16 +349,19 @@ end else begin
 		 where	P.Per_RFC = @Per_RFC
 	end
 
+
 	if @Tip_ConCon	= @Str_Dos begin /* L2 - Consulta de Personas Bases por nombre */
 		select Per_Person = Per_Numero, Per_Grupo = Per_Numero
 			into #tmpPerso02
 			from SOPERSON noholdlock
 			where	Per_Comple like @Str_PeuNom
 
+
 		update #tmpPerso02 set
 			Per_Grupo = Peu_Grupo
 			from SOUNIPER noholdlock
 			where	Peu_Person = Per_Person
+
 
 		select	distinct
 				Per_Numero,	Per_Comple,	Per_RFC,	Adi.Adi_FecNac,	Adi_FecCon,
@@ -324,8 +371,10 @@ end else begin
 			inner join SOPERADI Adi noholdlock on Adi_PerNum = Per_Numero
 			 left join CLADICIO noholdlock on Adi_NumPer = Per_Numero
 
+
 		drop table #tmpPerso02
 	end
+
 
 	if @Tip_ConCon	= @Str_Tres begin /* L3 - Consulta de todos los documentos por Persona */
 		if @Per_Numero = @Str_Vacio begin
@@ -339,11 +388,13 @@ end else begin
 		)
 		create index #tmpPersoL3 on #tmpPersoL3 (Per_Person)
 
+
 		create table #tmpClienL3 (
 			Cli_Client char(8),
 			Cli_Unific char(8)
 		)
 		create index #tmpClienL3 on #tmpClienL3 (Cli_Client)
+
 
 		create table #documentosBit (
 			Bad_Numero int,
@@ -356,50 +407,63 @@ end else begin
 		)
 		create index #documentosBit on #documentosBit (Bad_Docume)
 
+
 		create table #ultimosDoctos (
 			Tip_Docume int,
 			Max_Docume int
 		)
 		create index #ultimosDoctos on #ultimosDoctos (Tip_Docume)
 
+
 		select	@Per_Grupo = @Per_Numero
+
 
 		select	@Per_Grupo = Peu_Grupo
 			from SOUNIPER noholdlock
 			where	Peu_Person = @Per_Numero
+
 
 		insert into #tmpPersoL3
 			select	Peu_Person
 				from SOUNIPER noholdlock
 				where	Peu_Grupo = @Per_Grupo
 
+
 		select	@Int_Existe = @Ent_No
 		select	@Int_Existe = count(1)
 			from #tmpPersoL3
+
 
 		if @Int_Existe = @Ent_No
 			insert into #tmpPersoL3
 				values (@Per_Grupo)
 
+
 		insert into #tmpClienL3
 			select	Adi_Client,	@Str_Vacio
+
 				from CLADICIO noholdlock
 				inner join #tmpPersoL3 on Adi_NumPer = Per_Person
+
 
 		update #tmpClienL3 set
 			Cli_Unific = Clu_Grupo
 			from CLCLIUNI noholdlock
 			where Clu_Client = Cli_Client
 
+
 		select @Cli_Unific = Cli_Unific
 			from #tmpClienL3
+
 
 		select	Ban_Numero,	Ban_Person
 			into #documentosBitPer
 			from #tmpPersoL3
 			inner join DXBANDEJ noholdlock on Ban_Person = Per_Person
 
+
 		create index #documentosBitPer on #documentosBitPer (Ban_Numero)
+
 
 		select	Bad_Numero,	Bad_Bandej,	Bad_Docume,	Bad_Status,	Bad_Archiv,
 				Bad_PidCM,	Ban_Person
@@ -407,7 +471,9 @@ end else begin
 			from #documentosBitPer
 			inner join DXBANDOC noholdlock on Bad_Bandej = Ban_Numero
 
+
 		create index #documentosBitPerDoc on #documentosBitPerDoc (Bad_Status, Bad_Docume)
+
 
 		insert into #documentosBit
 			select	Bad_Numero,	Bad_Bandej,	Bad_Docume,	Bad_Status,	Bad_Archiv,
@@ -418,22 +484,29 @@ end else begin
 											  and Dop_Modulo = @Per_Modulo
 				where Bad_Status not in (@Str_I, @Str_B)
 
+
 		drop table #documentosBitPer, #documentosBitPerDoc
+
 
 		select	Ban_Numero,	Ban_Person, Ban_Client
 			into #documentosBitCli
 			from #tmpClienL3
 			inner join DXBANDEJ noholdlock on Ban_Client = Cli_Client
 
+
 		create index #documentosBitCli on #documentosBitCli (Ban_Numero)
+
 
 		select	Bad_Numero,	Bad_Bandej,	Bad_Docume,	Bad_Status,	Bad_Archiv,
 				Bad_PidCM,	Ban_Person
 			into #documentosBitCliDoc
 			from #documentosBitCli
+
 			inner join DXBANDOC noholdlock on Bad_Bandej = Ban_Numero
 
+
 		create index #documentosBitCliDoc on #documentosBitCliDoc (Bad_Status, Bad_Docume)
+
 
 		insert into #documentosBit
 			select	Bad_Numero,	Bad_Bandej,	Bad_Docume,	Bad_Status,	Bad_Archiv,
@@ -444,13 +517,16 @@ end else begin
 											  and Dop_Modulo = @Per_Modulo
 				where Bad_Status not in (@Str_I, @Str_B)
 
+
 		drop table #documentosBitCli, #documentosBitCliDoc
+
 
 		insert into #ultimosDoctos
 			select	Tip_Docume = Bad_Docume,
 					Max_Docume = max(Bad_Numero)
 				from #documentosBit
 				group by Bad_Docume
+
 
 		select	distinct
 				Bad_Numero,	Bad_Bandej,	Bad_Docume,	Bad_Archiv, Bad_PidCM,
@@ -460,8 +536,10 @@ end else begin
 									 and Max_Docume = Bad_Numero
 			inner join DXTIPDOC noholdlock on Tid_Numero = Bad_Docume
 
+
 		drop table #tmpPersoL3, #tmpClienL3, #documentosBit, #ultimosDoctos
 	end
+
 
 	if @Tip_ConCon	= @Str_Cuatro begin /* L4 - Obtenie el cliente o persona unificada*/
 		if @Per_Numero = @Str_Vacio and @Per_Client = @Str_Vacio begin
@@ -471,10 +549,13 @@ end else begin
 			return 1
 		end
 
+
 		select @Per_Grupo = @Per_Numero
 		select @Cli_Unific = @Per_Client
 
+
 		if @Cli_Unific <> @Str_Vacio and @Per_Grupo = @Str_Vacio begin
+
 			select	@Per_Grupo = Adi_NumPer,
 					@Per_Numero = Adi_NumPer
 				from CLADICIO noholdlock
@@ -509,9 +590,11 @@ end else begin
 				where Adi_NumPer = @Per_Grupo
 		end
 
+
 		select	Per_Client = @Cli_Unific,
 				Per_Numero = @Per_Grupo
 	end
+
 
 	if @Tip_ConCon	= @Str_Cinco begin /* L5 - Busqueda de Grupo de Persona por nombre*/
 		select Per_Person = Per_Numero, Per_Grupo = Per_Numero
@@ -519,10 +602,12 @@ end else begin
 			from SOPERSON noholdlock
 			where	Per_Comple like @Str_PeuNom
 
+
 		update #tmpPerso04 set
 			Per_Grupo = Peu_Grupo
 			from SOUNIPER noholdlock
 			where	Peu_Person = Per_Person
+
 
 		select	Per_Numero, Per_ComOrd, Per_Comple,	Per_RFC, Per_CURP,
 				Per_Nombre,	Per_ApePat,	Per_ApeMat,	Adi_TipIde,	Adi_NumIde,
@@ -532,8 +617,10 @@ end else begin
 			inner join SOPERSON noholdlock on Per_Numero = Per_Grupo
 			left outer join SOPERADI noholdlock on Adi_PerNum	= Per_Numero
 
+
 		drop table #tmpPerso04
 	end
+
 
 	if @Tip_ConCon	= @Str_Seis begin /* L6 - Consultar TODOS los documentos por Numero de Persona */
 		if @Per_Numero = @Str_Vacio begin
@@ -547,11 +634,13 @@ end else begin
 		)
 		create index #tmpPersoL5 on #tmpPersoL5 (Per_Person)
 
+
 		create table #tmpClienL5 (
 			Cli_Client char(8),
 			Cli_Unific char(8)
 		)
 		create index #tmpClienL5 on #tmpClienL5 (Cli_Client)
+
 
 		create table #documentosPersona (
 			Bad_Numero int,
@@ -564,44 +653,55 @@ end else begin
 		)
 		create index #documentosPersona on #documentosPersona (Bad_Docume)
 
+
 		select	@Per_Grupo = @Per_Numero
+
 
 		select	@Per_Grupo = Peu_Grupo
 			from SOUNIPER noholdlock
 			where	Peu_Person = @Per_Numero
+
 
 		insert into #tmpPersoL5
 			select	Peu_Person
 				from SOUNIPER noholdlock
 				where	Peu_Grupo = @Per_Grupo
 
+
 		select	@Int_Existe = @Ent_No
 		select	@Int_Existe = count(1)
 			from #tmpPersoL5
 
+
 		if @Int_Existe = @Ent_No
 			insert into #tmpPersoL5
 				values (@Per_Grupo)
+
 
 		insert into #tmpClienL5
 			select	Adi_Client,	@Str_Vacio
 				from CLADICIO noholdlock
 				inner join #tmpPersoL5 on Adi_NumPer = Per_Person
 
+
 		update #tmpClienL5 set
 			Cli_Unific = Clu_Grupo
 			from CLCLIUNI noholdlock
 			where Clu_Client = Cli_Client
 
+
 		select @Cli_Unific = Cli_Unific
 			from #tmpClienL5
+
 
 		select	Ban_Numero,	Ban_Person
 			into #documentosBandejaPersona
 			from #tmpPersoL5
 			inner join DXBANDEJ noholdlock on Ban_Person = Per_Person
 
+
 		create index #documentosBandejaPersona on #documentosBandejaPersona (Ban_Numero)
+
 
 		select	Bad_Numero,	Bad_Bandej,	Bad_Docume,	Bad_Status,	Bad_Archiv,
 				Bad_PidCM,	Ban_Person
@@ -609,16 +709,21 @@ end else begin
 			from #documentosBandejaPersona
 			inner join DXBANDOC noholdlock on Bad_Bandej = Ban_Numero
 
+
 		create index #documentosBandejaPersonaDoc on #documentosBandejaPersonaDoc (Bad_Status, Bad_Docume)
 
+
 		drop table #documentosBandejaPersona
+
 
 		select	Ban_Numero,	Ban_Person, Ban_Client
 			into #documentosBandejaCliente
 			from #tmpClienL5
 			inner join DXBANDEJ noholdlock on Ban_Client = Cli_Client
 
+
 		create index #documentosBandejaCliente on #documentosBandejaCliente (Ban_Numero)
+
 
 		select	Bad_Numero,	Bad_Bandej,	Bad_Docume,	Bad_Status,	Bad_Archiv,
 				Bad_PidCM,	Ban_Person
@@ -626,9 +731,12 @@ end else begin
 			from #documentosBandejaCliente
 			inner join DXBANDOC noholdlock on Bad_Bandej = Ban_Numero
 
+
 		create index #documentosBandejaClienteDoc on #documentosBandejaClienteDoc (Bad_Status, Bad_Docume)
 
+
 		drop table #documentosBandejaCliente
+
 
 		select	distinct
 				Bad_Numero,	Bad_Bandej,	Bad_Docume,	Bad_Archiv, Bad_PidCM,
@@ -643,8 +751,10 @@ end else begin
 			inner join DXTIPDOC noholdlock on Tid_Numero = Bad_Docume
 		order by Tid_Nombre, Bad_Numero
 
+
 		drop table #tmpPersoL5, #tmpClienL5, #documentosBandejaPersonaDoc, #documentosBandejaClienteDoc
 	end
+
 
 	if @Tip_ConCon	= @Str_Siete begin /* L7 - Busqueda por nombre de personas que representan la persona única*/
 		--Obligar a que se capturen más de 4 caracteres
@@ -656,19 +766,24 @@ end else begin
 	
 		create table #PersonasUnicas(
 			Per_Person	char(8) not null,
+
 			Per_Grupo	char(8) not null)
 
+
 		create index personasUnicas on #PersonasUnicas(Per_Grupo)
+
 
 		insert into #PersonasUnicas
 			select Per_Numero, Per_Numero
 				from SOPERSON noholdlock
 				where	Per_Comple like @Str_PeuNom
 
+
 		update #PersonasUnicas set
 			Per_Grupo = Peu_Grupo
 			from SOUNIPER noholdlock
 			where	Peu_Person = Per_Person
+
 
 		select	Per_Numero, Per_ComOrd, Per_Comple,	Per_RFC, Per_CURP,
 				Per_Nombre,	Per_ApePat,	Per_ApeMat,	Adi_TipIde,	Adi_NumIde,
@@ -678,6 +793,7 @@ end else begin
 			inner join SOPERSON noholdlock on Per_Numero = Per_Grupo
 			left outer join SOPERADI noholdlock on Adi_PerNum	= Per_Numero
 			where Per_Person	= Per_Grupo
+
 
 		drop table #PersonasUnicas
 	end
@@ -733,4 +849,39 @@ end else begin
 			
 		drop table #Personas
 	end 
+
+
+	if @Tip_ConCon = @Str_A begin /* LA - Busqueda persona unica por RFC*/
+		create table #PersonasRFC (
+			Per_Numero	char(8)
+		)
+		if isnull(@Str_PerRFC, @Str_Vacio) <> @Str_Vacio and len(@Str_PerRFC) = @Len_RFCHom begin
+			insert into #PersonasRFC
+			select Per_Numero
+			from	SOPERSON noholdlock
+			 where Per_RFC = @Str_PerRFC
+		end else if isnull(@Str_PerRFC, @Str_Vacio) <> @Str_Vacio and len(@Str_PerRFC) >= @Len_RFCOrd begin
+			insert into #PersonasRFC
+			select Per_Numero
+			from	SOPERSON noholdlock
+			 where Per_RFC like @Str_PerRFC + @Str_Porcen
+		end
+
+
+		select Per_Numero, Per_ComOrd, Per_Comple,	Per_RFC, Per_CURP,
+  			   Per_Nombre,	Per_ApePat,	Per_ApeMat,	Adi_TipIde,	Adi_NumIde,
+			   Adi_FeVeId,	Per_Nacion,	Adi_NacExt,	Adi_FeExId,	Adi_Sexo,
+			   Adi_FecNac
+		  from (
+		  	select SOUNIPER.Peu_Grupo 
+			  from #PersonasRFC
+			 inner join SOUNIPER noholdlock on #PersonasRFC.Per_Numero = SOUNIPER.Peu_Person
+		  ) as personasUnicas
+		 inner join SOPERSON on personasUnicas.Peu_Grupo = SOPERSON.Per_Numero
+		  left outer join SOPERADI noholdlock on Adi_PerNum	= Per_Numero
+
+
+		drop table #PersonasRFC
+	end
 end
+
