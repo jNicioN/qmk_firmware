@@ -37,6 +37,12 @@ as
 ****************************************************************************
 ** REFERENCIAS:															****
 ****************************************************************************
+** Modifico:		Erick Martinez										****
+** Fecha:			13/Mayo/2020			  							****
+** Help:			1297733												****
+** Descripcion:		Se valida si la cotizacion es nueva, para tomar 	****
+**					el iva correcto										****
+****************************************************************************
 ** Modifico:		Cristina Rodriguez									****
 ** Fecha:			03/Diciembre/2019		  							****
 ** Help:			1319161												****
@@ -181,7 +187,8 @@ declare	@Mon_Cero	smallint,				/*	Declaración de Constantes	*/
 		@Uni_B2B	smallint,
 		@Uni_TCC	smallint,
 		@Cob_NoIVA	char(1),
-		@Cob_SiIVA	char(1)
+		@Cob_SiIVA	char(1),
+		@Str_SieCer char(7)
 
 /*	Asignación de Constantes	*/
 select	@Mon_Cero	= 0.00,			/*	Moneda Cero																	*/
@@ -232,7 +239,8 @@ select	@Mon_Cero	= 0.00,			/*	Moneda Cero																	*/
 		@Uni_B2B	= 2,			/*	Unidad de negocios b2b														*/
 		@Uni_TCC	= 3,			/*	Unidad de negocios TCC														*/
 		@Cob_NoIVA	= 'N',			/*	No cobro de IVA																*/
-		@Cob_SiIVA	= 'S'			/*	Si cobro de IVA																*/																					 
+		@Cob_SiIVA	= 'S',			/*	Si cobro de IVA																*/																					 
+		@Str_SieCer	= '0000000'		/*	Cadena 7 ceros																*/
 		
 create table #Rentas (
 	Ren_Consec	smallint not null,
@@ -254,9 +262,12 @@ select	@Par_DiBaCr	= Par_DiBaCr,
 	from SOPARAMS noholdlock
 	where	Par_Sucurs	= @SucOrigen
 	
-/*PROM-37*/		
-select	@Zon_IVA	= Zon_IVA,  --Se obtiene el IVA en base a la zona de la cotizacion, 01 interior de la republica o 02 frontera 
-		@Cot_ExeIVA	= Caa_ExeIVA 
+/*PROM-37*/	
+if @Num_Cotiza = @Str_SieCer begin 
+	select	@Zon_IVA	= @Amo_IVA
+end else	
+	select	@Zon_IVA	= Zon_IVA,  --Se obtiene el IVA en base a la zona de la cotizacion, 01 interior de la republica o 02 frontera 
+			@Cot_ExeIVA	= Caa_ExeIVA 
 	from ABCOTIZA noholdlock
 	inner join SOZONAS noholdlock on Cot_Zona = Zon_Numero
 	inner join ABCOADAR noholdlock on Cot_Numero = Caa_Cotiza
