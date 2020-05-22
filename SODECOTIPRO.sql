@@ -124,7 +124,7 @@ begin
 		return 1
 	end
 	
-	delete SOHISEAC
+	delete SOHIEXCA
 		where Eac_Fecha = @Fec_Actual
 	--En caso de error hacer rollback
 	if @@error <> 0
