@@ -23,7 +23,7 @@ as
 ********************************************************************
 ** Modifico:	Esthepny Aguilar								****
 ** Fecha:		14/04/2020										****
-** Help:		NEXT	 										****
+** Help:		1396836	 										****
 ** Descripcion:	Se agrega LB para consultar por nombre		    ****
 ********************************************************************
 ** Modifico:	Armando Alexis Sepúlveda Cruz					****

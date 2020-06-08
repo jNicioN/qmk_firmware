@@ -24,7 +24,7 @@ as
 ****************************************************************************
 ** Modifico:		Esthepny Aguilar									****
 ** Fecha:			10/0/2020											****
-** Help:			pending next										****
+** Help:			1396836												****
 ** Descripcion:		Se agrega consulta L6 para obtener campo activo		****
 ****************************************************************************
 ** Modifico:		Victor Manuel Osorio Escamilla						****
