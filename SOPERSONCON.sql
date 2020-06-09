@@ -1,4 +1,5 @@
-﻿create procedure SOPERSONCON (
+﻿
+create procedure SOPERSONCON (
 	@Per_Numero	char(8),
 	@Per_Comple	varchar(181),
 	@Per_Tipo	char(1),
@@ -649,8 +650,28 @@ if @Tip_ConTip = 'C' begin
 			from SOPERSON sp noholdlock
 			inner join ITPERSON pe noholdlock on sp.PerPersoID = pe.Per_PerId 
 			where Per_Tipo in (@Tip_Fisica,@Tip_FisAE)
-			  and Per_RFC = @Per_RFC
-	end
+			and Per_RFC = @Per_RFC
+	end else if @Tip_ConCon = 'C' begin
+		select	Per_Numero,	Per_Tipo,	Per_Benefi,	Per_NuSeFi,	Per_Titulo,
+				Per_Nombre,	Per_ApePat,	Per_ApeMat,	Per_RazSoc,	Per_Comple,
+				Per_ComOrd,	Per_RFC,	Per_CURP,	Per_Calle,	Per_CalNum,
+				Per_Coloni,	Per_Entida,	Per_Locali,	Per_CodPos,	Per_ApaPos,
+				Per_LadTel,	Per_Telefo,	Per_Email,	Per_ComDom,	Per_EstCiv,
+				Per_Nacion,	Per_ActEmp,	Per_Giro,	Per_Sector,	Per_Activi,
+				Per_ActINE,	Adi_LugNac,	Adi_Sexo,	Adi_FecNac,	Adi_Fax,
+				Adi_Puesto,	Adi_Ocupac,	Adi_LugTra,	Adi_TelTra,	Adi_CalTra,
+				Adi_NuCaTr,	Adi_ColTra,	Adi_Locali,	Adi_CPTra,	Adi_NacExt,
+				Adi_DocEst,	Adi_FeExDo,	Adi_CalInm,	Adi_CalExt,	Adi_CaNuEx,
+				Adi_ColExt,	Adi_LocExt,	Adi_EntExt,	Adi_PaiExt,	Adi_CoPoEx,
+				Adi_TipIde,	Adi_OtrIde,	Adi_NumIde,	Adi_FeExId,	Adi_FeVeId,
+				Adi_NuIdFi,	Adi_TieRes,	Adi_NumDep,	Adi_AntLab,	Adi_FecCon,
+				Adi_CaNuIn,	Adi_EntPri,	Adi_EntSeg, PerPersoID 
+			from SOPERSON noholdlock
+			inner join SOPERADI noholdlock on Per_Numero = Adi_PerNum
+			
+			where	Per_RFC		= @Per_RFC
+			and 
+		end
 end else begin
 	select	@Per_Comple	= ltrim(rtrim(@Per_Comple)) + @Str_Porcen
 
