@@ -17,6 +17,12 @@ as
 /*****************************************************************************/
 /** REFERENCIAS:
 ****************************************************************************
+** Modifico:	Joel Barcenas								****
+** Fecha:		06/03/2020									****
+** Req:			1367345										****
+** Modificar:	Se agrega L3 para filtrar por paises 		****
+**				sancionados									****
+****************************************************************************
 ** Modifico:	Jorge Alejandro Garza Alvarado				****
 ** Fecha:		17/Julio/2014								****
 ** Req:			00538044									****
@@ -69,4 +75,12 @@ end else begin								/*	L I S T A S	*/
 			where	Pai_Gentil	like @Pai_Nombre
 			order by Pai_Gentil
 	end	
+	if @Tip_ConCon = '3' begin	/* Lista de paises filtrados por paises sancionados swift */	
+		select p.Pai_Numero,	p.Pai_Nombre,	p.Pai_Abrevi,	p.Pai_ISR, p.Pai_Gentil, p.Pai_IdeBMX, p.Pai_IdCNBV
+		from SOPAIS p noholdlock
+		left  join ITPAISAN ps noholdlock on p.Pai_IdCNBV = ps.Pas_ClaPai
+		where ps.Pas_Numero  is null
+		and	Pai_Nombre	like @Pai_Nombre
+		order by Pai_Nombre
+	end
 end

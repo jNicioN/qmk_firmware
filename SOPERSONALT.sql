@@ -44,11 +44,16 @@ as
 /* TABLAS AFECTADAS: */
 /*SoPerson*/
 /***************************************************************************/
-/* DESCRIPCION: ** Altas de Apoderados **						  		   */
+/** DESCRIPCION: ** Altas de Apoderados **						  		   */
 /***************************************************************************/
-/** REFERENCIAS:
+/** REFERENCIAS:														   */
+/***************************************************************************
+** Modifico:	CODE4U-Eliezer Catalino Xul Canche						****
+** Fecha:		06/Febrero/2020											****
+** Help:		1343720													****
+** Descripcion: Se agrega indentity para el campo PerPersoID			****
 ****************************************************************************
-** Modifico:		Armando Alexis Sepúlveda Cruz							****
+** Modifico:		Armando Alexis Sepúlveda Cruz						****
 ** Fecha:		26/Junio/2017											****
 ** Help:		991811													****
 ** Descripcion: Se elimina la concatenación de Per_Titulo en Per_ComOrd	****
@@ -186,7 +191,8 @@ declare	@Per_Comple	varchar(180),	/*	Declaracion de Variables	*/
 		@Sta_Entida	char(1),
 		@Per_Pais	char(3)
 
-declare	@Str_Vacio	char(1),		/*	Declaracion de Constantes	*/
+declare	@Fec_Vacia	smalldatetime,   /*	Declaracion de Constantes	*/
+        @Str_Vacio	char(1),		
 		@Str_Espaci	char(1),
 		@Per_Moral	char(1),
 		@Per_Fisica	char(1),
@@ -216,10 +222,12 @@ declare	@Str_Vacio	char(1),		/*	Declaracion de Constantes	*/
 		@Mod_FabCon char(2),
 		@Sta_Inacti	char(1),
 		@Loc_Pais 	char(3),
-		@Mod_AplOnl char(2)
+		@Mod_AplOnl char(2),
+		@Tip_PerNum char(1)
 
 
-select	@Str_Vacio	= '',			/*	String Vacio	*/
+select	@Fec_Vacia	= '1900-01-01',	/*	Fecha Vacía*/
+		@Str_Vacio	= '',			/*	String Vacio	*/
 		@Str_Espaci	= ' ',			/*	String Espacio	*/
 		@Per_Moral	= '1',			/* Persona Moral */
 		@Per_Fisica	= '2',			/* Persona Fisica */
@@ -248,7 +256,8 @@ select	@Str_Vacio	= '',			/*	String Vacio	*/
 	 	@Str_23		= '[23]',
 	 	@Mod_FabCon = 'FB',			/* Modulo de Fabrica de Crédito al Consumo */
 	 	@Sta_Inacti	= 'I',			/* Status Inactivo para validar localidad y entidad */
-		@Mod_AplOnl	= 'OL'			/* Modulo de Aplicaciones Online*/			
+		@Mod_AplOnl	= 'OL',			/* Modulo de Aplicaciones Online*/		
+		@Tip_PerNum = 'F'			/*  Tipo proceso para actualizar el numero de folio*/
 
 if @Modulo in (@Mod_AplOnl) begin
 
@@ -569,17 +578,6 @@ end else begin
 	select	@Per_ComOrd	= LTrim(RTrim(@Per_Nombre)) + ' ' + LTrim(RTrim(@Per_ApePat)) + ' ' + LTrim(RTrim(@Per_ApeMat))
 end
 
-execute @Status = SOFOLIOSACT
-	@Fol_Tabla  = @Tab_Nombre,
-	@Fol_Numero = @PerPersoID output
-
-if @Status <> @Ent_Cero begin
-	rollback
-	return 1
-end
-
-select	@Per_Numero	= right('00000000' + ltrim(rtrim(convert(char, @PerPersoID))), 8)
-
 if @Cob_Tipo = @Tip_Benefi begin
 	select	@Per_Benefi	= @Str_Si
 end else begin
@@ -591,15 +589,45 @@ if isnull(@Per_NumTra, @Str_Vacio) = @Str_Vacio begin
 			@Per_NumTra	= @NumTransac
 end
 
-insert into SOPERSON values	(
-	@PerPersoID,	@Per_Numero,	@Per_Fecha,		@Per_NumTra,	@Per_Tipo,
-	@Per_Benefi,	@Per_NuSeFi,	@Per_Titulo,	@Per_Nombre,	@Per_ApePat,
-	@Per_ApeMat,	@Per_RazSoc,	@Per_Comple,	@Per_ComOrd,	@Per_RFC,
-	@Per_CURP,		@Per_Calle,		@Per_CalNum,	@Per_Coloni,	@Per_Entida,
-	@Per_Locali,	@Per_CodPos,	@Per_ApaPos,	@Per_LadTel,	@Per_Telefo,
-	@Per_Email,		@Per_ComDom,	@Per_EstCiv,	@Per_Nacion,	@Per_ActEmp,
-	@Per_Giro,		@Per_Sector,	@Per_Activi,	@Per_ActINE,	@NumTransac,
-	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino)
+insert into SOPERSON (
+	Per_Numero, Per_Fecha,  Per_NumTra, Per_Tipo,   Per_Benefi,
+	Per_NuSeFi, Per_Titulo, Per_Nombre, Per_ApePat, Per_ApeMat,
+	Per_RazSoc, Per_Comple, Per_ComOrd, Per_RFC,    Per_CURP,
+	Per_Calle,  Per_CalNum, Per_Coloni, Per_Entida, Per_Locali,
+	Per_CodPos, Per_ApaPos, Per_LadTel, Per_Telefo, Per_Email,
+	Per_ComDom, Per_EstCiv, Per_Nacion, Per_ActEmp, Per_Giro,
+	Per_Sector, Per_Activi, Per_ActINE, NumTransac, Transaccio,
+	Usuario,	FechaSis,   SucOrigen,  SucDestino) 
+	values	(
+	@Str_Vacio,	    @Per_Fecha,		@Per_NumTra,	@Per_Tipo,		@Per_Benefi,	
+	@Per_NuSeFi,	@Per_Titulo,	@Per_Nombre,	@Per_ApePat,	@Per_ApeMat,
+	@Per_RazSoc,	@Per_Comple,	@Per_ComOrd,	@Per_RFC,		@Per_CURP,
+	@Per_Calle,		@Per_CalNum,	@Per_Coloni,	@Per_Entida,	@Per_Locali,	
+	@Per_CodPos,	@Per_ApaPos,	@Per_LadTel,	@Per_Telefo,	@Per_Email,		
+	@Per_ComDom,	@Per_EstCiv,	@Per_Nacion,	@Per_ActEmp,	@Per_Giro,		
+	@Per_Sector,	@Per_Activi,	@Per_ActINE,	@NumTransac,	@Transaccio,
+	@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino)
+
+select @PerPersoID = @@identity
+
+select	@Per_Numero	= right('00000000' + ltrim(rtrim(convert(char, @PerPersoID))), 8)
+
+if @Per_Numero = @Str_Vacio begin
+		rollback
+		return 1
+end
+
+exec @Status = SOPERSONPRO		
+			@Per_Numero, @Str_Vacio,  @Str_Vacio,  @Str_Vacio, @Str_Vacio,
+			@Fec_Vacia,  @Str_Vacio,  @Str_Vacio,  @Fec_Vacia, @Str_Vacio,
+			@Str_Vacio,  @Str_Vacio,  @Fec_Vacia,  @Str_Vacio, @Str_Vacio,
+			@Tip_PerNum, @NumTransac, @Transaccio, @Usuario,   @FechaSis,
+			@SucOrigen,  @SucDestino, @Modulo
+	
+	if @Status <> @Ent_Cero begin
+		rollback
+		return 1
+	end
 
 exec SOUNIPERPRO
 	@Per_Numero,	@NumTransac,	@Transaccio,	@Usuario,	@FechaSis,

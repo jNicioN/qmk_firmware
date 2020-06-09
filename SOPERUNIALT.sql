@@ -83,7 +83,12 @@ as
 /******************************************************************/
 /* DESCRIPCION: Alta de Personas Unicas (por sistemas externos)	  */
 /******************************************************************/
-/** REFERENCIAS: 												  
+/** REFERENCIAS: 
+*********************************************************************
+** Modifico:	CODE4U-Eliezer Catalino Xul Canche				****
+** Fecha:		06/Febrero/2020									****
+** Help:		1343720											****
+** Descripcion: Se agrega indentity para el campo PerPersoID	****												  
 ********************************************************************
 ** Modifico:	Erika Báez										****
 ** Fecha:		04/Marzo/2019									****
@@ -154,7 +159,9 @@ declare	@Str_Vacio	char(1),		/*	Declaracion de Constantes	*/
 		@Lon_Moral	int,
 		@Str_Ceros	char(8),
 		@Ent_Ocho	int,
-		@Usu_Prueba	char(6)
+		@Usu_Prueba	char(6),
+		@Fec_Vacia	smalldatetime,
+		@Tip_PerNum char(1)
 
 /*Asignacion de constantes*/
 select	@Str_Vacio	= '',			/* String Vacio	*/
@@ -163,6 +170,7 @@ select	@Str_Vacio	= '',			/* String Vacio	*/
 		@Per_Fisica	= '2',			/* Persona Fisica */
 		@Sta_ActIna	= 'I',			/* Status de actividad inactiva */
 		@Tab_Nombre	= 'SOPERSON',	/* Tabla que se consulta en SOFOLIOS */
+		@Fec_Vacia	= '1900-01-01',	/*	Fecha Vacía*/
 		@Ent_Cero	= 0,			/* Entero en Cero */
 		@Ent_Uno	= 1,			/* Entero en Uno */
 		@Tip_Titula	= '1',			/* Titular */
@@ -174,7 +182,9 @@ select	@Str_Vacio	= '',			/* String Vacio	*/
 		@Lon_Moral	= 12,			/*Longitud RFC persona moral*/
 		@Str_Ceros	='00000000',	/*String ceros*/
 		@Ent_Ocho	= 8,			/*Entero ocho*/
-		@Usu_Prueba	= '009999'		/*Usuario Pruebas*/
+		@Usu_Prueba	= '009999',		/*Usuario Pruebas*/
+		@Tip_PerNum = 'F'			/*  Tipo proceso para actualizar el numero de folio*/
+
 
 if (@NumTransac	= @Str_Vacio or isnull(@NumTransac, @Str_Vacio)	= @Str_Vacio) begin
 	/***** Genera el @NumTransac *****/
@@ -240,16 +250,6 @@ end else begin
 	select	@Per_ComOrd	= ltrim(rtrim(@Per_Nombre)) + ' ' + ltrim(rtrim(@Per_ApePat)) + ' ' + ltrim(rtrim(@Per_ApeMat))
 end
 
-exec @Status	= SOFOLIOSACT
-	@Fol_Tabla	= @Tab_Nombre,
-	@Fol_Numero	= @PerPersoID output
-if @Status <> 0 begin
-	rollback
-	return 1
-end
-
-select	@Per_Numero	= right(@Str_Ceros + ltrim(rtrim(convert(char, @PerPersoID))), @Ent_Ocho)
-
 select	@Per_ActINE	= @Str_Vacio
 if isnull(@Per_Activi, @Str_Vacio) != @Str_Vacio begin
 	select	@Per_ActINE	= Act_NumINE
@@ -260,15 +260,45 @@ end
 select	@Per_ActINE	= isnull(@Per_ActINE, @Str_Vacio)
 
 /* Datos Personales */
-insert into SOPERSON values	(
-	@PerPersoID,	@Per_Numero,	@Per_Fecha,		@Per_NumTra,	@Per_Tipo,
-	@Per_Benefi,	@Per_NuSeFi,	@Per_Titulo,	@Per_Nombre,	@Per_ApePat,
-	@Per_ApeMat,	@Per_RazSoc,	@Per_Comple,	@Per_ComOrd,	@Per_RFC,
-	@Per_CURP,		@Per_Calle,		@Per_CalNum,	@Per_Coloni,	@Per_Entida,
-	@Per_Locali,	@Per_CodPos,	@Per_ApaPos,	@Per_LadTel,	@Per_Telefo,
-	@Per_Email,		@Per_ComDom,	@Per_EstCiv,	@Per_Nacion,	@Per_ActEmp,
-	@Per_Giro,		@Per_Sector,	@Per_Activi,	@Per_ActINE,	@NumTransac,
-	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino)
+insert into SOPERSON (
+	Per_Numero, Per_Fecha,  Per_NumTra, Per_Tipo,   Per_Benefi,
+	Per_NuSeFi, Per_Titulo, Per_Nombre, Per_ApePat, Per_ApeMat,
+	Per_RazSoc, Per_Comple, Per_ComOrd, Per_RFC,    Per_CURP,
+	Per_Calle,  Per_CalNum, Per_Coloni, Per_Entida, Per_Locali,
+	Per_CodPos, Per_ApaPos, Per_LadTel, Per_Telefo, Per_Email,
+	Per_ComDom, Per_EstCiv, Per_Nacion, Per_ActEmp, Per_Giro,
+	Per_Sector, Per_Activi, Per_ActINE, NumTransac, Transaccio,
+	Usuario,	FechaSis,   SucOrigen,  SucDestino) 
+	values	(
+	@Str_Vacio,	    @Per_Fecha,		@Per_NumTra,	@Per_Tipo,		@Per_Benefi,	
+	@Per_NuSeFi,	@Per_Titulo,	@Per_Nombre,	@Per_ApePat,	@Per_ApeMat,
+	@Per_RazSoc,	@Per_Comple,	@Per_ComOrd,	@Per_RFC,		@Per_CURP,
+	@Per_Calle,		@Per_CalNum,	@Per_Coloni,	@Per_Entida,	@Per_Locali,	
+	@Per_CodPos,	@Per_ApaPos,	@Per_LadTel,	@Per_Telefo,	@Per_Email,		
+	@Per_ComDom,	@Per_EstCiv,	@Per_Nacion,	@Per_ActEmp,	@Per_Giro,		
+	@Per_Sector,	@Per_Activi,	@Per_ActINE,	@NumTransac,	@Transaccio,
+	@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino)
+
+select @PerPersoID = @@identity
+
+select	@Per_Numero	= right('00000000' + ltrim(rtrim(convert(char, @PerPersoID))), 8)
+
+if @Per_Numero = @Str_Vacio begin
+		rollback
+		return 1
+end
+
+exec @Status = SOPERSONPRO		
+			@Per_Numero, @Str_Vacio,  @Str_Vacio,  @Str_Vacio, @Str_Vacio,
+			@Fec_Vacia,  @Str_Vacio,  @Str_Vacio,  @Fec_Vacia, @Str_Vacio,
+			@Str_Vacio,  @Str_Vacio,  @Fec_Vacia,  @Str_Vacio, @Str_Vacio,
+			@Tip_PerNum, @NumTransac, @Transaccio, @Usuario,   @FechaSis,
+			@SucOrigen,  @SucDestino, @Modulo
+	
+	if @Status <> @Ent_Cero begin
+		rollback
+		return 1
+	end
 
 /* Datos Adicionales */
 insert into SOPERADI values (
