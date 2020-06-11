@@ -889,14 +889,14 @@ end else begin
 		drop table #PersonasRFC
 	end
 	if @Tip_ConCon	= @Str_B begin /* LB - Consulta de Personas Bases por nombre */
-		create table #tmpPerso05(Per_Person char(8), Per_Grupo char(8))
+		create table #PersonasUni(Per_Person char(8), Per_Grupo char(8))
 		
-		insert into #tmpPerso05(Per_Person, Per_Grupo)
+		insert into #PersonasUni(Per_Person, Per_Grupo)
 		select Per_Numero, Per_Numero
 			from SOPERSON (index SOPERSONCOM ) noholdlock
 			where	Per_Comple like @Str_PeuNom
 
-		update #tmpPerso05 set
+		update #PersonasUni set
 			Per_Grupo = Peu_Grupo
 			from SOUNIPER noholdlock
 			where	Peu_Person = Per_Person
@@ -904,11 +904,11 @@ end else begin
 		select	distinct
 				Per_Numero,	Per_Comple,	Per_RFC,	Adi.Adi_FecNac,	Adi_FecCon,
 				Per_Client = Adi_Client
-			from #tmpPerso05
+			from #PersonasUni
 			inner join SOPERSON noholdlock on Per_Numero = Per_Grupo
 			inner join SOPERADI Adi noholdlock on Adi_PerNum = Per_Numero
 			 left join CLADICIO noholdlock on Adi_NumPer = Per_Numero
 
-		drop table #tmpPerso05
+		drop table #PersonasUni
 	end
 end
