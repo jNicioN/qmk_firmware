@@ -23,7 +23,7 @@ as
 ** dar acceso al usuario BLOQUEAR										****
 ****************************************************************************
 ** Modifico:		Esthepny Aguilar									****
-** Fecha:			10/0/2020											****
+** Fecha:			10/03/2020											****
 ** Help:			1396836												****
 ** Descripcion:		Se agrega consulta L6 para obtener campo activo		****
 ****************************************************************************
