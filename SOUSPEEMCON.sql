@@ -1,4 +1,4 @@
-create procedure SOUSPEEMCON (
+﻿create procedure SOUSPEEMCON (
 	@Per_Numero	char(8),		/* Número de persona de la que se consultará el empleado */
 
 	@NumTransac	char(10),
