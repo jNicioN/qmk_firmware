@@ -1,3 +1,4 @@
+--drop procedure SODECOTIPRO
 create procedure SODECOTIPRO (
 	@Pro_Numero	smallint,		/* Proceso para el cual se ejecutarán sus Tipos de Movimientos */
 	@NumTransac	char(10),
@@ -60,7 +61,7 @@ select	@Bit_Si	= 1,					/* Si (bit)*/
 		@Sta_Activo = 'A',				/* Status Activo */
 		@Ent_ProMod = 29				/* Numero de Producto Modalidad */
 
-declare @Tab_TiMoPr table 
+create table #Tab_TiMoPr 
 		(Tmp_TipMov char(6),			/* Tabla para guardar las Comisiones a Procesar */
 		Tmp_Numero int identity)	
 
@@ -124,7 +125,7 @@ begin
 		return 1
 	end
 	
-	delete SOHIEXCA
+	delete SOHISEAC
 		where Eac_Fecha = @Fec_Actual
 	--En caso de error hacer rollback
 	if @@error <> 0
@@ -589,7 +590,7 @@ end
 --FIN Obtener las Configuraciones (SOCOTIMO) en las que aplica cada Cuenta en cada Nivel
 
 --Ejecutar proceso de Determinación de Configuracion de Cuentas, para cada Comision.
-insert into @Tab_TiMoPr
+insert into #Tab_TiMoPr
 	(Tmp_TipMov)
 	select substring('000000', 1, 6 - len(rtrim(convert(char(6), Dat_TipMov)))) + rtrim(convert(char(6), Dat_TipMov))
 	from	SODAADTI noholdlock
@@ -605,13 +606,13 @@ begin
 end
 
 select	@Reg_CoTiMo	=	min(Tmp_Numero),	@Reg_TipMov	=	max(Tmp_Numero)
-	from @Tab_TiMoPr
+	from #Tab_TiMoPr
 	
 while (@Reg_CoTiMo <= @Reg_TipMov) --Ejecutar cada Comision
 begin
 	--Obtener siguiente Comision
 	select	@Pro_TipMov = Tmp_TipMov
-		from	@Tab_TiMoPr
+		from	#Tab_TiMoPr
 		where 	Tmp_Numero = @Reg_CoTiMo
 
 	--Determinar si la Comision ya fue ejecutada
