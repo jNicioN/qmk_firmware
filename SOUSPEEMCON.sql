@@ -50,15 +50,15 @@ create table #Personas(
 	
 create table #UsuarioClave(
 	Usc_NumCli	char(8),
-	Usc_NumEmp	char(6),
-	Usc_Comple  varchar(120)
+	Usc_NumEmp	char(6)
 )
 
 create table #Usuario(
 	Usu_Numero	char(6),
 	Usu_Clave	char(15),
 	Usu_Sucurs	char(3)	,
-	Usu_NumEmp	varchar(6)
+	Usu_NumEmp	varchar(6),
+	Usu_Nombre  varchar(50)
 )
 
 select	@Peu_Grupo = Peu_Grupo
@@ -71,14 +71,13 @@ insert into #Personas
 		where Peu_Grupo	= @Peu_Grupo
 		
 insert into #UsuarioClave
-	select 	Cli_Numero,	@Str_Vacio,	@Str_Vacio
+	select 	Cli_Numero,	@Str_Vacio
 	from #Personas per
 		inner join CLADICIO adi noholdlock on adi.Adi_NumPer	= per.Per_Numero
 		inner join CLCLIENT cli noholdlock on cli.ClClientID	= adi.ClClientID
 		
 update #UsuarioClave set 
-	Usc_NumEmp	= Emp_Numero,
-	Usc_Comple	= Emp_Comple			
+	Usc_NumEmp	= Emp_Numero			
 	from RHEMPLEA noholdlock
 	where Emp_Client	= Usc_NumCli
 
@@ -90,7 +89,7 @@ select @Ent_Encont = @Int_Uno
 	
 if isnull(@Ent_Encont, @Int_Cero) > @Int_Cero begin
 		insert into #Usuario
-			select 	Usu_Numero,	Usu_Clave,	Usu_Sucurs,	Usu_Clave
+			select 	Usu_Numero,	Usu_Clave,	Usu_Sucurs,	Usu_Clave, Usu_Nombre
 				from SOUSUARI noholdlock 
 
 		update #Usuario set 
@@ -99,7 +98,7 @@ if isnull(@Ent_Encont, @Int_Cero) > @Int_Cero begin
 		update #Usuario set 
 			Usu_NumEmp	= replicate(@Str_Cero, @Int_Seis - len(Usu_NumEmp)) + Usu_NumEmp
 					
-		select top 1 Usu_Numero,	Usu_Clave,	Usu_Sucurs,	Usu_NumEmp,	Usc_Comple,	Usc_NumCli
+		select top 1 Usu_Numero,	Usu_Clave,	Usu_Sucurs,	Usu_NumEmp,	Usu_Nombre,	Usc_NumCli
 			from #UsuarioClave
 				 inner join #Usuario on Usu_NumEmp	= Usc_NumEmp						 
 end 
