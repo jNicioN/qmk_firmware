@@ -1,4 +1,4 @@
-create procedure SOPERUNICON (
+﻿create procedure SOPERUNICON (
 	@Per_Numero	char(8),
 	@Per_Fecha	smalldatetime,
 	@Per_NumTra	char(10),
@@ -20,6 +20,11 @@ create procedure SOPERUNICON (
 as
 /*******************************************************************
 ** DESCRIPCION: Consulta de Persona Unica						****
+********************************************************************
+** Modifico:	Esthepny Aguilar								****
+** Fecha:		14/04/2020										****
+** Help:		1396836	 										****
+** Descripcion:	Se agrega LB para consultar por nombre		    ****
 ********************************************************************
 ** Modifico:	Armando Alexis Sepúlveda Cruz					****
 ** Fecha:		16/04/2020  									****
@@ -883,5 +888,27 @@ end else begin
 
 		drop table #PersonasRFC
 	end
-end
+	if @Tip_ConCon	= @Str_B begin /* LB - Consulta de Personas Bases por nombre */
+		create table #PersonasUni(Per_Person char(8), Per_Grupo char(8))
+		
+		insert into #PersonasUni(Per_Person, Per_Grupo)
+		select Per_Numero, Per_Numero
+			from SOPERSON (index SOPERSONCOM ) noholdlock
+			where	Per_Comple like @Str_PeuNom
 
+		update #PersonasUni set
+			Per_Grupo = Peu_Grupo
+			from SOUNIPER noholdlock
+			where	Peu_Person = Per_Person
+
+		select	distinct
+				Per_Numero,	Per_Comple,	Per_RFC,	Adi.Adi_FecNac,	Adi_FecCon,
+				Per_Client = Adi_Client
+			from #PersonasUni
+			inner join SOPERSON noholdlock on Per_Numero = Per_Grupo
+			inner join SOPERADI Adi noholdlock on Adi_PerNum = Per_Numero
+			 left join CLADICIO noholdlock on Adi_NumPer = Per_Numero
+
+		drop table #PersonasUni
+	end
+end
