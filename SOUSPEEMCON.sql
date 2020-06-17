@@ -104,3 +104,4 @@ if isnull(@Ent_Encont, @Int_Cero) > @Int_Cero begin
 end 
 drop table #UsuarioClave
 drop table #Usuario
+drop table #Personas
