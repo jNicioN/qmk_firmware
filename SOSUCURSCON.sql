@@ -18,11 +18,16 @@ as
 ****************************************************************************
 **                           Store CONVERTIDO 							****
 ****************************************************************************
-** Modifico:	Joel Barcenas													****
-** Fecha:		18/Sep/19												    	****
-** HelpDesk:	1184558														****
-** Descripcion:	Agrega consulta de sucusarles de Tipo de cambio****
-					Pantallas de Sucursal en L9								****
+** Modifico:	Juan Pablo Mendez Cabrales								****
+** Fecha:		06/Abr/2020												****
+** HelpDesk:	01352603												****
+** Descripcion:	Se modifica C8, para dar salida a la direccion			****
+****************************************************************************
+** Modifico:	Joel Barcenas											****
+** Fecha:		18/Sep/19												****
+** HelpDesk:	1184558													****
+** Descripcion:	Agrega consulta de sucusarles de Tipo de cambio			****
+					Pantallas de Sucursal en L9							****
 ****************************************************************************
 ** Modifico:	Marcelo Bautista Hernandez								****
 ** Fecha:		24/Julio/2019											****
@@ -232,6 +237,7 @@ select	@Str_Vacio	= '',			/*	String Vacio 		*/
 		@Con_CieCen = '3',			/*	Consulta: Cierre Centralizado de Creditos	*/
 		@Con_CieAut = '4',			/*	Consulta: Cierre de Autoregio				*/
 		@Con_CiCrJa	= '5',			/*	Consulta: Cierre de Creditos en Java		*/
+
 		@Con_SucPer	= '6',			/*	Consulta: De Perfiles por Sucursal			*/				
 		@Con_DirSuc	= '7',			/*	Consulta: Direccion sucursal				*/
 		@Lis_Genera = '1',			/*	Lista: General								*/
@@ -335,6 +341,7 @@ end else begin													/* Cliente:  Visual Basic */
 				from SOSUCURS noholdlock,
 					 ABCREDIT noholdlock
 				where	Suc_Numero	= substring(Cre_Numero, 1, 3)
+
 				  and	Cre_Status	= @Sta_Proces
   				group by Suc_Numero
 				order by count(Cre_Numero)
@@ -409,7 +416,9 @@ end else begin													/* Cliente:  Visual Basic */
 					inner join SOPLAZAS noholdlock on Suc_Plaza = Pla_Numero
 				where	Suc_Numero	= @Suc_Numero
 		end else if @Tip_ConCon = @Str_Ocho begin
-			select Suc_Numero,Suc_Nombre,Ciu_Nombre,Est_Abrevi,Est_Nombre,Suc_Gerent,Suc_SubGer
+			select 	Suc_Numero,	Suc_Nombre,	Ciu_Nombre,	Est_Abrevi,	Est_Nombre,
+					Suc_Gerent,	Suc_SubGer, Suc_Calle, 	Suc_CalNum, Suc_Coloni, 
+					Suc_CodPos, Suc_ApaPos, Suc_Pais, 	Suc_Telefo
 				from SOSUCURS suc noholdlock
 				inner join SOCIUDAD ciu noholdlock on suc.SoCiudadID = ciu.SoCiudadID
 				inner join SOESTADO est noholdlock on ciu.Ciu_Estado = est.Est_Numero
@@ -501,6 +510,7 @@ end else begin													/* Cliente:  Visual Basic */
 				)
 										 
 					insert into #TextoBan
+
 					select Bag_Grupo, Bas_Texto
 					from ITBANGRU bang noholdlock
 					inner join ITBANSUC ban noholdlock on bang.Bag_Banner  = ban.Bas_NumReg 

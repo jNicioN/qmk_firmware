@@ -16,6 +16,11 @@ as
 
 /***************************************************************************
 ** Descripción:	 Consulta de Correos Persona							****
+*****************************************************************************
+** Modificó:	Joel Barcenas											****
+** Fecha:		15/02/2020												****
+** HelpDesk:	1179955													****
+** Descripción:	se agrega consulta por Persona 	L4						****
 ****************************************************************************
 ** Modificó:	Ezequiel Cruz											****
 ** Fecha:		03/08/2018											****
@@ -51,7 +56,9 @@ declare	@Str_Vacio	char(1),
 		@Con_Listas	char(1),
 		@Por_LlaPri	char(1),
 		@Str_A		char(1),
-		@Por_PerTip char(1)
+		@Por_PerTip char(1),
+		@Str_Dos	char(1),
+		@Str_Cuatro	char(1)
 
 										/* Asignación de constantes */
 select	@Str_Vacio	= '',				/* String vacío */
@@ -62,7 +69,9 @@ select	@Str_Vacio	= '',				/* String vacío */
 		@Con_Listas	= 'L',				/* Tipo: Lista */
 		@Por_LlaPri	= '1',				/* Por llave principal */
 		@Str_A		= 'A',
-		@Por_PerTip = '3'				/* Por Persona y Tipo de Correo */
+		@Por_PerTip = '3',				/* Por Persona y Tipo de Correo */
+		@Str_Dos	= '2',
+		@Str_Cuatro = '4'				/*Por Persona*/
 
 
 select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
@@ -105,6 +114,13 @@ end else if @Tip_ConTip = @Con_Listas begin	/* Listas */
 			from SOCORPER noholdlock
 			where PerPersoID = @PerPersoID
 			and Cop_TipCor = @Cop_TipCor
+			and Cop_Status  = @Str_A
+	end
+	
+	if @Tip_ConCon = @Str_Cuatro begin /* Lista por Persona*/
+		select	PerPersoID, Cop_TipCor, ClClientID, Cop_Correo  
+			from SOCORPER noholdlock
+			where PerPersoID = @PerPersoID
 			and Cop_Status  = @Str_A
 	end
 end
