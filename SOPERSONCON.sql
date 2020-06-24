@@ -648,13 +648,81 @@ if @Tip_ConTip = 'C' begin
 		  join SOUNIPER noholdlock on Per_Numero = Peu_Person 
 		  where Per_Comple like @Per_Comple + '%'
 	end else if @Tip_ConCon = 'C' begin /*Consulta por persona registrada en internacional para tercero autorizado*/
-		 select	sp.Per_Numero,	sp.Per_Tipo,	sp.Per_Benefi,	sp.Per_NuSeFi,	sp.Per_Titulo,
+			select	sp.Per_Numero,	sp.Per_Tipo,	sp.Per_Benefi,	sp.Per_NuSeFi,	sp.Per_Titulo,
 				sp.Per_Nombre,	sp.Per_ApePat,	sp.Per_ApeMat,	sp.Per_RazSoc,	sp.Per_Comple,
 				sp.Per_ComOrd,	sp.Per_RFC,		sp.Per_CURP
 			from SOPERSON sp noholdlock
 			inner join ITPERSON pe noholdlock on sp.PerPersoID = pe.Per_PerId 
 			where Per_Tipo in (@Tip_Fisica,@Tip_FisAE)
 			  and Per_RFC = @Per_RFC
+	end else if @Tip_ConCon = 'D' begin /*Consulta para personas que no existen en lIsta negra de Tercero autorizado*/
+			 select top 1	sp.Per_Numero,	sp.Per_Tipo,	sp.Per_Benefi,	sp.Per_NuSeFi,	sp.Per_Titulo,
+				sp.Per_Nombre,	sp.Per_ApePat,	sp.Per_ApeMat,	sp.Per_RazSoc,	sp.Per_Comple,
+				sp.Per_ComOrd,	sp.Per_RFC,		sp.Per_CURP
+			from SOPERSON sp noholdlock
+			where Per_Tipo in (@Tip_Fisica,@Tip_FisAE)
+			and Per_RFC = @Per_RFC	
+			order by  PerPersoID desc
+	end else if @Tip_ConCon = 'F' begin /*Consulta para obtener a todas las personas con el mismo RFC*/
+		select @Per_RFC	= Per_RFC
+		from SOPERSON noholdlock
+		where Per_Numero = @Per_Numero
+		if isnull(@Per_RFC,@Str_Vacio) = @Str_Vacio begin
+			select	sp.Per_Numero,	sp.Per_Tipo,	sp.Per_Benefi,	sp.Per_NuSeFi,	sp.Per_Titulo,
+				sp.Per_Nombre,	sp.Per_ApePat,	sp.Per_ApeMat,	sp.Per_RazSoc,	sp.Per_Comple,
+				sp.Per_ComOrd,	sp.Per_RFC,		sp.Per_CURP
+			from SOPERSON sp noholdlock
+			where Per_Tipo in (@Tip_Fisica,@Tip_FisAE)
+			and PerPersoID = @Ent_Cero
+		end else begin
+			select	sp.Per_Numero,	sp.Per_Tipo,	sp.Per_Benefi,	sp.Per_NuSeFi,	sp.Per_Titulo,
+				sp.Per_Nombre,	sp.Per_ApePat,	sp.Per_ApeMat,	sp.Per_RazSoc,	sp.Per_Comple,
+				sp.Per_ComOrd,	sp.Per_RFC,		sp.Per_CURP
+			from SOPERSON sp noholdlock
+			where Per_Tipo in (@Tip_Fisica,@Tip_FisAE)
+			and Per_RFC = @Per_RFC	
+		end 
+	end else if @Tip_ConCon = 'G' begin /*Consulta para personas que no existen en lIsta negra de Tercero autorizado*/
+		create table #PersonasBloqueadas(
+			Per_Id 	   int identity,
+			Per_Numero char(8)
+		)
+		create table #RFCBloqueados(
+			Per_RFC varchar(15)
+		)
+		insert into #RFCBloqueados
+		select Per_RFC
+		from ITTELINE noholdlock 
+		inner join SOPERSON noholdlock on PerPersoID = Tel_Person
+		where Tel_Estatu = 'A'
+		
+		
+		insert into #PersonasBloqueadas
+		select per.Per_Numero
+		from #RFCBloqueados bloc 
+		inner join SOPERSON per noholdlock on per.Per_RFC = bloc.Per_RFC
+		
+		select	per.Per_Numero,	Per_Tipo,	Per_Benefi,	Per_NuSeFi,	Per_Titulo,
+				Per_Nombre,	Per_ApePat,	Per_ApeMat,	Per_RazSoc,	Per_Comple,
+				Per_ComOrd,	Per_RFC,	Per_CURP,	Per_Calle,	Per_CalNum,
+				Per_Coloni,	Per_Entida,	Per_Locali,	Per_CodPos,	Per_ApaPos,
+				Per_LadTel,	Per_Telefo,	Per_Email,	Per_ComDom,	Per_EstCiv,
+				Per_Nacion,	Per_ActEmp,	Per_Giro,	Per_Sector,	Per_Activi,
+				Per_ActINE,	Adi_LugNac,	Adi_Sexo,	Adi_FecNac,	Adi_Fax,
+				Adi_Puesto,	Adi_Ocupac,	Adi_LugTra,	Adi_TelTra,	Adi_CalTra,
+				Adi_NuCaTr,	Adi_ColTra,	Adi_Locali,	Adi_CPTra,	Adi_NacExt,
+				Adi_DocEst,	Adi_FeExDo,	Adi_CalInm,	Adi_CalExt,	Adi_CaNuEx,
+				Adi_ColExt,	Adi_LocExt,	Adi_EntExt,	Adi_PaiExt,	Adi_CoPoEx,
+				Adi_TipIde,	Adi_OtrIde,	Adi_NumIde,	Adi_FeExId,	Adi_FeVeId,
+				Adi_NuIdFi,	Adi_TieRes,	Adi_NumDep,	Adi_AntLab,	Adi_FecCon,
+				Adi_CaNuIn,	Adi_EntPri,	Adi_EntSeg, PerPersoID 
+			from SOPERSON per noholdlock 
+			inner join ITPERSON pe noholdlock on per.PerPersoID = pe.Per_PerId
+			left join #PersonasBloqueadas bloc noholdlock on bloc.Per_Numero = per.Per_Numero
+			left join  SOPERADI noholdlock on per.Per_Numero	= Adi_PerNum
+			where bloc.Per_Id is null	
+			and Per_RFC		= @Per_RFC
+		
 	end
 end else begin
 	select	@Per_Comple	= ltrim(rtrim(@Per_Comple)) + @Str_Porcen
