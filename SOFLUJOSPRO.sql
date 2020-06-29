@@ -68,7 +68,7 @@ select  @Can_Cero   = 0,		-- Cantidad: Cero
 
 -- Obtener Fechas de Sistema y hoy
 select	@Fec_ActSis = Par_FecAct
-	from SOPARAMS 
+	from SOPARAMS noholdlock
 	where Par_Sucurs = @SucOrigen
 
 select @Fec_Hoy = convert(smalldatetime, convert(varchar(10),getdate(),112))
@@ -388,5 +388,7 @@ end-- Ciclo de Proceso a Ejecutar
 --update SOFLUJOS
 --	set Flu_EjeAct	= @Bit_No
 --	where Flu_Numero	= @Num_Flujo
+
+drop table #PROEJE
 
 return @Can_Cero

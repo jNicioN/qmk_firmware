@@ -66,7 +66,7 @@ select  @Can_Cero   = 0,		-- Cantidad: Cero
 
 -- Obtener Fechas de Sistema y hoy
 select	@Fec_ActSis = Par_FecAct
-	from SOPARAMS 
+	from SOPARAMS noholdlock
 	where Par_Sucurs = @SucOrigen
 
 -- Fecha Hoy Real
@@ -222,5 +222,7 @@ while @Reg_Actual	<= @Reg_Final begin
 	select	@Reg_Actual	= @Reg_Actual + @Can_Uno
 end
 --Terminar el Flujo con exito
+
+drop table #FLUEJE
 
 return @Can_Cero
