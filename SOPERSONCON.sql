@@ -316,7 +316,8 @@ declare	@Str_Vacio	char(1),
 		@Msj_MasInf	varchar(41),
 		@Sin_Direcc varchar(50),
 		@Sta_Termin char(1),
-		@Str_Usuari varchar(10)
+		@Str_Usuari varchar(10),
+		@Str_A		char(1)
 
 /* Asignacion de Constantes */
 select	@Str_Vacio	= '',			-- String Vacio
@@ -346,7 +347,8 @@ select	@Str_Vacio	= '',			-- String Vacio
 		@Msj_MasInf	= 'Capture más información para la busqueda',
 		@Sin_Direcc = 'Sin Direcci&oacuten',
 		@Sta_Termin	= 'T',			-- Status de Terminado
-		@Str_Usuari = 'USUARIO'		-- String Usuario
+		@Str_Usuari = 'USUARIO',		-- String Usuario
+		@Str_A		= 'A'
 		
 select	@Busqueda	= @Per_Comple
 select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
@@ -699,7 +701,7 @@ if @Tip_ConTip = 'C' begin
 		select Per_RFC
 		from ITTELINE noholdlock 
 		inner join SOPERSON noholdlock on PerPersoID = Tel_Person
-		where Tel_Estatu = 'A'
+		where Tel_Estatu = @Str_A
 		
 		
 		insert into #PersonasBloqueadas
