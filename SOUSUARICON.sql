@@ -1,4 +1,4 @@
-create procedure SOUSUARICON (
+﻿create procedure SOUSUARICON (
 	@Usu_Numero	char(6),
 	@Usu_Nombre	varchar(50),
 	@Usu_Clave	char(15),
@@ -21,6 +21,11 @@ as
 ****************************************************************************
 ** Si se Compila este store en ProducciÃ³n, hay que volverle a 			****
 ** dar acceso al usuario BLOQUEAR										****
+****************************************************************************
+** Modifico:		Esthepny Aguilar									****
+** Fecha:			10/03/2020											****
+** Help:			1396836												****
+** Descripcion:		Se agrega consulta L6 para obtener campo activo		****
 ****************************************************************************
 ** Modifico:		Victor Manuel Osorio Escamilla						****
 ** Fecha:			14/Ene/2016											****
@@ -430,7 +435,7 @@ end else begin					/* 'L':  Lista */
 	select	@Usu_Nombre = ltrim(rtrim(@Usu_Nombre)) + @Str_Porcen
 
 	if @Tip_ConCon = @Str_Uno begin				/* Lista General */
-		select	Usu_Numero,	Usu_Nombre,	Usu_Clave,	Usu_EMail
+		select	Usu_Numero,	Usu_Nombre,	Usu_Clave,	Usu_EMail 
 			from SOUSUARI noholdlock
 			where	Usu_Nombre	like @Usu_Nombre
 			order by Usu_Nombre
@@ -464,6 +469,13 @@ end else begin					/* 'L':  Lista */
 			inner join SAPERFIL per	noholdlock on (usu.Usu_Perfil = per.Per_Numero)
 			where	Usu_Numero	= @Usu_Numero
 			
+	end
+	
+	if @Tip_ConCon = @Str_Seis begin				/* Lista General mas campo de activo */
+		select	Usu_Numero,	Usu_Nombre,	Usu_Clave,	Usu_EMail, Usu_Activo 
+			from SOUSUARI noholdlock
+			where	Usu_Nombre	like @Usu_Nombre
+			order by Usu_Nombre
 	end
 
 end
