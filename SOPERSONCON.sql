@@ -730,6 +730,8 @@ if @Tip_ConTip = 'C' begin
 			where bloc.Per_Id is null	
 			and Per_RFC		= @Per_RFC
 		
+		drop table #PersonasBloqueadas
+		drop table #RFCBloqueados
 	end
 end else begin
 	select	@Per_Comple	= ltrim(rtrim(@Per_Comple)) + @Str_Porcen
