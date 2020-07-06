@@ -1,4 +1,4 @@
-﻿create procedure SOPERSONCON (
+create procedure SOPERSONCON (
 	@Per_Numero	char(8),
 	@Per_Comple	varchar(181),
 	@Per_Tipo	char(1),
@@ -285,7 +285,8 @@ declare	@Tip_ConTip	char(1),
 		@Ent_PreCom	int,
 		@Loc_Pais	char(3),
 		@Busqueda	varchar(100),
-		@Suc_Numero	varchar(3)
+		@Suc_Numero	varchar(3),
+		@Int_Client	int
 
 /* Declaracion de Constantes */
 declare	@Str_Vacio	char(1),
@@ -1390,3 +1391,4 @@ end else begin
 		drop table #PersonasRfc
 	end	
 end
+
