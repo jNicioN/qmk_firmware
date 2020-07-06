@@ -660,7 +660,6 @@ if @Tip_ConTip = 'C' begin
 		from CLCLIENT noholdlock
 		where Cli_Numero = @Per_Numero
 		 select	sp.Per_Numero,	sp.Per_Tipo,	sp.Per_Benefi,	sp.Per_NuSeFi,	sp.Per_Titulo,
-			select	sp.Per_Numero,	sp.Per_Tipo,	sp.Per_Benefi,	sp.Per_NuSeFi,	sp.Per_Titulo,
 				sp.Per_Nombre,	sp.Per_ApePat,	sp.Per_ApeMat,	sp.Per_RazSoc,	sp.Per_Comple,
 				sp.Per_ComOrd,	sp.Per_RFC,		sp.Per_CURP
 			from SOPERSON sp noholdlock
