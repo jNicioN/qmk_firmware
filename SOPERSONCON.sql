@@ -656,6 +656,10 @@ if @Tip_ConTip = 'C' begin
 		  join SOUNIPER noholdlock on Per_Numero = Peu_Person 
 		  where Per_Comple like @Per_Comple + '%'
 	end else if @Tip_ConCon = 'C' begin /*Consulta por persona registrada en internacional para tercero autorizado*/
+		select @Int_Client = ClClientID 
+		from CLCLIENT noholdlock
+		where Cli_Numero = @Per_Numero
+		 select	sp.Per_Numero,	sp.Per_Tipo,	sp.Per_Benefi,	sp.Per_NuSeFi,	sp.Per_Titulo,
 			select	sp.Per_Numero,	sp.Per_Tipo,	sp.Per_Benefi,	sp.Per_NuSeFi,	sp.Per_Titulo,
 				sp.Per_Nombre,	sp.Per_ApePat,	sp.Per_ApeMat,	sp.Per_RazSoc,	sp.Per_Comple,
 				sp.Per_ComOrd,	sp.Per_RFC,		sp.Per_CURP
@@ -663,6 +667,7 @@ if @Tip_ConTip = 'C' begin
 			inner join ITPERSON pe noholdlock on sp.PerPersoID = pe.Per_PerId 
 			where Per_Tipo in (@Tip_Fisica,@Tip_FisAE)
 			  and Per_RFC = @Per_RFC
+			  and pe.Per_Client = @Int_Client
 	end else if @Tip_ConCon = 'D' begin /*Consulta para personas que no existen en lIsta negra de Tercero autorizado*/
 			 select top 1	sp.Per_Numero,	sp.Per_Tipo,	sp.Per_Benefi,	sp.Per_NuSeFi,	sp.Per_Titulo,
 				sp.Per_Nombre,	sp.Per_ApePat,	sp.Per_ApeMat,	sp.Per_RazSoc,	sp.Per_Comple,
