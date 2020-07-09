@@ -1,4 +1,4 @@
-﻿create procedure SOPERSONCON (
+create procedure SOPERSONCON (
 	@Per_Numero	char(8),
 	@Per_Comple	varchar(181),
 	@Per_Tipo	char(1),
@@ -280,7 +280,8 @@ declare	@Tip_ConTip	char(1),
 		@Ent_PreCom	int,
 		@Loc_Pais	char(3),
 		@Busqueda	varchar(100),
-		@Suc_Numero	varchar(3)
+		@Suc_Numero	varchar(3),
+		@Int_Client	int
 
 /* Declaracion de Constantes */
 declare	@Str_Vacio	char(1),
@@ -648,6 +649,10 @@ if @Tip_ConTip = 'C' begin
 		  join SOUNIPER noholdlock on Per_Numero = Peu_Person 
 		  where Per_Comple like @Per_Comple + '%'
 	end else if @Tip_ConCon = 'C' begin /*Consulta por persona registrada en internacional para tercero autorizado*/
+		
+		select @Int_Client = ClClientID 
+		from CLCLIENT noholdlock
+		where Cli_Numero = @Per_Numero
 		 select	sp.Per_Numero,	sp.Per_Tipo,	sp.Per_Benefi,	sp.Per_NuSeFi,	sp.Per_Titulo,
 				sp.Per_Nombre,	sp.Per_ApePat,	sp.Per_ApeMat,	sp.Per_RazSoc,	sp.Per_Comple,
 				sp.Per_ComOrd,	sp.Per_RFC,		sp.Per_CURP
@@ -655,6 +660,7 @@ if @Tip_ConTip = 'C' begin
 			inner join ITPERSON pe noholdlock on sp.PerPersoID = pe.Per_PerId 
 			where Per_Tipo in (@Tip_Fisica,@Tip_FisAE)
 			  and Per_RFC = @Per_RFC
+			  and pe.Per_Client = @Int_Client
 	end
 end else begin
 	select	@Per_Comple	= ltrim(rtrim(@Per_Comple)) + @Str_Porcen
@@ -1313,3 +1319,4 @@ end else begin
 		drop table #PersonasRfc
 	end	
 end
+
