@@ -115,7 +115,7 @@ if @Tip_Proces = @Str_RegTem begin
 		
 		if @Str_Estatu = @Str_EstPen begin
 			select	top 1000	Fir_Identi,	Fir_Cuenta,	Fir_Consec,	Fir_NumTer, Fir_Person
-				from CHTMPFIR
+				from CHTMPFIR noholdlock
 				where	NumTransac	= @Str_NumTra
 				  and	Fir_Estatu	= @Str_EstPen
 				order by	Fir_Identi
