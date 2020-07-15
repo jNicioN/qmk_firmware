@@ -356,13 +356,32 @@ if @Tip_Proces = @Str_ConFir begin
 			@Fec_FechaS	= Fir_FecSis
 		from CHTMPFIR noholdlock
 		where	Fir_Identi = @Mif_Numero
-		
-	update top 1 CHFIRMAS set
-		NumTransac	= convert(char(10), @Mif_Numero)
+			
+	select	@Ent_Valido	= count(1)
+		from CHFIRMAS noholdlock
 		where	Fir_Cuenta	= @Str_Cuenta
 		  and	Fir_Consec	= @Str_Consec
 		  and	FechaSis	= @Fec_FechaS
 		  and	NumTransac	= @Str_Espaci
+		  
+	if @Ent_Valido > @Ent_Cero begin
+		
+		update top 1 CHFIRMAS set
+			NumTransac	= convert(char(10), @Mif_Numero)
+			where	Fir_Cuenta	= @Str_Cuenta
+			  and	Fir_Consec	= @Str_Consec
+			  and	FechaSis	= @Fec_FechaS
+			  and	NumTransac	= @Str_Espaci
+			  
+	end else begin
+		
+		 update top 1 CHFIRMAS set
+			NumTransac	= convert(char(10), @Mif_Numero)
+			where	Fir_Cuenta	= @Str_Cuenta
+			  and	FechaSis	= @Fec_FechaS
+			  and	NumTransac	= @Str_Espaci
+		
+	end
 	
 	select	t.Fir_Identi,	t.Fir_Cuenta,	t.Fir_Consec,	t.Fir_NumTer,	t.Fir_Person,
 			t.Fir_Observ,	PerPersoID,	f.Fir_Firma,	f.Usuario,	f.FechaSis
