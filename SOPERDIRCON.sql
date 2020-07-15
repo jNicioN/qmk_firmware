@@ -24,6 +24,12 @@ create procedure SOPERDIRCON (
 ** REFERENCIAS:															****
 ****************************************************************************
 ** Modifico: 	Edwin Santiago											  **
+** Fecha:		25/06/2020						                    	  **
+** HelpDesk:	1299445						                    	      **
+** Descripcion:	Se modifican consultas para contemplar la actividad       **
+**              economica y tipos de sociedad                             **
+****************************************************************************
+** Modifico: 	Edwin Santiago											  **
 ** Fecha:		27/04/2020						                    	  **
 ** HelpDesk:	1299445						                    	      **
 ** Descripcion:	Se modifican consultas para contemplar mas inforamcion de **
@@ -111,7 +117,7 @@ begin
 				Per_RFC,		Per_RazSoc,	Per_Calle,	Per_CalNum,	Per_Coloni, @Col_Nombre as Col_Nombre,
 				Per_Entida,		@Ent_Nombre as Ent_Nombre,			Per_Locali,
 				@Loc_Nombre as Loc_Nombre,	Per_CodPos, Per_Tipo, 	Adi_Client,
-				Per_Email , 	Per_LadTel, Per_Telefo, Adi_FecCon, Adi.Adi_FecNac
+				Per_Email , 	Per_LadTel, Per_Telefo, Adi_FecCon, Adi.Adi_FecNac,Per_Activi
 			into #SOTMPDPE
 			from #SOTMPNUM tmp
 			inner join SOPERSON s noholdlock on s.Per_Numero = tmp.Peu_Grupo
@@ -139,13 +145,20 @@ begin
 		 
 		 
 			select 	Per_Numero,	rtrim(Per_Nombre) as Per_Nombre,	rtrim(Per_ApePat) as Per_ApePat,
-					rtrim(Per_ApeMat) as Per_ApeMat, Per_Comple,	Per_RFC,	rtrim(Per_Calle) as Per_Calle,
+					rtrim(Per_ApeMat) as Per_ApeMat, Per_Comple,	Upper(Per_RFC) as Per_RFC,	rtrim(Per_Calle) as Per_Calle,
 					Per_CalNum,	Per_RazSoc,			 Per_Coloni,	rtrim(Col_Nombre) as Col_Nombre,Per_Entida,
 					rtrim(Ent_Nombre) as Ent_Nombre, Per_Locali,	rtrim(Loc_Nombre) as Loc_Nombre,
 					Per_CodPos,			 Adi_Client, Per_Tipo,		Per_Email,
-					Per_LadTel , 		 Per_Telefo, Adi_FecCon, 	Adi_FecNac
+					Per_LadTel , 		 Per_Telefo, Adi_FecCon, 	Adi_FecNac, Act_Numero, Act_Descri,
+					Tis_Numero, Tis_Descri
 			from #SOTMPDPE
-				
+			inner join CLACTIVI
+			on Act_Numero = Per_Activi
+			left join SOCLCAPE
+			on Clp_NumPer = Per_Numero
+			left join CLTIPSOC
+			on Clp_TipSoc = Tis_Numero
+
 			drop table #SOTMPNUM,#SOTMPDPE,#SOTMPCPU,#SOTMPCPS
 
 		end
@@ -158,7 +171,7 @@ begin
 			select 	Per_Numero, @Peu_Grupo as Peu_Grupo
 					into #SOTMPPER
 					from SOPERSON noholdlock
-					where Per_RFC = @Per_RFC
+					where Upper(Per_RFC) = @Per_RFC
 			 
 			-- Busqueda de Grupo por numero de persona
 			update #SOTMPPER set Peu_Grupo = su.Peu_Grupo
@@ -187,7 +200,8 @@ begin
 				Per_RFC,		Per_RazSoc,	Per_Calle,	Per_CalNum,	Per_Coloni, @Col_Nombre as Col_Nombre,
 				Per_Entida,		@Ent_Nombre as Ent_Nombre,			Per_Locali,
 				@Loc_Nombre as Loc_Nombre,	Per_CodPos, Per_Tipo, 	Adi_Client,
-				Per_Email , 	Per_LadTel, Per_Telefo, Adi_FecCon, Adi.Adi_FecNac
+				Per_Email , 	Per_LadTel, Per_Telefo, Adi_FecCon, Adi.Adi_FecNac,
+				Per_Activi
 			into #SOTMPPRR
 			from #SOTMPPER tmp
 			inner join SOPERSON s noholdlock on s.Per_Numero = tmp.Peu_Grupo
@@ -215,12 +229,19 @@ begin
 		 
 		 
 			select 	Per_Numero,	rtrim(Per_Nombre) as Per_Nombre,	rtrim(Per_ApePat) as Per_ApePat,
-					rtrim(Per_ApeMat) as Per_ApeMat, Per_Comple,	Per_RFC,	rtrim(Per_Calle) as Per_Calle,
+					rtrim(Per_ApeMat) as Per_ApeMat, Per_Comple,	Upper(Per_RFC) as Per_RFC,	rtrim(Per_Calle) as Per_Calle,
 					Per_CalNum,	Per_RazSoc,			 Per_Coloni,	rtrim(Col_Nombre) as Col_Nombre,Per_Entida,
 					rtrim(Ent_Nombre) as Ent_Nombre, Per_Locali,	rtrim(Loc_Nombre) as Loc_Nombre,
 					Per_CodPos,			 Adi_Client, Per_Tipo,		Per_Email,
-					Per_LadTel , 		 Per_Telefo, Adi_FecCon, 	Adi_FecNac
+					Per_LadTel , 		 Per_Telefo, Adi_FecCon, 	Adi_FecNac,Act_Numero, Act_Descri,
+					Tis_Numero, Tis_Descri
 			from #SOTMPPRR
+			inner join CLACTIVI
+			on Act_Numero = Per_Activi
+			left join SOCLCAPE
+			on Clp_NumPer = Per_Numero
+			left join CLTIPSOC
+			on Clp_TipSoc = Tis_Numero
 				
 			drop table #SOTMPPER,#SOTMPPRR,#SOTMPCLI,#SOTMPCLP
 
@@ -232,7 +253,7 @@ begin
 			select 	Per_Numero, @Peu_Grupo as Peu_Grupo
 					into #SOTMPRFC
 					from SOPERSON noholdlock
-					where Per_RFC like  @Per_RFC + @Str_Porcen
+					where Upper(Per_RFC) like  @Per_RFC + @Str_Porcen
 			 
 			-- Busqueda de Grupo por numero de persona
 			update #SOTMPRFC set Peu_Grupo = su.Peu_Grupo
@@ -261,7 +282,8 @@ begin
 				Per_RFC,		Per_RazSoc,	Per_Calle,	Per_CalNum,	Per_Coloni, @Col_Nombre as Col_Nombre,
 				Per_Entida,		@Ent_Nombre as Ent_Nombre,			Per_Locali,
 				@Loc_Nombre as Loc_Nombre,	Per_CodPos, Per_Tipo, 	Adi_Client,
-				Per_Email , 	Per_LadTel, Per_Telefo, Adi_FecCon, Adi.Adi_FecNac
+				Per_Email , 	Per_LadTel, Per_Telefo, Adi_FecCon, Adi.Adi_FecNac,
+				Per_Activi
 			into #SOTMPDAT
 			from #SOTMPRFC tmp
 			inner join SOPERSON s noholdlock on s.Per_Numero = tmp.Peu_Grupo
@@ -288,12 +310,19 @@ begin
 		 
 		 
 			select 	Per_Numero,	rtrim(Per_Nombre) as Per_Nombre,	rtrim(Per_ApePat) as Per_ApePat,
-					rtrim(Per_ApeMat) as Per_ApeMat, Per_Comple,	Per_RFC,	rtrim(Per_Calle) as Per_Calle,
+					rtrim(Per_ApeMat) as Per_ApeMat, Per_Comple,	Upper(Per_RFC) as Per_RFC,	rtrim(Per_Calle) as Per_Calle,
 					Per_CalNum,	Per_RazSoc,			 Per_Coloni,	rtrim(Col_Nombre) as Col_Nombre,Per_Entida,
 					rtrim(Ent_Nombre) as Ent_Nombre, Per_Locali,	rtrim(Loc_Nombre) as Loc_Nombre,
 					Per_CodPos,			 Adi_Client, Per_Tipo,		Per_Email,
-					Per_LadTel , 		 Per_Telefo, Adi_FecCon, 	Adi_FecNac
+					Per_LadTel , 		 Per_Telefo, Adi_FecCon, 	Adi_FecNac,Act_Numero, Act_Descri,
+					Tis_Numero, Tis_Descri
 			from #SOTMPDAT
+			inner join CLACTIVI
+			on Act_Numero = Per_Activi
+			left join SOCLCAPE
+			on Clp_NumPer = Per_Numero
+			left join CLTIPSOC
+			on Clp_TipSoc = Tis_Numero
 				
 			drop table #SOTMPRFC,#SOTMPCLF,#SOTMPCLR,#SOTMPDAT
 			
@@ -332,7 +361,8 @@ begin
 				Per_RFC,		Per_RazSoc,	Per_Calle,	Per_CalNum,	Per_Coloni, @Col_Nombre as Col_Nombre,
 				Per_Entida,		@Ent_Nombre as Ent_Nombre,			Per_Locali,
 				@Loc_Nombre as Loc_Nombre,	Per_CodPos, Per_Tipo, 	Adi_Client,
-				Per_Email , 	Per_LadTel, Per_Telefo, Adi_FecCon, Adi.Adi_FecNac
+				Per_Email , 	Per_LadTel, Per_Telefo, Adi_FecCon, Adi.Adi_FecNac,
+				Per_Activi
 			into #SOTMPPCO
 			from #SOTMPNOM tmp
 			inner join SOPERSON s noholdlock on s.Per_Numero = tmp.Peu_Grupo
@@ -359,12 +389,19 @@ begin
 		 
 		 
 			select 	Per_Numero,	rtrim(Per_Nombre) as Per_Nombre,	rtrim(Per_ApePat) as Per_ApePat,
-					rtrim(Per_ApeMat) as Per_ApeMat, Per_Comple,	Per_RFC,	rtrim(Per_Calle) as Per_Calle,
+					rtrim(Per_ApeMat) as Per_ApeMat, Per_Comple,	Upper(Per_RFC) as Per_RFC,	rtrim(Per_Calle) as Per_Calle,
 					Per_CalNum,	Per_RazSoc,			 Per_Coloni,	rtrim(Col_Nombre) as Col_Nombre,Per_Entida,
 					rtrim(Ent_Nombre) as Ent_Nombre, Per_Locali,	rtrim(Loc_Nombre) as Loc_Nombre,
 					Per_CodPos,			 Adi_Client, Per_Tipo,		Per_Email,
-					Per_LadTel , 		 Per_Telefo, Adi_FecCon, 	Adi_FecNac
+					Per_LadTel , 		 Per_Telefo, Adi_FecCon, 	Adi_FecNac,Act_Numero, Act_Descri,
+					Tis_Numero, Tis_Descri
 			from #SOTMPPCO
+			inner join CLACTIVI
+			on Act_Numero = Per_Activi
+			left join SOCLCAPE
+			on Clp_NumPer = Per_Numero
+			left join CLTIPSOC
+			on Clp_TipSoc = Tis_Numero
 				
 			drop table #SOTMPNOM,#SOTMPCPE,#SOTMPCUN,#SOTMPPCO
 
