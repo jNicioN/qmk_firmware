@@ -16,6 +16,10 @@ as
 ******************************************************************
 **	Proceso migración firmas								    **
 ******************************************************************
+** Modifico:	Alma Perez										**
+** HelpDesk:	1390218											**
+** Fecha:		20/07/2019										**
+******************************************************************
 ** Creo:		Alma Perez										**
 ** HelpDesk:	1390218											**
 ** Fecha:		29/06/2020										**
@@ -53,6 +57,7 @@ declare @Ent_Cero	int,
 		@Str_AcTeNo	char(1),
 		@Str_ConFir	char(1),
 		@Str_ConTot	char(1),
+		@Str_Revers	char(1),
 		@Str_ConVac	char(3),
 		@Str_Espaci	char(1),
 		@Str_TipNue	char(1),
@@ -77,6 +82,7 @@ select	@Ent_Cero	= 0,		/* Entero cero */
 		@Str_AcTeNo	= 'C',		/* Actualizacon de registro tabla temporal como no procesado y su observacion */
 		@Str_ConFir	= 'D',		/* Opcion para consultar el registro */
 		@Str_ConTot	= 'E',		/* Opcion para consultar los totales por sucursal pendientes de procesar */
+		@Str_Revers	= 'F',		/* Opcion para reversa de registros no procesados */
 		@Str_ConVac	= '000',	/* String consecutivo vacio */
 		@Str_Espaci	= ' ',		/* String espacio */
 		@Str_TipNue	= 'N',		/* String tipo nuevo */
@@ -401,4 +407,29 @@ if @Tip_Proces = @Str_ConTot begin
 		from CHTMPFIR noholdlock
 		where	NumTransac	= @Str_NumTra
 		  and	Fir_Estatu	= @Str_EstPen
+end
+
+if @Tip_Proces = @Str_Revers begin
+	
+	select	@Str_Estatu	= Mif_Estatu,
+			@Str_NumTra	= NumTransac
+		from SOMIGFIR noholdlock
+		where	Mif_Sucurs	= @Mif_Sucurs
+		
+	if isnull(@Str_Estatu,@Str_Vacio) != @Str_EstTer begin
+		select	Err_Codigo = '000003', 
+				Err_Mensaj = 'Sólo se pueden reversar sucursales terminadas'
+		return 1
+	end
+	
+	update SOMIGFIR set
+		Mif_Estatu	= @Str_EstPen
+		where  Mif_Sucurs = @Mif_Sucurs
+		
+	update CHTMPFIR set
+		Fir_Estatu	= @Str_EstPen,
+		Fir_Observ	= @Str_Vacio
+		where	NumTransac	= @Str_NumTra
+		  and	Fir_Estatu	= @Str_EsNoPr
+
 end
