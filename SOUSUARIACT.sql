@@ -30,7 +30,7 @@ as
 ** 				momento de dar de baja un empleado se modifique el 		****
 **              correo electrónico por el valor "micorreo@banregio.com"	****
 **																		****
-** Help Desk:	  														****
+** Help Desk:	1205794													****
 ****************************************************************************
 ** Modificó:	Francisco Alejandro Bernal Castro						****
 ** Fecha:		02/07/2013												****
@@ -205,7 +205,7 @@ select	@Tab_Nombre	= 'SOUSUARI',	/* Nombre de la Tabla Local que se va actualiza
 		@Act_MuSeIn	= 'Q',			/* Actualización de Multisesión (Desactivar)		*/
 		@Act_CamSuc	= 'Z',			/* Actualización de Cambio de Sucursal Sibamex3		*/
 		@Mod_Ventan	= 'VE',			/* Módulo Ventanilla								*/
-		@Can_Correo	= 'micorreo@banregio.com'
+		@Can_Correo	= 'micorreo@banregio.com' /*Actualización baja Usuario              */
 
 select	@FechaSis	= getdate()
 
