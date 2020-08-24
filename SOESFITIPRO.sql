@@ -4,6 +4,7 @@ create procedure SOESFITIPRO (
 	@Eft_EsFin1	int,
 	@Eft_EsFin2	int,
 	@Eft_EsFin3	int,
+	
 	@Eft_EsFin4	int,
 	@Tip_Proces char(1),
 
@@ -18,6 +19,11 @@ create procedure SOESFITIPRO (
 as
 /****************************************************************/
 /* DESCRIPCION: Proceso de Estados Financieros Tipo Cuenta		*/
+/****************************************************************
+** Modifica:		Claudia Sandoval                   	        **
+** Fecha:			30/07/2020                               	**
+** Descripcion:		Validación cuando no hay segundo Eeff		**
+** Help:			1403550 					 				*/
 /****************************************************************
 ** Modifica:		Jose Rodriguez                     	        **
 ** Fecha:			09/03/2020                               	**
@@ -870,8 +876,9 @@ end	else if @Tip_Proces = @Tip_ProG begin
 		from SOESFITI noholdlock
 		where Eft_EstFin = @Eft_EsFin1
 		and SOESFITI.Eft_TipCue = @Tip_CueDep
-		
-	select @Esf_ValDep2 = Eft_Valor
+	
+	select @Esf_ValDep2 = @Mon_Cero
+	select @Esf_ValDep2 = isnull(Eft_Valor, @Mon_Cero)
 		from SOESFITI noholdlock
 		where Eft_EstFin = @Eft_EsFin2
 		and SOESFITI.Eft_TipCue = @Tip_CueDep
