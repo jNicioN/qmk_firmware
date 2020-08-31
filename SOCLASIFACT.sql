@@ -23,21 +23,27 @@ as
 ** Fecha:	07/08/2020													****
 ** Help:	01415639													****
 ****************************************************************************/
-
+/*	Declaracion de Variables	*/
+declare @Com_Numero char(2)
+		
 /*	Declaracion de Constantes	*/
 declare	@Str_Vacio	char(1),
-	@Ent_Uno	int,
-	@Str_Uno	char(1)
+		@Ent_Uno	int,
+		@Str_Uno	char(1)
 
 /* Asignacion de Constantes */
 select	@Str_Vacio	= '',			/* Tipo consulta*/
-	@Ent_Uno	= 1,			/* Entero Uno*/
-	@Str_Uno	= '1'			/* Caracter Uno*/
+		@Ent_Uno	= 1,			/* Entero Uno*/
+		@Str_Uno	= '1'			/* Caracter Uno*/
 
+select @FechaSis = getdate()
 
 if @Tip_Actual = @Str_Uno begin 						/*	Actualiza descripcion por compania */
 
-	
+	select @Com_Numero = Com_Numero 
+		from SOCOMPAN	noholdlock
+		where  Com_Numero  = @Cla_Compan
+							
 	if isnull(@Cla_Descri,@Str_Vacio) = @Str_Vacio begin
 		select	Err_Codigo	= '000001',
 				Err_Mensaj	= 'La descripcion es incorrecta',
@@ -46,9 +52,7 @@ if @Tip_Actual = @Str_Uno begin 						/*	Actualiza descripcion por compania */
 		return @Ent_Uno
 	end
 	
-	if not exists (	select	 Com_Numero 
-							from SOCOMPAN	noholdlock
-							where  Com_Numero  	= @Cla_Compan) begin
+	if isnull(@Com_Numero,@Str_Vacio) = @Str_Vacio begin
 		select	Err_Codigo	= '000002',
 				Err_Mensaj	= 'La compañia no existe',
 				Err_Variab	= 'Cla_Compan'
@@ -65,6 +69,6 @@ if @Tip_Actual = @Str_Uno begin 						/*	Actualiza descripcion por compania */
 		FechaSis	=	@FechaSis,
 		SucOrigen	=	@SucOrigen,
 		SucDestino	=	@SucDestino
-	where Cla_Numero = @Cla_Compan
+		where Cla_Numero = @Cla_Compan
 		
 end

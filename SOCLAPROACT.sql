@@ -23,18 +23,33 @@ as
 ** Help:	01415639													****
 ****************************************************************************/
 
+/*	Declaracion de Variables	*/
+declare @Cla_Numero int,
+		@Pro_Numero int
+
 /*	Declaracion de Constantes	*/
 declare	@Ent_Uno	int,
-	@Str_Uno	char(1)
+		@Ent_Cero int,
+		@Str_Uno	char(1)
 
 /* Asignacion de Constantes */
 select	@Ent_Uno	= 1,			/* Entero Uno*/
-	@Str_Uno	= '1'			/* Caracter Uno*/
+		@Ent_Cero = 0, 			/* Entero Cero*/
+		@Str_Uno	= '1'			/* Caracter Uno*/
+
+select @FechaSis = getdate()
 
 if @Tip_Actual = @Str_Uno begin 						/*	Actualiza clasificacion de producto */
-	if not exists (	select	 Cla_Numero 
-							from SOCLASIF	noholdlock
-							where  Cla_Numero  	= @Clp_Clasif) begin
+
+	select @Cla_Numero =  Cla_Numero 
+		from SOCLASIF	noholdlock
+		where  Cla_Numero  	= @Clp_Clasif 
+		
+	select	@Pro_Numero =  Pro_Numero 
+		from SOPRODUC	noholdlock
+		where  Pro_Numero  = @Clp_Produc
+
+	if isnull(@Cla_Numero,@Ent_Cero) = @Ent_Cero begin
 		select	Err_Codigo	= '000001',
 				Err_Mensaj	= 'La clasificacion no existe',
 				Err_Variab	= 'Clp_Clasif'
@@ -42,9 +57,7 @@ if @Tip_Actual = @Str_Uno begin 						/*	Actualiza clasificacion de producto */
 		return @Ent_Uno
 	end
 		
-	if not exists (	select	 Pro_Numero 
-							from SOPRODUC	noholdlock
-							where  Pro_Numero  = @Clp_Produc) begin
+	if  isnull(@Pro_Numero,@Ent_Cero) = @Ent_Cero begin
 		select	Err_Codigo	= '000002',
 				Err_Mensaj	= 'El producto no existe',
 				Err_Variab	= 'Clp_Produc'
@@ -52,14 +65,14 @@ if @Tip_Actual = @Str_Uno begin 						/*	Actualiza clasificacion de producto */
 		return @Ent_Uno
 	end
 
-	update SOCLAPRO set
-		Clp_Clasif	=	@Clp_Clasif,
-		NumTransac	=	@NumTransac,
-		Transaccio	=	@Transaccio,
-		Usuario	=	@Usuario,
-		FechaSis	=	@FechaSis,
-		SucOrigen	=	@SucOrigen,
-		SucDestino	=	@SucDestino
-	where Clp_Produc	=	@Clp_Produc
+	update SOCLAPRO 
+		set Clp_Clasif	=	@Clp_Clasif,
+			NumTransac	=	@NumTransac,
+			Transaccio	=	@Transaccio,
+			Usuario	=	@Usuario,
+			FechaSis	=	@FechaSis,
+			SucOrigen	=	@SucOrigen,
+			SucDestino	=	@SucDestino
+			where Clp_Produc	=	@Clp_Produc
 	
 end
