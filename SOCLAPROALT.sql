@@ -1,4 +1,5 @@
 create procedure SOCLAPROALT (
+	@Clp_Numero  int out,
 	@Clp_Clasif int,
 	@Clp_Produc int,
 
@@ -66,3 +67,4 @@ insert into SOCLAPRO (
 		@Clp_Clasif, 	@Clp_Produc, 	@NumTransac, 	@Transaccio, 	@Usuario, 
 		@FechaSis, 	@SucOrigen, 	@SucDestino)
 
+select @Clp_Numero = @@identity

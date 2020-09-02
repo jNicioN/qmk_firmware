@@ -1,4 +1,5 @@
-create procedure SOCLASIFALT (
+create  procedure SOCLASIFALT (
+	@Cla_Numero int out,
 	@Cla_Descri varchar(50),
 	@Cla_Compan char(2),
 	@Cla_Status char(1),
@@ -72,3 +73,5 @@ insert into SOCLASIF (
 	values (
 		@Cla_Descri, @Cla_Compan,	@Cla_Status,	@NumTransac, 	@Transaccio,
 		@Usuario,	@FechaSis,	@SucOrigen,	@SucDestino)
+		
+select @Cla_Numero = @@identity

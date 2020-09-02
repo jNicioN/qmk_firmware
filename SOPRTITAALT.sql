@@ -1,4 +1,5 @@
 create procedure SOPRTITAALT (
+	@Ptt_Numero int out,
 	@Ptt_TipTar char(4),
 	@Ptt_Produc int,
 
@@ -70,3 +71,4 @@ insert into SOPRTITA (
 		@Ptt_TipTar, 	@Ptt_Produc, 	@NumTransac, 	@Transaccio, 	@Usuario, 
 		@FechaSis, 	@SucOrigen, 	@SucDestino)
 
+select @Ptt_Numero = @@identity
