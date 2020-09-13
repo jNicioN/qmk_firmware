@@ -30,47 +30,51 @@ as
 ****************************************************************************/
 
 -- Declaracion de Variables
-declare	@Fec_Actual	smalldatetime,						/* Fecha */
-		@Fec_FecIni	smalldatetime,						/* Fecha Inicio */
-		@Fec_FecFin	smalldatetime,						/* Fecha Fin */		
-		@Reg_CoTiMo	int,								/* Contador de Registros de Tipos de Movimientos */ 
-		@Reg_TipMov	int,								/* Total de Registros de Tipos de Movimientos */
-		@Pro_TipMov	char(6),							/* Tipo de Movimiento a Procesar */
-		@Var_Contin bit,								/* Continuar con proceso que esta por ejecutarse */
-		@Str_Descri char(50),							/* Descripcion del proceso ejecutado */
-		@Fec_IniPro datetime,						/* Fecha de inicio de proceso ejecutado */
-		@Fec_FinPro datetime,						/* Fecha de finalizacion de proceso ejecutado */
-		@Can_TieEje int									/* Tiempo de ejecucion del proceso ejecutado */
+declare	@Status		int,			-- Resultado de la ejecucion de subprocedimientos
+		@Fec_Actual	smalldatetime,	-- Fecha 
+		@Fec_FecIni	smalldatetime,	-- Fecha Inicio 
+		@Fec_FecFin	smalldatetime,	-- Fecha Fin 	
+		@Reg_CoTiMo	int,			-- Contador de Registros de Tipos de Movimientos 
+		@Reg_TipMov	int,			-- Total de Registros de Tipos de Movimientos 
+		@Pro_TipMov	char(6),		-- Tipo de Movimiento a Procesar
+		@Var_Contin bit,			-- Continuar con proceso que esta por ejecutarse 
+		@Str_Descri char(50),		-- Descripcion del proceso ejecutado 
+		@Fec_IniPro datetime,		-- Fecha de inicio de proceso ejecutado 
+		@Fec_FinPro datetime,		-- Fecha de finalizacion de proceso ejecutado 
+		@Can_TieEje int				-- Tiempo de ejecucion del proceso ejecutado 
 
 -- Declaracion de Constantes
-declare	@Bit_Si	bit,				/* Activo Registro*/
-		@Bit_No	bit,				/* No */
-		@Ent_Uno int,				/* Entero Uno */
-		@Ent_NivPro smallint,		/* Nivel Producto */
-		@Ent_VigMod tinyint,		/* Vigencia de Configuraciones Especiales de Modalidades. */
-									/* Esta Vigencia NO podria utilizarse dentro del proceso  */
-									/* determinacion del Nivel. En este caso el Nivel es      */
-									/* asignado directamente                                  */
-		@Sto_CieCom	varchar(11),	/* Proceso de Cierre de Comisiones */
-		@Sta_Activo char(1),		/* Status Activo */
-		@Ent_ProMod int				/* Numero de Producto Modalidad */
+declare	@Bit_Si		bit,			-- Activo Registro
+		@Bit_No		bit,			-- No 
+		@Ent_Uno	int,			-- Entero: Uno
+		@Ent_Cero	int,			-- Entero: Cero
+		@Ent_NivPro smallint,		-- Nivel Producto 
+		@Ent_VigMod tinyint,		-- Vigencia de Configuraciones Especiales de Modalidades. 
+									-- Esta Vigencia NO podria utilizarse dentro del proceso  
+									-- determinacion del Nivel. En este caso el Nivel es      
+									-- asignado directamente                                  
+		@Sto_CieCom	varchar(11),	-- Proceso de Cierre de Comisiones 
+		@Sta_Activo char(1),		-- Status Activo 
+		@Ent_ProMod int				-- Numero de Producto Modalidad --
 
 -- Asignacion de Constantes
-select	@Bit_Si	= 1,					/* Si (bit)*/
-		@Bit_No	= 0,					/* No (bit) */
-		@Ent_Uno = 1,					/* Entero Uno */
-		@Ent_NivPro = 1,				/* Nivel Producto */
-		@Ent_VigMod = 2,				/* Vigencia de Configuraciones Especiales de Modalidades. */
-										/* Esta Vigencia NO podria utilizarse dentro del proceso  */
-										/* determinacion del Nivel. En este caso el Nivel es      */
-										/* asignado directamente                                  */
-		@Sto_CieCom	= 'SODECOTIPRO',	/* Proceso de Cierre de Comisiones */
-		@Sta_Activo = 'A',				/* Status Activo */
-		@Ent_ProMod = 29				/* Numero de Producto Modalidad */
+select	@Bit_Si		= 1,				-- Si (bit)
+		@Bit_No		= 0,				-- No (bit) 
+		@Ent_Uno	= 1,				-- Entero Uno 
+		@Ent_Cero	= 0,				-- Entero: Cero
+		@Ent_NivPro = 1,				-- Nivel Producto 
+		@Ent_VigMod = 2,				-- Vigencia de Configuraciones Especiales de Modalidades. 
+										-- Esta Vigencia NO podria utilizarse dentro del proceso  
+										-- determinacion del Nivel. En este caso el Nivel es      
+										-- asignado directamente                                  
+		@Sto_CieCom	= 'SODECOTIPRO',	-- Proceso de Cierre de Comisiones 
+		@Sta_Activo = 'A',				-- Status Activo 
+		@Ent_ProMod = 29				-- Numero de Producto Modalidad 
 
 create table #Tab_TiMoPr 
 		(Tmp_TipMov char(6),			/* Tabla para guardar las Comisiones a Procesar */
 		Tmp_Numero int identity)
+create index Tab_TiMoPr on #Tab_TiMoPr (Tmp_Numero)
 		
 create table #ConfiguracionProd			-- Configuraciones por Productos - Personalidad Fiscal
 		(	Cop_Cuenta	char(12) not null,
@@ -92,7 +96,6 @@ select	@Fec_Actual		= Par_FecAct
 --En caso de error hacer rollback
 if @@error <> 0
 begin
-	--rollback
 	return 1
 end
 
@@ -104,10 +107,13 @@ select
 	@Pro_TipMov = 'A00000'	--Producto, Personalidad Fiscal y Tipo de Movimiento
 
 --Determinar si el proceso de Preparacion ya fue ejecutado
-exec SOTMPBCCCON 
+execute	@Status = SOTMPBCCCON 
 	@Fec_Actual,	@Sto_CieCom,	@Pro_TipMov,	@Var_Contin	output, @NumTransac,
 	@Transaccio, 	@Usuario,		@FechaSis, 		@SucOrigen,			@SucDestino,
 	@Modulo
+if @Status <> @Ent_Cero begin
+	return @Status
+end
 
 if @Var_Contin = @Bit_Si
 begin
@@ -131,7 +137,6 @@ begin
 	--En caso de error hacer rollback
 	if @@error <> 0
 	begin
-		--rollback
 		return 1
 	end
 	
@@ -140,7 +145,6 @@ begin
 	--En caso de error hacer rollback
 	if @@error <> 0
 	begin
-		--rollback
 		return 1
 	end
 	
@@ -149,7 +153,6 @@ begin
 	--En caso de error hacer rollback
 	if @@error <> 0
 	begin
-		--rollback
 		return 1
 	end
 
@@ -186,17 +189,19 @@ begin
 	--En caso de error hacer rollback
 	if @@error <> 0
 	begin
-		--rollback
 		return 1
 	end
 	--Registrar ejecucion de Preparacion
 	select @Fec_FinPro = getdate()	/* Fecha de finalizacion de proceso ejecutado */
 	select @Can_TieEje = datediff(second, @Fec_IniPro, @Fec_FinPro)
 	
-	exec SOTMPBCCALT 
+	execute	@Status = SOTMPBCCALT 
 		@Fec_Actual,	@Sto_CieCom,	@Pro_TipMov,	@Str_Descri,	@Can_TieEje,
 		@Fec_IniPro,	@Fec_FinPro,	@NumTransac,	@Transaccio,	@Usuario, 
 		@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
+	if @Status <> @Ent_Cero begin
+		return @Status
+	end
 end
 
 --Codigo para ejecucion de Proceso de Preparacion de Productos y Cuentas
@@ -204,10 +209,13 @@ select
 	@Pro_TipMov = 'A00001'	--Configuraciones a Nivel Producto
 
 --Determinar si el proceso de Preparacion ya fue ejecutado
-exec SOTMPBCCCON 
+execute	@Status = SOTMPBCCCON 
 	@Fec_Actual, @Sto_CieCom, @Pro_TipMov, @Var_Contin	output, @NumTransac,
 	@Transaccio, @Usuario,	@FechaSis, @SucOrigen,	@SucDestino,
 	@Modulo
+if @Status <> @Ent_Cero begin
+	return @Status
+end
 
 if @Var_Contin = @Bit_Si
 begin
@@ -239,7 +247,6 @@ begin
 	--En caso de error hacer rollback
 	if @@error <> 0
 	begin
-		--rollback
 		return 1
 	end
 	
@@ -247,20 +254,26 @@ begin
 	select @Fec_FinPro = getdate()	/* Fecha de finalizacion de proceso ejecutado */
 	select @Can_TieEje = datediff(second, @Fec_IniPro, @Fec_FinPro)
 	
-	exec SOTMPBCCALT 
+	execute	@Status = SOTMPBCCALT 
 		@Fec_Actual,	@Sto_CieCom,	@Pro_TipMov,	@Str_Descri,	@Can_TieEje,
 		@Fec_IniPro,	@Fec_FinPro,	@NumTransac,	@Transaccio,	@Usuario, 
 		@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
+	if @Status <> @Ent_Cero begin
+		return @Status
+	end
 end
 
 --Codigo para ejecucion de Proceso de Preparacion de Productos y Cuentas
 select	@Pro_TipMov = 'A00002'	--Configuraciones a Nivel Clasificacion Cliente
 
 --Determinar si el proceso de Preparacion ya fue ejecutado
-exec SOTMPBCCCON 
+execute	@Status = SOTMPBCCCON 
 	@Fec_Actual,	@Sto_CieCom,	@Pro_TipMov,	@Var_Contin	output,	@NumTransac,
 	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,
 	@Modulo
+if @Status <> @Ent_Cero begin
+	return @Status
+end
 
 if @Var_Contin = @Bit_Si
 begin
@@ -289,7 +302,6 @@ begin
 	--En caso de error hacer rollback
 	if @@error <> 0
 	begin
-		--rollback
 		return 1
 	end
 	
@@ -297,20 +309,26 @@ begin
 	select @Fec_FinPro = getdate()	/* Fecha de finalizacion de proceso ejecutado */
 	select @Can_TieEje = datediff(second, @Fec_IniPro, @Fec_FinPro)
 	
-	exec SOTMPBCCALT 
+	execute	@Status = SOTMPBCCALT 
 		@Fec_Actual,	@Sto_CieCom,	@Pro_TipMov,	@Str_Descri,	@Can_TieEje,
 		@Fec_IniPro,	@Fec_FinPro,	@NumTransac,	@Transaccio,	@Usuario, 
 		@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
+	if @Status <> @Ent_Cero begin
+		return @Status
+	end
 end
 
 --Codigo para ejecucion de Proceso de Preparacion de Productos y Cuentas
 select	@Pro_TipMov = 'A00003'	--Configuraciones a Nivel Grupo Cliente
 
 --Determinar si el proceso de Preparacion ya fue ejecutado
-exec SOTMPBCCCON 
+execute	@Status = SOTMPBCCCON 
 	@Fec_Actual,	@Sto_CieCom,	@Pro_TipMov,	@Var_Contin	output,	@NumTransac,
 	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,
 	@Modulo
+if @Status <> @Ent_Cero begin
+	return @Status
+end
 
 if @Var_Contin = @Bit_Si
 begin
@@ -340,7 +358,6 @@ begin
 	--En caso de error hacer rollback
 	if @@error <> 0
 	begin
-		--rollback
 		return 1
 	end
 	
@@ -348,20 +365,26 @@ begin
 	select @Fec_FinPro = getdate()	/* Fecha de finalizacion de proceso ejecutado */
 	select @Can_TieEje = datediff(second, @Fec_IniPro, @Fec_FinPro)
 	
-	exec SOTMPBCCALT 
+	execute	@Status = SOTMPBCCALT 
 		@Fec_Actual,	@Sto_CieCom,	@Pro_TipMov,	@Str_Descri,	@Can_TieEje,
 		@Fec_IniPro,	@Fec_FinPro,	@NumTransac,	@Transaccio,	@Usuario, 
 		@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
+	if @Status <> @Ent_Cero begin
+		return @Status
+	end
 end
 
 --Codigo para ejecucion de Proceso de Preparacion de Productos y Cuentas
 select	@Pro_TipMov = 'A00005'	--Configuraciones a Nivel Zona
 
 --Determinar si el proceso de Preparacion ya fue ejecutado
-exec SOTMPBCCCON 
+execute	@Status = SOTMPBCCCON 
 	@Fec_Actual,	@Sto_CieCom,	@Pro_TipMov,	@Var_Contin	output,	@NumTransac,
 	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,
 	@Modulo
+if @Status <> @Ent_Cero begin
+	return @Status
+end
 
 if @Var_Contin = @Bit_Si
 begin
@@ -373,7 +396,7 @@ begin
 		(Cuc_Cuenta,	Cuc_CoTiMo)
 	select Cue_Numero, Ctz_CoTiMo
 		from CHCUENTA noholdlock
-		inner join SOSUCURS noholdlock
+		inner join SOSUCURS (index SOSUCURS) noholdlock
 				on Suc_Numero = Cue_Sucurs
 		inner join SOZONAS noholdlock
 				on Zon_Numero = Suc_Zona
@@ -393,7 +416,6 @@ begin
 	--En caso de error hacer rollback
 	if @@error <> 0
 	begin
-		--rollback
 		return 1
 	end
 	
@@ -401,20 +423,26 @@ begin
 	select @Fec_FinPro = getdate()	/* Fecha de finalizacion de proceso ejecutado */
 	select @Can_TieEje = datediff(second, @Fec_IniPro, @Fec_FinPro)
 	
-	exec SOTMPBCCALT 
+	execute	@Status = SOTMPBCCALT 
 		@Fec_Actual,	@Sto_CieCom,	@Pro_TipMov,	@Str_Descri,	@Can_TieEje,
 		@Fec_IniPro,	@Fec_FinPro,	@NumTransac,	@Transaccio,	@Usuario, 
 		@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
+	if @Status <> @Ent_Cero begin
+		return @Status
+	end
 end
 
 --Codigo para ejecucion de Proceso de Preparacion de Productos y Cuentas
 select	@Pro_TipMov = 'A00006'	--Configuraciones a Nivel Plaza
 
 --Determinar si el proceso de Preparacion ya fue ejecutado
-exec SOTMPBCCCON 
+execute	@Status = SOTMPBCCCON 
 	@Fec_Actual,	@Sto_CieCom,	@Pro_TipMov,	@Var_Contin	output,	@NumTransac,
 	@Transaccio,	@Usuario,		@FechaSis, 		@SucOrigen,			@SucDestino,
 	@Modulo
+if @Status <> @Ent_Cero begin
+	return @Status
+end
 
 if @Var_Contin = @Bit_Si
 begin
@@ -426,12 +454,12 @@ begin
 		(Cuc_Cuenta,	Cuc_CoTiMo)
 	select Cue_Numero, Ctp_CoTiMo
 		from CHCUENTA noholdlock
-		inner join SOSUCURS noholdlock
+		inner join SOSUCURS (index SOSUCURS) noholdlock
 				on Suc_Numero = Cue_Sucurs
-		inner join SOCOTIPL noholdlock
+		inner join SOCOTIPL (index SOCOTIPLPLA) noholdlock
 				on Ctp_Plazas = SoPlazaID
 				and Ctp_Activo = @Bit_Si
-		inner join SOCOTIMO noholdlock
+		inner join SOCOTIMO (index SOCOTIMO) noholdlock
 				on Ctm_Numero = Ctp_CoTiMo
 				and Ctm_Activo = @Bit_Si
 		left join SOVICOTI noholdlock
@@ -444,7 +472,6 @@ begin
 	--En caso de error hacer rollback
 	if @@error <> 0
 	begin
-		--rollback
 		return 1
 	end
 	
@@ -452,20 +479,26 @@ begin
 	select @Fec_FinPro = getdate()	/* Fecha de finalizacion de proceso ejecutado */
 	select @Can_TieEje = datediff(second, @Fec_IniPro, @Fec_FinPro)
 	
-	exec SOTMPBCCALT 
+	execute	@Status = SOTMPBCCALT 
 		@Fec_Actual,	@Sto_CieCom,	@Pro_TipMov,	@Str_Descri,	@Can_TieEje,
 		@Fec_IniPro,	@Fec_FinPro,	@NumTransac,	@Transaccio,	@Usuario, 
 		@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
+	if @Status <> @Ent_Cero begin
+		return @Status
+	end
 end
 
 --Codigo para ejecucion de Proceso de Preparacion de Productos y Cuentas
 select	@Pro_TipMov = 'A00007'	--Configuraciones a Nivel Sucursal
 
 --Determinar si el proceso de Preparacion ya fue ejecutado
-exec SOTMPBCCCON 
+execute	@Status = SOTMPBCCCON 
 	@Fec_Actual,	@Sto_CieCom,	@Pro_TipMov,	@Var_Contin	output,	@NumTransac,
 	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,
 	@Modulo
+if @Status <> @Ent_Cero begin
+	return @Status
+end
 
 if @Var_Contin = @Bit_Si
 begin
@@ -495,7 +528,6 @@ begin
 	--En caso de error hacer rollback
 	if @@error <> 0
 	begin
-		--rollback
 		return 1
 	end
 	
@@ -503,20 +535,26 @@ begin
 	select @Fec_FinPro = getdate()	/* Fecha de finalizacion de proceso ejecutado */
 	select @Can_TieEje = datediff(second, @Fec_IniPro, @Fec_FinPro)
 	
-	exec SOTMPBCCALT 
+	execute	@Status = SOTMPBCCALT 
 		@Fec_Actual,	@Sto_CieCom,	@Pro_TipMov,	@Str_Descri,	@Can_TieEje,
 		@Fec_IniPro, 	@Fec_FinPro,	@NumTransac, 	@Transaccio, 	@Usuario, 
 		@FechaSis, 		@SucOrigen, 	@SucDestino, 	@Modulo
+	if @Status <> @Ent_Cero begin
+		return @Status
+	end
 end
 
 --Codigo para ejecucion de Proceso de Preparacion de Productos y Cuentas
 select	@Pro_TipMov = 'A00008'	--Configuraciones a Nivel Ciente
 
 --Determinar si el proceso de Preparacion ya fue ejecutado
-exec SOTMPBCCCON 
+execute	@Status = SOTMPBCCCON 
 	@Fec_Actual,	@Sto_CieCom,	@Pro_TipMov,	@Var_Contin	output,	@NumTransac,
 	@Transaccio,	@Usuario,		@FechaSis, 		@SucOrigen,			@SucDestino,
 	@Modulo
+if @Status <> @Ent_Cero begin
+	return @Status
+end
 
 if @Var_Contin = @Bit_Si
 begin
@@ -531,7 +569,7 @@ begin
 		inner join CHCUENTA noholdlock
 				on Cue_Client = substring('00000000', 1, 8 - len(rtrim(convert(CHAR(8), Ctc_Client)))) + rtrim(convert(CHAR(8), Ctc_Client))
 				and Cue_Status = @Sta_Activo
-		inner join SOCOTIMO noholdlock
+		inner join SOCOTIMO (index SOCOTIMO) noholdlock
 				on Ctm_Numero = Ctc_CoTiMo
 				and Ctm_Activo = @Bit_Si
 		left join SOVICOTI noholdlock
@@ -543,7 +581,6 @@ begin
 	--En caso de error hacer rollback
 	if @@error <> 0
 	begin
-		--rollback
 		return 1
 	end
 	
@@ -551,20 +588,26 @@ begin
 	select @Fec_FinPro = getdate()	/* Fecha de finalizacion de proceso ejecutado */
 	select @Can_TieEje = datediff(second, @Fec_IniPro, @Fec_FinPro)
 	
-	exec SOTMPBCCALT 
+	execute	@Status = SOTMPBCCALT 
 		@Fec_Actual,	@Sto_CieCom,	@Pro_TipMov,	@Str_Descri,	@Can_TieEje,
 		@Fec_IniPro,	@Fec_FinPro,	@NumTransac,	@Transaccio,	@Usuario, 
 		@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
+	if @Status <> @Ent_Cero begin
+		return @Status
+	end
 end
 
 --Codigo para ejecucion de Proceso de Preparacion de Productos y Cuentas
 select	@Pro_TipMov = 'A00009'	--Configuraciones a Nivel Cuenta
 
 --Determinar si el proceso de Preparacion ya fue ejecutado
-exec SOTMPBCCCON 
+execute	@Status = SOTMPBCCCON 
 	@Fec_Actual,	@Sto_CieCom,	@Pro_TipMov,	@Var_Contin	output,	@NumTransac,
 	@Transaccio, 	@Usuario,		@FechaSis, 		@SucOrigen,			@SucDestino,
 	@Modulo
+if @Status <> @Ent_Cero begin
+	return @Status
+end
 
 if @Var_Contin = @Bit_Si
 begin
@@ -592,7 +635,6 @@ begin
 	--En caso de error hacer rollback
 	if @@error <> 0
 	begin
-		--rollback
 		return 1
 	end	
 	
@@ -600,10 +642,13 @@ begin
 	select @Fec_FinPro = getdate()	/* Fecha de finalizacion de proceso ejecutado */
 	select @Can_TieEje = datediff(second, @Fec_IniPro, @Fec_FinPro)
 	
-	exec SOTMPBCCALT 
+	execute	@Status = SOTMPBCCALT 
 		@Fec_Actual,	@Sto_CieCom,	@Pro_TipMov,	@Str_Descri,	@Can_TieEje,
 		@Fec_IniPro,	@Fec_FinPro, 	@NumTransac, 	@Transaccio, 	@Usuario, 
 		@FechaSis, 		@SucOrigen, 	@SucDestino, 	@Modulo
+	if @Status <> @Ent_Cero begin
+		return @Status
+	end
 end
 
 --FIN Obtener las Configuraciones (SOCOTIMO) en las que aplica cada Cuenta en cada Nivel
@@ -621,11 +666,14 @@ insert into #Tab_TiMoPr
 --En caso de error hacer rollback
 if @@error <> 0
 begin
-	--rollback
 	return 1
 end
 
-select	@Reg_CoTiMo	=	min(Tmp_Numero),	@Reg_TipMov	=	max(Tmp_Numero)
+-- Primer Tipo de Movimiento
+select	@Reg_CoTiMo	=	min(Tmp_Numero)
+	from #Tab_TiMoPr
+-- Ultimo Tipo de Movimiento
+select	@Reg_TipMov	=	max(Tmp_Numero)
 	from #Tab_TiMoPr
 	
 while (@Reg_CoTiMo <= @Reg_TipMov) --Ejecutar cada Comision
@@ -636,16 +684,19 @@ begin
 		where 	Tmp_Numero = @Reg_CoTiMo
 
 	--Determinar si la Comision ya fue ejecutada
-	exec SOTMPBCCCON 
+	execute	@Status = SOTMPBCCCON 
 		@Fec_Actual,	@Sto_CieCom,	@Pro_TipMov,	@Var_Contin	output,	@NumTransac,
 		@Transaccio, 	@Usuario,		@FechaSis, 		@SucOrigen,			@SucDestino,
 		@Modulo
+	if @Status <> @Ent_Cero begin
+		return @Status
+	end
 
 	if @Var_Contin = @Bit_Si
 	begin
 		truncate table SOTMPCTA
 		truncate table SOTMPCUL
-		delete #ConfiguracionProd
+		truncate table #ConfiguracionProd
 		
 		-----Inicio Proceso de Comision----
 		begin transaction
@@ -687,7 +738,7 @@ begin
 		--En caso de error hacer rollback
 		if @@error <> 0
 		begin
-			--rollback
+			rollback transaction
 			return 1
 		end
 		
@@ -712,6 +763,7 @@ begin
 		-- En caso de error terminar con error
 		if @@error <> 0
 		begin
+			rollback transaction
 			return 1
 		end
 
@@ -730,6 +782,7 @@ begin
 		-- En caso de error terminar con error
 		if @@error <> 0
 		begin
+			rollback transaction
 			return 1
 		end
 		
@@ -1004,13 +1057,16 @@ begin
 		select @Fec_FinPro = getdate()	/* Fecha de finalizacion de proceso ejecutado */
 		select @Can_TieEje = datediff(second, @Fec_IniPro, @Fec_FinPro)
 		
-		exec SOTMPBCCALT 
+		execute	@Status = SOTMPBCCALT 
 			@Fec_Actual,	@Sto_CieCom,	@Pro_TipMov,	@Str_Descri,	@Can_TieEje,
 			@Fec_IniPro, 	@Fec_FinPro, 	@NumTransac, 	@Transaccio, 	@Usuario, 
 			@FechaSis, 		@SucOrigen, 	@SucDestino, 	@Modulo
+		if @Status <> @Ent_Cero begin
+			return @Status
+		end
 		
 		--Fin de ejecución de Comisión
-		commit
+		commit transaction
 	end 
 		
 	--Incrementar contador de Tipos de Movimientos
