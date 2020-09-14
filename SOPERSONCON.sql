@@ -1,4 +1,4 @@
-create procedure SOPERSONCON2 (
+create procedure SOPERSONCON (
 	@Per_Numero	char(8),
 	@Per_Comple	varchar(181),
 	@Per_Tipo	char(1),
