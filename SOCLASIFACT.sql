@@ -29,12 +29,14 @@ declare @Com_Numero char(2)
 /*	Declaracion de Constantes	*/
 declare	@Str_Vacio	char(1),
 		@Ent_Uno	int,
-		@Str_Uno	char(1)
+		@Str_Uno	char(1),
+		@Str_Dos 	char(2)
 
 /* Asignacion de Constantes */
 select	@Str_Vacio	= '',			/* Tipo consulta*/
 		@Ent_Uno	= 1,			/* Entero Uno*/
-		@Str_Uno	= '1'			/* Caracter Uno*/
+		@Str_Uno	= '1',			/* Caracter Uno Act. Descripcion*/
+		@Str_Dos	= '2'			/* Caracter Dos Act. Status*/
 
 select @FechaSis = getdate()
 
@@ -54,21 +56,32 @@ if @Tip_Actual = @Str_Uno begin 						/*	Actualiza descripcion por compania */
 	
 	if isnull(@Com_Numero,@Str_Vacio) = @Str_Vacio begin
 		select	Err_Codigo	= '000002',
-				Err_Mensaj	= 'La compañia no existe',
+				Err_Mensaj	= 'La compania no existe',
 				Err_Variab	= 'Cla_Compan'
 		rollback
 		return @Ent_Uno
 	end
 	
-	update SOCLASIF set
-		Cla_Descri	=	@Cla_Descri,
-		
-		NumTransac	=	@NumTransac,
-		Transaccio	=	@Transaccio,
-		Usuario	=	@Usuario,
-		FechaSis	=	@FechaSis,
-		SucOrigen	=	@SucOrigen,
-		SucDestino	=	@SucDestino
+	update SOCLASIF 
+		set	Cla_Descri	=	@Cla_Descri,
+			NumTransac	=	@NumTransac,
+			Transaccio	=	@Transaccio,
+			Usuario	=	@Usuario,
+			FechaSis	=	@FechaSis,
+			SucOrigen	=	@SucOrigen,
+			SucDestino	=	@SucDestino
 		where Cla_Numero = @Cla_Compan
+		
+end else if @Tip_Actual = @Str_Dos begin 						/*	Actualiza de status*/
+	
+	update SOCLASIF
+		set Cla_Status = @Cla_Status,
+			NumTransac	=	@NumTransac,
+			Transaccio	=	@Transaccio,
+			Usuario	=	@Usuario,
+			FechaSis	=	@FechaSis,
+			SucOrigen	=	@SucOrigen,
+			SucDestino	=	@SucDestino
+		where Cla_Numero = @Cla_Numero
 		
 end
