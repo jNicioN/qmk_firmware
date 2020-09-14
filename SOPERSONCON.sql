@@ -657,7 +657,7 @@ if @Tip_ConTip = 'C' begin
 			Per_Numero	char(8)
 		)
 
-		create index PersonasRFC on #PersonasRFC(Per_Numero)
+		create index #PersonasRFC on #PersonasRFC(Per_Numero)
 
 		if isnull(@Per_RFC, @Str_Vacio) <> @Str_Vacio and len(@Per_RFC) = @Len_RFCHom begin
 			insert into #PersonasRFC
@@ -678,6 +678,7 @@ if @Tip_ConTip = 'C' begin
 	  	  from #PersonasRFC
 	  	 inner join SOUNIPER noholdlock on Per_Numero = Peu_Person
 	  	 group by Peu_Grupo
+        order by Peu_Grupo
 
 		select Per_Numero, Per_Comple, Per_ComOrd, Per_RFC, Per_CURP,
 			   Per_Nombre, Per_ApePat, Per_ApeMat
@@ -694,6 +695,7 @@ if @Tip_ConTip = 'C' begin
 	  	 inner join SOUNIPER noholdlock on Per_Numero = Peu_Person
 	  	 where Per_Comple like @Per_Comple
 	  	 group by Peu_Grupo
+         order by Peu_Grupo
 
 		select Per_Numero, Per_Comple, Per_ComOrd, Per_RFC, Per_CURP,
 			   Per_Nombre, Per_ApePat, Per_ApeMat
