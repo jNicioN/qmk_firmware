@@ -359,7 +359,7 @@ select	@Str_Vacio	= '',			-- String Vacio
 		@Str_Usuari = 'USUARIO',		-- String Usuario
 		@Str_A		= 'A',
 		@Len_RFCOrd	= 10,			/* Longitud de rfc ordinario*/
-		@Len_RFCHom = 13
+		@Len_RFCHom = 13			/* Longitud de rfc ordinario*/
 		
 select	@Busqueda	= @Per_Comple
 select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
@@ -387,7 +387,6 @@ if @Tip_ConTip = 'C' begin
 	if @Tip_ConCon	= '2' begin
 		select	Per_Numero,	Per_Tipo,	Per_Titulo,	Per_Nombre,	Per_ApePat,
 				Per_ApeMat,	Per_RazSoc,	Per_Comple,	Per_ComOrd,	Per_RFC,
-
 				Per_CURP,	Per_Calle,	Per_CalNum,	Per_Coloni,	Per_Entida,
 				Per_Locali,	Per_CodPos,	Per_ApaPos,	Per_Telefo,	Per_EstCiv,
 				Per_Nacion,	Per_ActEmp,	Per_Giro,	Per_Sector,	Per_Activi,
@@ -923,7 +922,6 @@ end else begin
 			_Tipo	char(1),
 			_ActEmp	char(1),
 			Adi_FecNac	smalldatetime,
-
 			Per_Ciudad	char(40),
 			Per_Estado	char(30))
 
@@ -957,7 +955,6 @@ end else begin
 						Per_Calle,	Per_CalNum,	Per_RFC,	Per_LadTel,	Per_Telefo,
 						Per_Tipo,	Per_ActEmp, @Fec_Vacio, @Str_Vacio,	@Str_Vacio
 					from SOPERSON noholdlock
-
 					where	Per_RFC	like @Per_RFC
 		end else if char_length(ltrim(rtrim(@Per_Comple))) > @Ent_Uno and char_length(ltrim(rtrim(@Per_RFC))) > @Ent_Uno begin
 			insert into #Personas
@@ -1040,7 +1037,6 @@ end else begin
 		end
 
 		if @Per_Tipo <> @Tip_Moral begin /* SE BUSCA POR RFC CORTO Y NOMBRES */
-
 			select @Per_RFC = substring(@Per_RFC, 1, 10) + @Str_Porcen
 
 			insert into #PersonasExis
@@ -1095,7 +1091,6 @@ end else begin
 					isnull(Cli_ApePat, @Str_Vacio) as Per_ApePat,
 					isnull(Cli_ApeMat, @Str_Vacio) as Per_ApeMat,
 					isnull(Con_TipSoc, @Str_Vacio) as Per_RazSoc,
-
 					case when Cli_Tipo = @Tip_Moral then
 						isnull(con.Con_FeEsCl, cla.Adi_FecNac)
 					else
@@ -1144,7 +1139,6 @@ end else begin
 					Adi_NumIde,		Clp_TipSoc,  Clp_NomSoc,  Per_Nacion,
 					DaP_CoVeDi,		Per_CURP
 				into #PersonaNumero
-
 				from #PersonaPorNumero
 					left join SOPEDACO noholdlock on DaP_Person = Per_Numero
 
@@ -1332,7 +1326,6 @@ end else begin
 	if @Tip_ConCon = '9' begin /* L9 - Busqueda y/o RFC que incluye el numero de cliente */
 	
 		/* Creamos la tabla temporal */
-
 		create table #PersonasRfc (
 			Per_Numero	char(8),
 			Per_Tipo	char(1) null,
@@ -1381,7 +1374,6 @@ end else begin
 								and ((@Per_Tipo = @Tip_Moral and Per_Tipo = @Per_Tipo)
 								or (Per_Tipo = @Tip_Fisica or Per_Tipo = @Tip_FisAE)))
 					begin
-
 						insert into #PersonasRfc
 							select	Per_Numero,	Per_Tipo,	Per_Nombre,	Per_ApePat,	Per_ApeMat,
 									Per_RazSoc,	Per_Comple,	Per_RFC,	Per_Calle,	Per_CalNum,	
