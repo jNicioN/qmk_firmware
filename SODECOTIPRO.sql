@@ -76,7 +76,7 @@ select	@Bit_Si		= 1,				-- Si (bit)
 create table #TiposMovPro 
 		(Tmp_TipMov char(6),			/* Tabla para guardar los Tipos de Movimientos a Procesar */
 		Tmp_Numero int identity)
-create index TiposMovPro on #TiposMovPro (Tmp_Numero)
+create index SOTIMOPR on #TiposMovPro (Tmp_Numero)
 		
 create table #ConfiguracionProd			-- Configuraciones por Productos - Personalidad Fiscal
 		(	Cop_Cuenta	char(12) not null,
@@ -104,7 +104,7 @@ create table #CuentasAct
 create table #GruposCli
 		(	Grc_CliEnt	int			not null,	-- Cliente en formato Entero
 			Grc_GruEnt	int			not null)	-- Grupo en formato Entero
-create index GruposCliCli on #GruposCli (Grc_CliEnt)
+create index SOGRUCLI on #GruposCli (Grc_CliEnt)
 
 -- Proceso principal
 
@@ -340,7 +340,7 @@ begin
 				on Ctm_Numero = Ctp_CoTiMo
 				and Ctm_Activo = @Bit_Si
 				and Ctm_Vigenc = @Bit_No		-- Obtener todas las Configuraciones Base (sin vigencia)
-		union
+		union all
 			select Cua_Cuenta, Ctp_CoTiMo
 			from #CuentasAct noholdlock
 			inner join SOPRTICU noholdlock
@@ -406,7 +406,7 @@ begin
 					on Ctm_Numero = Ccc_CoTiMo
 					and Ctm_Activo = @Bit_Si
 					and Ctm_Vigenc = @Bit_No		-- Obtener todas las Configuraciones Base (sin vigencia)
-		union
+		union all
 			select Cua_Cuenta, Ccc_CoTiMo
 				from #CuentasAct noholdlock
 				inner join SOCOCLCL noholdlock
@@ -469,7 +469,7 @@ begin
 					on Ctm_Numero	= Ctg_CoTiMo
 					and Ctm_Activo	= @Bit_Si
 					and	Ctm_Vigenc	= @Bit_No	-- Obtener todas las Configuraciones Base (sin vigencia)
-		union
+		union all
 			select Cua_Cuenta, Ctg_CoTiMo
 				from #CuentasAct noholdlock
 				inner join #GruposCli noholdlock
@@ -485,26 +485,6 @@ begin
 						on Vct_CoTiMo = Ctg_CoTiMo
 						and @Fec_Actual	between Vct_FecIni and Vct_FecFin
 						and Vct_Activo = @Bit_Si
-		   
-	-- insert into SOTMPCUC 
-		-- (Cuc_Cuenta,	Cuc_CoTiMo)
-	-- select Cue_Numero, Ctg_CoTiMo
-		-- from SOCOTIGR noholdlock
-		-- inner join CHGRUCLI noholdlock
-				-- on GCh_Grupo = substring('0000', 1, 4 - len(rtrim(convert(char(4), Ctg_Grupos)))) + rtrim(convert(char(4), Ctg_Grupos))
-		-- inner join CHCUENTA noholdlock
-				-- on Cue_Client = GCh_Client
-				-- and Cue_Status = @Sta_Activo
-		-- inner join SOCOTIMO noholdlock
-				-- on Ctm_Numero = Ctg_CoTiMo
-				-- and Ctm_Activo = @Bit_Si
-		-- left join SOVICOTI noholdlock
-				-- on Vct_CoTiMo = Ctg_CoTiMo
-				-- and @Fec_Actual	between Vct_FecIni and Vct_FecFin
-				-- and Vct_Activo = @Bit_Si
-		-- where	Ctg_Activo = @Bit_Si
-		  -- and	(Ctm_Vigenc = @Bit_No	--Obtener todas las Configuraciones Base (sin vigencia)
-		   -- or		Vct_CoTiMo is not null)	--Obtener las Configuraciones con Vigencia que correspondan a la fecha de Proceso
 	--En caso de error hacer rollback
 	if @@error <> 0
 	begin
@@ -556,7 +536,7 @@ begin
 				on Ctm_Numero = Ctz_CoTiMo
 				and Ctm_Activo = @Bit_Si
 				and Ctm_Vigenc = @Bit_No	-- Obtener todas las Configuraciones Base (sin vigencia)
-		union
+		union all
 			select Cua_Cuenta, Ctz_CoTiMo
 				from #CuentasAct noholdlock
 				inner join SOSUCURS noholdlock
@@ -623,7 +603,7 @@ begin
 					on Ctm_Numero = Ctp_CoTiMo
 					and Ctm_Activo = @Bit_Si
 					and Ctm_Vigenc = @Bit_No	-- Obtener todas las Configuraciones Base (sin vigencia)
-		union
+		union all
 			select Cua_Cuenta, Ctp_CoTiMo
 				from #CuentasAct noholdlock
 				inner join SOSUCURS noholdlock
@@ -687,7 +667,7 @@ begin
 					on Ctm_Numero = Cts_CoTiMo
 					and Ctm_Activo = @Bit_Si
 					and Ctm_Vigenc = @Bit_No	-- Obtener todas las Configuraciones Base (sin vigencia)
-		union
+		union all
 			select Cua_Cuenta, Cts_CoTiMo
 				from #CuentasAct noholdlock
 				inner join SOCOTISU noholdlock
@@ -749,7 +729,7 @@ begin
 					on Ctm_Numero = Ctc_CoTiMo
 					and Ctm_Activo = @Bit_Si
 					and Ctm_Vigenc = @Bit_No		-- Obtener todas las Configuraciones Base (sin vigencia)
-		union
+		union all
 			select Cua_Cuenta, Ctc_CoTiMo
 				from #CuentasAct noholdlock
 				inner join SOCOTICL noholdlock	
@@ -812,7 +792,7 @@ begin
 					and Ctm_Activo = @Bit_Si
 					and	Ctm_Vigenc = @Bit_No	-- Obtener todas las Configuraciones Base (sin vigencia)
 			where	Cue_Status = @Sta_Activo
-		union
+		union all
 		select Cue_Numero,	Ctu_CoTiMo
 			from CHCUENTA noholdlock
 			inner join SOCOTICU noholdlock
