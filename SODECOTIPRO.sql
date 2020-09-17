@@ -76,7 +76,7 @@ select	@Bit_Si		= 1,				-- Si (bit)
 create table #TiposMovPro 
 		(Tmp_TipMov char(6),			/* Tabla para guardar los Tipos de Movimientos a Procesar */
 		Tmp_Numero int identity)
-create index SOTIMOPR on #TiposMovPro (Tmp_Numero)
+create index TiposMovPro on #TiposMovPro (Tmp_Numero)
 		
 create table #ConfiguracionProd			-- Configuraciones por Productos - Personalidad Fiscal
 		(	Cop_Cuenta	char(12) not null,
@@ -103,8 +103,9 @@ create table #CuentasAct
 -- Tabla Temporal para obtener los Grupos de Clientes.
 create table #GruposCli
 		(	Grc_CliEnt	int			not null,	-- Cliente en formato Entero
+			Grc_Grupo	char(4)		not null,	-- Grupo de Clientes
 			Grc_GruEnt	int			not null)	-- Grupo en formato Entero
-create index SOGRUCLI on #GruposCli (Grc_CliEnt)
+create index GruposCli on #GruposCli (Grc_CliEnt)
 
 -- Proceso principal
 
@@ -286,9 +287,15 @@ begin
 			@Fec_IniPro = getdate()					/* Fecha de inicio de proceso ejecutado */
 
 	-- Obtener las Cuentas Activas junto con su Cliente, Tipo de Cuenta, Sucursal, Clasificacion de Cliente.
-	insert into #GruposCli	(	Grc_CliEnt,					Grc_GruEnt)
-		select					convert(int, GCh_Client),	convert(int, case when isnumeric(GCh_Grupo) = @Bit_Si then GCh_Grupo else @Car_Cero end)
+	insert into #GruposCli	(	Grc_CliEnt,					Grc_Grupo,	Grc_GruEnt)
+		select					convert(int, GCh_Client),	GCh_Grupo,	@Ent_Cero
 		from CHGRUCLI noholdlock
+	if @Status <> @Ent_Cero begin
+		return @Status
+	end
+	--
+	update	#GruposCli
+		set Grc_GruEnt	= convert(int, case when isnumeric(Grc_Grupo) = @Bit_Si then Grc_Grupo else @Car_Cero end)
 	if @Status <> @Ent_Cero begin
 		return @Status
 	end
