@@ -100,8 +100,13 @@ end
 
 
 /* Alta de Descripción */
-insert into SODIRPER values(
-	@PerPersoID,	@Dip_TipDir,	@ClClientID,	@Dip_Calle,		@Dip_NumExt,
-	@Dip_NumInt,	@Dip_NumCP,		@Dip_EntCa1,	@Dip_EntCa2,	@Dip_Refere,
-	@Dip_Status,	@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,
-	@SucOrigen,		@SucDestino)
+insert into SODIRPER (
+	PerPersoID,	Dip_TipDir,	ClClientID,	Dip_Calle,	Dip_NumExt,
+	Dip_NumInt,	Dip_NumCP,	Dip_EntCa1,	Dip_EntCa2,	Dip_Refere,
+	Dip_Status,	NumTransac,	Transaccio,	Usuario,	FechaSis,
+	SucOrigen,	SucDestino)
+	values(
+		@PerPersoID,	@Dip_TipDir,	@ClClientID,	@Dip_Calle,		@Dip_NumExt,
+		@Dip_NumInt,	@Dip_NumCP,		@Dip_EntCa1,	@Dip_EntCa2,	@Dip_Refere,
+		@Dip_Status,	@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,
+		@SucOrigen,		@SucDestino)
