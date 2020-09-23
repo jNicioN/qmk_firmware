@@ -18,7 +18,12 @@ as
 ******************************************************************
 ** Modifico:	Alma Perez										**
 ** HelpDesk:	1390218											**
-** Fecha:		20/07/2019										**
+** Fecha:		15/09/2020										**
+** Desc: Se agrega opcion para reprocesamiento					**
+******************************************************************
+** Modifico:	Alma Perez										**
+** HelpDesk:	1390218											**
+** Fecha:		20/07/2020										**
 ******************************************************************
 ** Creo:		Alma Perez										**
 ** HelpDesk:	1390218											**
@@ -43,6 +48,7 @@ declare	@Ent_Valido	int,		/* Entero valida existe registro */
 		@Ent_IdeFof	int				/* Entero identificador #NuevoFormatoFirma */
 
 declare @Ent_Cero	int,
+		@Ent_Uno	int,
 		@Str_Cero	char(1),
 		@Str_EstPen	char(1),
 		@Str_EstPro	char(1),
@@ -58,6 +64,8 @@ declare @Ent_Cero	int,
 		@Str_ConFir	char(1),
 		@Str_ConTot	char(1),
 		@Str_Revers	char(1),
+		@Str_RepImg	char(1),
+		@Str_Duplic	char(1),
 		@Str_ConVac	char(3),
 		@Str_Espaci	char(1),
 		@Str_TipNue	char(1),
@@ -65,9 +73,11 @@ declare @Ent_Cero	int,
 		@Str_ErrDos	char(1),
 		@Str_ErrTre	char(1),
 		@Str_ErrCua	char(1),
-		@Str_Porcen	char(1)
+		@Str_Porcen	char(1),
+		@Str_Reproc	char(1)
 
 select	@Ent_Cero	= 0,		/* Entero cero */
+		@Ent_Uno	= 1,		/* Entero uno */
 		@Str_Cero	= '0',		/* String cero */
 		@Str_EstPen	= 'P',		/* Estatus pendiente */
 		@Str_EstPro	= 'S',		/* Estatus procesado */
@@ -83,6 +93,8 @@ select	@Ent_Cero	= 0,		/* Entero cero */
 		@Str_ConFir	= 'D',		/* Opcion para consultar el registro */
 		@Str_ConTot	= 'E',		/* Opcion para consultar los totales por sucursal pendientes de procesar */
 		@Str_Revers	= 'F',		/* Opcion para reversa de registros no procesados */
+		@Str_RepImg	= 'G',		/* Opcion para reprocesar imagen pixeleada */
+		@Str_Duplic	= 'H',		/* Opcion para eliminar duplicados */
 		@Str_ConVac	= '000',	/* String consecutivo vacio */
 		@Str_Espaci	= ' ',		/* String espacio */
 		@Str_TipNue	= 'N',		/* String tipo nuevo */
@@ -90,7 +102,8 @@ select	@Ent_Cero	= 0,		/* Entero cero */
 		@Str_ErrDos	= '2',		/* Error dos = NO SE IDENTIFICO EL FORMATO CHPEFOFI */
 		@Str_ErrTre	= '3',		/* Error tres = NO SE IDENTIFICO LA PERSONA */
 		@Str_ErrCua	= '4',		/* Error cuatro = REGISTROS NumTer 000 NO IDENTIFICADO */
-		@Str_Porcen	= '%'		/* String porcentaje */
+		@Str_Porcen	= '%',		/* String porcentaje */
+		@Str_Reproc	= 'R'		/* String reproceso */
 		
 if @Tip_Proces = @Str_RegTem begin
 	
@@ -120,7 +133,9 @@ if @Tip_Proces = @Str_RegTem begin
 		end
 		
 		if @Str_Estatu = @Str_EstPen begin
-			select	top 1000	Fir_Identi,	Fir_Cuenta,	Fir_Consec,	Fir_NumTer, Fir_Person
+			select	top 1000
+					Fir_Identi,	Fir_Cuenta,	Fir_Consec,	Fir_NumTer, Fir_Person,
+					Fir_Observ
 				from CHTMPFIR noholdlock
 				where	NumTransac	= @Str_NumTra
 				  and	Fir_Estatu	= @Str_EstPen
@@ -178,7 +193,6 @@ if @Tip_Proces = @Str_RegTem begin
 			from #baseFirmas b
 			inner join CHADPEFO c noholdlock on Fir_Cuenta = Apf_Cuenta
 			  and	Fir_NumTer	= Apf_NumTer
-			  and	b.FechaSis	= c.FechaSis
 		
 		/* Identificar mediante relacion datos */
 		
@@ -326,7 +340,9 @@ if @Tip_Proces = @Str_RegTem begin
 			where	Fir_Estatu	= @Str_ErrTre
 			  and	NumTransac	= @Str_NumTra
 		
-		select	Top 1000 Fir_Identi,	Fir_Cuenta,	Fir_Consec,	Fir_NumTer,	Fir_Person
+		select	Top 1000 
+				Fir_Identi,	Fir_Cuenta,	Fir_Consec,	Fir_NumTer,	Fir_Person,
+				Fir_Observ
 			from CHTMPFIR noholdlock
 			where	NumTransac	= @Str_NumTra
 			  and	Fir_Estatu	= @Str_EstPen
@@ -431,5 +447,112 @@ if @Tip_Proces = @Str_Revers begin
 		Fir_Observ	= @Str_Vacio
 		where	NumTransac	= @Str_NumTra
 		  and	Fir_Estatu	= @Str_EsNoPr
+		  
+	select	Err_Codigo	= '000000',
+			Err_Mensaj	= 'Sucursal actualizada para reproceso'
+
+end
+
+if @Tip_Proces = @Str_RepImg begin
+	
+	select	@Str_Estatu	= Mif_Estatu,
+			@Ent_Numero	= Mif_Numero,
+			@Str_Cuenta	= Fir_Cuenta,
+			@Str_Consec = Fir_Consec,
+			@Str_NumTer = Fir_NumTer
+	from CHTMPFIR a noholdlock
+	inner join SOMIGFIR b noholdlock on b.NumTransac = a.NumTransac
+	where	Fir_Identi	= @Mif_Numero
+	
+	select @Ent_Valido	= count(1)
+		from CHADPEFO noholdlock
+		where	Apf_Cuenta	= @Str_Cuenta
+		  and	Apf_Consec	= @Str_Consec
+		  and	Apf_NumTer	= @Str_NumTer
+		  and	Usuario		= 'MIGRAC'
+	
+	if @Ent_Valido > @Ent_Uno begin
+		select	Err_Codigo = '000004', 
+				Err_Mensaj = 'El registro adicional esta duplicado.'
+		return 1
+	end
+	
+	update CHTMPFIR set
+		Fir_Estatu	= @Str_EstPen,
+		Fir_Observ	= @Str_Reproc
+		where	Fir_Identi = @Mif_Numero
+	
+	if @Str_Estatu != @Str_EstPen begin
+		update SOMIGFIR set
+			Mif_Estatu	= @Str_EstPen
+			where  Mif_Numero = @Ent_Numero
+	end
+	
+	insert into CHHISAPF
+			(Apf_Identi,	Apf_Cuenta,		Apf_Consec,		Apf_NumTer,		Apf_Person,
+			Apf_NomFir,		Apf_FecReg,		NumTransac,		Transaccio,		Usuario,
+			FechaSis,		SucOrigen,		SucDestino )
+		select  Apf_Identi,	Apf_Cuenta,		Apf_Consec,		Apf_NumTer,		Apf_Person,
+				Apf_NomFir,	Apf_FecReg,		NumTransac,		Transaccio,		Usuario,
+				FechaSis,	SucOrigen,		SucDestino
+			from CHADPEFO noholdlock
+			where	Apf_Cuenta	= @Str_Cuenta
+			  and	Apf_Consec	= @Str_Consec
+			  and	Apf_NumTer	= @Str_NumTer
+			  and	Usuario		= 'MIGRAC'
+		
+	delete CHADPEFO
+		where	Apf_Cuenta	= @Str_Cuenta
+		  and	Apf_Consec	= @Str_Consec
+		  and	Apf_NumTer	= @Str_NumTer
+		  and	Usuario		= 'MIGRAC'
+		  
+	select	Err_Codigo	= '000000',
+			Err_Mensaj	= 'Registro marcado para reproceso'
+
+end
+
+if @Tip_Proces = @Str_Duplic begin
+	
+	select	@Str_Cuenta	= Fir_Cuenta,
+			@Str_Consec = Fir_Consec,
+			@Str_NumTer = Fir_NumTer
+	from CHTMPFIR a noholdlock
+	where	Fir_Identi	= @Mif_Numero
+	
+	select @Ent_Valido	= count(1)
+		from CHADPEFO noholdlock
+		where	Apf_Cuenta	= @Str_Cuenta
+		  and	Apf_Consec	= @Str_Consec
+		  and	Apf_NumTer	= @Str_NumTer
+	
+	if @Ent_Valido = @Ent_Uno begin
+		select	Err_Codigo = '000005', 
+				Err_Mensaj = 'El registro no esta duplicado'
+		return 1
+	end
+	
+	select @Ent_Identi	= Apf_Identi
+		from CHADPEFO noholdlock
+		where	Apf_Cuenta	= @Str_Cuenta
+		  and	Apf_Consec	= @Str_Consec
+		  and	Apf_NumTer	= @Str_NumTer
+		  and	Usuario		= 'MIGRAC'
+	
+	insert into CHHISAPF
+			(Apf_Identi,	Apf_Cuenta,		Apf_Consec,		Apf_NumTer,		Apf_Person,
+			Apf_NomFir,		Apf_FecReg,		NumTransac,		Transaccio,		Usuario,
+			FechaSis,		SucOrigen,		SucDestino )
+		select  Apf_Identi,	Apf_Cuenta,		Apf_Consec,		Apf_NumTer,		Apf_Person,
+				Apf_NomFir,	Apf_FecReg,		NumTransac,		Transaccio,		Usuario,
+				FechaSis,	SucOrigen,		SucDestino
+			from CHADPEFO noholdlock
+			where	Apf_Identi	= @Ent_Identi
+		
+	delete CHADPEFO
+		where	Apf_Identi 	= @Ent_Identi
+		
+	select	Err_Codigo	= '000000',
+			Err_Mensaj	= 'Registro duplicado eliminado'
 
 end
