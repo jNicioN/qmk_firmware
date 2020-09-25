@@ -20,6 +20,18 @@ as
 ********************************************************************
 ** REFERENCIAS:													****
 *********************************************************************
+** Modifico:		Luis Enrique Ramirez Ortiz					****
+** Fecha:			25/09/2020									****
+** Help:			1179955 									****
+** Descripcion:		Se modifica la consulta CG, para validar que****
+**					un registro de persona le pertenezca a un 	****
+**					cliente										****
+********************************************************************
+** Modifico:		Luis Enrique Ramirez Ortiz					****
+** Fecha:			15/09/2020									****
+** Help:			1179955 									****
+** Descripcion:		Se agrega LA, busqueda con like por RFC		****
+********************************************************************
 ** Modifico:		Joel Barcenas								****
 ** Fecha:			25/06/2020									****
 ** Help:			1179955 									****
@@ -286,7 +298,8 @@ declare	@Tip_ConTip	char(1),
 		@Loc_Pais	char(3),
 		@Busqueda	varchar(100),
 		@Suc_Numero	varchar(3),
-		@Int_Client	int
+		@Int_Client	int,
+		@Rfc_Like	varchar(15)
 
 /* Declaracion de Constantes */
 declare	@Str_Vacio	char(1),
@@ -695,6 +708,11 @@ if @Tip_ConTip = 'C' begin
 			and Per_RFC = @Per_RFC	
 		end 
 	end else if @Tip_ConCon = 'G' begin /*Consulta para personas que no existen en lIsta negra de Tercero autorizado*/
+		
+		select @Int_Client = ClClientID 
+		from CLCLIENT noholdlock
+		where Cli_Numero = @Per_Numero
+	
 		create table #PersonasBloqueadas(
 			Per_Id 	   int identity,
 			Per_Numero char(8)
@@ -707,7 +725,6 @@ if @Tip_ConTip = 'C' begin
 		from ITTELINE noholdlock 
 		inner join SOPERSON noholdlock on PerPersoID = Tel_Person
 		where Tel_Estatu = @Str_A
-		
 		
 		insert into #PersonasBloqueadas
 		select per.Per_Numero
@@ -729,7 +746,8 @@ if @Tip_ConTip = 'C' begin
 				Adi_NuIdFi,	Adi_TieRes,	Adi_NumDep,	Adi_AntLab,	Adi_FecCon,
 				Adi_CaNuIn,	Adi_EntPri,	Adi_EntSeg, PerPersoID 
 			from SOPERSON per noholdlock 
-			inner join ITPERSON pe noholdlock on per.PerPersoID = pe.Per_PerId
+			inner join ITPERSON pe noholdlock on per.PerPersoID = pe.Per_PerId 
+											and pe.Per_Client = @Int_Client
 			left join #PersonasBloqueadas bloc noholdlock on bloc.Per_Numero = per.Per_Numero
 			left join  SOPERADI noholdlock on per.Per_Numero	= Adi_PerNum
 			where bloc.Per_Id is null	
@@ -1393,6 +1411,12 @@ end else begin
 			order by Per_Comple
 			
 		drop table #PersonasRfc
-	end	
+	end	else if @Tip_ConCon = @Str_A begin
+		
+		select @Rfc_Like = @Per_RFC + @Str_Porcen
+		
+		select Per_RFC, Per_Comple
+		from SOPERSON noholdlock
+		where Per_RFC like @Rfc_Like
+	end
 end
-
