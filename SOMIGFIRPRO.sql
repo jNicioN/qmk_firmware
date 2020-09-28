@@ -286,7 +286,9 @@ if @Tip_Proces = @Str_RegTem begin
 				if isnull(@Str_Person,@Str_Vacio) = @Str_Vacio begin
 					
 					update #baseFirmas set 
-						Fir_EstVal	= @Str_ErrTre
+						Fir_EstVal	= @Str_ErrTre,
+						Fir_NumTer	= @Str_NumTer,
+						Fir_Consec	= @Str_Consec
 						where	Identificador	= @Ent_Identi
 						
 				end else begin
