@@ -23,7 +23,11 @@ as
 /***********************************************************
 ** Descripción:	 Alta de Dirección Persona				****
 ************************************************************
-** Modifico:		Norma Tijerina						****
+** Modifico:	Jonathan Nicio							****
+** Fecha:		14-09-2020								****
+** Help:		1399388									****
+************************************************************
+** Modifico:	Norma Tijerina							****
 ** Fecha:		04-05-2017								****
 ** Help:		00946339								****
 ************************************************************
@@ -31,7 +35,10 @@ as
 ** Fecha:		17-03-2017								****
 ** Help:		00909908								****
 ************************************************************/
-										/* Declaración de constantes */
+
+										/*	Declaración de Variables	*/
+declare	@Val_Existe	int
+										/*	Declaración de Constantes	*/
 declare	@Str_Vacio	char(1),
 		@Ent_Cero	int,
 		@Ent_Uno	int,
@@ -46,53 +53,60 @@ select	@Str_Vacio	= '',				/* String vacío */
 		@Tim_Vigenc = 12,				/* Cantidad de meses de vigencia*/
 		@Tip_Vigenc = 'mm',				/* Tipo de tiempo para aumentar la fecha de Viegencia (meses)*/
 		@Dip_Status = 'A'
-		
+
 /* Validaciones */
 if @PerPersoID = @Ent_Cero begin
-
 	select	Err_Codigo	= '000001',
 			Err_Mensaj	= 'Error con el parámetro: @PerPersonID .',
 			Err_Variab	= '@PerPersonID'
 	rollback
 	return @Ent_Uno
-
 end
 
-
 if @Dip_TipDir = @Ent_Cero begin
-
 	select	Err_Codigo	= '000003',
 			Err_Mensaj	= 'Error con el parámetro: @Dip_TipDir.',
 			Err_Variab	= '@Dip_TipDir'
 	rollback
 	return @Ent_Uno
-
 end
 
 if isnull(@Dip_Calle, @Str_Vacio) = @Str_Vacio begin
-
 	select	Err_Codigo	= '000004',
 			Err_Mensaj	= 'Error con el parámetro: @Dip_Calle.',
 			Err_Variab	= '@Dip_Calle'
 	rollback
 	return @Ent_Uno
-
 end
 
 if isnull(@Dip_NumCP, @Str_Vacio) = @Str_Vacio begin
-
 	select	Err_Codigo	= '000007',
-			Err_Mensaj	= 'Error con el parámetro: @Dip_NumCP.',
+			Err_Mensaj	= 'El parámetro @Dip_NumCP no puede ir vacio.',
 			Err_Variab	= '@Dip_NumCP'
 	rollback
 	return @Ent_Uno
-
+end else begin
+	select @Val_Existe = @Ent_Cero
+	select @Val_Existe = count(Cpc_Numero)
+		from CLCODPOS noholdlock
+		where	Cpc_Numero	= @Dip_NumCP
+	if @Val_Existe <= @Ent_Cero begin
+		select	Err_Codigo	= '000008',
+				Err_Mensaj	= 'El parámetro @Dip_NumCP no es valido.',
+				Err_Variab	= '@Dip_NumCP'
+		rollback
+	end
 end
 
 
-/* Alta de Descripcion */
-insert into SODIRPER values(
-	@PerPersoID,		@Dip_TipDir,		@ClClientID,		@Dip_Calle,			@Dip_NumExt,
-	@Dip_NumInt,		@Dip_NumCP,			@Dip_EntCa1,		@Dip_EntCa2,		@Dip_Refere,
-	@Dip_Status,		@NumTransac,		@Transaccio,		@Usuario,			@FechaSis,			
-	@SucOrigen,			@SucDestino)
+/* Alta de Descripción */
+insert into SODIRPER (
+	PerPersoID,	Dip_TipDir,	ClClientID,	Dip_Calle,	Dip_NumExt,
+	Dip_NumInt,	Dip_NumCP,	Dip_EntCa1,	Dip_EntCa2,	Dip_Refere,
+	Dip_Status,	NumTransac,	Transaccio,	Usuario,	FechaSis,
+	SucOrigen,	SucDestino)
+	values(
+		@PerPersoID,	@Dip_TipDir,	@ClClientID,	@Dip_Calle,		@Dip_NumExt,
+		@Dip_NumInt,	@Dip_NumCP,		@Dip_EntCa1,	@Dip_EntCa2,	@Dip_Refere,
+		@Dip_Status,	@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,
+		@SucOrigen,		@SucDestino)

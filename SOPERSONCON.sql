@@ -21,10 +21,15 @@ as
 ** REFERENCIAS:													****
 ********************************************************************
 ** Modifico:		Armando Alexis Sepúlveda Cruz				****
-** Fecha:			20/08/2020									****
+** Fecha:			07/10/2020									****
 ** Help:			1379522 									****
 ** Descripcion:		Se modifical la consulta CA y CB para 		****
 **					optimizar las búsquedas						****
+*********************************************************************
+** Modifico:		Luis Enrique Ramirez Ortiz					****
+** Fecha:			15/09/2020									****
+** Help:			1179955 									****
+** Descripcion:		Se agrega LA, busqueda con like por RFC		****
 ********************************************************************
 ** Modifico:		Joel Barcenas								****
 ** Fecha:			25/06/2020									****
@@ -292,7 +297,8 @@ declare	@Tip_ConTip	char(1),
 		@Loc_Pais	char(3),
 		@Busqueda	varchar(100),
 		@Suc_Numero	varchar(3),
-		@Int_Client	int
+		@Int_Client	int,
+		@Rfc_Like	varchar(15)
 
 /* Declaracion de Constantes */
 declare	@Str_Vacio	char(1),
@@ -1441,5 +1447,12 @@ end else begin
 			order by Per_Comple
 			
 		drop table #PersonasRfc
-	end	
+	end	else if @Tip_ConCon = @Str_A begin
+		
+		select @Rfc_Like = @Per_RFC + @Str_Porcen
+		
+		select Per_RFC, Per_Comple
+		from SOPERSON noholdlock
+		where Per_RFC like @Rfc_Like
+	end
 end
