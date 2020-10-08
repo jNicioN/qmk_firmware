@@ -21,6 +21,13 @@ as
 ** REFERENCIAS:													****
 *********************************************************************
 ** Modifico:		Luis Enrique Ramirez Ortiz					****
+** Fecha:			25/09/2020									****
+** Help:			1179955 									****
+** Descripcion:		Se modifica la consulta CG, para validar que****
+**					un registro de persona le pertenezca a un 	****
+**					cliente										****
+********************************************************************
+** Modifico:		Luis Enrique Ramirez Ortiz					****
 ** Fecha:			15/09/2020									****
 ** Help:			1179955 									****
 ** Descripcion:		Se agrega LA, busqueda con like por RFC		****
@@ -701,6 +708,11 @@ if @Tip_ConTip = 'C' begin
 			and Per_RFC = @Per_RFC	
 		end 
 	end else if @Tip_ConCon = 'G' begin /*Consulta para personas que no existen en lIsta negra de Tercero autorizado*/
+		
+		select @Int_Client = ClClientID 
+		from CLCLIENT noholdlock
+		where Cli_Numero = @Per_Numero
+	
 		create table #PersonasBloqueadas(
 			Per_Id 	   int identity,
 			Per_Numero char(8)
@@ -713,7 +725,6 @@ if @Tip_ConTip = 'C' begin
 		from ITTELINE noholdlock 
 		inner join SOPERSON noholdlock on PerPersoID = Tel_Person
 		where Tel_Estatu = @Str_A
-		
 		
 		insert into #PersonasBloqueadas
 		select per.Per_Numero
@@ -735,7 +746,8 @@ if @Tip_ConTip = 'C' begin
 				Adi_NuIdFi,	Adi_TieRes,	Adi_NumDep,	Adi_AntLab,	Adi_FecCon,
 				Adi_CaNuIn,	Adi_EntPri,	Adi_EntSeg, PerPersoID 
 			from SOPERSON per noholdlock 
-			inner join ITPERSON pe noholdlock on per.PerPersoID = pe.Per_PerId
+			inner join ITPERSON pe noholdlock on per.PerPersoID = pe.Per_PerId 
+											and pe.Per_Client = @Int_Client
 			left join #PersonasBloqueadas bloc noholdlock on bloc.Per_Numero = per.Per_Numero
 			left join  SOPERADI noholdlock on per.Per_Numero	= Adi_PerNum
 			where bloc.Per_Id is null	
