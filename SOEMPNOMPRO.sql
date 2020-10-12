@@ -151,12 +151,13 @@ end
 		@Modulo
 		
 	if @Status <> @Ent_Cero
-		begin
-			
-			rollback
-			return 1
+	begin
+		select	Err_Codigo	= '000002',
+				Err_Mensaj	= 'Ocurrió un error al modificar la persona'
+		rollback
+		return 1
 
-		end
+	end
 
 select	Err_Codigo	= '000000',
 		Err_Mensaj	= 'Registro Actualizado',
