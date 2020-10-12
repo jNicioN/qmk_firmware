@@ -131,30 +131,30 @@ begin
 	
 end
 
-	exec @Status =  SOPERUNIMOD
-		@Per_Numero,	@Per_Fecha,		@Per_NumTra,	@Per_Tipo,		@Per_NuSeFi,
-		@Per_Titulo,	@Per_Nombre,	@Per_ApePat,	@Per_ApeMat,	@Per_RazSoc,
-		@Per_RFC,		@Per_CURP,		@Per_Benefi,	@Per_Calle,		@Per_CalNum,
-		@Per_Coloni,	@Per_Entida,	@Per_Locali,	@Per_CodPos,	@Per_ApaPos,
-		@Per_LadTel,	@Per_Telefo,	@Per_Email,		@Per_ComDom,	@Per_EstCiv,
-		@Per_Nacion,	@Per_ActEmp,	@Per_Giro,		@Per_Sector,	@Per_Activi,
-		@Per_TipPar,	@Adi_LugNac,	@Adi_Sexo,		@Adi_FecNac,	@Adi_RegMat,
-		@Adi_VivCas,	@Adi_TieRes,	@Adi_Fax,		@Adi_NumDep,	@Adi_Puesto,
-		@Adi_Ocupac,	@Adi_AntLab,	@Adi_LugTra,	@Adi_TelTra,	@Adi_CalTra,	
-		@Adi_NuCaTr,	@Adi_ColTra,	@Adi_Locali,	@Adi_CPTra,		@Adi_FecCon,
-		@Adi_CaNuIn,	@Adi_NacExt,	@Adi_Reside,	@Adi_DocEst,	@Adi_OtDoEs,
-		@Adi_FeExDo,	@Adi_CalInm,	@Adi_CalExt,	@Adi_CaNuEx,	@Adi_ColExt,
-		@Adi_LocExt,	@Adi_EntExt,	@Adi_PaiExt,	@Adi_CoPoEx,	@Adi_TelExt,
-		@Adi_TipIde,	@Adi_OtrIde,	@Adi_NumIde,	@Adi_FeExId,	@Adi_FeVeId,
-		@Adi_NuIdFi,	@Adi_EntPri,	@Adi_EntSeg,	@Str_Vacio,		@NumTransac,
-		@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino,
-		@Modulo
+exec @Status =  SOPERUNIMOD
+	@Per_Numero,	@Per_Fecha,		@Per_NumTra,	@Per_Tipo,		@Per_NuSeFi,
+	@Per_Titulo,	@Per_Nombre,	@Per_ApePat,	@Per_ApeMat,	@Per_RazSoc,
+	@Per_RFC,		@Per_CURP,		@Per_Benefi,	@Per_Calle,		@Per_CalNum,
+	@Per_Coloni,	@Per_Entida,	@Per_Locali,	@Per_CodPos,	@Per_ApaPos,
+	@Per_LadTel,	@Per_Telefo,	@Per_Email,		@Per_ComDom,	@Per_EstCiv,
+	@Per_Nacion,	@Per_ActEmp,	@Per_Giro,		@Per_Sector,	@Per_Activi,
+	@Per_TipPar,	@Adi_LugNac,	@Adi_Sexo,		@Adi_FecNac,	@Adi_RegMat,
+	@Adi_VivCas,	@Adi_TieRes,	@Adi_Fax,		@Adi_NumDep,	@Adi_Puesto,
+	@Adi_Ocupac,	@Adi_AntLab,	@Adi_LugTra,	@Adi_TelTra,	@Adi_CalTra,	
+	@Adi_NuCaTr,	@Adi_ColTra,	@Adi_Locali,	@Adi_CPTra,		@Adi_FecCon,
+	@Adi_CaNuIn,	@Adi_NacExt,	@Adi_Reside,	@Adi_DocEst,	@Adi_OtDoEs,
+	@Adi_FeExDo,	@Adi_CalInm,	@Adi_CalExt,	@Adi_CaNuEx,	@Adi_ColExt,
+	@Adi_LocExt,	@Adi_EntExt,	@Adi_PaiExt,	@Adi_CoPoEx,	@Adi_TelExt,
+	@Adi_TipIde,	@Adi_OtrIde,	@Adi_NumIde,	@Adi_FeExId,	@Adi_FeVeId,
+	@Adi_NuIdFi,	@Adi_EntPri,	@Adi_EntSeg,	@Str_Vacio,		@NumTransac,
+	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino,
+	@Modulo
 		
-	if @Status <> @Ent_Cero
-	begin
+if @Status <> @Ent_Cero
+begin
 
-		rollback
-		return 1
+	rollback
+	return 1
 
 	end
 
