@@ -1,4 +1,4 @@
-create procedure SOPERSONCON (
+﻿create procedure SOPERSONCON (
 	@Per_Numero	char(8),
 	@Per_Comple	varchar(181),
 	@Per_Tipo	char(1),
@@ -19,6 +19,12 @@ as
 ** DESCRIPCION:  ** Consulta de Personas **						****
 ********************************************************************
 ** REFERENCIAS:													****
+********************************************************************
+** Modifico:		Armando Alexis Sepúlveda Cruz				****
+** Fecha:			07/10/2020									****
+** Help:			1379522 									****
+** Descripcion:		Se modifical la consulta CA y CB para 		****
+**					optimizar las búsquedas						****
 *********************************************************************
 ** Modifico:		Luis Enrique Ramirez Ortiz					****
 ** Fecha:			25/09/2020									****
@@ -331,7 +337,9 @@ declare	@Str_Vacio	char(1),
 		@Sin_Direcc varchar(50),
 		@Sta_Termin char(1),
 		@Str_Usuari varchar(10),
-		@Str_A		char(1)
+		@Str_A		char(1),
+		@Len_RFCOrd	int,
+		@Len_RFCHom int
 
 /* Asignacion de Constantes */
 select	@Str_Vacio	= '',			-- String Vacio
@@ -362,7 +370,9 @@ select	@Str_Vacio	= '',			-- String Vacio
 		@Sin_Direcc = 'Sin Direcci&oacuten',
 		@Sta_Termin	= 'T',			-- Status de Terminado
 		@Str_Usuari = 'USUARIO',		-- String Usuario
-		@Str_A		= 'A'
+		@Str_A		= 'A',
+		@Len_RFCOrd	= 10,			/* Longitud de rfc ordinario*/
+		@Len_RFCHom = 13			/* Longitud de rfc ordinario*/
 		
 select	@Busqueda	= @Per_Comple
 select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
@@ -390,7 +400,6 @@ if @Tip_ConTip = 'C' begin
 	if @Tip_ConCon	= '2' begin
 		select	Per_Numero,	Per_Tipo,	Per_Titulo,	Per_Nombre,	Per_ApePat,
 				Per_ApeMat,	Per_RazSoc,	Per_Comple,	Per_ComOrd,	Per_RFC,
-
 				Per_CURP,	Per_Calle,	Per_CalNum,	Per_Coloni,	Per_Entida,
 				Per_Locali,	Per_CodPos,	Per_ApaPos,	Per_Telefo,	Per_EstCiv,
 				Per_Nacion,	Per_ActEmp,	Per_Giro,	Per_Sector,	Per_Activi,
@@ -657,17 +666,56 @@ if @Tip_ConTip = 'C' begin
 			 and	Per_Numero	*= Adi_PerNum
 			 and	Per_Numero	*= DaP_Person 
 	end else if @Tip_ConCon	= 'A' begin   /* Consulta Móvil por RFC **/
-		select Peu_Grupo as Per_Numero, Per_Comple, Per_ComOrd, Per_RFC, Per_CURP,
-		       Per_Nombre, Per_ApePat, Per_ApeMat
-		  from SOPERSON noholdlock
-		  join SOUNIPER noholdlock on Per_Numero = Peu_Person 
-		 where Per_RFC = @Per_RFC
+		create table #PersonasRFC (
+			Per_Numero	char(8)
+		)
+
+		create index #PersonasRFC on #PersonasRFC(Per_Numero)
+
+		if isnull(@Per_RFC, @Str_Vacio) <> @Str_Vacio and len(@Per_RFC) = @Len_RFCHom begin
+			insert into #PersonasRFC
+			select Per_Numero
+			  from SOPERSON noholdlock
+			 where Per_RFC = @Per_RFC
+		end else if isnull(@Per_RFC, @Str_Vacio) <> @Str_Vacio and len(@Per_RFC) >= @Len_RFCOrd begin
+			select @Per_RFC = @Per_RFC + @Str_Porcen
+
+			insert into #PersonasRFC
+			select Per_Numero
+			  from SOPERSON noholdlock
+			 where Per_RFC like @Per_RFC
+		end
+
+		select top 100 Peu_Grupo
+		  into #MovilPersonaRFC
+	  	  from #PersonasRFC
+	  	 inner join SOUNIPER noholdlock on Per_Numero = Peu_Person
+	  	 group by Peu_Grupo
+        order by Peu_Grupo
+
+		select Per_Numero, Per_Comple, Per_ComOrd, Per_RFC, Per_CURP,
+			   Per_Nombre, Per_ApePat, Per_ApeMat
+		  from #MovilPersonaRFC
+		 inner join SOPERSON noholdlock on Peu_Grupo = Per_Numero
+
+		drop table #PersonasRFC, #MovilPersonaRFC
 	end else if @Tip_ConCon	= 'B' begin   /* Consulta Móvil por Nombre Completo**/
-		select Peu_Grupo as Per_Numero, Per_Comple, Per_ComOrd, Per_RFC, Per_CURP,
-		       Per_Nombre, Per_ApePat, Per_ApeMat
-		  from SOPERSON noholdlock
-		  join SOUNIPER noholdlock on Per_Numero = Peu_Person 
-		  where Per_Comple like @Per_Comple + '%'
+		select @Per_Comple = @Per_Comple + @Str_Porcen -- El porcentaje se debe poner antes de usarse en la consulta para que sea rapido
+		
+		select top 100 Peu_Grupo
+		  into #MovilPersonaNombre
+	  	  from SOPERSON noholdlock
+	  	 inner join SOUNIPER noholdlock on Per_Numero = Peu_Person
+	  	 where Per_Comple like @Per_Comple
+	  	 group by Peu_Grupo
+         order by Peu_Grupo
+
+		select Per_Numero, Per_Comple, Per_ComOrd, Per_RFC, Per_CURP,
+			   Per_Nombre, Per_ApePat, Per_ApeMat
+		  from #MovilPersonaNombre
+		 inner join SOPERSON noholdlock on Peu_Grupo = Per_Numero
+
+		drop table #MovilPersonaNombre
 	end else if @Tip_ConCon = 'C' begin /*Consulta por persona registrada en internacional para tercero autorizado*/
 		select @Int_Client = ClClientID 
 		from CLCLIENT noholdlock
