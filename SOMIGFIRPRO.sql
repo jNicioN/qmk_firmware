@@ -292,15 +292,15 @@ if @Tip_Proces = @Str_RegTem begin
 					
 					update #baseFirmas set 
 						Fir_EstVal	= @Str_ErrTre,
-						Fir_NumTer	= @Str_NumTer,
-						Fir_Consec	= @Str_Consec
+						Fir_NumTer	= isnull(@Str_NumTer,@Str_Vacio),
+						Fir_Consec	= isnull(@Str_Consec,@Str_Vacio)
 						where	Identificador	= @Ent_Identi
 						
 				end else begin
 					
 					update #baseFirmas set 
-						Fir_NumTer	= @Str_NumTer,
-						Fir_Consec	= @Str_Consec,
+						Fir_NumTer	= isnull(@Str_NumTer,@Str_Vacio),
+						Fir_Consec	= isnull(@Str_Consec,@Str_Vacio),
 						Fir_Person	= @Str_Person
 						where	Identificador	= @Ent_Identi
 						
