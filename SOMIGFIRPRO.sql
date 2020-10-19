@@ -18,6 +18,11 @@ as
 ******************************************************************
 ** Modifico:	Alma Perez										**
 ** HelpDesk:	1390218											**
+** Fecha:		12/10/2020										**
+** Desc: Validar valores nulos									**
+******************************************************************
+** Modifico:	Alma Perez										**
+** HelpDesk:	1390218											**
 ** Fecha:		15/09/2020										**
 ** Desc: Se agrega opcion para reprocesamiento					**
 ******************************************************************
@@ -182,7 +187,7 @@ if @Tip_Proces = @Str_RegTem begin
 		insert into #baseFirmas (
 			Fir_Cuenta,	Fir_Consec,	Fir_NumTer,	Fir_Person,	FechaSis,
 			Fir_EstVal)
-		select	Fir_Cuenta,	@Str_Vacio, Fir_Consec,	@Str_Vacio,	FechaSis,
+		select	Fir_Cuenta,	@Str_Vacio, isnull(Fir_Consec, @Str_Vacio),	@Str_Vacio,	FechaSis,
 				@Str_EstPen
 			from CHFIRMAS noholdlock
 			inner join #cuentasBase on Cue_Numero = Fir_Cuenta
@@ -287,15 +292,15 @@ if @Tip_Proces = @Str_RegTem begin
 					
 					update #baseFirmas set 
 						Fir_EstVal	= @Str_ErrTre,
-						Fir_NumTer	= @Str_NumTer,
-						Fir_Consec	= @Str_Consec
+						Fir_NumTer	= isnull(@Str_NumTer,@Str_Vacio),
+						Fir_Consec	= isnull(@Str_Consec,@Str_Vacio)
 						where	Identificador	= @Ent_Identi
 						
 				end else begin
 					
 					update #baseFirmas set 
-						Fir_NumTer	= @Str_NumTer,
-						Fir_Consec	= @Str_Consec,
+						Fir_NumTer	= isnull(@Str_NumTer,@Str_Vacio),
+						Fir_Consec	= isnull(@Str_Consec,@Str_Vacio),
 						Fir_Person	= @Str_Person
 						where	Identificador	= @Ent_Identi
 						
