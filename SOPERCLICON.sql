@@ -21,6 +21,12 @@ as
 ** Descripción:	 Consulta Persona y Cliente								****
 ****************************************************************************
 ** Modificó:	Armando Alexis Sepúlveda Cruz							****
+** Fecha:		03/Agosto/2020											****
+** Help Desk:	1379522													****
+** Descripción:	Se modifica la consulta C7 para buscar las personas		****
+** 				relacionadas al cliente registrado en RHEMPLEA			****
+****************************************************************************
+** Modificó:	Armando Alexis Sepúlveda Cruz							****
 ** Fecha:		11/Octubre/2019											****
 ** Help Desk:	1285508													****
 ** Descripción:	Se agrega consulta C7 que retorna las personas Empleado	****
@@ -49,7 +55,8 @@ as
 													/* Declaración de variables */
 declare	@Tip_ConTip	char(1),
 		@Tip_ConCon	char(1),
-		@Str_Vacio  char(1)
+		@Str_Vacio  char(1),
+		@Peu_Grupo  char(8)
 		
 										/* Asignación de constantes */
 select	@Str_Vacio	= ''				/* String vacío */		
@@ -118,11 +125,16 @@ if @Tip_ConTip = 'C' begin							/* 'C':  Consulta */
 				 left join CLADICIO on  Per_Numero  =  Adi_NumPer 
 			where @Per_Numero != @Str_Vacio and Per_Numero = @Per_Numero	
 	end else	if @Tip_ConCon = '7' begin						/* Consulta unificada por Cli_Numero o Per_Numero*/	
+		select @Peu_Grupo = Peu_Grupo
+		  from SOUNIPER noholdlock
+		 where Peu_Person = @Per_Numero
+		 
 		select ClClientID,  PerPersoID ,  Adi_Client as Cli_Numero, Per_Numero
-		  from CLADICIO 	noholdlock
-    inner join SOPERSON 	noholdlock on	Per_Numero	=	Adi_NumPer
-    inner join RHEMPLEA		noholdlock on   Emp_Client	=	Adi_Client 
-    	 where Per_Numero  = @Per_Numero
+		  from SOUNIPER noholdlock
+		 inner join SOPERSON noholdlock on Per_Numero = Peu_Person
+		 inner join CLADICIO noholdlock on Per_Numero =	Adi_NumPer
+		 inner join RHEMPLEA noholdlock on Emp_Client =	Adi_Client
+		 where Peu_Grupo = @Peu_Grupo
 	end
 end
 
