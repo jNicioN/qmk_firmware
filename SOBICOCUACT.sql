@@ -30,7 +30,6 @@ as
 ** Descripcion:	Generacion del Procedimiento											****
 ********************************************************************************************/
 -- Declaracion de Variables
-declare	@Res_EjePro	int		-- Resultado de Ejecucion de instrucciones
 	
 -- Declaracion de Constantes	
 declare	@Ent_Cero  	tinyint,	-- Valor Entero: Cero
