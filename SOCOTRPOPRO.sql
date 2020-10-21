@@ -336,7 +336,7 @@ insert into SOCOCUNU(	Ccn_FecPro,	Ccn_TipCon,	Ccn_TipMov,	Ccn_Cuenta,	Ccn_Vigenc
 						Ccn_PrTiMo,	Ccn_Aplica,	Ccn_Termin,	Ccn_ElTiMo,	Ccn_Valor,
 						NumTransac,	Transaccio,	Usuario,	FechaSis,	SucOrigen,
 						SucDestino)
-select	@Fec_Proces,	@Tip_CoCuNu,	@Tip_CheExp,	Cun_Cuenta,	@Bit_No,			
+	select	@Fec_Proces,	@Tip_CoCuNu,	@Tip_CheExp,	Cun_Cuenta,	@Bit_No,			
 		@Fec_Vacia,		@Fec_Vacia,		Prp_Produc,		Prp_PeFiEn,	Prp_PrPeFi,	
 		Prp_PrTiMo,	
 		Dat_Aplica = case when Coc_CobExp = @Str_Si then @Bit_Si else @Bit_No end, 
@@ -350,8 +350,7 @@ select	@Fec_Proces,	@Tip_CoCuNu,	@Tip_CheExp,	Cun_Cuenta,	@Bit_No,
 			and Cun_Moneda	= Prp_Moneda
 	inner join CLCOMCUE noholdlock
 			on Coc_Cuenta	= Cun_Cuenta
-			and (Coc_CobExp		= @Str_No
-		   		or Coc_CheExp	> @Mon_Cero)
+			and Coc_CobExp	= @Str_No
 	left join CLLIMCHE noholdlock
 			on LiC_Client	= Cun_Client
 			and LiC_Moneda	= Cun_Moneda
@@ -361,6 +360,34 @@ select	@Fec_Proces,	@Tip_CoCuNu,	@Tip_CheExp,	Cun_Cuenta,	@Bit_No,
 			and Etm_Activo	= @Bit_Si
 	where Prp_TipMov	= @Tip_CheExp		--	Tipo de Movimiento: 5. Cheques Expedidos
 	  and LiC_Client	is null
+	union all
+	select	@Fec_Proces,	@Tip_CoCuNu,	@Tip_CheExp,	Cun_Cuenta,	@Bit_No,			
+			@Fec_Vacia,		@Fec_Vacia,		Prp_Produc,		Prp_PeFiEn,	Prp_PrPeFi,	
+			Prp_PrTiMo,	
+			Dat_Aplica = case when Coc_CobExp = @Str_Si then @Bit_Si else @Bit_No end, 
+			Dat_Termin = @Bit_No,	Etm_Numero, 
+			Etc_Valor = case when Coc_CobExp = @Str_Si then case when Etm_Numero = @Etm_CoChEx then Coc_CheExp else Prp_CheGra end else @Mon_Cero end,
+			@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,	@SucOrigen,
+			@SucDestino
+		from #ProductosPro noholdlock
+		inner join #CuentasNue noholdlock
+				on Cun_TipCue	= Prp_TipCue
+				and Cun_Moneda	= Prp_Moneda
+		inner join CLCOMCUE noholdlock
+				on Coc_Cuenta	= Cun_Cuenta
+				and Coc_CobExp	= @Str_Si
+				and Coc_CheExp	> @Mon_Cero
+		left join CLLIMCHE noholdlock
+				on LiC_Client	= Cun_Client
+				and LiC_Moneda	= Cun_Moneda
+				and LiC_CobExp	= @Str_No
+		inner join SOELTIMO noholdlock
+				on Etm_TiCaMo	= @Tip_CaChEx	--4	-- Tipo de Calculo: Cheques Expedidos
+				and Etm_Activo	= @Bit_Si
+		where Prp_TipMov	= @Tip_CheExp		--	Tipo de Movimiento: 5. Cheques Expedidos
+		  and LiC_Client	is null
+	
+	
 
 -- Configuraciones a Nivel Cuenta de Manejo de Cuenta
 insert into SOCOCUNU(	Ccn_FecPro,	Ccn_TipCon,	Ccn_TipMov,	Ccn_Cuenta,	Ccn_Vigenc,	
@@ -428,12 +455,34 @@ insert into SOCOCLCA(	Ccc_FecPro,	Ccc_TipCon,	Ccc_TipMov,	Ccc_Client,	Ccc_Vigenc
 	inner join CLLIMCHE noholdlock
 			on LiC_Client	= Cln_Client
 			and LiC_Moneda	= Cln_Moneda
-			and (LiC_CobExp		= @Str_No
-		   		or LiC_CheExp	> @Mon_Cero)
+			and LiC_CobExp	= @Str_No
 	inner join SOELTIMO noholdlock
 			on Etm_TiCaMo	= @Tip_CaChEx	--4	-- Tipo de Calculo: Cheques Expedidos
 			and Etm_Activo	= @Bit_Si
 	where Prp_TipMov	= @Tip_CheExp		--	Tipo de Movimiento: 5. Cheques Expedidos
+	union all
+		select	@Fec_Proces,	@Tip_CoCuNu,	@Tip_CheExp,	Cln_Client,	@Bit_No,			
+				@Fec_Vacia,		@Fec_Vacia,		Prp_Produc,		Prp_PeFiEn,	Prp_PrPeFi,	
+				Prp_PrTiMo,	
+				Dat_Aplica = case when LiC_CobExp = @Str_Si then @Bit_Si else @Bit_No end, 
+				Dat_Termin = case when LiC_CobExp = @Str_No then @Bit_Si else @Bit_No end,	Etm_Numero, 
+				Etc_Valor = case when LiC_CobExp = @Str_Si then case when Etm_Numero = @Etm_CoChEx then LiC_CheExp else Prp_CheGra end else @Mon_Cero end,
+				@NumTransac,	@Transaccio,	@Usuario,	@FechaSis,	@SucOrigen,
+				@SucDestino	
+		from #ProductosPro noholdlock
+		inner join #ClientesNue noholdlock
+				on Cln_TipCue	= Prp_TipCue
+				and Cln_Moneda	= Prp_Moneda
+		inner join CLLIMCHE noholdlock
+				on LiC_Client	= Cln_Client
+				and LiC_Moneda	= Cln_Moneda
+				and LiC_CobExp	= @Str_Si
+				and LiC_CheExp	> @Mon_Cero
+		inner join SOELTIMO noholdlock
+				on Etm_TiCaMo	= @Tip_CaChEx	--4	-- Tipo de Calculo: Cheques Expedidos
+				and Etm_Activo	= @Bit_Si
+		where Prp_TipMov	= @Tip_CheExp		--	Tipo de Movimiento: 5. Cheques Expedidos
+	
 
 -- Configuraciones a Nivel Cliente de Manejo de Cuenta
 insert into SOCOCLCA(	Ccc_FecPro,	Ccc_TipCon,	Ccc_TipMov,	Ccc_Client,	Ccc_Vigenc,	
@@ -473,8 +522,7 @@ insert into #ClientesBan(	Clb_Client,	Clb_TipCli,	Clb_TiAcEm,	Clb_TipCue,	Clb_Mo
 	inner join CLLIMITE noholdlock
 			on Lim_Client	= Cln_Client
 			and Lim_Moneda in (@Mon_Peso, @Mon_Dolar)
-			and (	Lim_CobBaE = @Str_No
-	   				or Lim_CoBaEl <> @Mon_Cero)
+			and Lim_CobBaE = @Str_No
 	inner join CLCLIENT noholdlock
 			on Cli_Numero = Lim_Client
 			and Cli_Status = @Str_Si
@@ -487,7 +535,30 @@ insert into #ClientesBan(	Clb_Client,	Clb_TipCli,	Clb_TiAcEm,	Clb_TipCue,	Clb_Mo
 			and Usu_Tipo   = @Tip_UsuAdm
 		  	and	Usu_Status not in (@Sta_Cancel, @Sta_Inacti)	-- ('C', 'I')
 		  	and Usu_Client > @Cli_Vacio			--'00000000'
-	group by Cli_Numero, Cli_Tipo, Cli_ActEmp, Cue_Tipo, Cue_Moneda	
+	group by Cli_Numero, Cli_Tipo, Cli_ActEmp, Cue_Tipo, Cue_Moneda
+	union all
+		select	Cli_Numero, Cli_Tipo, Cli_ActEmp, Cue_Tipo, Cue_Moneda, 
+				Com_Aplica = min(Lim_CobBaE), Com_BanEle = min(case when Lim_CobBaE = @Str_Si then Lim_CoBaEl else @Mon_Cero end) 
+		from #ClientesNue noholdlock
+		inner join CLLIMITE noholdlock
+				on Lim_Client	= Cln_Client
+				and Lim_Moneda in (@Mon_Peso, @Mon_Dolar)
+				and Lim_CobBaE = @Str_Si
+				and Lim_CoBaEl > @Mon_Cero
+		inner join CLCLIENT noholdlock
+				on Cli_Numero = Lim_Client
+				and Cli_Status = @Str_Si
+		inner join CHCUENTA noholdlock
+				on Cue_Client = Lim_Client
+				and Cue_Moneda = Lim_Moneda
+				and Cue_Status = @Sta_CueAct
+		inner join NBUSUARI noholdlock
+				on Usu_CuCaCo = Cue_Numero
+				and Usu_Tipo   = @Tip_UsuAdm
+				and	Usu_Status not in (@Sta_Cancel, @Sta_Inacti)	-- ('C', 'I')
+				and Usu_Client > @Cli_Vacio			--'00000000'
+		group by Cli_Numero, Cli_Tipo, Cli_ActEmp, Cue_Tipo, Cue_Moneda
+	
 	
 insert into SOCOCLCA(	Ccc_FecPro,	Ccc_TipCon,	Ccc_TipMov,	Ccc_Client,	Ccc_Vigenc,	
 						Ccc_FecIni,	Ccc_FecFin,	Ccc_Produc,	Ccc_PerFis,	Ccc_PrPeFi,	
