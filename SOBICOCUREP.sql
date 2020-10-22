@@ -20,15 +20,6 @@ as
 ** Help:		1286068						        									****
 ** Descripcion:	Generacion del Procedimiento											****
 ********************************************************************************************/
-		
---Variables
-
---Constantes
---declare	@Ent_Cero   tinyint		-- Cantidad: Cero 
-
--- Asignacion de Constantes
---select  @Ent_Cero   = 0			-- Cantidad: Cero
-		
 
 select	Bcc_Numero,	Bcc_FecPro,	Bcc_CanCue,	Bcc_CanCli,	Bcc_CaReCu,
 		Bcc_CaReCl,	Bcc_GenExi,	Bcc_TraExi,	Bcc_MenGen,	Bcc_MenTra

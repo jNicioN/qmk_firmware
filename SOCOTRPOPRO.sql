@@ -356,9 +356,9 @@ insert into SOCOCUNU(	Ccn_FecPro,	Ccn_TipCon,	Ccn_TipMov,	Ccn_Cuenta,	Ccn_Vigenc
 			and LiC_Moneda	= Cun_Moneda
 			and LiC_CobExp	= @Str_No
 	inner join SOELTIMO noholdlock
-			on Etm_TiCaMo	= @Tip_CaChEx	--4	-- Tipo de Calculo: Cheques Expedidos
+			on Etm_TiCaMo	= @Tip_CaChEx	
 			and Etm_Activo	= @Bit_Si
-	where Prp_TipMov	= @Tip_CheExp		--	Tipo de Movimiento: 5. Cheques Expedidos
+	where Prp_TipMov	= @Tip_CheExp		
 	  and LiC_Client	is null
 	union all
 	select	@Fec_Proces,	@Tip_CoCuNu,	@Tip_CheExp,	Cun_Cuenta,	@Bit_No,			
@@ -382,9 +382,9 @@ insert into SOCOCUNU(	Ccn_FecPro,	Ccn_TipCon,	Ccn_TipMov,	Ccn_Cuenta,	Ccn_Vigenc
 				and LiC_Moneda	= Cun_Moneda
 				and LiC_CobExp	= @Str_No
 		inner join SOELTIMO noholdlock
-				on Etm_TiCaMo	= @Tip_CaChEx	--4	-- Tipo de Calculo: Cheques Expedidos
+				on Etm_TiCaMo	= @Tip_CaChEx	
 				and Etm_Activo	= @Bit_Si
-		where Prp_TipMov	= @Tip_CheExp		--	Tipo de Movimiento: 5. Cheques Expedidos
+		where Prp_TipMov	= @Tip_CheExp		
 		  and LiC_Client	is null
 	
 	
@@ -413,9 +413,9 @@ select	@Fec_Proces,	@Tip_CoCuNu,	@Tip_ManCue,	Cun_Cuenta,	@Bit_No,
 			and LiC_Moneda	= Cun_Moneda
 			and LiC_CobCue	= @Str_No
 	inner join SOELTIMO noholdlock
-			on Etm_TiCaMo	= @Tip_CaMaCu	-- Tipo de Calculo: Saldo Promedio Mínimo no cubierto
+			on Etm_TiCaMo	= @Tip_CaMaCu	
 			and Etm_Activo	= @Bit_Si
-	where Prp_TipMov	= @Tip_ManCue		--	Tipo de Movimiento: 3. Manejo de Cuenta
+	where Prp_TipMov	= @Tip_ManCue		
 	  and LiC_Client	is null
 	
 ----------------------------------------------------------------
@@ -457,9 +457,9 @@ insert into SOCOCLCA(	Ccc_FecPro,	Ccc_TipCon,	Ccc_TipMov,	Ccc_Client,	Ccc_Vigenc
 			and LiC_Moneda	= Cln_Moneda
 			and LiC_CobExp	= @Str_No
 	inner join SOELTIMO noholdlock
-			on Etm_TiCaMo	= @Tip_CaChEx	--4	-- Tipo de Calculo: Cheques Expedidos
+			on Etm_TiCaMo	= @Tip_CaChEx	
 			and Etm_Activo	= @Bit_Si
-	where Prp_TipMov	= @Tip_CheExp		--	Tipo de Movimiento: 5. Cheques Expedidos
+	where Prp_TipMov	= @Tip_CheExp		
 	union all
 		select	@Fec_Proces,	@Tip_CoCuNu,	@Tip_CheExp,	Cln_Client,	@Bit_No,			
 				@Fec_Vacia,		@Fec_Vacia,		Prp_Produc,		Prp_PeFiEn,	Prp_PrPeFi,	
@@ -479,9 +479,9 @@ insert into SOCOCLCA(	Ccc_FecPro,	Ccc_TipCon,	Ccc_TipMov,	Ccc_Client,	Ccc_Vigenc
 				and LiC_CobExp	= @Str_Si
 				and LiC_CheExp	> @Mon_Cero
 		inner join SOELTIMO noholdlock
-				on Etm_TiCaMo	= @Tip_CaChEx	--4	-- Tipo de Calculo: Cheques Expedidos
+				on Etm_TiCaMo	= @Tip_CaChEx	
 				and Etm_Activo	= @Bit_Si
-		where Prp_TipMov	= @Tip_CheExp		--	Tipo de Movimiento: 5. Cheques Expedidos
+		where Prp_TipMov	= @Tip_CheExp		
 	
 
 -- Configuraciones a Nivel Cliente de Manejo de Cuenta
@@ -507,9 +507,9 @@ insert into SOCOCLCA(	Ccc_FecPro,	Ccc_TipCon,	Ccc_TipMov,	Ccc_Client,	Ccc_Vigenc
 			and LiC_Moneda	= Cln_Moneda
 			and LiC_CobCue	= @Str_No
 	inner join SOELTIMO noholdlock
-			on Etm_TiCaMo	= @Tip_CaMaCu	-- Tipo de Calculo: 2. Manejo de Cuenta
+			on Etm_TiCaMo	= @Tip_CaMaCu	
 			and Etm_Activo	= @Bit_Si
-	where Prp_TipMov	= @Tip_ManCue		--	Tipo de Movimiento: 3. Manejo de Cuenta
+	where Prp_TipMov	= @Tip_ManCue		
 
 	
 				
@@ -533,8 +533,8 @@ insert into #ClientesBan(	Clb_Client,	Clb_TipCli,	Clb_TiAcEm,	Clb_TipCue,	Clb_Mo
 	inner join NBUSUARI noholdlock
 			on Usu_CuCaCo = Cue_Numero
 			and Usu_Tipo   = @Tip_UsuAdm
-		  	and	Usu_Status not in (@Sta_Cancel, @Sta_Inacti)	-- ('C', 'I')
-		  	and Usu_Client > @Cli_Vacio			--'00000000'
+		  	and	Usu_Status not in (@Sta_Cancel, @Sta_Inacti)	
+		  	and Usu_Client > @Cli_Vacio			
 	group by Cli_Numero, Cli_Tipo, Cli_ActEmp, Cue_Tipo, Cue_Moneda
 	union all
 		select	Cli_Numero, Cli_Tipo, Cli_ActEmp, Cue_Tipo, Cue_Moneda, 
@@ -556,7 +556,7 @@ insert into #ClientesBan(	Clb_Client,	Clb_TipCli,	Clb_TiAcEm,	Clb_TipCue,	Clb_Mo
 				on Usu_CuCaCo = Cue_Numero
 				and Usu_Tipo   = @Tip_UsuAdm
 				and	Usu_Status not in (@Sta_Cancel, @Sta_Inacti)	-- ('C', 'I')
-				and Usu_Client > @Cli_Vacio			--'00000000'
+				and Usu_Client > @Cli_Vacio			
 		group by Cli_Numero, Cli_Tipo, Cli_ActEmp, Cue_Tipo, Cue_Moneda
 	
 	
@@ -578,9 +578,9 @@ insert into SOCOCLCA(	Ccc_FecPro,	Ccc_TipCon,	Ccc_TipMov,	Ccc_Client,	Ccc_Vigenc
 			on Clb_TipCue	= Prp_TipCue
 			and Clb_Moneda	= Prp_Moneda
 	inner join SOELTIMO noholdlock
-			on Etm_TiCaMo	= @Tip_CaBaEl	-- Tipo de Calculo: 8 Banca Electronica
+			on Etm_TiCaMo	= @Tip_CaBaEl	
 			and Etm_Activo	= @Bit_Si
-	where Prp_TipMov	= @Tip_BanEle		--	Tipo de Movimiento: 13. Banca Electronica
+	where Prp_TipMov	= @Tip_BanEle		
 
 
 -----------------------------------------------------------------------
@@ -631,7 +631,6 @@ insert into SOCOCUNU(	Ccn_FecPro,	Ccn_TipCon,	Ccn_TipMov,	Ccn_Cuenta,	Ccn_Vigenc
 			and Ctm_Activo	= @Bit_Si
 	left join SOVICOTI noholdlock
 			on Vct_CoTiMo	= Ctm_Numero
-			--and '20201015'	between Vct_FecIni and Vct_FecFin
 			and Vct_Activo	= @Bit_Si
 	inner join #ProductosPro ProAnt noholdlock
 			on ProAnt.Prp_TipCue	= Cca_TiCuAn
