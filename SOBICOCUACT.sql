@@ -43,7 +43,7 @@ select  @Ent_Cero   = 0,		-- Valor Entero: Cero
 
 select @FechaSis = getdate()
 
-if @Tip_Actual = @Act_Genera begin						-- Actualizacion: Generacion
+if @Tip_Actual = @Act_Genera begin						
 
 	update SOBICOCU
 		set	Bcc_CanCue	= @Bcc_CanCue,
@@ -60,7 +60,7 @@ if @Tip_Actual = @Act_Genera begin						-- Actualizacion: Generacion
 			SucDestino	= @SucDestino
 		where Bcc_FecPro = @Bcc_FecPro
 		
-end else if @Tip_Actual = @Act_Traspa begin				-- Actualizacion: Traspaso
+end else if @Tip_Actual = @Act_Traspa begin				
 	
 	update SOBICOCU
 		set	Bcc_TraExi	= @Bcc_TraExi,
