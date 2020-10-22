@@ -24,6 +24,14 @@ as
 ****************************************************************************
 ** Si se compila este stored en Prod, dar acceso a BLOQUEAR				****
 ****************************************************************************
+** Modificó:	Eliel de la O Silva										****
+** Fecha:		19/08/2020												****
+** Descripción:	para el proyecto de Identidades se requiere que al 		****
+** 				momento de dar de baja un empleado se modifique el 		****
+**              correo electrónico por el valor "micorreo@banregio.com"	****
+**																		****
+** Help Desk:	1205794													****
+****************************************************************************
 ** Modificó:	Francisco Alejandro Bernal Castro						****
 ** Fecha:		02/07/2013												****
 ** Descripción:	Se agrego el tipo de actualizacion 'Z' para el cambio	****
@@ -166,7 +174,9 @@ declare	@Tab_Nombre char(8),		/* Declaracion de Constantes */
 		@Act_MuSeAc	char(1),
 		@Act_MuSeIn	char(1),
 		@Act_CamSuc	char(1),
-		@Mod_Ventan	char(2)
+		@Mod_Ventan	char(2),
+		@Can_Correo	char(30)
+		
 
 /* Asignación de Constantes */
 select	@Tab_Nombre	= 'SOUSUARI',	/* Nombre de la Tabla Local que se va actualizar	*/
@@ -194,7 +204,8 @@ select	@Tab_Nombre	= 'SOUSUARI',	/* Nombre de la Tabla Local que se va actualiza
 		@Act_MuSeAc	= 'M',			/* Actualización de Multisesión (Activar)			*/
 		@Act_MuSeIn	= 'Q',			/* Actualización de Multisesión (Desactivar)		*/
 		@Act_CamSuc	= 'Z',			/* Actualización de Cambio de Sucursal Sibamex3		*/
-		@Mod_Ventan	= 'VE'			/* Módulo Ventanilla								*/
+		@Mod_Ventan	= 'VE',			/* Módulo Ventanilla								*/
+		@Can_Correo	= 'micorreo@banregio.com' /*Actualización baja Usuario              */
 
 select	@FechaSis	= getdate()
 
@@ -428,6 +439,7 @@ end else if @Tip_Actual = @Act_Baja begin
 		Usu_Status	= @Sta_Cancel,
 		Usu_Activo	= @No_Activo,
 		Usu_FecDes	= @FechaSis,
+		Usu_EMail  = @Can_Correo,
 
 		NumTransac	= @NumTransac,
 		Transaccio	= @Transaccio,
