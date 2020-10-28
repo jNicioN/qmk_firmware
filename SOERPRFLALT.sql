@@ -1,5 +1,5 @@
 create procedure SOERPRFLALT (
-	@Epf_Fecha	smalldatetime,
+	@Epf_EjeFlu	int,
     @Epf_ProFlu	int,
     @Epf_Elemen	varchar(20),
     @Epf_Mensaj	varchar(200),
@@ -17,21 +17,17 @@ as
 ** Referencias:																	  		****
 ********************************************************************************************
 ** Elaboro: 	Joel Gonzalez	                     									****
+** Fecha:		28/08/2020									        					****
+** Help:		1394242									        						****
+** Descripcion:	Cambio por acceso a SOERPRFL con el Numero de Ejecucion de Flujo		****
+********************************************************************************************
+** Elaboro: 	Joel Gonzalez	                     									****
 ** Fecha:		27/05/2020									        					****
 ** Help:		1394242									        						****
 ** Descripcion:	Alta de Errores de Procesos de Flujos									****
 ********************************************************************************************/
 		
---Variables
-
---Constantes
-declare	@Can_Cero   tinyint		-- Cantidad: Cero 
-
-select  @Can_Cero   = 0			-- Cantidad: Cero
-		
-insert into SOERPRFL	(	Epf_Fecha,	Epf_ProFlu,	Epf_Elemen,	Epf_Mensaj, NumTransac, 
+insert into SOERPRFL	(	Epf_EjeFlu,	Epf_ProFlu,	Epf_Elemen,	Epf_Mensaj, NumTransac, 
 							Transaccio, Usuario,	FechaSis, 	SucOrigen,	SucDestino)
-values(						@Epf_Fecha,	@Epf_ProFlu,@Epf_Elemen,@Epf_Mensaj,@NumTransac,
+values(						@Epf_EjeFlu,@Epf_ProFlu,@Epf_Elemen,@Epf_Mensaj,@NumTransac,
 							@Transaccio,@Usuario,	@FechaSis, 	@SucOrigen,	@SucDestino)
-
-return @Can_Cero
