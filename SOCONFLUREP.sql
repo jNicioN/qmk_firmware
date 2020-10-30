@@ -25,8 +25,16 @@ as
 ** Descripcion:	Reporte de Control de Flujos											****
 ********************************************************************************************/
 
-select	Flu_Numero, Flu_Nombre = isnull(Flu_Nombre,''), Cof_ProFlu, Prf_Nombre = isnull(Prf_Nombre, ''), Ejecucion = case when Cof_Ejecut = 1 then 'Ejecucion Exitosa' else 'Ejecucion PENDIENTE' end, 
-		Cof_FecHor = case when Cof_FecHor = '19000101' then null else Cof_FecHor end
+-- Declaracion de Constantes
+declare	@Ent_Uno	int,			-- Entero: Uno
+		@Fec_Vacia	smalldatetime	-- Fecha: Vacía
+
+-- Asignacion de Constantes
+select	@Ent_Uno	= 1,			-- Entero: Uno
+		@Fec_Vacia	= '19000101'	-- Fecha: Vacía
+
+select	Flu_Numero, Flu_Nombre = isnull(Flu_Nombre,''), Cof_ProFlu, Prf_Nombre = isnull(Prf_Nombre, ''), Ejecucion = case when Cof_Ejecut = @Ent_Uno then 'Ejecucion Exitosa' else 'Ejecucion PENDIENTE' end, 
+		Cof_FecHor = case when Cof_FecHor = @Fec_Vacia then null else Cof_FecHor end
 	from SOCONFLU noholdlock
 	left join SOPROFLU noholdlock
 			on Prf_Numero = Cof_ProFlu

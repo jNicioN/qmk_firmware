@@ -21,52 +21,62 @@ as
 ** Descripcion:	Generacion de Lista de Parametros de Procesos en Ejecucion de Flujos	****
 **              para incluirse en la ejecucion del Proceso								****
 ********************************************************************************************/
-		
+
+create table #Parametros	-- Parametros a agregar en la ejecucion de procedimientos
+	(
+		Par_Identi	int	identity	not null,
+		Par_NomPar	varchar(20) 	not null,	-- Nombre de Parametro
+		Par_Valor	varchar(50)		not null,	-- Valor de Parametro
+		Par_Comill	varchar(1)		not null	-- El Valor de Comillas para Parametro. (Se agrega Comillas al valor cuando este lo requiera).
+	)
+
 --Variables
-declare	@Res_EjePro	int,			-- Resultado de Ejecucion
-		@Ppf_NomPar	varchar(20),	-- Nombre de Parametro
+declare	@Ppf_NomPar	varchar(20),	-- Nombre de Parametro
 		@Ppf_Valor	varchar(50),	-- Valor de Parametro
-		@Val_Comill	varchar(1)		-- El Valor de Comillas para Parametro. (Se agrega Comillas al valor cuando este lo requiera).
+		@Val_Comill	varchar(1),		-- El Valor de Comillas para Parametro. (Se agrega Comillas al valor cuando este lo requiera).
+		@Reg_Inicia	int,			-- Registro Inicial a procesar
+		@Reg_Final	int,			-- Registro Final a procesar
+		@Reg_Actual	int				-- Registro Actual en proceso
 
 --Constantes
-declare	@Can_Cero	tinyint,	-- Cantidad: Cero
-		@Can_Uno	tinyint,	-- Cantidad: Uno
+declare	@Ent_Uno	tinyint,	-- Cantidad: Uno
 		@Bit_Si		bit			-- Si
 
-select  @Can_Cero	= 0,		-- Cantidad: Cero
-		@Can_Uno	= 1,		-- Cantidad: Uno
+select  @Ent_Uno	= 1,		-- Cantidad: Uno
 		@Bit_Si		= 1			-- Si
 
 --
---select	@Res_EjePro	= @Can_Uno
 
 select	@Lis_Parame	= ''
 
-declare PAPRFL cursor for
-	select Ppf_NomPar, Ppf_Valor = isnull(Ppe_Valor, Ppf_Valor), Val_Comill = case when Ppf_Comill = 1 then '''' else '' end
+insert into #Parametros(Par_NomPar,	Par_Valor,	Par_Comill)
+	select Ppf_NomPar, Ppf_Valor = isnull(Ppe_Valor, Ppf_Valor), Val_Comill = case when Ppf_Comill = @Bit_Si then '''' else '' end
 	from SOPAPRFL noholdlock
 	left join SOPAPREJ noholdlock
 			on Ppe_EjeFlu	= @Num_EjeFlu
 			and Ppe_PaPrFl	= Ppf_Numero
 	where Ppf_ProFlu = @Num_ProFlu
 	  and Ppf_Activo = @Bit_Si
-	for read only
 
-open PAPRFL
+select	@Reg_Inicia	= min(Par_Identi)
+	from #Parametros noholdlock
+	
+select	@Reg_Final	= max(Par_Identi)
+	from #Parametros noholdlock
 
-fetch PAPRFL into @Ppf_NomPar, @Ppf_Valor, @Val_Comill
+select	@Reg_Actual	= @Reg_Inicia
 
-while @@sqlstatus = 0 begin
+while @Reg_Actual <= @Reg_Final begin
+	select 
+		@Ppf_NomPar	= Par_NomPar, 
+		@Ppf_Valor	= Par_Valor, 
+		@Val_Comill	= Par_Comill
+		from #Parametros noholdlock
+		where Par_Identi	= @Reg_Actual
+
 	select @Lis_Parame	= @Lis_Parame + ',' + '@' + @Ppf_NomPar + ' = ' + @Val_Comill + @Ppf_Valor + @Val_Comill + ' '
 	
-	fetch PAPRFL into @Ppf_NomPar, @Ppf_Valor, @Val_Comill
+	select	@Reg_Actual	= @Reg_Actual + @Ent_Uno
 end
 
--- En caso de error informar Codigo de Error
--- select	@Res_EjePro	= @@error
--- if @Res_EjePro	<> @Can_Cero begin
-	-- return	@Res_EjePro
--- end
-
-close PAPRFL
-deallocate PAPRFL
+drop table #Parametros

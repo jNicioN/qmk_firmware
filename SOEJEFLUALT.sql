@@ -32,6 +32,9 @@ declare	@Can_Cero  tinyint,		-- Cantidad: Cero
 select  @Can_Cero  = 0,			-- Cantidad: Cero
 		@Can_Uno   = 1			-- Cantidad: Uno
 
+-- Eliminar la hora en la Fecha recibida
+select @Ejf_Fecha = convert(smalldatetime, convert(varchar(10), @Ejf_Fecha, 112))
+
 --
 select	@Res_EjePro	= @Can_Uno
 

@@ -37,8 +37,7 @@ create table #ProcesosEje	(
 						)
 
 --Variables
-declare --@Num_EjeFlu	int,			-- Ejecucion de Flujo
-		@Num_ProFlu	int,			-- Proceso de Flujo
+declare @Num_ProFlu	int,			-- Proceso de Flujo
 		@Num_CoDiEj	int,			-- Numero de Configuracion de Dias de Ejecucion del Flujo
 		@Dia_ValEje	bit,			-- Dia valido para ejecucion
 		@Dep_ProFal	bit,			-- Dependencias de Procesos Fallidas
@@ -49,6 +48,7 @@ declare --@Num_EjeFlu	int,			-- Ejecucion de Flujo
 		@Par_ProEje	varchar(200),	-- Parametros de Proceso de Flujo
 		@Men_Error 	varchar(200),	-- Mensaje de Error
 		@Ins_Ejecut	varchar(1000),	-- Instruccion a Ejecutar
+		@Status		int,			-- Resultado de Ejecucion de Procedimientos
 		@Res_Ejecuc	int,			-- Resultado de Ejecucion
 		@Res_EjePro int,			-- Resultado de Ejecucion (Sybase)
 		@Men_Bitaco	varchar(200),	-- Mensaje de Bitacora
@@ -106,9 +106,9 @@ end
 -- Si se solicita una nueva Ejecucion, generarla sin afectar a la Ejecucion anterior.
 -- Si no se solicito Nueva Ejecucion, pero no se tiene una Ejecucion Actual, generar una Nueva.
 if @Nue_Ejecuc	= @Bit_Si or @Num_EjeFlu	= @Can_Cero begin
-	select	@Res_Ejecuc	= @Can_Uno	-- Se inicializa con "error" para detectar alguna ejecucion indeterminada
+	select	@Status	= @Can_Uno	-- Se inicializa con "error" para detectar alguna ejecucion indeterminada
 	
-	execute @Res_Ejecuc	= SOEJEFLUALT
+	execute @Status	= SOEJEFLUALT
 		@Ejf_Numero	= @Num_EjeFlu output, 
 		@Ejf_Flujo 	= @Num_Flujo,
 		@Ejf_Fecha	= @Fec_Hoy,
@@ -127,7 +127,8 @@ if @Nue_Ejecuc	= @Bit_Si or @Num_EjeFlu	= @Can_Cero begin
 				@Fec_HorEje	= getdate()
 	end
 	else begin
-		select	@Men_Bitaco	= 'Error Sybase Codigo: ' + convert(varchar(10), @Res_Ejecuc)
+		select	@Res_Ejecuc	= @Status
+		select	@Men_Bitaco	= 'Error Codigo: ' + convert(varchar(10), @Res_Ejecuc)
 		if @Res_Ejecuc	<> @Can_Cero begin
 			select	@Men_Bitaco = 'ERROR en proceso de Generacion de Nueva Ejecucion. Flujo [' + @Abr_Flujo + '] - ' + @Men_Bitaco,
 					@Fec_HorEje	= getdate()
@@ -180,8 +181,10 @@ insert into #ProcesosEje (	Pre_ProFlu, Pre_CoDiEj, Pre_Hito, Pre_AbPrFl, Pre_Req
 	  and Cof_Ejecut	= @Bit_No
 	order by Cof_Orden
 
-select	@Reg_Inicia	= min(Pre_Numero),
-		@Reg_Final	= max(Pre_Numero)
+select	@Reg_Inicia	= min(Pre_Numero)
+	from #ProcesosEje
+	
+select	@Reg_Final	= max(Pre_Numero)
 	from #ProcesosEje
 
 select	@Reg_Actual	= @Reg_Inicia
@@ -204,10 +207,10 @@ while @Reg_Actual	<= @Reg_Final begin
 	end
 	
 	-- Se inicia con un Resultado de Ejecucion No correcto, esperando por el resultado del proceso
-	select	@Res_Ejecuc	= @Can_Uno
+	select	@Status	= @Can_Uno
 		
 	-- Revisar si el Dia y Horario son correctos para ejecucion del Proceso
-	execute @Res_Ejecuc	= SOCODIEJVAL
+	execute @Status	= SOCODIEJVAL
 							@Fec_Hoy	= @Fec_Hoy,				-- Fecha a validar
 							@Num_CoDiEj	= @Num_CoDiEj,			-- Configuracion de Dias de Ejecucion
 							@Dia_Valido	= @Dia_ValEje output,	-- Resultado: Dia valido o no para ejecucion
@@ -227,6 +230,7 @@ while @Reg_Actual	<= @Reg_Final begin
 				@Dia_ValEje	= @Bit_No
 	end
 	else begin
+		select 	@Res_Ejecuc	= @Status
 		if @Res_Ejecuc	<> @Can_Cero begin
 			select	@Men_Bitaco = 'ERROR al validar Dia y Horario de Ejecucion. Flujo [' + + @Abr_Flujo + ' - ' + @Pro_Ejecut + '] - ' + @Men_Bitaco,
 					@Fec_HorEje	= getdate(),
@@ -247,7 +251,7 @@ while @Reg_Actual	<= @Reg_Final begin
 	select @Dep_ProFal	= @Bit_No
 	if @Res_Ejecuc = @Can_Cero begin
 		--Si el proceso tiene Dependencias, verificar si se ejecutaron correctamente.
-		if exists (select *
+		if exists (select Dpf_ProFlu
 					from SODEPRFL noholdlock
 					inner join SOCONFLU noholdlock
 							on Cof_EjeFlu		= @Num_EjeFlu
@@ -257,7 +261,7 @@ while @Reg_Actual	<= @Reg_Final begin
 					  and Dpf_Activo	= @Bit_Si) begin
 			-- El proceso tiene Dependencias no ejecutadas
 			select	@Dep_ProFal	= @Bit_Si,
-					@Res_Ejecuc	= @Can_Uno,	-- El Resultado general de ejecucion se coloca diferente de cero (No Existoso)
+					@Res_Ejecuc	= @Can_Uno,	-- El Resultado general de ejecucion se coloca diferente de cero (No Exitoso)
 					@Men_Bitaco = 'ERROR por Dependencias no ejecutadas. Flujo [' + @Abr_Flujo + ' - ' + @Pro_Ejecut + '] - ' + @Men_Bitaco,
 					@Fec_HorEje	= getdate()
 		end
@@ -266,7 +270,7 @@ while @Reg_Actual	<= @Reg_Final begin
 	-- Si se detecto alguna situacion por la que no se va a ejecutar el Flujo, registrarlo en la Bitacora
 	if  @Res_Ejecuc = @Can_Uno begin
 		-- Registrar mensaje de error
-		execute SOBITFLUALT
+		execute	@Status	= SOBITFLUALT
 					@Bif_EjeFlu	= @Num_EjeFlu,	-- Ejecucion de Flujo
 					@Bif_ProFlu	= @Num_ProFlu,	-- Proceso
 					@Bif_EjeExi	= @Bit_No,		-- Ejecucion Exitosa
@@ -301,7 +305,7 @@ while @Reg_Actual	<= @Reg_Final begin
 				where Cof_EjeFlu	= @Num_EjeFlu
 				  and Cof_ProFlu	= @Num_ProFlu
 			-- Registrar Bitacora
-			execute SOBITFLUALT
+			execute	@Status	= SOBITFLUALT
 						@Bif_EjeFlu	= @Num_EjeFlu,	-- Ejecucion de Flujo
 						@Bif_ProFlu	= @Num_ProFlu,	-- Proceso
 						@Bif_EjeExi	= @Bit_Si,		-- Ejecucion Exitosa
@@ -319,10 +323,8 @@ while @Reg_Actual	<= @Reg_Final begin
 		-- Si el Proceso no es un Hito, Ejecutar el Procedimiento
 		if @Pre_Hito = @Bit_No begin
 		
-			select @Res_Ejecuc	= @Can_Uno	--De inicio no se puede saber si hay ejecucion exitosa
-			
 			-- Obtener los parametros del Proceso de Flujo
-			execute SOPAPREJPRO
+			execute	@Status	= SOPAPREJPRO
 						@Num_EjeFlu = @Num_EjeFlu,			-- Numero de Ejecucion de Flujo
 						@Num_ProFlu = @Num_ProFlu,			-- Numero de Proceso de Flujo
 						@Lis_Parame	= @Par_ProEje output,	-- Lista de Parametros
@@ -334,8 +336,10 @@ while @Reg_Actual	<= @Reg_Final begin
 						@SucDestino	= @SucDestino,
 						@Modulo		= @Modulo
 			
+			select @Status	= @Can_Uno	--De inicio no se puede saber si hay ejecucion exitosa
+			
 			--Ejecutar proceso Dinamicamente
-			select @Ins_Ejecut	= '@Res_Ejecuc = ' + @Pro_Ejecut
+			select @Ins_Ejecut	= '@Status = ' + @Pro_Ejecut
 			select @Ins_Ejecut	= @Ins_Ejecut + 
 									' @Num_EjeFlu 	= @Num_EjeFlu' +
 									' ,@Num_ProFlu 	= @Num_ProFlu' +
@@ -359,6 +363,7 @@ while @Reg_Actual	<= @Reg_Final begin
 						@Fec_HorEje	= getdate()
 			end
 			else begin	--Si el procedimiento respondio con error, registrar que el error fue dentro del proceso ejecutado
+				select	@Res_Ejecuc	= @Status
 				if @Res_Ejecuc <> @Can_Cero begin
 					select	@Men_Bitaco = 'ERROR dentro del proceso de [' + @Abr_Flujo + ' - ' + @Pro_Ejecut + ']: ' + @Men_Error,
 							@Fec_HorEje	= getdate()
@@ -366,13 +371,13 @@ while @Reg_Actual	<= @Reg_Final begin
 			end
 			
 			-- Si el proceso ejecutado dejo una transaccion pendiente, hacer rollback
-			if @@trancount > 0
+			if @@trancount > @Can_Cero
 				rollback
 			
 			-- Si hubo error de ejecucion, registrar en la Bitacora
 			if @Res_Ejecuc <> @Can_Cero begin
 				-- Registrar Bitacora
-				execute SOBITFLUALT
+				execute	@Status	= SOBITFLUALT
 							@Bif_EjeFlu	= @Num_EjeFlu,	-- Ejecucion de Flujo
 							@Bif_ProFlu	= @Num_ProFlu,	-- Proceso
 							@Bif_EjeExi	= @Bit_No,		-- Ejecucion Exitosa
@@ -406,7 +411,7 @@ while @Reg_Actual	<= @Reg_Final begin
 					  and Cof_ProFlu	= @Num_ProFlu
 		
 				-- Registrar Bitacora
-				execute SOBITFLUALT
+				execute	@Status	= SOBITFLUALT
 							@Bif_EjeFlu	= @Num_EjeFlu,	-- Ejecucion de Flujo
 							@Bif_ProFlu	= @Num_ProFlu,	-- Proceso
 							@Bif_EjeExi	= @Bit_Si,		-- Ejecucion Exitosa
@@ -430,7 +435,7 @@ while @Reg_Actual	<= @Reg_Final begin
 					@Fec_HorEje	= getdate()
 					
 			-- Registrar Bitacora
-			execute SOBITFLUALT
+			execute	@Status	= SOBITFLUALT
 						@Bif_EjeFlu	= @Num_EjeFlu,	-- Ejecucion de Flujo
 						@Bif_ProFlu	= @Can_Cero,	-- Proceso
 						@Bif_EjeExi	= @Bit_No,		-- Ejecucion Exitosa
