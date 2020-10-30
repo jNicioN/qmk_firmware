@@ -24,7 +24,14 @@ as
 ** Descripcion:	Reporte de Bitacora de Flujos											****
 ********************************************************************************************/
 
-select	Flu_Numero,	Flu_Nombre = isnull(Flu_Nombre,''), Bif_ProFlu, Prf_Nombre = isnull(Prf_Nombre, ''), Bif_EjeExi = case when Bif_EjeExi = 1 then 'Ejecucion Exitosa' else 'Ejecucion Fallida' end, 
+-- Declaracion de Constantes
+declare	@Ent_Uno	int			-- Entero: Uno
+
+-- Asignacion de Constantes
+select	@Ent_Uno	= 1			-- Entero: Uno
+
+
+select	Flu_Numero,	Flu_Nombre = isnull(Flu_Nombre,''), Bif_ProFlu, Prf_Nombre = isnull(Prf_Nombre, ''), Bif_EjeExi = case when Bif_EjeExi = @Ent_Uno then 'Ejecucion Exitosa' else 'Ejecucion Fallida' end, 
 		Bif_FecHor,	Bif_Mensaj
 	from SOBITFLU noholdlock
 	left join SOPROFLU noholdlock
