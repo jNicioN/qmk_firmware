@@ -38,7 +38,9 @@ select  @Can_Cero   = 0,		-- Cantidad: Cero
 select	@Res_EjePro	= @Can_Uno
 		
 update SOINEJPR
-	set Iep_ElePro	= @Iep_ElePro,
+	set Iep_EjeFlu	= @Iep_EjeFlu,
+		Iep_ProFlu	= @Iep_ProFlu,
+		Iep_ElePro	= @Iep_ElePro,
 		Iep_ElPrEx	= @Iep_ElPrEx, 
 		Iep_ElPrEr	= @Iep_ElPrEr,
 		NumTransac	= @NumTransac,
