@@ -1,0 +1,400 @@
+create procedure SOPERCLACON (
+	@Per_Numero	char(8),
+	@Per_Comple	varchar(181),
+	@Per_Tipo	char(1),
+	@Per_RFC	varchar(15),
+	@Per_ClaCom	int,
+	@Tip_Consul	char(2),
+
+	@NumTransac	char(10),
+	@Transaccio	char(3),
+	@Usuario	char(6),
+	@FechaSis	smalldatetime,
+	@SucOrigen	char(3),
+	@SucDestino	char(3),
+	@Modulo		char(2))
+
+as
+
+/*******************************************************************
+** DESCRIPCION:  ** Consulta de Personas y Clasificacion **		****
+********************************************************************
+** REFERENCIAS:													****
+********************************************************************
+** Creo:			Juan Sandoval								****
+** Fecha:			09/oct/2020									****
+** Help:			1431786 									****
+** Descripcion:		Creacion SP atomico base: SOPERSONCON		****
+********************************************************************/
+
+/* Declaracion de Variables */
+declare	@Tip_ConTip	char(1),
+		@Tip_ConCon	char(1),
+		@Busqueda	varchar(100),
+		@Suc_Numero	varchar(3)
+
+/* Declaracion de Constantes */
+declare	@Str_Vacio	char(1),
+		@Str_Porcen	char(1),
+		@Str_Coma	char(1),
+		@Str_Prospe	varchar(25),
+		@Sta_Si		char(1),
+		@Ent_Uno	int,
+		@Ent_Dos	int,
+		@Ent_Tres	int,
+		@Ent_Cinco	int,
+		@Ent_Ocho	int,
+		@Tip_Moral	char(1),
+		@Tip_Fisica	char(1),
+		@Str_Uno	char(1),
+		@Str_Tres	char(1),
+		@Per_RFCSH	varchar(15),
+		@Sin_Direcc varchar(50),
+		@Sta_Termin char(1),
+		@Str_Usuari varchar(10),
+		@Str_L		char(1),
+		@Str_CuaCer	char(4),
+		@Cla_Banreg	int,
+		@Cue_HeyBiz	char(2),
+		@Cue_CashBa	char(2)
+
+/* Asignacion de Constantes */
+select	@Str_Vacio	= '',			-- String Vacio
+		@Str_Porcen	= '%',			-- String Porcentaje
+		@Str_Coma	= ',',			-- String Coma
+		@Str_Prospe	= 'PROSPECTO',	-- String Prospecto
+		@Sta_Si		= 'S',			-- Status : Si
+		@Ent_Uno	= 1,			-- Entero : 1
+		@Ent_Dos	= 2,			-- Entero : 2
+		@Ent_Tres	= 3,			-- Entero : 3
+		@Ent_Cinco	= 5,			-- Entero : 5
+		@Ent_Ocho	= 8,			-- Entero : 8
+		@Tip_Moral	= '1',			-- Tipo de Persona Moral
+		@Tip_Fisica	= '2',			-- Tipo de Persona Fisica
+		@Str_Uno	= '1',
+		@Str_Tres	= '3',
+		@Sin_Direcc = 'Sin Direcci&oacuten',
+		@Sta_Termin	= 'T',			-- Status de Terminado
+		@Str_Usuari = 'USUARIO',		-- String Usuario
+		@Str_L		= 'L',
+		@Str_CuaCer	= '0000',		/* String: cuatro ceros */
+		@Cla_Banreg = 2,			/* Clasificacion: Banregio */
+		@Cue_HeyBiz = '47',			/* Tipo de Cuenta: Cashback */
+		@Cue_CashBa = '31'			/* Tipo de Cuenta: Cashback */
+		
+select	@Busqueda	= @Per_Comple
+select	@Tip_ConTip	= substring(@Tip_Consul, @Ent_Uno, @Ent_Uno),
+		@Tip_ConCon	= substring(@Tip_Consul, @Ent_Dos, @Ent_Uno)
+
+if @Tip_ConTip = @Str_L begin
+	select	@Per_Comple	= ltrim(rtrim(@Per_Comple)) + @Str_Porcen
+	
+	if @Tip_ConCon = @Str_Uno begin /* LA - busqueda de personas-apertura nueva cuenta-sibamex3 solo Adi_ApeSuc='S' */
+		select	@Suc_Numero = ltrim(rtrim(@Per_Numero))
+		if ISNUMERIC(@Busqueda) = @Ent_Uno begin--Busqueda por numero de cliente/persona 
+			if char_length(ltrim(rtrim(@Busqueda))) < @Ent_Ocho begin
+				select	Err_Codigo	= '000001',
+						Err_Mensaj	= 'El número de cliente debe ser de 8 digitos',
+						Err_Variab	= 'Per_Comple'
+				return @Ent_Uno
+			end
+			if char_length(ltrim(rtrim(@Busqueda))) > @Ent_Ocho begin
+				select	@Busqueda = substring(@Busqueda,@Ent_Uno,@Ent_Ocho)
+			end
+
+			select	Cli_Numero as Per_Numero,
+					Cli_Numero as Per_NumTra,
+					cast(@Ent_Uno as varchar) as Per_Titulo,
+					Cli_ComOrd as Per_ComOrd,
+					space(@Ent_Tres) as Per_Nacion,
+					Cli_RFC as Per_RFC,
+					rtrim(ltrim(Cli_Calle)) + @Str_Coma + space(@Ent_Uno) + Cli_CalNum + @Str_Coma + space(@Ent_Uno) + Cli_Coloni + @Str_Coma + space(@Ent_Uno) +
+					Loc_Nombre + @Str_Coma + space(@Ent_Uno) + Ent_Nombre as Per_Calle,
+					case when Cli_Tipo = @Tip_Fisica and Cli_ActEmp = @Sta_Si then
+						@Str_Tres
+					else
+						Cli_Tipo
+					end as Per_Tipo,
+					case when Cli_Tipo = @Tip_Moral then
+						isnull(Con_NomSoc, @Str_Vacio)
+					else
+						Cli_Nombre
+					end as Per_Nombre,
+					isnull(Cli_ApePat, @Str_Vacio) as Per_ApePat,
+					isnull(Cli_ApeMat, @Str_Vacio) as Per_ApeMat,
+					isnull(Con_TipSoc, @Str_Vacio) as Per_RazSoc,
+					case when Cli_Tipo = @Tip_Moral then
+						isnull(con.Con_FeEsCl, cla.Adi_FecNac)
+					else
+						cla.Adi_FecNac
+					end as Adi_FecNac,
+					con.Con_TipIde as Adi_TipIde,
+
+					con.Con_NumIde as Adi_NumIde,
+					cla.Adi_NumPer as Per_NumPer,
+					Cli_CURP as Per_CURP,
+					@Str_Vacio as Cli_HeyBiz,
+					@Str_Vacio as Cli_Banreg
+					into #ClientesPorNumeroCliente
+			from CLCLIENT clc noholdlock
+					left join CLADICIO cla noholdlock on Cli_Numero = Adi_Client
+					left join CLCONTRA con noholdlock on Cli_Numero =  Con_Client
+					left join CLLOCALI noholdlock on Cli_Locali = Loc_Numero
+					left join CLENTIDA noholdlock on Cli_Entida = Ent_Numero
+			where	Cli_Numero = @Busqueda and Cli_SucAti = isnull(@Suc_Numero,Cli_SucAti)
+			
+			update #ClientesPorNumeroCliente set 
+				Cli_HeyBiz = @Sta_Si
+			from #ClientesPorNumeroCliente
+			inner join CHCUENTA noholdlock on Per_Numero = Cue_Client 
+			where	Cue_Tipo in  (@Cue_HeyBiz)
+
+			update #ClientesPorNumeroCliente set 
+				Cli_Banreg = @Sta_Si
+			from #ClientesPorNumeroCliente
+			inner join CHCUENTA noholdlock on Per_Numero = Cue_Client
+			inner join SOPRTICU noholdlock on Cue_Tipo =  right(@Str_CuaCer + convert(varchar, Ptc_TipCue ),2)
+			inner join SOCLAPRO noholdlock on Ptc_Produc  =  Clp_Produc 
+			where	Clp_Clasif  = @Cla_Banreg
+			  and	Cue_Tipo not in  (@Cue_CashBa)
+			
+			delete from #ClientesPorNumeroCliente
+			where	Cli_HeyBiz = @Str_Vacio 
+			  and	Cli_Banreg = @Str_Vacio
+			
+			--Obtener las personas por el numero
+			select	Per_Comple, Per_RFC,  Per_Nacion ,	max(FechaSis) FechaSis
+				into #PersonasPorNumeroPersona
+				from SOPERSON noholdlock
+				where	Per_Numero	= @Busqueda
+				group by Per_Comple,	Per_RFC
+
+			select	spe.Per_Numero,	Per_ComOrd,	spe.Per_RFC, 					
+					(CASE when (Per_Calle <> @Str_Vacio and  Per_CalNum <> @Str_Vacio and Per_Coloni <> @Str_Vacio) THEN 
+					rtrim(ltrim(Per_Calle)) + @Str_Coma + space(@Ent_Uno) + Per_CalNum 
+					+ @Str_Coma + space(@Ent_Uno) + Per_Coloni + @Str_Coma + space(@Ent_Uno) +
+					Loc_Nombre + @Str_Coma + space(@Ent_Uno) + Ent_Nombre ELSE @Sin_Direcc END) as Per_Calle,
+					
+					Per_Coloni,		Per_Locali,	Per_Entida,	Per_Tipo,	Per_ActEmp,
+					Per_Nombre,		Per_ApePat,	Per_ApeMat,	Adi_FecNac,	Adi_TipIde,
+					Adi_NumIde,		@Str_Vacio as Clp_TipSoc, @Str_Vacio as Clp_NomSoc,  per.Per_Nacion,
+					Per_CURP
+				into #PersonaPorNumeroPersona
+				from #PersonasPorNumeroPersona per
+					inner join SOPERSON spe noholdlock on per.Per_Comple = spe.Per_Comple and per.Per_RFC = spe.Per_RFC and per.FechaSis = spe.FechaSis
+					inner join SOPERADI spa noholdlock on spe.Per_Numero = Adi_PerNum					
+					left join CLLOCALI noholdlock on Per_Locali = Loc_Numero
+					left join CLENTIDA noholdlock on Per_Entida = Ent_Numero
+					
+				select Per_Numero,	Per_ComOrd,	Per_RFC, Per_Calle ,					
+					Per_Coloni,		Per_Locali,	Per_Entida,	Per_Tipo,	Per_ActEmp,
+					Per_Nombre,		Per_ApePat,	Per_ApeMat,	Adi_FecNac,	Adi_TipIde,
+					Adi_NumIde,		Clp_TipSoc,  Clp_NomSoc,  Per_Nacion,
+					DaP_CoVeDi,		Per_CURP
+				into #PersonaNumeroPersona
+				from #PersonaPorNumeroPersona
+					left join SOPEDACO noholdlock on DaP_Person = Per_Numero
+
+			--Agrupar Clientes y Personas por numero 			
+			select	Per_Numero, Per_NumTra, Per_Titulo, Per_ComOrd, Per_RFC, 
+					Per_Calle, Per_Tipo, Per_Nombre, Per_ApePat, Per_ApeMat, 
+					Per_RazSoc, Adi_FecNac, Adi_TipIde, Adi_NumIde, Per_Nacion,
+					Per_NumPer, Per_CURP
+			  from  #ClientesPorNumeroCliente
+			union all
+			select distinct Per_Numero, case when DaP_CoVeDi=@Sta_Termin then @Str_Usuari else @Str_Prospe 	end as Per_NumTra, 
+					@Tip_Fisica as Per_Titulo, 
+					Per_ComOrd, Per_RFC, Per_Calle, Per_Tipo, Per_Nombre, 
+					Per_ApePat, Per_ApeMat, @Str_Vacio as Per_RazSoc, Adi_FecNac, 
+					Adi_TipIde, Adi_NumIde, Per_Nacion, Per_Numero as Per_NumPer, Per_CURP
+			  from  #PersonaNumeroPersona
+				
+					
+			drop table #PersonasPorNumeroPersona
+			drop table #PersonaPorNumeroPersona
+			drop table #ClientesPorNumeroCliente
+			drop table #PersonaNumeroPersona
+			
+		end else begin-- Busqueda por nombre cliente/persona
+			if char_length(ltrim(rtrim(@Per_Comple))) < @Ent_Cinco begin
+				select	Err_Codigo	= '000001',
+						Err_Mensaj	= 'Se requieren mínimo 4 letras para obtener resultados',
+						Err_Variab	= 'Per_Comple'
+				return 1
+			end
+			
+			--Se busca al cliente por el nombre
+			select	Cli_Numero,	Cli_ComOrd,	Cli_RFC,	Cli_Calle,	Cli_CalNum,
+					Cli_Coloni,	Cli_Locali,	Cli_Entida,	Cli_Tipo,	Cli_ActEmp,
+					Cli_Nombre,	Cli_ApePat,	Cli_ApeMat,	Adi_FecNac,	Con_NomSoc,
+					Con_TipSoc,	Con_FeEsCl,	Con_TipIde,	Con_NumIde, Adi_NumPer as Per_NumPer,
+					Cli_CURP,	
+					@Str_Vacio as Cli_HeyBiz, 
+					@Str_Vacio as Cli_Banreg
+				into #ClientesAperturaSucursal
+				from CLCLIENT clc noholdlock
+					left join CLADICIO cla noholdlock on Cli_Numero = Adi_Client
+					left join CLCONTRA con noholdlock on Cli_Numero =  Con_Client
+				where	Cli_SucAti = isnull(@Suc_Numero,Cli_SucAti) and Cli_Comple	like @Per_Comple
+			
+			update #ClientesAperturaSucursal set 
+				Cli_HeyBiz = @Sta_Si
+			from #ClientesAperturaSucursal
+			inner join CHCUENTA noholdlock on Cli_Numero = Cue_Client
+			where	Cue_Tipo in  (@Cue_HeyBiz)
+
+			update #ClientesAperturaSucursal set 
+				Cli_Banreg = @Sta_Si
+			from #ClientesAperturaSucursal
+			inner join CHCUENTA noholdlock on Cli_Numero = Cue_Client
+			inner join SOPRTICU noholdlock on Cue_Tipo =  right(@Str_CuaCer + convert(varchar, Ptc_TipCue ),2)
+			inner join SOCLAPRO noholdlock on Ptc_Produc  =  Clp_Produc 
+			where	Clp_Clasif  = @Cla_Banreg
+			  and	Cue_Tipo not in  (@Cue_CashBa)
+			
+			delete from #ClientesAperturaSucursal
+			where	Cli_HeyBiz = @Str_Vacio 
+			  and	Cli_Banreg = @Str_Vacio
+
+			select	Cli_Numero as Per_Numero,
+					Cli_Numero + space(@Ent_Uno) as Per_NumTra,
+					cast(@Ent_Uno as varchar) as Per_Titulo,
+					Cli_ComOrd as Per_ComOrd,
+					space(@Ent_Tres) as Per_Nacion, 
+					Cli_RFC as Per_RFC,
+
+					(CASE when (Cli_Calle <> @Str_Vacio and  Cli_CalNum <> @Str_Vacio and Cli_Coloni <> @Str_Vacio) THEN 
+					rtrim(ltrim(Cli_Calle)) + @Str_Coma + space(@Ent_Uno) + Cli_CalNum + @Str_Coma + space(@Ent_Uno) + Cli_Coloni + @Str_Coma + space(@Ent_Uno) +
+					Loc_Nombre + @Str_Coma + space(@Ent_Uno) + Ent_Nombre ELSE @Sin_Direcc END) as Per_Calle ,
+					case when Cli_Tipo = @Tip_Fisica and Cli_ActEmp = @Sta_Si then
+						@Str_Tres
+					else
+						Cli_Tipo
+					end as Per_Tipo,
+					case when Cli_Tipo = @Tip_Moral then
+						isnull(Con_NomSoc, @Str_Vacio)
+					else
+						Cli_Nombre
+					end as Per_Nombre,
+					isnull(Cli_ApePat, @Str_Vacio) as Per_ApePat,
+					isnull(Cli_ApeMat, @Str_Vacio) as Per_ApeMat,
+					isnull(Con_TipSoc, @Str_Vacio) as Per_RazSoc,
+					case when Cli_Tipo = @Tip_Moral then
+						isnull(Con_FeEsCl, Adi_FecNac)
+					else
+						Adi_FecNac
+					end as Adi_FecNac,
+					Con_TipIde as Adi_TipIde,
+					Con_NumIde as Adi_NumIde,
+					cli.Per_NumPer,
+					cli.Cli_CURP as Per_CURP
+				into #ClientesProspectosApertura
+				from #ClientesAperturaSucursal cli
+					inner join CLLOCALI noholdlock on Cli_Locali = Loc_Numero
+					inner join CLENTIDA noholdlock on Cli_Entida = Ent_Numero
+					
+					
+					
+					--Se busca se a la persona por el nombre
+			select	Per_Comple, Per_RFC,  Per_Nacion ,	max(FechaSis) FechaSis
+				into #PersonasRecientesApertura
+				from SOPERSON noholdlock
+				where	Per_Comple	like @Per_Comple
+				group by Per_Comple,	Per_RFC
+
+			select	spe.Per_Numero,	Per_ComOrd,	spe.Per_RFC,	Per_Calle,	Per_CalNum,
+					Per_Coloni,		Per_Locali,	Per_Entida,	Per_Tipo,	Per_ActEmp,
+					Per_Nombre,		Per_ApePat,	Per_ApeMat,	Adi_FecNac,	Adi_TipIde,
+					Adi_NumIde,		Clp_TipSoc, Clp_NomSoc,  per.Per_Nacion, Per_CURP 
+				into #PersonaAperturaSucursal
+				from #PersonasRecientesApertura per
+					inner join SOPERSON spe noholdlock on per.Per_Comple = spe.Per_Comple and per.Per_RFC = spe.Per_RFC and per.FechaSis = spe.FechaSis
+					inner join SOPERADI spa noholdlock on spe.Per_Numero = Adi_PerNum
+					left join SOCLCAPE cla noholdlock on spe.Per_Numero =  Clp_NumPer
+			
+			--Se inserta al prospecto
+			insert into #ClientesProspectosApertura
+			select	Per_Numero,
+					@Str_Prospe as Per_NumTra,
+					@Tip_Fisica as Per_Titulo,
+					Per_ComOrd,					
+					Per_Nacion,
+					Per_RFC,
+					
+					(CASE when (Per_Calle <> @Str_Vacio and  Per_CalNum <> @Str_Vacio and Per_Coloni <> @Str_Vacio) THEN 
+					rtrim(ltrim(Per_Calle)) + @Str_Coma + space(@Ent_Uno) + Per_CalNum + @Str_Coma + space(@Ent_Uno) + Per_Coloni + @Str_Coma + space(@Ent_Uno) +
+					Loc_Nombre + @Str_Coma + space(@Ent_Uno) + Ent_Nombre  ELSE @Sin_Direcc END) as Per_Calle ,
+					case when Per_Tipo = @Tip_Fisica and Per_ActEmp = @Sta_Si then
+						@Str_Tres
+					else
+						Per_Tipo
+					end as Per_Tipo,
+					case when Per_Tipo = @Tip_Moral then
+						isnull(Clp_NomSoc, @Str_Vacio)
+					else
+						Per_Nombre
+					end as Per_Nombre,
+					Per_ApePat,
+					Per_ApeMat,
+					isnull(Clp_TipSoc, @Str_Vacio) as Per_RazSoc,
+					Adi_FecNac,
+					Adi_TipIde,
+					Adi_NumIde,
+					Per_Numero as Per_NumPer,
+					Per_CURP
+				from #PersonaAperturaSucursal
+					left join CLLOCALI noholdlock on Per_Locali = Loc_Numero
+					left join CLENTIDA noholdlock on Per_Entida = Ent_Numero
+					
+					
+					--se inserta al usuario de compra venta si existe
+		insert into #ClientesProspectosApertura
+			select	Per_Numero,
+					@Str_Usuari as Per_NumTra,
+					@Tip_Fisica as Per_Titulo,
+					Per_ComOrd,					
+					Per_Nacion,
+					Per_RFC,
+					
+					(CASE when (Per_Calle <> @Str_Vacio and  Per_CalNum <> @Str_Vacio and Per_Coloni <> @Str_Vacio) THEN 
+					rtrim(ltrim(Per_Calle)) + @Str_Coma + space(@Ent_Uno) + Per_CalNum + @Str_Coma + space(@Ent_Uno) + Per_Coloni + @Str_Coma + space(@Ent_Uno) +
+					Loc_Nombre + @Str_Coma + space(@Ent_Uno) + Ent_Nombre  ELSE @Sin_Direcc END) as Per_Calle ,
+					case when Per_Tipo = @Tip_Fisica and Per_ActEmp = @Sta_Si then
+						@Str_Tres
+					else
+						Per_Tipo
+					end as Per_Tipo,
+					case when Per_Tipo = @Tip_Moral then
+						isnull(Clp_NomSoc, @Str_Vacio)
+					else
+						Per_Nombre
+					end as Per_Nombre,
+					Per_ApePat,
+					Per_ApeMat,
+					isnull(Clp_TipSoc, @Str_Vacio) as Per_RazSoc,
+					Adi_FecNac,
+					Adi_TipIde,
+					Adi_NumIde,
+					Per_Numero as Per_NumPer,
+					Per_CURP
+				from #PersonaAperturaSucursal
+					left join CLLOCALI noholdlock on Per_Locali = Loc_Numero
+					left join CLENTIDA noholdlock on Per_Entida = Ent_Numero
+					left join SOPEDACO noholdlock on DaP_Person = Per_Numero
+					    where DaP_CoVeDi in (@Sta_Termin)
+			
+			select	distinct
+					Per_Numero,	Per_NumTra,	Per_Titulo,	Per_ComOrd,	Per_RFC,
+					Per_Calle,	Per_Tipo,	Per_Nombre,	Per_ApePat,	Per_ApeMat,
+					Per_RazSoc,	Adi_FecNac,	Adi_TipIde,	Adi_NumIde, Per_Nacion, 
+					Per_NumPer, Per_CURP
+				from #ClientesProspectosApertura
+				
+			drop table #ClientesProspectosApertura
+			drop table #ClientesAperturaSucursal
+			drop table #PersonaAperturaSucursal
+			drop table #PersonasRecientesApertura
+		end
+		
+	end
+end
