@@ -1584,7 +1584,7 @@ end else begin
 					inner join SOPERADI spa noholdlock on spe.Per_Numero = Adi_PerNum					
 					left join CLLOCALI noholdlock on Per_Locali = Loc_Numero
 					left join CLENTIDA noholdlock on Per_Entida = Ent_Numero
-
+					
 			--Agrupar Clientes y Personas por numero 			
 			select	Per_Numero, Per_NumTra, Per_Titulo, Per_ComOrd, Per_RFC, 
 					Per_Calle, Per_Tipo, Per_Nombre, Per_ApePat, Per_ApeMat, 
@@ -1592,8 +1592,7 @@ end else begin
 					Per_NumPer, Per_CURP
 			  from  #ClientesPorNumeroCliente
 			union all
-			select distinct Per_Numero, 
-					@Str_Prospe as Per_NumTra, 
+			select distinct Per_Numero, @Str_Prospe as Per_NumTra, 
 					@Tip_Fisica as Per_Titulo, 
 					Per_ComOrd, Per_RFC, Per_Calle, Per_Tipo, Per_Nombre, 
 					Per_ApePat, Per_ApeMat, @Str_Vacio as Per_RazSoc, Adi_FecNac, 
@@ -1604,7 +1603,6 @@ end else begin
 			drop table #PersonasPorNumeroPersona
 			drop table #PersonaPorNumeroPersona
 			drop table #ClientesPorNumeroCliente
-			drop table #PersonaNumeroPersona
 			
 		end else begin-- Busqueda por nombre cliente/persona
 			if char_length(ltrim(rtrim(@Per_Comple))) < @Ent_Cinco begin
@@ -1736,7 +1734,7 @@ end else begin
 				from #PersonaAperturaSucursal
 					left join CLLOCALI noholdlock on Per_Locali = Loc_Numero
 					left join CLENTIDA noholdlock on Per_Entida = Ent_Numero
-					
+			
 			select	distinct
 					Per_Numero,	Per_NumTra,	Per_Titulo,	Per_ComOrd,	Per_RFC,
 					Per_Calle,	Per_Tipo,	Per_Nombre,	Per_ApePat,	Per_ApeMat,
