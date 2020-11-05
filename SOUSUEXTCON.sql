@@ -73,7 +73,7 @@ select @Ent_Identi = @Use_IdUsEx /* idUsEx que se recibe es el identiti de la ta
 
 /* se obtiene el id de la tabla de extranjero con el que se hace la consulta */
 select @Use_IdUsEx = Une_IdeUsu 
-from SOUSNAEX inner join SOUSUEXT on Une_IdeUsu = Use_IdUsEx 
+from SOUSNAEX noholdlock inner join SOUSUEXT noholdlock on Une_IdeUsu = Use_IdUsEx 
 where Une_Identi = @Use_IdUsEx
 	
 if @Tip_ConTip = 'C' begin
