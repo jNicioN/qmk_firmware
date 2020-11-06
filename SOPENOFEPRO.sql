@@ -106,7 +106,7 @@ end
 if 	@Per_ID <> @Str_Vacio and @Per_ID is not null begin
 	
 	select	Err_Codigo	= '000000',
-			Err_Mensaj = 'Ya existe un Cliente/Usuario con el nombre ' + ltrim(rtrim(@Str_Comple)),
+			Err_Mensaj = 'Ya existe un Cliente/Usuario con el nombre ' + @Per_Nombre + ' ' + @Per_ApePat + ' ' + @Per_ApeMat,
 			Per_Numero	= ltrim(rtrim(@Per_ID)),
 			Tab_Ori = @Tab_Ori,
 			rfc = ltrim(rtrim(@Per_RFC))
