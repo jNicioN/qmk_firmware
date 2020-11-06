@@ -210,7 +210,7 @@ end	else begin
 					if @Use_LuNaUs is not null 
 						and charindex(',',  @Use_LuNaUs ) > 0 begin
 					
-						select Loc_Numero 
+						select @Use_LuNaUs= Loc_Numero 
 						from CLLOCALI noholdlock 
 						where Loc_Status = @Sta_Activo 
 						and Loc_Nombre = substring(@Use_LuNaUs, 1, charindex(',',  @Use_LuNaUs ) - 1)
@@ -271,7 +271,7 @@ end	else begin
 					if @Use_LuNaUs is not null 
 						and charindex(',',  @Use_LuNaUs ) > 0 begin
 					
-						select Loc_Numero 
+						select @Use_LuNaUs = Loc_Numero 
 						from CLLOCALI noholdlock 
 						where Loc_Status = @Sta_Activo 
 						and Loc_Nombre = substring(@Use_LuNaUs, 1, charindex(',',  @Use_LuNaUs ) - 1)
