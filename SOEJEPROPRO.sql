@@ -29,25 +29,33 @@ declare	@Status		int,			-- Status de ejecucion de procedimientos
 		@Par_EntUno	int				-- Parametro de Tipo Entero Uno
 
 --Constantes
-declare	@Ent_Uno	tinyint,	-- Cantidad: Uno
-		@Ent_Cero	tinyint,	-- Cantidad: Cero
-		@Bit_Si		bit,		-- Bit: Si
-		@Bit_No		bit,		-- Bit: No
-		@Par_TipEje	varchar(20)	-- Parametro: Tip_Ejecuc
+declare	@Ent_Uno	tinyint,		-- Cantidad: Uno
+		@Ent_Cero	tinyint,		-- Cantidad: Cero
+		@Bit_Si		bit,			-- Bit: Si
+		@Bit_No		bit,			-- Bit: No
+		@Par_TipEje	varchar(20),	-- Parametro: Tip_Ejecuc
+		@Pro_BlDeLi	varchar(11),	-- Procedimiento de Bloqueo y Desbloqueo de Lineas y Tarjetas. TATMPBLOMAE.
+		@Pro_LiPeLi	varchar(11),	-- Procedimiento de Aplicacion de limites personal de lineas de crédito. TATMPLIMMAE.
+		@Pro_InDeLi	varchar(11),	-- Procedimiento de incremento y decremento de lineas de credito. TATMPMIDMAE.
+		@Pro_CanLin	varchar(11)		-- Procedimiento de Aplicacion de Cancelacion de lineas. TATMPSUSMAE.
 
-select  @Ent_Uno	= 1,			-- Cantidad: Uno
-		@Ent_Cero	= 0,			-- Cantidad: Cero
-		@Bit_Si		= 1,			-- Bit: Si
-		@Bit_No		= 0,			-- Bit: No
-		@Par_TipEje	= 'Tip_Ejecuc'	-- Parametro: Tip_Ejecuc
+select  @Ent_Uno	= 1,				-- Cantidad: Uno
+		@Ent_Cero	= 0,				-- Cantidad: Cero
+		@Bit_Si		= 1,				-- Bit: Si
+		@Bit_No		= 0,				-- Bit: No
+		@Par_TipEje	= 'Tip_Ejecuc',		-- Parametro: Tip_Ejecuc
+		@Pro_BlDeLi	= 'TATMPBLOMAE',	-- Procedimiento de Bloqueo y Desbloqueo de Lineas y Tarjetas. TATMPBLOMAE.
+		@Pro_LiPeLi	= 'TATMPLIMMAE',	-- Procedimiento de Aplicacion de limites personal de lineas de crédito. TATMPLIMMAE.
+		@Pro_InDeLi	= 'TATMPMIDMAE',	-- Procedimiento de incremento y decremento de lineas de credito. TATMPMIDMAE.
+		@Pro_CanLin	= 'TATMPSUSMAE'		-- Procedimiento de Aplicacion de Cancelacion de lineas. TATMPSUSMAE.
 --
 select	@Pro_ExiEje	= @Bit_No
 
 select	@Stp_Proced	= Prf_Proced
-	from SOPROFLU
+	from SOPROFLU noholdlock
 	where Prf_Numero	= @Num_ProFlu
 
-if @Stp_Proced	= 'TATMPLIMMAE' begin
+if @Stp_Proced	= @Pro_LiPeLi begin
 
 	select @Par_EntUno	= convert(int, isnull(Ppe_Valor, Ppf_Valor))
 	from SOPAPRFL noholdlock
@@ -94,7 +102,7 @@ if @Stp_Proced	= 'TATMPLIMMAE' begin
 	end
 
 	select	@Pro_ExiEje	= @Bit_Si
-end else if @Stp_Proced	= 'TATMPMIDMAE' begin
+end else if @Stp_Proced	= @Pro_InDeLi begin
 
 	select @Par_EntUno	= convert(int, isnull(Ppe_Valor, Ppf_Valor))
 	from SOPAPRFL noholdlock
@@ -141,7 +149,7 @@ end else if @Stp_Proced	= 'TATMPMIDMAE' begin
 	end
 
 	select	@Pro_ExiEje	= @Bit_Si
-end else if @Stp_Proced	= 'TATMPSUSMAE' begin
+end else if @Stp_Proced	= @Pro_CanLin begin
 
 	select @Par_EntUno	= convert(int, isnull(Ppe_Valor, Ppf_Valor))
 	from SOPAPRFL noholdlock
@@ -188,7 +196,7 @@ end else if @Stp_Proced	= 'TATMPSUSMAE' begin
 	end
 
 	select	@Pro_ExiEje	= @Bit_Si
-end else if @Stp_Proced	= 'TATMPBLOMAE' begin
+end else if @Stp_Proced	= @Pro_BlDeLi begin
 
 	select @Par_EntUno	= convert(int, isnull(Ppe_Valor, Ppf_Valor))
 	from SOPAPRFL noholdlock

@@ -47,7 +47,6 @@ declare @Num_ProFlu	int,			-- Proceso de Flujo
 		@Pro_Ejecut	varchar(50),	-- Proceso a ejecutar
 		@Par_ProEje	varchar(200),	-- Parametros de Proceso de Flujo
 		@Men_Error 	varchar(200),	-- Mensaje de Error
-		@Ins_Ejecut	varchar(1000),	-- Instruccion a Ejecutar
 		@Status		int,			-- Resultado de Ejecucion de Procedimientos
 		@Res_Ejecuc	int,			-- Resultado de Ejecucion
 		@Res_EjePro int,			-- Resultado de Ejecucion (Sybase)
