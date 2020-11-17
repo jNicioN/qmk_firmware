@@ -336,24 +336,20 @@ while @Reg_Actual	<= @Reg_Final begin
 						@SucDestino	= @SucDestino,
 						@Modulo		= @Modulo
 			
-			select @Status	= @Can_Uno	--De inicio no se puede saber si hay ejecucion exitosa
-			
-			--Ejecutar proceso Dinamicamente
-			select @Ins_Ejecut	= '@Status = ' + @Pro_Ejecut
-			select @Ins_Ejecut	= @Ins_Ejecut + 
-									' @Num_EjeFlu 	= @Num_EjeFlu' +
-									' ,@Num_ProFlu 	= @Num_ProFlu' +
-									@Par_ProEje +
-									' ,@NumTransac 	= @NumTransac' +	
-									' ,@Transaccio	= @Transaccio' +
-									' ,@Usuario		= @Usuario' +
-									' ,@FechaSis	= @FechaSis' +
-									' ,@SucOrigen	= @SucOrigen' +
-									' ,@SucDestino	= @SucDestino' +
-									' ,@Modulo		= @Modulo'
-			
-			 execute(@Ins_Ejecut)
-			
+			select	@Status		= @Can_Uno,	--De inicio no se puede saber si hay ejecucion exitosa
+					@Men_Error	= @Men_Vacio
+			 
+			execute	@Status = SOEJEPROPRO
+				@Num_EjeFlu = @Num_EjeFlu,			-- Numero de Ejecucion de Flujo
+				@Num_ProFlu = @Num_ProFlu,			-- Numero de Proceso de Flujo
+				@Men_Error	= @Men_Error output,	-- Mensaje de Error
+				@NumTransac	= @NumTransac,	
+				@Transaccio	= @Transaccio,
+				@Usuario	= @Usuario,
+				@FechaSis	= @FechaSis,
+				@SucOrigen	= @SucOrigen,
+				@SucDestino	= @SucDestino,
+				@Modulo		= @Modulo
 			
 			--Si se detecta un error de ejecucion del procedimiento, reporta el Codigo de error.
 			select @Res_EjePro = @@error
