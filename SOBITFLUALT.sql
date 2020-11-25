@@ -1,3 +1,5 @@
+
+
 create procedure SOBITFLUALT (
 	@Bif_EjeFlu	int,			-- Ejecucion de Flujo
 	@Bif_ProFlu	int,			-- Proceso
