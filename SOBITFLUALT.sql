@@ -1,3 +1,5 @@
+
+
 create procedure SOBITFLUALT (
 	@Bif_Flujo	int,			-- Flujo
 	@Bif_Fecha	smalldatetime,	-- Fecha
