@@ -1,11 +1,3 @@
-use BANREGIO
-go
-if exists(select 1
-		from sysobjects
-		where id=object_id('dbo.SOUSUEXTCON')
-		and type='P')
-	drop procedure dbo.SOUSUEXTCON
-go
 create procedure SOUSUEXTCON (
 	@Use_IdUsEx	int,
 	@Use_NoCoUs	varchar(150),
@@ -335,10 +327,3 @@ end	else begin
 	end
 	drop table #UsuarioCompVentDola 
 end
-
-
-
-
-go
-grant exec on dbo.SOUSUEXTCON to public
-go

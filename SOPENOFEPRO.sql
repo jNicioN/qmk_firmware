@@ -1,11 +1,3 @@
-use BANREGIO
-go
-if exists(select 1
-		from sysobjects
-		where id=object_id('dbo.SOPENOFEPRO')
-		and type='P')
-	drop procedure dbo.SOPENOFEPRO
-go
 create procedure SOPENOFEPRO (
 	@Per_Nombre	varchar(40),
 	@Per_ApePat	varchar(40),
@@ -167,7 +159,4 @@ end else begin
 			Err_Mensaj = 'No se encuentra la persona'
 	return @Ent_Uno
 end 
-		
-go
-grant exec on dbo.SOPENOFEPRO to public
-go
+
