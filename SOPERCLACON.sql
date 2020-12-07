@@ -21,6 +21,11 @@ as
 ********************************************************************
 ** REFERENCIAS:													****
 ********************************************************************
+** Creo:			Adriana Gomez								****
+** Fecha:			28/nov/2020									****
+** Help:			1376175 									****
+** Descripcion:		se quita busqueda viejita de usuarios de CV	****
+********************************************************************
 ** Creo:			Juan Sandoval								****
 ** Fecha:			09/oct/2020									****
 ** Help:			1431786 									****
@@ -133,8 +138,7 @@ if @Tip_ConTip = @Str_L begin
 					con.Con_NumIde as Adi_NumIde,
 					cla.Adi_NumPer as Per_NumPer,
 					Cli_CURP as Per_CURP,
-					@Str_Vacio as Cli_HeyBiz,
-					@Str_Vacio as Cli_Banreg
+					@Str_Vacio as Cli_TieCla
 					into #ClientesPorNumeroCliente
 			from CLCLIENT clc noholdlock
 					left join CLADICIO cla noholdlock on Cli_Numero = Adi_Client
@@ -144,23 +148,16 @@ if @Tip_ConTip = @Str_L begin
 			where	Cli_Numero = @Busqueda and Cli_SucAti = isnull(@Suc_Numero,Cli_SucAti)
 			
 			update #ClientesPorNumeroCliente set 
-				Cli_HeyBiz = @Sta_Si
-			from #ClientesPorNumeroCliente
-			inner join CHCUENTA noholdlock on Per_Numero = Cue_Client 
-			where	Cue_Tipo in  (@Cue_HeyBiz)
-
-			update #ClientesPorNumeroCliente set 
-				Cli_Banreg = @Sta_Si
+				Cli_TieCla = @Sta_Si
 			from #ClientesPorNumeroCliente
 			inner join CHCUENTA noholdlock on Per_Numero = Cue_Client
 			inner join SOPRTICU noholdlock on Cue_Tipo =  right(@Str_CuaCer + convert(varchar, Ptc_TipCue ),2)
 			inner join SOCLAPRO noholdlock on Ptc_Produc  =  Clp_Produc 
-			where	Clp_Clasif  = @Cla_Banreg
+			where	Clp_Clasif  = @Per_ClaCom
 			  and	Cue_Tipo not in  (@Cue_CashBa)
 			
 			delete from #ClientesPorNumeroCliente
-			where	Cli_HeyBiz = @Str_Vacio 
-			  and	Cli_Banreg = @Str_Vacio
+			where	Cli_TieCla = @Str_Vacio
 			
 			--Obtener las personas por el numero
 			select	Per_Comple, Per_RFC,  Per_Nacion ,	max(FechaSis) FechaSis
@@ -190,10 +187,9 @@ if @Tip_ConTip = @Str_L begin
 					Per_Coloni,		Per_Locali,	Per_Entida,	Per_Tipo,	Per_ActEmp,
 					Per_Nombre,		Per_ApePat,	Per_ApeMat,	Adi_FecNac,	Adi_TipIde,
 					Adi_NumIde,		Clp_TipSoc,  Clp_NomSoc,  Per_Nacion,
-					DaP_CoVeDi,		Per_CURP
+					'' as DaP_CoVeDi,		Per_CURP
 				into #PersonaNumeroPersona
 				from #PersonaPorNumeroPersona
-					left join SOPEDACO noholdlock on DaP_Person = Per_Numero
 
 			--Agrupar Clientes y Personas por numero 			
 			select	Per_Numero, Per_NumTra, Per_Titulo, Per_ComOrd, Per_RFC, 
@@ -202,7 +198,7 @@ if @Tip_ConTip = @Str_L begin
 					Per_NumPer, Per_CURP
 			  from  #ClientesPorNumeroCliente
 			union all
-			select distinct Per_Numero, case when DaP_CoVeDi=@Sta_Termin then @Str_Usuari else @Str_Prospe 	end as Per_NumTra, 
+			select distinct Per_Numero, @Str_Prospe as Per_NumTra, 
 					@Tip_Fisica as Per_Titulo, 
 					Per_ComOrd, Per_RFC, Per_Calle, Per_Tipo, Per_Nombre, 
 					Per_ApePat, Per_ApeMat, @Str_Vacio as Per_RazSoc, Adi_FecNac, 
@@ -229,32 +225,24 @@ if @Tip_ConTip = @Str_L begin
 					Cli_Nombre,	Cli_ApePat,	Cli_ApeMat,	Adi_FecNac,	Con_NomSoc,
 					Con_TipSoc,	Con_FeEsCl,	Con_TipIde,	Con_NumIde, Adi_NumPer as Per_NumPer,
 					Cli_CURP,	
-					@Str_Vacio as Cli_HeyBiz, 
-					@Str_Vacio as Cli_Banreg
+					@Str_Vacio as Cli_TieCla
 				into #ClientesAperturaSucursal
 				from CLCLIENT clc noholdlock
 					left join CLADICIO cla noholdlock on Cli_Numero = Adi_Client
 					left join CLCONTRA con noholdlock on Cli_Numero =  Con_Client
 				where	Cli_SucAti = isnull(@Suc_Numero,Cli_SucAti) and Cli_Comple	like @Per_Comple
-			
+			--@Per_ClaCom
 			update #ClientesAperturaSucursal set 
-				Cli_HeyBiz = @Sta_Si
-			from #ClientesAperturaSucursal
-			inner join CHCUENTA noholdlock on Cli_Numero = Cue_Client
-			where	Cue_Tipo in  (@Cue_HeyBiz)
-
-			update #ClientesAperturaSucursal set 
-				Cli_Banreg = @Sta_Si
+				Cli_TieCla = @Sta_Si
 			from #ClientesAperturaSucursal
 			inner join CHCUENTA noholdlock on Cli_Numero = Cue_Client
 			inner join SOPRTICU noholdlock on Cue_Tipo =  right(@Str_CuaCer + convert(varchar, Ptc_TipCue ),2)
 			inner join SOCLAPRO noholdlock on Ptc_Produc  =  Clp_Produc 
-			where	Clp_Clasif  = @Cla_Banreg
+			where	Clp_Clasif  = @Per_ClaCom
 			  and	Cue_Tipo not in  (@Cue_CashBa)
 			
 			delete from #ClientesAperturaSucursal
-			where	Cli_HeyBiz = @Str_Vacio 
-			  and	Cli_Banreg = @Str_Vacio
+			where	Cli_TieCla = @Str_Vacio
 
 			select	Cli_Numero as Per_Numero,
 					Cli_Numero + space(@Ent_Uno) as Per_NumTra,
@@ -346,42 +334,6 @@ if @Tip_ConTip = @Str_L begin
 					left join CLLOCALI noholdlock on Per_Locali = Loc_Numero
 					left join CLENTIDA noholdlock on Per_Entida = Ent_Numero
 					
-					
-					--se inserta al usuario de compra venta si existe
-		insert into #ClientesProspectosApertura
-			select	Per_Numero,
-					@Str_Usuari as Per_NumTra,
-					@Tip_Fisica as Per_Titulo,
-					Per_ComOrd,					
-					Per_Nacion,
-					Per_RFC,
-					
-					(CASE when (Per_Calle <> @Str_Vacio and  Per_CalNum <> @Str_Vacio and Per_Coloni <> @Str_Vacio) THEN 
-					rtrim(ltrim(Per_Calle)) + @Str_Coma + space(@Ent_Uno) + Per_CalNum + @Str_Coma + space(@Ent_Uno) + Per_Coloni + @Str_Coma + space(@Ent_Uno) +
-					Loc_Nombre + @Str_Coma + space(@Ent_Uno) + Ent_Nombre  ELSE @Sin_Direcc END) as Per_Calle ,
-					case when Per_Tipo = @Tip_Fisica and Per_ActEmp = @Sta_Si then
-						@Str_Tres
-					else
-						Per_Tipo
-					end as Per_Tipo,
-					case when Per_Tipo = @Tip_Moral then
-						isnull(Clp_NomSoc, @Str_Vacio)
-					else
-						Per_Nombre
-					end as Per_Nombre,
-					Per_ApePat,
-					Per_ApeMat,
-					isnull(Clp_TipSoc, @Str_Vacio) as Per_RazSoc,
-					Adi_FecNac,
-					Adi_TipIde,
-					Adi_NumIde,
-					Per_Numero as Per_NumPer,
-					Per_CURP
-				from #PersonaAperturaSucursal
-					left join CLLOCALI noholdlock on Per_Locali = Loc_Numero
-					left join CLENTIDA noholdlock on Per_Entida = Ent_Numero
-					left join SOPEDACO noholdlock on DaP_Person = Per_Numero
-					    where DaP_CoVeDi in (@Sta_Termin)
 			
 			select	distinct
 					Per_Numero,	Per_NumTra,	Per_Titulo,	Per_ComOrd,	Per_RFC,
