@@ -26,6 +26,11 @@ as
 *****************************************************************
 ** Referencias: 												*
 *****************************************************************
+** Creo:			Adriana Gomez								*
+** Fecha:			28/nov/2020									*
+** Help:			1376175 									*
+** Descripcion:		se agrega retorno de folio de cv 			*
+*****************************************************************
 ** modifico: Carlos Copto										*
 ** Fecha:	 05/07/2020											*
 ** Help:	 1376175		     								*
@@ -139,7 +144,8 @@ end	else begin
 		
 		create table #UsuarioCompVentDola(
 			Use_Consec  int identity,
-			Use_IdUsEx	char(8),
+			Use_FolUsu	char(8), /*folio usuario c/V*/
+			Use_IdUsEx	char(8), /* id tabla  */
 			Use_NumSuc  char(3),
 			Use_FecCre	smalldatetime,
 			Use_NomUsu	varchar(40),
@@ -184,6 +190,7 @@ end	else begin
 		/*Usuarios Compra Venta de Dlls Extranjeros*/
 			insert into #UsuarioCompVentDola
 				select	 right('00000000' + ltrim(rtrim(convert(char, Une_Identi))), 8) as 
+						Use_FolUsu, right('00000000' + ltrim(rtrim(convert(char,  Une_IdeUsu ))), 8) as 
 						Use_IdUsEx, Use_NumSuc, Use_FecCre, Use_NomUsu, Use_ApPaUs, 
 						Use_ApMaUs, Use_NoCoUs, Use_FecNac, Use_SexUsu,	Use_PaNaUs, 
 						'', '',			'',			Use_CaDoUs, Use_PrEnCa, 
@@ -225,7 +232,8 @@ end	else begin
 				
 		/*Usuarios Compra Venta de Dlls Nacionales*/	
 			insert into #UsuarioCompVentDola
-				select	right('00000000' + ltrim(rtrim(convert(char, Une_Identi))), 8) as 
+				select	 right('00000000' + ltrim(rtrim(convert(char, Une_Identi))), 8) as 
+						Use_FolUsu, right('00000000' + ltrim(rtrim(convert(char,  Une_IdeUsu ))), 8) as 
 						Use_IdUsEx, '',  		Per_Fecha,  Per_Nombre, Per_ApePat, 
 						Per_ApeMat, Per_Comple, Adi_FecNac, Adi_Sexo,   Per_Nacion, 
 						Per_Locali, Per_RFC,	Per_CURP,   Per_Calle, 	'', 
@@ -245,7 +253,8 @@ end	else begin
 			
 			/*Usuarios Compra Venta de Dlls Extranjeros*/
 			insert into #UsuarioCompVentDola
-				select	 right('00000000' + ltrim(rtrim(convert(char, Une_Identi))), 8) as 
+				select	  right('00000000' + ltrim(rtrim(convert(char, Une_Identi))), 8) as 
+						Use_FolUsu, right('00000000' + ltrim(rtrim(convert(char,  Une_IdeUsu ))), 8) as 
 						Use_IdUsEx, Use_NumSuc, Use_FecCre, Use_NomUsu, Use_ApPaUs, 
 						Use_ApMaUs, Use_NoCoUs, Use_FecNac, Use_SexUsu,	Use_PaNaUs, 
 						'', '',			'',			Use_CaDoUs, Use_PrEnCa, 
@@ -287,7 +296,8 @@ end	else begin
 				
 		/*Usuarios Compra Venta de Dlls Nacionales*/	
 		insert into #UsuarioCompVentDola
-				select	right('00000000' + ltrim(rtrim(convert(char, Une_Identi))), 8) as 
+				select	 right('00000000' + ltrim(rtrim(convert(char, Une_Identi))), 8) as 
+						Use_FolUsu, right('00000000' + ltrim(rtrim(convert(char,  Une_IdeUsu ))), 8) as 
 						Use_IdUsEx, '',  		Per_Fecha,  Per_Nombre, Per_ApePat, 
 						Per_ApeMat, Per_Comple, Adi_FecNac, Adi_Sexo,   Per_Nacion, 
 						Per_Locali, Per_RFC,	Per_CURP,   Per_Calle, 	'', 
@@ -303,18 +313,17 @@ end	else begin
 				and Per_Comple	like @Use_NoCoUs		
 		end
 		
-		select  Use_IdUsEx, Use_NumSuc, Use_FecCre, Use_NomUsu, Use_ApPaUs, 
-				Use_ApMaUs, Use_NoCoUs, Use_FecNac, Use_SexUsu,	Use_PaNaUs, 
-				Use_LocDom, Use_CaDoUs, Use_PrEnCa, Use_SeEnCa, Use_RFC,
-				Use_CURP,	Use_NuDoUs, Use_CoDoUs, Use_EntDom, Use_LocDom, 
-				Use_CpDoUs, Use_LaTeUs, Use_TelUsu, Use_CorUsu, Use_ActUsu, 
-				Use_OcuUsu, Use_TiIdUs, Use_NumIde, Use_FeExId, Use_FeVeId, 
-				Use_CaDoEx, Use_NuDoEx, Use_CoDoEx, Use_LoDoEx, Use_EnDoEx, 
-				Use_PaDoEx, Use_CpDoEx,	Use_TelExt
+		select  Use_FolUsu, Use_IdUsEx, Use_NumSuc, Use_FecCre, Use_NomUsu, 
+				Use_ApPaUs, Use_ApMaUs, Use_NoCoUs, Use_FecNac, Use_SexUsu,	
+				Use_PaNaUs, Use_LocDom, Use_CaDoUs, Use_PrEnCa, Use_SeEnCa, 
+				Use_RFC,	Use_CURP,	Use_NuDoUs, Use_CoDoUs, Use_EntDom, 
+				Use_LocDom, Use_CpDoUs, Use_LaTeUs, Use_TelUsu, Use_CorUsu, 
+				Use_ActUsu, Use_OcuUsu, Use_TiIdUs, Use_NumIde, Use_FeExId, 
+				Use_FeVeId, Use_CaDoEx, Use_NuDoEx, Use_CoDoEx, Use_LoDoEx, 
+				Use_EnDoEx, Use_PaDoEx, Use_CpDoEx,	Use_TelExt
 		from #UsuarioCompVentDola noholdlock 
 		
 		
 	end
 	drop table #UsuarioCompVentDola 
 end
-
