@@ -26,14 +26,17 @@ as
 *****************************************************************
 ** Referencias: 												*
 *****************************************************************
+** modifico: 	Carlos Copto									*
+** Fecha:	 	10/12/2020										*
+** Help:		1376175 										*
+** Descripcion: Se agrega trim a la vaiable de nombre y se 		*
+**				agrega retornar el campo Une_Estatu de SOUSNAEX	*
+**				en consulta 1 y C1								*
+*****************************************************************
 ** Creo:			Adriana Gomez								*
 ** Fecha:			28/nov/2020									*
 ** Help:			1376175 									*
 ** Descripcion:		se agrega retorno de folio de cv 			*
-*****************************************************************
-** modifico: Carlos Copto										*
-** Fecha:	 05/07/2020											*
-** Help:	 1376175		     								*
 *****************************************************************
 ** creo:	 Adriana Gomez										*
 ** Fecha:	 04/05/2020											*
@@ -49,7 +52,8 @@ declare	@Tip_ConTip	char(1),
 		@Ent_Contad	int,
 		@Use_LuNaUs varchar(50),
 		@Ent_Total  int,
-		@Ent_Consec int
+		@Ent_Consec int,
+		@Une_Estatu char(1)
 
 /* Declaracion de Constantes */
 declare	@Str_Vacio	char(1),
@@ -75,9 +79,11 @@ select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
 		@Tip_ConCon	= substring(@Tip_Consul, 2, 1)
 
 select @Ent_Identi = @Use_IdUsEx /* idUsEx que se recibe es el identiti de la tabla de relacion  */
+select @Use_NoCoUs = ltrim(rtrim(@Use_NoCoUs))  /* se le quitan espacios extremos al nombre que se busca */
 
-/* se obtiene el id de la tabla de extranjero con el que se hace la consulta */
-select @Use_IdUsEx = Une_IdeUsu 
+/* se obtiene el id y el estatus del usuario, de la tabla de extranjero con el que se hace la consulta */
+select @Use_IdUsEx = Une_IdeUsu,
+	   @Une_Estatu = Une_Estatu
 from SOUSNAEX noholdlock inner join SOUSUEXT noholdlock on Une_IdeUsu = Use_IdUsEx 
 where Une_Identi = @Use_IdUsEx
 	
@@ -95,7 +101,7 @@ if @Tip_ConTip = 'C' begin
 				Use_TelUsu, Use_CorUsu, Use_ActUsu, Use_OcuUsu, Use_TiIdUs,
 				Use_NumIde, Use_FeExId, Use_FeVeId, Use_CaDoEx, Use_NuDoEx,
 				Use_CoDoEx, Use_LoDoEx, Use_EnDoEx, Use_PaDoEx, Use_CpDoEx,
-				Use_TelExt, @Ent_Identi as Use_Numero
+				Use_TelExt, @Ent_Identi as Use_Numero, @Une_Estatu as Une_Estatu
 			from SOUSUEXT noholdlock
 			where	Use_IdUsEx	=  @Use_IdUsEx
 	end
@@ -183,7 +189,8 @@ end	else begin
 			Use_PaDoEx  char(3), 
 			Use_CpDoEx  char(6),	
 			Use_TelExt  varchar(20),
-			Use_LugNac  varchar(50)
+			Use_LugNac  varchar(50),
+			Une_Estatu  varchar(1)
 		)
 		
 		if ISNUMERIC(@Use_NoCoUs) = @Ent_Uno begin
@@ -193,17 +200,16 @@ end	else begin
 						Use_FolUsu, right('00000000' + ltrim(rtrim(convert(char,  Une_IdeUsu ))), 8) as 
 						Use_IdUsEx, Use_NumSuc, Use_FecCre, Use_NomUsu, Use_ApPaUs, 
 						Use_ApMaUs, Use_NoCoUs, Use_FecNac, Use_SexUsu,	Use_PaNaUs, 
-						'', '',			'',			Use_CaDoUs, Use_PrEnCa, 
+						'', 		'',			'',			Use_CaDoUs, Use_PrEnCa, 
 						Use_SeEnCa, Use_NuDoUs, Use_CoDoUs, Use_EntDom, Use_LocDom, 
 						Use_CpDoUs, Use_LaTeUs, Use_TelUsu, Use_CorUsu, Use_ActUsu, 
 						Use_OcuUsu, Use_TiIdUs, Use_NumIde, Use_FeExId, Use_FeVeId, 
 						Use_CaDoEx, Use_NuDoEx, Use_CoDoEx, Use_LoDoEx, Use_EnDoEx, 
-						Use_PaDoEx, Use_CpDoEx,	Use_TelExt, Use_LuNaUs
+						Use_PaDoEx, Use_CpDoEx,	Use_TelExt, Use_LuNaUs,	Une_Estatu
 				from SOUSNAEX noholdlock 
 				join SOUSUEXT  noholdlock on Une_IdeUsu = Use_IdUsEx  
 				where Une_TabOri = @Tip_TabExt
-				and Une_Identi	= convert(int, ltrim(rtrim(@Use_NoCoUs)))	
-				
+				and Une_Identi	= convert(int, @Use_NoCoUs)	
 			
 			select @Ent_Total =  count(*) from #UsuarioCompVentDola
 			
@@ -222,7 +228,7 @@ end	else begin
 						where Loc_Status = @Sta_Activo 
 						and Loc_Nombre = substring(@Use_LuNaUs, 1, charindex(',',  @Use_LuNaUs ) - 1)
 					
-						update  #UsuarioCompVentDola  set Use_LuNaUs= @Use_LuNaUs
+						update  #UsuarioCompVentDola  set Use_LuNaUs = @Use_LuNaUs
 						where  Use_Consec= @Ent_Consec
 					end
 					select @Ent_Contad = @Ent_Contad + @Ent_Uno
@@ -241,12 +247,12 @@ end	else begin
 						Per_CodPos, Per_LadTel, Per_Telefo, Per_Email, 	Per_Activi, 
 						Adi_Ocupac, Adi_TipIde, Adi_TipIde, Adi_FeExId, Adi_FeVeId, 
 						'', 		'', 		'', 		'', 		'', 
-						'', 		'',			'', 		''
+						'', 		'',			'', 		'',			Une_Estatu
 				from SOUSNAEX noholdlock 
 				join SOPERSON  noholdlock on  PerPersoID = Une_IdeUsu  
 				join SOPERADI noholdlock on Adi_PerNum = Per_Numero
 				where Une_TabOri = @Tip_TabNac
-				and Une_Identi	= convert(int, ltrim(rtrim(@Use_NoCoUs)))	
+				and Une_Identi	= convert(int, @Use_NoCoUs)	
 			
 		end else begin
 			select	@Use_NoCoUs	= ltrim(rtrim(@Use_NoCoUs)) + '%'
@@ -257,12 +263,12 @@ end	else begin
 						Use_FolUsu, right('00000000' + ltrim(rtrim(convert(char,  Une_IdeUsu ))), 8) as 
 						Use_IdUsEx, Use_NumSuc, Use_FecCre, Use_NomUsu, Use_ApPaUs, 
 						Use_ApMaUs, Use_NoCoUs, Use_FecNac, Use_SexUsu,	Use_PaNaUs, 
-						'', '',			'',			Use_CaDoUs, Use_PrEnCa, 
+						'', 		'',			'',			Use_CaDoUs, Use_PrEnCa, 
 						Use_SeEnCa, Use_NuDoUs, Use_CoDoUs, Use_EntDom, Use_LocDom, 
 						Use_CpDoUs, Use_LaTeUs, Use_TelUsu, Use_CorUsu, Use_ActUsu, 
 						Use_OcuUsu, Use_TiIdUs, Use_NumIde, Use_FeExId, Use_FeVeId, 
 						Use_CaDoEx, Use_NuDoEx, Use_CoDoEx, Use_LoDoEx, Use_EnDoEx, 
-						Use_PaDoEx, Use_CpDoEx,	Use_TelExt, Use_LuNaUs
+						Use_PaDoEx, Use_CpDoEx,	Use_TelExt, Use_LuNaUs,	Une_Estatu
 				from SOUSNAEX noholdlock 
 				join SOUSUEXT  noholdlock on Une_IdeUsu = Use_IdUsEx  
 				where Une_TabOri = @Tip_TabExt
@@ -285,14 +291,13 @@ end	else begin
 						where Loc_Status = @Sta_Activo 
 						and Loc_Nombre = substring(@Use_LuNaUs, 1, charindex(',',  @Use_LuNaUs ) - 1)
 					
-						update  #UsuarioCompVentDola  set Use_LuNaUs= @Use_LuNaUs
-						where  Use_Consec= @Ent_Consec
+						update  #UsuarioCompVentDola  set Use_LuNaUs = @Use_LuNaUs
+						where  Use_Consec = @Ent_Consec
 					end
 					select @Ent_Contad = @Ent_Contad + @Ent_Uno
 					select @Ent_Consec = @Ent_Consec + @Ent_Uno
 				end
 			end
-				
 				
 		/*Usuarios Compra Venta de Dlls Nacionales*/	
 		insert into #UsuarioCompVentDola
@@ -305,7 +310,7 @@ end	else begin
 						Per_CodPos, Per_LadTel, Per_Telefo, Per_Email, 	Per_Activi, 
 						Adi_Ocupac, Adi_TipIde, Adi_TipIde, Adi_FeExId, Adi_FeVeId, 
 						'', 		'', 		'', 		'', 		'', 
-						'', 		'',			'',			''
+						'', 		'',			'',			'',			Une_Estatu
 				from SOUSNAEX noholdlock 
 				join SOPERSON  noholdlock on  PerPersoID = Une_IdeUsu  
 				join SOPERADI noholdlock on Adi_PerNum = Per_Numero
@@ -320,9 +325,8 @@ end	else begin
 				Use_LocDom, Use_CpDoUs, Use_LaTeUs, Use_TelUsu, Use_CorUsu, 
 				Use_ActUsu, Use_OcuUsu, Use_TiIdUs, Use_NumIde, Use_FeExId, 
 				Use_FeVeId, Use_CaDoEx, Use_NuDoEx, Use_CoDoEx, Use_LoDoEx, 
-				Use_EnDoEx, Use_PaDoEx, Use_CpDoEx,	Use_TelExt
+				Use_EnDoEx, Use_PaDoEx, Use_CpDoEx,	Use_TelExt,	Une_Estatu
 		from #UsuarioCompVentDola noholdlock 
-		
 		
 	end
 	drop table #UsuarioCompVentDola 

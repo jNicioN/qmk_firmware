@@ -19,6 +19,11 @@ as
 ****************************************************************************
 **	REFERENCIAS:														****
 ****************************************************************************
+** Modifico:	Carlos Copto 											****
+** Fecha:		15/Diciembre/2020										****
+** Help Desk:	1376175										 			****
+** Descripción:	Se agrega registro a Bitacora							****
+****************************************************************************
 ** Creo:		Carlos Copto											****
 ** Fecha:		10/07/2020   											****
 ** Help Desk:	1376175										 			****
@@ -27,21 +32,26 @@ as
 
 								/* Declaracion de Variables */
 declare	@Ent_Existe	int,
-		@Une_IdeInt int
+		@Une_IdeInt int,
+		@Status		int
 		
 								/* Declaracion de constantes */
-declare	@Str_Vacio char(1),
-		@Ent_Cero  int,
-		@Ent_Uno   int,
-		@Str_Cero  varchar(1),
-		@Str_LetraA  varchar(1)
+declare	@Str_Vacio 	char(1),
+		@Ent_Cero  	int,
+		@Ent_Uno   	int,
+		@Str_Cero  	varchar(1),
+		@Str_LetraA varchar(1),
+		@Biu_Canal	char(3),
+		@Biu_DesEst	varchar(180)
 
 								/* Asignacion de valores a constantes */
 select	@Str_Vacio = '',		/* String Vacio */
 		@Ent_Cero  = 0,			/* Entero cero */
 		@Ent_Uno = 1,			/* Entero uno */
 		@Str_Cero = '0',		/* String Cero */
-		@Str_LetraA = 'A'		/* String Letra A */
+		@Str_LetraA = 'A',		/* String Letra A */
+		@Biu_Canal = '005',		/* Canal de originacion del usuario correspondiente a Apertura*/
+		@Biu_DesEst = 'Creacion de Usuario de compra venta'  /* Descripcion para la bitacora */
 
 select @Une_IdeInt = (convert(int, str_replace(ltrim(str_replace(@Une_IdeUsu , '0', ' ')),' ', '0') ))
 
@@ -89,7 +99,18 @@ insert into SOUSNAEX (
 	@Une_Identi, @Une_IdeInt, @Une_TabOri, @Str_LetraA, @Str_Cero, 
 	@FechaSis, 	 @FechaSis,   @NumTransac, @Transaccio, @Usuario,	   
 	@FechaSis,	 @SucOrigen,  @SucDestino)
+
+exec @Status = SOBITUSUALT 
+	@Une_Identi, @Str_LetraA, @FechaSis, 	@Usuario,
+	@SucOrigen,  @Biu_Canal,  @Biu_DesEst,  @NumTransac,
+	@Transaccio, @Usuario,	  @FechaSis,	@SucOrigen,	
+	@SucDestino, @Modulo
 	
+if @Status <> @Ent_Cero begin
+	rollback
+	return @Ent_Uno
+end
+
+if @@nestlevel = @Ent_Uno
 select	Err_Codigo	= '000000',
 		Err_Mensaj	= 'Registro realizado'
-		

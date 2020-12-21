@@ -24,10 +24,14 @@ as
 ** Modifico:	Carlos Copto											****
 ** Fecha:		27/11/2020   											****
 ** Descripcion: Se agrego validacion de estatus 'B' bloqueado			****
-**				para validacion de cuentas de cliente.				    ****
-**			 	Se agrego validacion para filtrar por usuarios activos  ****
+				para validacion de cuentas de cliente existente.		****
+** Help Desk:	1376175										 			****
+****************************************************************************
+** Modifico:	Carlos Copto											****
+** Fecha:		10/11/2020   											****
+** Descripcion: Se agrego validacion para filtrar por usuarios activos  ****
 **  			y se agregaron mensajes especificos para cliente 		****
-**				usuario y prospecto  									****
+				usuario y prospecto  									****
 ** Help Desk:	1376175										 			****
 ****************************************************************************
 ** Creo:		Carlos Copto											****
@@ -54,7 +58,7 @@ declare	@Str_Vacio 	char(1),
 		@Sta_Activo varchar(1),
 		@Cue_CashBa	char(2),
 		@Cue_Refere	char(2),
-		@Sta_Bloqueado varchar(1)		
+		@Sta_Bloque varchar(1)		
 
 								/* Asignacion de valores a constantes */
 select	@Str_Vacio  = '',		/* String vacio */
@@ -63,7 +67,7 @@ select	@Str_Vacio  = '',		/* String vacio */
 		@Sta_Activo = 'A',		/* Estatus activo */
 		@Cue_CashBa = '31',		-- Tipo de Cuenta: Cashback
 		@Cue_Refere = '50',		-- Tipo de Cuenta: Referenciado
-		@Sta_Bloqueado = 'B'	/* Estatus bloqueado */
+		@Sta_Bloque = 'B'		/* Estatus bloqueado */
 
 if isnull(@Per_Nombre, @Str_Vacio) = @Str_Vacio  begin
 	select	Err_Codigo = '000002',
@@ -110,7 +114,7 @@ if( @Persona = @Ent_Uno ) begin
 		from CLCLIENT noholdlock
 		inner join CHCUENTA noholdlock on Cli_Numero = Cue_Client
 		where Cli_RFC	= @Per_RFC
-		and Cue_Status = @Sta_Activo
+		and Cue_Status in (@Sta_Bloque, @Sta_Activo) 
 		and Cue_Tipo not in  (@Cue_CashBa , @Cue_Refere)
 			
 end 
@@ -159,4 +163,4 @@ end else begin
 			Err_Mensaj = 'No se encuentra la persona'
 	return @Ent_Uno
 end 
-
+		
