@@ -42,9 +42,9 @@ if @Tip_ConTip	= @Str_C begin /* 'C': Consulta */
 	if @Tip_ConCon = @Str_Uno begin		/* C1 */
 		select
 			Rig_Numero,		Rig_NumRib,		Rig_ActCre,		Rig_TiDeGo,		Rig_DepGob,
-			Rig_TieExp,		Rig_Export,		Rig_TiGeDi,		Rig_GeCoMa,		Rig_GenCob,
-			Rig_GeNoCo,		Rig_Activo,		NumTransac,		Transaccio,		Usuario,
-			FechaSis,		SucOrigen,		SucDestino
+			Rig_TieExp,		Rig_Export,		Rig_TiGeDi,		Rig_GeCoMa,		Rig_Activo,
+			NumTransac,		Transaccio,		Usuario,		FechaSis,		SucOrigen,
+			SucDestino
 		from SORIBGEN noholdlock
 		where	Rig_Numero	= @Rig_Numero
 	end
@@ -52,18 +52,18 @@ end else begin
 	if @Tip_ConCon = @Str_Uno begin		/* L1 */
 		select
 			Rig_Numero,		Rig_NumRib,		Rig_ActCre,		Rig_TiDeGo,		Rig_DepGob,
-			Rig_TieExp,		Rig_Export,		Rig_TiGeDi,		Rig_GeCoMa,		Rig_GenCob,
-			Rig_GeNoCo,		Rig_Activo,		NumTransac,		Transaccio,		Usuario,
-			FechaSis,		SucOrigen,		SucDestino
+			Rig_TieExp,		Rig_Export,		Rig_TiGeDi,		Rig_GeCoMa,		Rig_Activo,
+			NumTransac,		Transaccio,		Usuario,		FechaSis,		SucOrigen,
+			SucDestino
 		from SORIBGEN noholdlock
 		where Rig_Activo = @Est_Activo
 	end
 	if @Tip_ConCon = @Str_Dos begin		/* L2 */
 		select
 			Rig_Numero,		Rig_NumRib,		Rig_ActCre,		Rig_TiDeGo,		Rig_DepGob,
-			Rig_TieExp,		Rig_Export,		Rig_TiGeDi,		Rig_GeCoMa,		Rig_GenCob,
-			Rig_GeNoCo,		Rig_Activo,		NumTransac,		Transaccio,		Usuario,
-			FechaSis,		SucOrigen,		SucDestino
+			Rig_TieExp,		Rig_Export,		Rig_TiGeDi,		Rig_GeCoMa,		Rig_Activo,
+			NumTransac,		Transaccio,		Usuario,		FechaSis,		SucOrigen,
+			SucDestino
 		from SORIBGEN noholdlock
 		where Rig_NumRib = @Rig_NumRib
 		  and Rig_Activo = @Est_Activo

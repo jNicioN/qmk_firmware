@@ -1,15 +1,13 @@
 create procedure SORIBGENALT (
    @Rig_Numero int,
    @Rig_NumRib int,
-   @Rig_ActCre varchar(10),
+   @Rig_ActCre int,
    @Rig_TiDeGo int,
    @Rig_DepGob int,
    @Rig_TieExp int,
    @Rig_Export int,
    @Rig_TiGeDi int,
    @Rig_GeCoMa int,
-   @Rig_GenCob int,
-   @Rig_GeNoCo int,
    @Rig_Activo bit,
 
    @NumTransac char(10),
@@ -35,14 +33,14 @@ select  @Int_Uno = 1
 
 insert into SORIBGEN
 	(Rig_Numero,	Rig_NumRib,		Rig_ActCre,		Rig_TiDeGo,		Rig_DepGob,
-	Rig_TieExp,		Rig_Export,		Rig_TiGeDi,		Rig_GeCoMa,		Rig_GenCob,
-	Rig_GeNoCo,		Rig_Activo,		NumTransac,		Transaccio,		Usuario,
-	FechaSis,		SucOrigen,		SucDestino)
+	Rig_TieExp,		Rig_Export,		Rig_TiGeDi,		Rig_GeCoMa,		Rig_Activo,
+	NumTransac,		Transaccio,		Usuario,		FechaSis,		SucOrigen,
+	SucDestino)
 	values (
 	@Rig_Numero,	@Rig_NumRib,	@Rig_ActCre,	@Rig_TiDeGo,	@Rig_DepGob,
-	@Rig_TieExp,	@Rig_Export,	@Rig_TiGeDi,	@Rig_GeCoMa,	@Rig_GenCob,
-	@Rig_GeNoCo,	@Rig_Activo,	@NumTransac,	@Transaccio,	@Usuario,
-	@FechaSis,		@SucOrigen,		@SucDestino)
+	@Rig_TieExp,	@Rig_Export,	@Rig_TiGeDi,	@Rig_GeCoMa,	@Rig_Activo,
+	@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,
+	@SucDestino)
 
 select @Rig_Numero = @@IDENTITY 
 
