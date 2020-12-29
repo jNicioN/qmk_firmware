@@ -6,7 +6,7 @@ create procedure SOUSUARIACT (
 	@Usu_IPSesi	char(15),
 	@Tip_Actual	char(1),			/*  P. Cambio de Password, I. Inactivar Usuario, A. Activar Usuario
 										U. Fecha Ultimo Acceso, B. Baja de Usuario  
-										L. Limpiar Sesiones de Usuario, R. Reactivar Usuario 			*/
+										L. Limpiar Sesiones de Usuario, R. Reactivar Usuario, F. Cambiar fecha de caducidad de usuario */
 	@NumTransac	char(10),
 	@Transaccio	char(3),
 	@Usuario	char(6),
@@ -23,6 +23,12 @@ as
 /** REFERENCIAS: 
 ****************************************************************************
 ** Si se compila este stored en Prod, dar acceso a BLOQUEAR				****
+****************************************************************************
+** Modificó:	Eliel de la O Silva										****
+** Fecha:		11/12/2020												****
+** Descripción:	Modificacion para cambiar la fecha de caducidad de un  ****
+**				usuario													****
+** Help Desk:	1205794													****
 ****************************************************************************
 ** Modificó:	Eliel de la O Silva										****
 ** Fecha:		19/08/2020												****
@@ -174,6 +180,7 @@ declare	@Tab_Nombre char(8),		/* Declaracion de Constantes */
 		@Act_MuSeAc	char(1),
 		@Act_MuSeIn	char(1),
 		@Act_CamSuc	char(1),
+		@Act_CamFec char(1),
 		@Mod_Ventan	char(2),
 		@Can_Correo	char(30)
 		
@@ -204,6 +211,7 @@ select	@Tab_Nombre	= 'SOUSUARI',	/* Nombre de la Tabla Local que se va actualiza
 		@Act_MuSeAc	= 'M',			/* Actualización de Multisesión (Activar)			*/
 		@Act_MuSeIn	= 'Q',			/* Actualización de Multisesión (Desactivar)		*/
 		@Act_CamSuc	= 'Z',			/* Actualización de Cambio de Sucursal Sibamex3		*/
+		@Act_CamFec	= 'F',			/* Cambiar Fecha de Caducidad de Usuario			*/
 		@Mod_Ventan	= 'VE',			/* Módulo Ventanilla								*/
 		@Can_Correo	= 'micorreo@banregio.com' /*Actualización baja Usuario              */
 
@@ -703,4 +711,29 @@ end else if @Tip_Actual	= @Act_CamSuc begin
 
 	select	Err_Codigo	= '000000',
 			Err_Mensaj	= 'Usuario Actualizado'
+end else if @Tip_Actual	= @Act_CamFec begin
+	
+	if not exists (select	Usu_Numero
+					from SOUSUARI noholdlock
+					where	Usu_Numero	= @Usu_Numero) begin
+		select	Err_Codigo	= '000001',
+				Err_Mensaj	= 'El Usuario ' + @Usu_Numero + ' no existe'
+		rollback
+		return 1
+	end
+	/* Actualizar */
+	update SOUSUARI set
+		Usu_FeAcPa = @Usu_FeAcPa,
+
+		NumTransac	= @NumTransac,
+		Transaccio	= @Transaccio,
+		Usuario		= @Usuario,
+		FechaSis	= @FechaSis,
+		SucOrigen	= @SucOrigen,
+		SucDestino	= @SucDestino
+		where	Usu_Numero	= @Usu_Numero
+
+	select	Err_Codigo	= '000000',
+			Err_Mensaj	= 'Fecha Actualizada'
 end
+
