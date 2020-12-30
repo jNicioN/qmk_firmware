@@ -187,7 +187,7 @@ declare	@Tab_Nombre char(8),		/* Declaracion de Constantes */
 		@Act_CamSuc	char(1),
 		@Act_CamFec char(1),
 		@Mod_Ventan	char(2),
-		@Can_Correo	char(30)
+		@Act_Correo	char(30)
 
 /* Asignación de Constantes */
 select	@Tab_Nombre	= 'SOUSUARI',	/* Nombre de la Tabla Local que se va actualizar	*/
@@ -452,7 +452,7 @@ end else if @Tip_Actual = @Act_Baja begin
 		Usu_Status	= @Sta_Cancel,
 		Usu_Activo	= @No_Activo,
 		Usu_FecDes	= @FechaSis,
-		Usu_EMail  = @Act_Correo,
+		Usu_EMail   = @Act_Correo,
 
 		NumTransac	= @NumTransac,
 		Transaccio	= @Transaccio,
