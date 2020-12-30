@@ -190,35 +190,37 @@ declare	@Tab_Nombre char(8),		/* Declaracion de Constantes */
 		@Act_Correo	char(30)
 
 /* Asignación de Constantes */
-select	@Tab_Nombre	= 'SOUSUARI',	/* Nombre de la Tabla Local que se va actualizar	*/
-		@Str_Vacio	= '',			/* String Vacío										*/
-		@Str_Si		= 'S',			/* String Si										*/
-		@Str_No		= 'N',			/* String No										*/
-		@Ent_Cero	= 0,			/* Entero en Cero									*/
-		@Ent_Uno	= 1,			/* Entero en Uno									*/
-		@Si_Activo	= 'S',			/* Usuario Activo									*/
-		@No_Activo	= 'N',			/* Usuario No Activo								*/
-		@Sta_Inacti	= 'I',			/* Status de Usuario Inactivo						*/
-		@Sta_Activo	= 'A',			/* Status de Usuario Activo							*/
-		@Sta_Cancel	= 'C',			/* Status de Cancelado								*/
-		@Fec_Vacia	= '1900-01-01',	/* Fecha Vacía										*/
-		@Act_CamPas	= 'P',			/* Actualización de Cambio de Password				*/
-		@Act_InaUsu	= 'I',			/* Actualización de Inactivar Usuario				*/
-		@Act_ActUsu	= 'A',			/* Actualización de Activar Usuario					*/
-		@Act_UltAcc	= 'U',			/* Actualización de Fecha de último acceso			*/
-		@Act_BajSes	= 'S',			/* Actualización por Baja de Sesión					*/
-		@Act_Baja	= 'B',			/* Baja del Sistema									*/
-		@Act_Limpia	= 'L',			/* Actualización de Inicializacion de Sesión		*/
-		@Act_Sucurs	= 'C',			/* Actualización de Sucursal						*/
-		@Act_Reacti	= 'R',			/* Actualización de Reactivar Usuario Cancelado		*/
-		@Act_UlAcIn	= 'D',			/* Actualización de Fecha de último acceso Intranet	*/
-		@Act_MuSeAc	= 'M',			/* Actualización de Multisesión (Activar)			*/
-		@Act_MuSeIn	= 'Q',			/* Actualización de Multisesión (Desactivar)		*/
-		@Act_CamSuc	= 'Z',			/* Actualización de Cambio de Sucursal Sibamex3		*/
-		@Act_CamFec	= 'F',			/* Cambiar Fecha de Caducidad de Usuario			*/
-		@Mod_Ventan	= 'VE',			/* Módulo Ventanilla								*/
-		@Act_Correo	= 'micorreo@banregio.com' /*Actualización baja Usuario              */
-
+select	@Tab_Nombre	= 'SOUSUARI',					/* Nombre de la Tabla Local que se va actualizar	*/
+		@Str_Vacio	= '',							/* String Vacío										*/
+		@Str_Si		= 'S',							/* String Si										*/
+		@Str_No		= 'N',							/* String No										*/
+		@Ent_Cero	= 0,							/* Entero en Cero									*/
+		@Ent_Uno	= 1,							/* Entero en Uno									*/
+		@Si_Activo	= 'S',							/* Usuario Activo									*/
+		@No_Activo	= 'N',							/* Usuario No Activo								*/
+		@Sta_Inacti	= 'I',							/* Status de Usuario Inactivo						*/
+		@Sta_Activo	= 'A',							/* Status de Usuario Activo							*/
+		@Sta_Cancel	= 'C',							/* Status de Cancelado								*/
+		@Fec_Vacia	= '1900-01-01',					/* Fecha Vacía										*/
+		@Act_CamPas	= 'P',							/* Actualización de Cambio de Password				*/
+		@Act_InaUsu	= 'I',							/* Actualización de Inactivar Usuario				*/
+		@Act_ActUsu	= 'A',							/* Actualización de Activar Usuario					*/
+		@Act_UltAcc	= 'U',							/* Actualización de Fecha de último acceso			*/
+		@Act_BajSes	= 'S',							/* Actualización por Baja de Sesión					*/
+		@Act_Baja	= 'B',							/* Baja del Sistema									*/
+		@Act_Limpia	= 'L',							/* Actualización de Inicializacion de Sesión		*/
+		@Act_Sucurs	= 'C',							/* Actualización de Sucursal						*/
+		@Act_Reacti	= 'R',							/* Actualización de Reactivar Usuario Cancelado		*/
+		@Act_UlAcIn	= 'D',							/* Actualización de Fecha de último acceso Intranet	*/
+		@Act_MuSeAc	= 'M',							/* Actualización de Multisesión (Activar)			*/
+		@Act_MuSeIn	= 'Q',							/* Actualización de Multisesión (Desactivar)		*/
+		@Act_CamSuc	= 'Z',							/* Actualización de Cambio de Sucursal Sibamex3		*/
+		@Act_CamFec	= 'F',							/* Cambiar Fecha de Caducidad de Usuario			*/
+		@Mod_Ventan	= 'VE',							/* Módulo Ventanilla								*/
+		@Act_Correo	= 'micorreo@banregio.com',		/*Actualización baja Usuario       				    */
+		@Usu_Uno 	= '000001',   					/* Usu_Clave = BRM98888								*/
+		@Usu_SWAT   = '000662',						/* Usu_Clave = BRMDSWAT								*/
+		@Usu_Java	= '001104'						/* Usu_Clave = JAVA 								*/
 
 select	@FechaSis	= getdate()
 
@@ -342,7 +344,7 @@ end else if @Tip_Actual = @Act_UltAcc begin
 		return 1
 	end
 
-	if @Usu_Numero <> '000001' and @Usu_Numero <> '000662' and @Usu_Numero <> '001104' begin
+	if @Usu_Numero <> @Usu_Uno and @Usu_Numero <> @Usu_SWAT and @Usu_Numero <> @Usu_Java begin
 
 		/* Sacar la IP si no se mandó de parámetro (en Fox no se envía) */
 		if isnull(@Usu_IPSesi, @Str_Vacio) = @Str_Vacio
