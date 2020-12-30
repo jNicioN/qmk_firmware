@@ -4,9 +4,14 @@ create procedure SOUSUARIACT (
 	@Usu_PassWo	char(32),			/*	Contraseña con 32 caracteres Encriptados por RACAL 				*/
 	@Usu_FeAcPa	smalldatetime,
 	@Usu_IPSesi	char(15),
-	@Tip_Actual	char(1),			/*  P. Cambio de Password, I. Inactivar Usuario, A. Activar Usuario
-										U. Fecha Ultimo Acceso, B. Baja de Usuario  
-										L. Limpiar Sesiones de Usuario, R. Reactivar Usuario, F. Cambiar fecha de caducidad de usuario */
+	@Tip_Actual	char(1),			/*  P. Cambio de Password, 
+										I. Inactivar Usuario, 
+										A. Activar Usuario,
+										U. Fecha Ultimo Acceso,
+										B. Baja de Usuario  
+										L. Limpiar Sesiones de Usuario,
+										R. Reactivar Usuario, 
+										F. Cambiar fecha de caducidad de usuario */
 	@NumTransac	char(10),
 	@Transaccio	char(3),
 	@Usuario	char(6),
@@ -183,7 +188,6 @@ declare	@Tab_Nombre char(8),		/* Declaracion de Constantes */
 		@Act_CamFec char(1),
 		@Mod_Ventan	char(2),
 		@Can_Correo	char(30)
-		
 
 /* Asignación de Constantes */
 select	@Tab_Nombre	= 'SOUSUARI',	/* Nombre de la Tabla Local que se va actualizar	*/
@@ -213,7 +217,8 @@ select	@Tab_Nombre	= 'SOUSUARI',	/* Nombre de la Tabla Local que se va actualiza
 		@Act_CamSuc	= 'Z',			/* Actualización de Cambio de Sucursal Sibamex3		*/
 		@Act_CamFec	= 'F',			/* Cambiar Fecha de Caducidad de Usuario			*/
 		@Mod_Ventan	= 'VE',			/* Módulo Ventanilla								*/
-		@Can_Correo	= 'micorreo@banregio.com' /*Actualización baja Usuario              */
+		@Act_Correo	= 'micorreo@banregio.com' /*Actualización baja Usuario              */
+
 
 select	@FechaSis	= getdate()
 
@@ -243,7 +248,7 @@ if @Tip_Actual = @Act_CamPas begin
 	exec @Status = SOHISPASALT
 		@Usu_Numero,	@Usu_PassWo,	@NumTransac,	@Transaccio,	@Usuario,
 		@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
-	if @Status <> 0 begin
+	if @Status <> Ent_Cero begin
 		rollback
 		return 1
 	end
@@ -277,7 +282,7 @@ end else if @Tip_Actual = @Act_InaUsu begin
 	exec @Status = SYTABLOCACT
 		@Tab_Nombre,	@NumTransac,	@Transaccio,	@Usuario,	@FechaSis,
 		@SucOrigen,		@SucDestino,	@Modulo
-	if @Status <> 0 begin
+	if @Status <> Ent_Cero begin
 		rollback
 		return 1
 	end
@@ -312,7 +317,7 @@ end else if @Tip_Actual = @Act_ActUsu begin
 	execute @Status = SYTABLOCACT
 		@Tab_Nombre,	@NumTransac,	@Transaccio,	@Usuario,	@FechaSis,
 		@SucOrigen,		@SucDestino,	@Modulo
-	if @Status <> 0 begin
+	if @Status <> Ent_Cero begin
 		rollback
 		return 1
 	end
@@ -381,7 +386,7 @@ end else if @Tip_Actual = @Act_UltAcc begin
 	execute @Status = RHASIGRAALT
 		@Usu_Numero,	@Par_FecAct,	@NumTransac,	@Transaccio,	@Usuario,
 		@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
-	if @Status <> 0 begin
+	if @Status <> Ent_Cero begin
 		rollback
 		return 1
 	end
@@ -423,7 +428,7 @@ end else if @Tip_Actual = @Act_BajSes begin
 	execute @Status = SYTABLOCACT
 		@Tab_Nombre,	@NumTransac,	@Transaccio,	@Usuario,	@FechaSis,
 		@SucOrigen,		@SucDestino,	@Modulo
-	if @Status <> 0 begin
+	if @Status <> Ent_Cero begin
 		rollback
 		return 1
 	end
@@ -447,7 +452,7 @@ end else if @Tip_Actual = @Act_Baja begin
 		Usu_Status	= @Sta_Cancel,
 		Usu_Activo	= @No_Activo,
 		Usu_FecDes	= @FechaSis,
-		Usu_EMail  = @Can_Correo,
+		Usu_EMail  = @Act_Correo,
 
 		NumTransac	= @NumTransac,
 		Transaccio	= @Transaccio,
@@ -460,7 +465,7 @@ end else if @Tip_Actual = @Act_Baja begin
 	execute @Status = SYTABLOCACT
 		@Tab_Nombre,	@NumTransac,	@Transaccio,	@Usuario,	@FechaSis,
 		@SucOrigen,		@SucDestino,	@Modulo
-	if @Status <> 0 begin
+	if @Status <> Ent_Cero begin
 		rollback
 		return 1
 	end
@@ -496,7 +501,7 @@ end else if @Tip_Actual = @Act_Limpia begin
 	execute @Status = SYTABLOCACT
 		@Tab_Nombre,	@NumTransac,	@Transaccio,	@Usuario,	@FechaSis,
 		@SucOrigen,		@SucDestino,	@Modulo
-	if @Status <> 0 begin
+	if @Status <> Ent_Cero begin
 		rollback
 		return 1
 	end
@@ -607,7 +612,7 @@ end else if @Tip_Actual = @Act_Reacti begin
 	execute @Status = SYTABLOCACT
 		@Tab_Nombre,	@NumTransac,	@Transaccio,	@Usuario,	@FechaSis,
 		@SucOrigen,		@SucDestino,	@Modulo
-	if @Status <> 0 begin
+	if @Status <> Ent_Cero begin
 		rollback
 		return 1
 	end
