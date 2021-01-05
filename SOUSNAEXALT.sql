@@ -41,7 +41,7 @@ declare	@Str_Vacio 	char(1),
 		@Ent_Uno   	int,
 		@Str_Cero  	varchar(1),
 		@Str_LetraA varchar(1),
-		@Biu_Canal	char(3),
+		@Biu_Canal	int,
 		@Biu_DesEst	varchar(180)
 
 								/* Asignacion de valores a constantes */
@@ -50,7 +50,7 @@ select	@Str_Vacio = '',		/* String Vacio */
 		@Ent_Uno = 1,			/* Entero uno */
 		@Str_Cero = '0',		/* String Cero */
 		@Str_LetraA = 'A',		/* String Letra A */
-		@Biu_Canal = '005',		/* Canal de originacion del usuario correspondiente a Apertura*/
+		@Biu_Canal = 5,			/* Canal de originacion del usuario correspondiente a Apertura*/
 		@Biu_DesEst = 'Creacion de Usuario de compra venta'  /* Descripcion para la bitacora */
 
 select @Une_IdeInt = (convert(int, str_replace(ltrim(str_replace(@Une_IdeUsu , '0', ' ')),' ', '0') ))
@@ -101,10 +101,9 @@ insert into SOUSNAEX (
 	@FechaSis,	 @SucOrigen,  @SucDestino)
 
 exec @Status = SOBITUSUALT 
-	@Une_Identi, @Str_LetraA, @FechaSis, 	@Usuario,
-	@SucOrigen,  @Biu_Canal,  @Biu_DesEst,  @NumTransac,
-	@Transaccio, @Usuario,	  @FechaSis,	@SucOrigen,	
-	@SucDestino, @Modulo
+	@Une_Identi, @Str_LetraA, @FechaSis,   @Usuario,    @SucOrigen,  
+	@Biu_Canal,  @Biu_DesEst, @NumTransac, @Transaccio, @Usuario,	  
+	@FechaSis,	 @SucOrigen,  @SucDestino, @Modulo
 	
 if @Status <> @Ent_Cero begin
 	rollback
@@ -114,3 +113,4 @@ end
 if @@nestlevel = @Ent_Uno
 select	Err_Codigo	= '000000',
 		Err_Mensaj	= 'Registro realizado'
+		

@@ -2,9 +2,9 @@ create procedure SOBITUSUALT (
 	@Biu_FolUsu		int,				
 	@Biu_Estatus	char(1),				
 	@Biu_FecEst		smalldatetime,		
-	@Biu_Usuari		char(3),			
+	@Biu_Usuari		char(6),			
 	@Biu_Sucurs		char(3),			
-	@Biu_Canal 		char(3),			
+	@Biu_Canal 		int,			
 	@Biu_DesEst 	char(180),		
 		
 	@NumTransac	char(10),
@@ -81,7 +81,7 @@ if isnull(@Biu_Sucurs, @Str_Vacio) = @Str_Vacio begin
 	return @Ent_Uno
 end 
 
-if isnull(@Biu_Canal, @Str_Vacio) = @Str_Vacio begin
+if isnull(@Biu_Canal, @Ent_Cero) = @Ent_Cero begin
 	select	Err_Codigo = '000006',
 			Err_Mensaj = 'El Canal no puede ir vacio.'
 	rollback
@@ -95,18 +95,14 @@ if isnull(@Biu_DesEst, @Str_Vacio) = @Str_Vacio begin
 	return @Ent_Uno
 end 
 
-
 insert into SOBITUSU ( 
-	Biu_FolUsu, Biu_Estatus, Biu_FecEst, Biu_Usuari,
-	Biu_Sucurs, Biu_Canal,   Biu_DesEst, NumTransac,
-	Transaccio, Usuario,	 FechaSis,	 SucOrigen,	 
-	SucDestino)
+	Biu_FolUsu, Biu_Estatus, Biu_FecEst, Biu_Usuari, Biu_Sucurs, 
+	Biu_Canal,   Biu_DesEst, NumTransac, Transaccio, Usuario,	 
+	FechaSis,	 SucOrigen,	 SucDestino)
 	values (
-	@Biu_FolUsu, @Biu_Estatus, @Biu_FecEst, @Biu_Usuari,
-	@Biu_Sucurs, @Biu_Canal,   @Biu_DesEst, @NumTransac,
-	@Transaccio, @Usuario,	   @FechaSis,	@SucOrigen,	
-	@SucDestino)
+	@Biu_FolUsu, @Biu_Estatus, 	@Biu_FecEst, @Biu_Usuari, @Biu_Sucurs, 
+	@Biu_Canal,  @Biu_DesEst, 	@NumTransac, @Transaccio, @Usuario,	 
+	@FechaSis,	 @SucOrigen,	@SucDestino)
 	
 select	Err_Codigo	= '000000',
 		Err_Mensaj	= 'Registro realizado'
-		

@@ -87,7 +87,8 @@ if @Une_TabCon = '0' begin   /* Consultas propias a SOUSNAEX */
 		
 		/* se obtiene el id de la tabla de extranjeros */
 		select @Une_IdeUsu = Une_IdeUsu
-		from SOUSNAEX noholdlock inner join SOUSUEXT on Une_IdeUsu = Use_IdUsEx 
+		from SOUSNAEX noholdlock 
+		inner join SOUSUEXT noholdlock on Une_IdeUsu = Use_IdUsEx 
 		where Une_Identi = @Ent_Identi
 
 		if @Tip_ConCon = @Str_LetraI begin

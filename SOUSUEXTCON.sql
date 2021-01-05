@@ -84,13 +84,16 @@ select @Use_NoCoUs = ltrim(rtrim(@Use_NoCoUs))  /* se le quitan espacios extremo
 /* se obtiene el id y el estatus del usuario, de la tabla de extranjero con el que se hace la consulta */
 select @Use_IdUsEx = Une_IdeUsu,
 	   @Une_Estatu = Une_Estatu
-from SOUSNAEX noholdlock inner join SOUSUEXT noholdlock on Une_IdeUsu = Use_IdUsEx 
+from SOUSNAEX noholdlock 
+inner join SOUSUEXT noholdlock on Une_IdeUsu = Use_IdUsEx 
 where Une_Identi = @Use_IdUsEx
 	
 if @Tip_ConTip = 'C' begin
 	if @Tip_ConCon	= '1' begin
 		
-		select @Str_LuNaNu = Loc_Numero from CLLOCALI noholdlock inner join SOUSUEXT noholdlock on substring(Use_LuNaUs, 1, charindex(',', Use_LuNaUs) - 1) = Loc_Nombre and Loc_Status = @Sta_Activo
+		select @Str_LuNaNu = Loc_Numero 
+		from CLLOCALI noholdlock 
+		inner join SOUSUEXT noholdlock on substring(Use_LuNaUs, 1, charindex(',', Use_LuNaUs) - 1) = Loc_Nombre and Loc_Status = @Sta_Activo
 		where	Use_IdUsEx	= @Use_IdUsEx
 		and Use_LuNaUs is not null and charindex(',',  Use_LuNaUs ) > 0
 	
@@ -249,7 +252,7 @@ end	else begin
 						'', 		'', 		'', 		'', 		'', 
 						'', 		'',			'', 		'',			Une_Estatu
 				from SOUSNAEX noholdlock 
-				join SOPERSON  noholdlock on  PerPersoID = Une_IdeUsu  
+				join SOPERSON noholdlock on  PerPersoID = Une_IdeUsu  
 				join SOPERADI noholdlock on Adi_PerNum = Per_Numero
 				where Une_TabOri = @Tip_TabNac
 				and Une_Identi	= convert(int, @Use_NoCoUs)	
@@ -270,19 +273,24 @@ end	else begin
 						Use_CaDoEx, Use_NuDoEx, Use_CoDoEx, Use_LoDoEx, Use_EnDoEx, 
 						Use_PaDoEx, Use_CpDoEx,	Use_TelExt, Use_LuNaUs,	Une_Estatu
 				from SOUSNAEX noholdlock 
-				join SOUSUEXT  noholdlock on Une_IdeUsu = Use_IdUsEx  
+				join SOUSUEXT noholdlock on Une_IdeUsu = Use_IdUsEx  
 				where Une_TabOri = @Tip_TabExt
 				and  Use_NoCoUs  like @Use_NoCoUs
 					
 				select @Ent_Total =  count(*) from #UsuarioCompVentDola
 			
 			if @Ent_Total> @Ent_Cero begin
-				select @Ent_Consec = min(Use_Consec) from #UsuarioCompVentDola noholdlock 
+				
+				select @Ent_Consec = min(Use_Consec) 
+				from #UsuarioCompVentDola noholdlock 
 				select 	@Ent_Contad = @Ent_Uno
 				
 				while @Ent_Contad <= @Ent_Total begin
-					select @Use_LuNaUs  = Use_LugNac from #UsuarioCompVentDola noholdlock 
-										where Use_Consec= @Ent_Consec
+					
+					select @Use_LuNaUs  = Use_LugNac 
+					from #UsuarioCompVentDola noholdlock 
+					where Use_Consec= @Ent_Consec
+					
 					if @Use_LuNaUs is not null 
 						and charindex(',',  @Use_LuNaUs ) > 0 begin
 					
@@ -312,7 +320,7 @@ end	else begin
 						'', 		'', 		'', 		'', 		'', 
 						'', 		'',			'',			'',			Une_Estatu
 				from SOUSNAEX noholdlock 
-				join SOPERSON  noholdlock on  PerPersoID = Une_IdeUsu  
+				join SOPERSON noholdlock on  PerPersoID = Une_IdeUsu  
 				join SOPERADI noholdlock on Adi_PerNum = Per_Numero
 				where Une_TabOri = @Tip_TabNac
 				and Per_Comple	like @Use_NoCoUs		

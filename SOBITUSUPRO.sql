@@ -29,8 +29,11 @@ select	@Ent_Cero  = 0			/* Entero cero */
 begin transaction
 
 	insert into SOHISUSU 
-	select Biu_FolUsu, Biu_Estatus, Biu_FecEst, Biu_Usuari, Biu_Sucurs, Biu_Canal, Biu_DesEst, @NumTransac, @Transaccio, @Usuario, @FechaSis, @SucOrigen, @SucDestino
-	from SOBITUSU where Biu_Consec > @Ent_Cero
+	select 	Biu_FolUsu, Biu_Estatus, Biu_FecEst, Biu_Usuari, Biu_Sucurs, 
+			Biu_Canal, Biu_DesEst, @NumTransac, @Transaccio, @Usuario, 
+			@FechaSis, @SucOrigen, @SucDestino
+	from SOBITUSU noholdlock
+	where Biu_Consec > @Ent_Cero
 			  
 commit
 
@@ -38,4 +41,4 @@ begin transaction
 	
 	delete from SOBITUSU where Biu_Consec > @Ent_Cero
 	
-commit 
+commit

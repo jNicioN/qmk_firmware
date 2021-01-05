@@ -1,13 +1,13 @@
-create procedure SOBITUSUCON (
-	@Biu_FolUsu		int,				
-	@Biu_Estatus	char(1),			
-	@Biu_FecEst		smalldatetime,		
-	@Biu_Usuari		char(6),				
-	@Biu_Sucurs		char(3),				
-	@Biu_Canal 		int,				
-	@Biu_DesEst 	char(180),			
-	@Biu_FecIni		smalldatetime,
-	@Biu_FecFin		smalldatetime,
+create procedure SOHISUSUCON (
+	@Hiu_FolUsu		int,				
+	@Hiu_Estatus	char(1),			
+	@Hiu_FecEst		smalldatetime,		
+	@Hiu_Usuari		char(6),				
+	@Hiu_Sucurs		char(3),				
+	@Hiu_Canal 		int,				
+	@Hiu_DesEst 	char(180),			
+	@Hiu_FecIni		smalldatetime,
+	@Hiu_FecFin		smalldatetime,
 	@Tip_Consul		char(2),
 	
 	@NumTransac char(10),
@@ -22,7 +22,7 @@ as
 
 /**
 ****************************************************************************
-** DESCRIPCION: ** Consulta de bitacora de usuarios						****
+** DESCRIPCION: ** Consulta de historico de usuarios					****
 ****************************************************************************
 **	REFERENCIAS:														****
 ****************************************************************************
@@ -55,40 +55,40 @@ select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
 if @Tip_ConTip = 'C' begin
 	if @Tip_ConCon	= '1' begin
 		/* consulta por folio de compra venta por rango de fecha*/
-		select 	Biu_FolUsu, Biu_Estatus, Biu_FecEst, Biu_Usuari, Biu_Sucurs, 
-				Biu_Canal,   Biu_DesEst
-			from SOBITUSU noholdlock
-			where Biu_FolUsu = @Biu_FolUsu
-			and Biu_FecEst > @Biu_FecIni
-			and Biu_FecEst < @Biu_FecFin
-			order by Biu_FecEst
+		select 	Hiu_FolUsu, Hiu_Estatus, Hiu_FecEst, Hiu_Usuari, Hiu_Sucurs, 
+				Hiu_Canal,  Hiu_DesEst
+			from SOHISUSU noholdlock
+			where Hiu_FolUsu = @Hiu_FolUsu
+			and Hiu_FecEst > @Hiu_FecIni
+			and Hiu_FecEst < @Hiu_FecFin
+			order by Hiu_FecEst
 	end
 end	else if @Tip_ConTip	= 'L' begin	
 	
 	/* conuslta todo por rango de fecha */
 	if @Tip_ConCon	= '1' begin
-		select 	Biu_FolUsu, Biu_Estatus, Biu_FecEst, Biu_Usuari, Biu_Sucurs, 
-				Biu_Canal,   Biu_DesEst
-			from SOBITUSU noholdlock
-			where Biu_FecEst > @Biu_FecIni
-			and   Biu_FecEst < @Biu_FecFin
-			order by Biu_FecEst
+		select 	Hiu_FolUsu, Hiu_Estatus, Hiu_FecEst, Hiu_Usuari, Hiu_Sucurs, 
+				Hiu_Canal,  Hiu_DesEst
+			from SOHISUSU noholdlock
+			where Hiu_FecEst > @Hiu_FecIni
+			and   Hiu_FecEst < @Hiu_FecFin
+			order by Hiu_FecEst
 	end
 	
 	/* conuslta por sucursal y rango de fecha */
 	if @Tip_ConCon	= '2' begin
-		select 	Biu_FolUsu, Biu_Estatus, Biu_FecEst, Biu_Usuari, Biu_Sucurs, 
-				Biu_Canal,   Biu_DesEst
-			from SOBITUSU noholdlock
-			where Biu_Sucurs = @Biu_Sucurs
-			and	  Biu_FecEst > @Biu_FecIni
-			and   Biu_FecEst < @Biu_FecFin
-			order by Biu_FecEst
+		select 	Hiu_FolUsu, Hiu_Estatus, Hiu_FecEst, Hiu_Usuari, Hiu_Sucurs, 
+				Hiu_Canal,  Hiu_DesEst
+			from SOHISUSU noholdlock
+			where Hiu_Sucurs = @Hiu_Sucurs
+			and	  Hiu_FecEst > @Hiu_FecIni
+			and   Hiu_FecEst < @Hiu_FecFin
+			order by Hiu_FecEst
 	end
 end else begin
 	
-	select 	Biu_FolUsu, Biu_Estatus, Biu_FecEst, Biu_Usuari, Biu_Sucurs, 
-			Biu_Canal,   Biu_DesEst
-	from SOBITUSU noholdlock
+	select 	Hiu_FolUsu, Hiu_Estatus, Hiu_FecEst, Hiu_Usuari, Hiu_Sucurs, 
+			Hiu_Canal,  Hiu_DesEst
+	from SOHISUSU noholdlock
 	
-end 
+end

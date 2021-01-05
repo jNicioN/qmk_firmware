@@ -24,7 +24,7 @@ as
 ** Modifico:	Carlos Copto											****
 ** Fecha:		27/11/2020   											****
 ** Descripcion: Se agrego validacion de estatus 'B' bloqueado			****
-				para validacion de cuentas de cliente existente.		****
+				para validacion de cuentas de cliente.					****
 ** Help Desk:	1376175										 			****
 ****************************************************************************
 ** Modifico:	Carlos Copto											****
@@ -56,6 +56,7 @@ declare	@Str_Vacio 	char(1),
 		@Ent_Cero	int,
 		@Ent_Uno	int,
 		@Sta_Activo varchar(1),
+		@Sta_Inacti varchar(1),
 		@Cue_CashBa	char(2),
 		@Cue_Refere	char(2),
 		@Sta_Bloque varchar(1)		
@@ -65,6 +66,7 @@ select	@Str_Vacio  = '',		/* String vacio */
 		@Ent_Cero	= 0,		/* Entero cero */
 		@Ent_Uno	= 1,		/* Entero uno */
 		@Sta_Activo = 'A',		/* Estatus activo */
+		@Sta_Inacti = 'I',		/* Estatus inactivo */
 		@Cue_CashBa = '31',		-- Tipo de Cuenta: Cashback
 		@Cue_Refere = '50',		-- Tipo de Cuenta: Referenciado
 		@Sta_Bloque = 'B'		/* Estatus bloqueado */
@@ -145,14 +147,22 @@ if ( @Cliente <> @Ent_Uno ) begin
 
 end
 
+/* solo cuando existe un usuario con estatus activo se mantiene la variable como uno, 
+ya que puede exitsir un usuario inactivo y no debe tomarse en cuenta para la validacion  */
+if @UsuarioCV = @Ent_Uno and @Estatus = @Sta_Activo begin
+	select @UsuarioCV = @Ent_Uno
+end else if @UsuarioCV = @Ent_Uno and @Estatus = @Sta_Inacti begin
+	select @UsuarioCV = @Ent_Cero
+end
+
 if @Cliente = @Ent_Uno begin
 	select	@Mensaje = 'Ya existe un Cliente con el nombre ' + @Per_Nombre + ' ' + @Per_ApePat + ' ' + @Per_ApeMat
-end else if @UsuarioCV = @Ent_Uno and @Estatus = @Sta_Activo begin
+end else if @UsuarioCV = @Ent_Uno begin
 	select	@Mensaje = 'Ya existe un Usuario activo con el nombre ' + @Per_Nombre + ' ' + @Per_ApePat + ' ' + @Per_ApeMat + ' favor de dar salida como Cliente.'
 end
 
 if @Cliente = @Ent_Uno or @UsuarioCV = @Ent_Uno begin
-	select	Err_Codigo	= '000000',
+		select	Err_Codigo	= '000000',
 			Err_Mensaj  = @Mensaje,
 			Per_Numero	= ltrim(rtrim(@Per_ID)),
 			Tab_Ori = @Tab_Ori,
@@ -162,5 +172,4 @@ end else begin
 	select	Err_Codigo	= '000006',
 			Err_Mensaj = 'No se encuentra la persona'
 	return @Ent_Uno
-end 
-		
+end

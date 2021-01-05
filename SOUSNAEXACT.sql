@@ -1,7 +1,7 @@
 create procedure SOUSNAEXACT (
 	@Une_Identi	int,
 	@Une_Estatu	varchar(1),
-	@Tip_Actual	char(1),
+	@Tip_Actual	char(2),
 
 	@NumTransac	char(10),
 	@Transaccio	char(3),
@@ -38,7 +38,10 @@ declare	@Use_NoCoUs 	varchar(150),			/* Declaración de Variables */
 		@Estatus		char(1),
 		@Per_RFC 		char(15),
 		@Mensaje		varchar(150),
-		@Status			int
+		@Status			int,
+		@Tip_ActTip		char(1),
+		@Tip_ActAct		char(1),
+		@Biu_DesEst		varchar(180)
 
 declare	@Tip_ActEst 	varchar(1),			/* Declaración de Constantes */
 		@Str_Vacio	 	varchar(1),			
@@ -48,8 +51,7 @@ declare	@Tip_ActEst 	varchar(1),			/* Declaración de Constantes */
 		@Sta_Bloque		varchar(1),
 		@Cue_CashBa		char(2),
 		@Cue_Refere		char(2),
-		@Biu_Canal		char(3),
-		@Biu_DesEst		varchar(180)		
+		@Biu_Canal		int
 
 											/* Asignación de valores a constantes 	*/
 select	@Tip_ActEst	= 'A',					/*	Tipo Act Estatus de Usuario			*/					
@@ -60,8 +62,7 @@ select	@Tip_ActEst	= 'A',					/*	Tipo Act Estatus de Usuario			*/
 		@Sta_Bloque	= 'B',					/*	Status Bloqueado					*/
 		@Cue_CashBa = '31',					-- Tipo de Cuenta: Cashback
 		@Cue_Refere = '50',					-- Tipo de Cuenta: Referenciado
-		@Biu_Canal  = '005',				/* Canal de actualizacion del usuario correspondiente a Apertura*/
-		@Biu_DesEst = 'Actualizacion de estatus de Usuario de compra venta'  /* Descripcion para la bitacora */
+		@Biu_Canal  = 5						/* Canal de actualizacion del usuario correspondiente a Apertura*/
 
 if isnull(@Tip_Actual, @Str_Vacio) = @Str_Vacio  begin
 		select	Err_Codigo = '000001',
@@ -70,7 +71,10 @@ if isnull(@Tip_Actual, @Str_Vacio) = @Str_Vacio  begin
 		return @Ent_Uno
 end
 
-if @Tip_Actual = @Tip_ActEst begin
+select	@Tip_ActTip	= substring(@Tip_Actual, 1, 1),
+		@Tip_ActAct	= substring(@Tip_Actual, 2, 1)
+
+if @Tip_ActTip = @Tip_ActEst begin
 	
 	if isnull(@Une_Identi, @Ent_Cero) = @Ent_Cero  begin
 		select	Err_Codigo = '000002',
@@ -88,7 +92,8 @@ if @Tip_Actual = @Tip_ActEst begin
 	
 	/* Se obtiene la tabla origen del usuario para consultar su nombre y fecha*/
 	select @Une_TabOri = Une_TabOri
-	from SOUSNAEX where Une_Identi = @Une_Identi
+	from SOUSNAEX noholdlock 
+	where Une_Identi = @Une_Identi
 	
 	/* Se obtiene el nombre y fecha de nacimiento en su tabla de origen para buscar despues si hay homonimo activo */
 	if @Une_TabOri = '1' begin
@@ -154,29 +159,45 @@ if @Tip_Actual = @Tip_ActEst begin
 	
 	end
 	
-	if @Cliente = @Ent_Uno begin
-		select	@Mensaje = 'No se ha podido activar porque existe un Cliente con cuentas Activas o Bloqueadas con el nombre ' + @Use_NoCoUs
-	end else if @UsuarioCV = @Ent_Uno and @Estatus = @Sta_Activo begin
-		select	@Mensaje = 'No se ha podido activar porque ya existe un Usuario Activo con el nombre ' + @Use_NoCoUs
-	end
+	/* se checa si el cambio del estatus es activacion o inactivacion, si es inactivacion no hace la validacion de cuenta activa */
+	if @Tip_ActAct = 'A' begin 
 	
-	/* Si encontro algun homonimo usuario activo se evita la activacion*/
-	if @UsuarioCV = @Ent_Uno and @Estatus = @Sta_Activo or @Cliente = @Ent_Uno begin
-		select	Err_Codigo	= '000004',
-				Err_Mensaj = @Mensaje	
-		rollback
-		return @Ent_Uno
+		if @Cliente = @Ent_Uno begin
+			select	@Mensaje = 'No se ha podido activar porque existe un Cliente con cuentas Activas o Bloqueadas con el nombre ' + @Use_NoCoUs
+		end else if @UsuarioCV = @Ent_Uno and @Estatus = @Sta_Activo begin
+			select	@Mensaje = 'No se ha podido activar porque ya existe un Usuario Activo con el nombre ' + @Use_NoCoUs
+		end
+		
+		/* Si encontro algun homonimo usuario activo se evita la activacion*/
+		if @UsuarioCV = @Ent_Uno and @Estatus = @Sta_Activo or @Cliente = @Ent_Uno begin
+			select	Err_Codigo	= '000004',
+					Err_Mensaj = @Mensaje	
+			rollback
+			return @Ent_Uno
+		end
+		
+	select @Biu_DesEst = 'Activacion de estatus de Usuario de compra venta'  /* Descripcion para la bitacora */
+	
+	end else if @Tip_ActAct = 'I' begin 
+		
+		select @Biu_DesEst = 'Inactivacion de Usuario de compra venta por actvacion de Cuenta'  /* Descripcion para la bitacora */
+	
 	end
 	
 	update SOUSNAEX set 
-		Une_Estatu = @Une_Estatu
+		Une_Estatu  = @Une_Estatu,
+		NumTransac  = @NumTransac,
+		Transaccio  = @Transaccio, 
+		Usuario 	= @Usuario,	  
+		FechaSis	= @FechaSis,	
+		SucOrigen	= @SucOrigen,	
+		SucDestino	= @SucDestino
 	where	Une_Identi	= @Une_Identi
 	
 	exec @Status = SOBITUSUALT 
-	@Une_Identi, @Une_Estatu, @FechaSis, 	@Usuario,
-	@SucOrigen,  @Biu_Canal,  @Biu_DesEst,  @NumTransac,
-	@Transaccio, @Usuario,	  @FechaSis,	@SucOrigen,	
-	@SucDestino, @Modulo
+	@Une_Identi, @Une_Estatu, @FechaSis,   @Usuario,    @SucOrigen,  
+	@Biu_Canal,  @Biu_DesEst, @NumTransac, @Transaccio, @Usuario,	  
+	@FechaSis,	 @SucOrigen,  @SucDestino, @Modulo
 	
 	if @Status <> @Ent_Cero begin
 		rollback
@@ -188,6 +209,4 @@ if @Tip_Actual = @Tip_ActEst begin
 				Err_Mensaj	= 'Usuario Activado',
 				Use_Numero	= @Une_Identi
 		return @Ent_Uno
-	
 end
-
