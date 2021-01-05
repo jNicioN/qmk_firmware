@@ -50,11 +50,11 @@ if @Tip_Proces = @Str_A begin
 			delete from SORIBGEN where Rig_NumRib = @Int_RibBas
 
 			insert into SORIBGEN 
-				(Rig_NumRib,	Rig_ActCre,		Rig_TiDeGo,		Rig_DepGob,		Rig_TieExp,
-				Rig_Export,		Rig_TiGeDi,		Rig_GeCoMa,		Rig_Activo,		NumTransac,
+				(Rig_NumRib,	Rig_TiDeGo,		Rig_DepGob,		Rig_TieExp,		Rig_Export,
+				Rig_PorExp,		Rig_TiGeDi,		Rig_GeCoMa,		Rig_Activo,		NumTransac,
 				Transaccio,		Usuario,		FechaSis,		SucOrigen,		SucDestino)
-				select	@Int_RibBas,	Rig_ActCre,		Rig_TiDeGo,		Rig_DepGob,		Rig_TieExp,
-						Rig_Export,		Rig_TiGeDi,		Rig_GeCoMa,		Rig_Activo,		@NumTransac,
+				select	@Int_RibBas,	Rig_TiDeGo,		Rig_DepGob,		Rig_TieExp,		Rig_Export,
+						Rig_PorExp,		Rig_TiGeDi,		Rig_GeCoMa,		Rig_Activo,		@NumTransac,
 						@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
 					from SORIBGEN noholdlock
 					where Rig_NumRib = @Rig_NumRib

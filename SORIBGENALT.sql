@@ -1,11 +1,11 @@
 create procedure SORIBGENALT (
    @Rig_Numero int,
    @Rig_NumRib int,
-   @Rig_ActCre int,
    @Rig_TiDeGo int,
    @Rig_DepGob int,
    @Rig_TieExp int,
    @Rig_Export int,
+   @Rig_PorExp numeric(10,2),
    @Rig_TiGeDi int,
    @Rig_GeCoMa int,
    @Rig_Activo bit,
@@ -32,12 +32,12 @@ declare @Int_Uno int
 select  @Int_Uno = 1
 
 insert into SORIBGEN
-	(Rig_NumRib,	Rig_ActCre,		Rig_TiDeGo,		Rig_DepGob,		Rig_TieExp,
-	Rig_Export,		Rig_TiGeDi,		Rig_GeCoMa,		Rig_Activo,		NumTransac,
+	(Rig_NumRib,	Rig_TiDeGo,		Rig_DepGob,		Rig_TieExp,		Rig_Export,
+	Rig_PorExp,		Rig_TiGeDi,		Rig_GeCoMa,		Rig_Activo,		NumTransac,
 	Transaccio,		Usuario,		FechaSis,		SucOrigen,		SucDestino)
 	values (
-	@Rig_NumRib,	@Rig_ActCre,	@Rig_TiDeGo,	@Rig_DepGob,	@Rig_TieExp,
-	@Rig_Export,	@Rig_TiGeDi,	@Rig_GeCoMa,	@Rig_Activo,	@NumTransac,
+	@Rig_NumRib,	@Rig_TiDeGo,	@Rig_DepGob,	@Rig_TieExp,	@Rig_Export,
+	@Rig_PorExp,	@Rig_TiGeDi,	@Rig_GeCoMa,	@Rig_Activo,	@NumTransac,
 	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino)
 
 select @Rig_Numero = @@IDENTITY 
