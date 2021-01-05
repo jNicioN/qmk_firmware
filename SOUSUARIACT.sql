@@ -158,7 +158,9 @@ declare	@Status		int,			/* Declaracion de Variables */
 		@Usu_MulSes	char(1),
 		@Sta_SesAct	char(1),
 		@IP_SesAct	char(15),
-		@Par_FecAct	smalldatetime
+		@Par_FecAct	smalldatetime,
+		@Usu_NumAux char,
+		@Usu_ClaAux char				
 
 declare	@Tab_Nombre char(8),		/* Declaracion de Constantes */
 		@Str_Vacio	char(1),
@@ -187,7 +189,11 @@ declare	@Tab_Nombre char(8),		/* Declaracion de Constantes */
 		@Act_CamSuc	char(1),
 		@Act_CamFec char(1),
 		@Mod_Ventan	char(2),
-		@Act_Correo	char(30)
+		@Act_Correo	char(30), 
+		@Usu_Uno    char, 
+		@Usu_SWAT   char,
+		@Usu_Java	char
+
 
 /* Asignación de Constantes */
 select	@Tab_Nombre	= 'SOUSUARI',					/* Nombre de la Tabla Local que se va actualizar	*/
@@ -221,14 +227,18 @@ select	@Tab_Nombre	= 'SOUSUARI',					/* Nombre de la Tabla Local que se va actua
 		@Usu_Uno 	= '000001',   					/* Usu_Clave = BRM98888								*/
 		@Usu_SWAT   = '000662',						/* Usu_Clave = BRMDSWAT								*/
 		@Usu_Java	= '001104'						/* Usu_Clave = JAVA 								*/
+		
 
 select	@FechaSis	= getdate()
 
+select		@Usu_NumAux  = Usu_Numero, 
+			@Usu_ClaAux  = Usu_Clave
+	from SOUSUARI noholdlock
+	where	Usu_Numero	 = @Usu_Numero
+
 if @Tip_Actual = @Act_CamPas begin
 
-	if not exists (select	Usu_Numero
-					from SOUSUARI noholdlock
-					where	Usu_Numero	= @Usu_Numero) begin
+	if isnull(@Usu_NumAux, @Str_Vacio) = @Str_Vacio begin
 		select	Err_Codigo	= '000001',
 				Err_Mensaj	= 'El Usuario ' + @Usu_Numero + ' no existe'
 		rollback
@@ -250,7 +260,7 @@ if @Tip_Actual = @Act_CamPas begin
 	exec @Status = SOHISPASALT
 		@Usu_Numero,	@Usu_PassWo,	@NumTransac,	@Transaccio,	@Usuario,
 		@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
-	if @Status <> Ent_Cero begin
+	if @Status <> @Ent_Cero begin
 		rollback
 		return 1
 	end
@@ -260,9 +270,7 @@ if @Tip_Actual = @Act_CamPas begin
 
 end else if @Tip_Actual = @Act_InaUsu begin
 
-	if not exists (select	Usu_Clave
-					from SOUSUARI noholdlock
-					where	Usu_Clave	= @Usu_Clave) begin
+	if isnull(@Usu_Clave, @Str_Vacio) = @Str_Vacio begin
 		select	Err_Codigo	= '000001',
 				Err_Mensaj	= 'El Usuario con Clave ' + @Usu_Clave + ' no existe'
 		rollback
@@ -284,7 +292,7 @@ end else if @Tip_Actual = @Act_InaUsu begin
 	exec @Status = SYTABLOCACT
 		@Tab_Nombre,	@NumTransac,	@Transaccio,	@Usuario,	@FechaSis,
 		@SucOrigen,		@SucDestino,	@Modulo
-	if @Status <> Ent_Cero begin
+	if @Status <> @Ent_Cero begin
 		rollback
 		return 1
 	end
@@ -294,9 +302,7 @@ end else if @Tip_Actual = @Act_InaUsu begin
 
 end else if @Tip_Actual = @Act_ActUsu begin
 
-	if not exists (select	Usu_Numero
-					from SOUSUARI noholdlock
-					where	Usu_Numero	= @Usu_Numero) begin
+	if isnull(@Usu_NumAux, @Str_Vacio) = @Str_Vacio begin
 		select	Err_Codigo	= '000001',
 				Err_Mensaj	= 'El Usuario no existe',
 				Err_Variab	= 'Usu_Numero'
@@ -319,7 +325,7 @@ end else if @Tip_Actual = @Act_ActUsu begin
 	execute @Status = SYTABLOCACT
 		@Tab_Nombre,	@NumTransac,	@Transaccio,	@Usuario,	@FechaSis,
 		@SucOrigen,		@SucDestino,	@Modulo
-	if @Status <> Ent_Cero begin
+	if @Status <> @Ent_Cero begin
 		rollback
 		return 1
 	end
@@ -388,7 +394,7 @@ end else if @Tip_Actual = @Act_UltAcc begin
 	execute @Status = RHASIGRAALT
 		@Usu_Numero,	@Par_FecAct,	@NumTransac,	@Transaccio,	@Usuario,
 		@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
-	if @Status <> Ent_Cero begin
+	if @Status <> @Ent_Cero begin
 		rollback
 		return 1
 	end
@@ -430,7 +436,7 @@ end else if @Tip_Actual = @Act_BajSes begin
 	execute @Status = SYTABLOCACT
 		@Tab_Nombre,	@NumTransac,	@Transaccio,	@Usuario,	@FechaSis,
 		@SucOrigen,		@SucDestino,	@Modulo
-	if @Status <> Ent_Cero begin
+	if @Status <> @Ent_Cero begin
 		rollback
 		return 1
 	end
@@ -440,9 +446,7 @@ end else if @Tip_Actual = @Act_BajSes begin
 
 end else if @Tip_Actual = @Act_Baja begin
 
-	if not exists (select	Usu_Numero
-					from SOUSUARI noholdlock
-					where	Usu_Numero	= @Usu_Numero) begin
+	if isnull(@Usu_NumAux, @Str_Vacio) = @Str_Vacio begin
 		select	Err_Codigo	= '000001',
 				Err_Mensaj	= 'El Usuario no existe',
 				Err_Variab	= 'Usu_Numero'
@@ -467,7 +471,7 @@ end else if @Tip_Actual = @Act_Baja begin
 	execute @Status = SYTABLOCACT
 		@Tab_Nombre,	@NumTransac,	@Transaccio,	@Usuario,	@FechaSis,
 		@SucOrigen,		@SucDestino,	@Modulo
-	if @Status <> Ent_Cero begin
+	if @Status <> @Ent_Cero begin
 		rollback
 		return 1
 	end
@@ -477,9 +481,7 @@ end else if @Tip_Actual = @Act_Baja begin
 
 end else if @Tip_Actual = @Act_Limpia begin
 
-	if not exists (select	Usu_Numero
-					from SOUSUARI noholdlock
-					where	Usu_Numero	= @Usu_Numero) begin
+	if isnull(@Usu_NumAux, @Str_Vacio) = @Str_Vacio begin
 		select	Err_Codigo	= '000001',
 				Err_Mensaj	= 'El Usuario no existe',
 				Err_Variab	= 'Usu_Numero'
@@ -503,7 +505,7 @@ end else if @Tip_Actual = @Act_Limpia begin
 	execute @Status = SYTABLOCACT
 		@Tab_Nombre,	@NumTransac,	@Transaccio,	@Usuario,	@FechaSis,
 		@SucOrigen,		@SucDestino,	@Modulo
-	if @Status <> Ent_Cero begin
+	if @Status <> @Ent_Cero begin
 		rollback
 		return 1
 	end
@@ -589,9 +591,7 @@ end else if @Tip_Actual = @Act_UlAcIn begin
 
 end else if @Tip_Actual = @Act_Reacti begin
 
-	if not exists (select	Usu_Numero
-					from SOUSUARI noholdlock
-					where	Usu_Numero	= @Usu_Numero) begin
+	if isnull(@Usu_NumAux, @Str_Vacio) = @Str_Vacio begin
 		select	Err_Codigo	= '000001',
 				Err_Mensaj	= 'El Usuario ' + @Usu_Numero + ' no existe'
 		rollback
@@ -614,7 +614,7 @@ end else if @Tip_Actual = @Act_Reacti begin
 	execute @Status = SYTABLOCACT
 		@Tab_Nombre,	@NumTransac,	@Transaccio,	@Usuario,	@FechaSis,
 		@SucOrigen,		@SucDestino,	@Modulo
-	if @Status <> Ent_Cero begin
+	if @Status <> @Ent_Cero begin
 		rollback
 		return 1
 	end
@@ -624,9 +624,7 @@ end else if @Tip_Actual = @Act_Reacti begin
 
 end else if @Tip_Actual = @Act_MuSeAc begin
 
-	if not exists (select	Usu_Numero
-					from SOUSUARI noholdlock
-					where	Usu_Numero	= @Usu_Numero) begin
+	if isnull(@Usu_Numero, @Str_Vacio) = @Str_Vacio begin
 		select	Err_Codigo	= '000001',
 				Err_Mensaj	= 'El Usuario ' + @Usu_Numero + ' no existe'
 		rollback
@@ -650,9 +648,7 @@ end else if @Tip_Actual = @Act_MuSeAc begin
 
 end else if @Tip_Actual = @Act_MuSeIn begin
 
-	if not exists (select	Usu_Numero
-					from SOUSUARI noholdlock
-					where	Usu_Numero	= @Usu_Numero) begin
+	if isnull(@Usu_NumAux, @Str_Vacio) = @Str_Vacio begin
 		select	Err_Codigo	= '000001',
 				Err_Mensaj	= 'El Usuario ' + @Usu_Numero + ' no existe'
 		rollback
@@ -676,9 +672,7 @@ end else if @Tip_Actual = @Act_MuSeIn begin
 
 end else if @Tip_Actual	= @Act_CamSuc begin
 	
-	if not exists (select	Usu_Numero
-					from SOUSUARI noholdlock
-					where	Usu_Numero	= @Usu_Numero) begin
+	if isnull(@Usu_NumAux, @Str_Vacio) = @Str_Vacio begin
 		select	Err_Codigo	= '000001',
 				Err_Mensaj	= 'El Usuario ' + @Usu_Numero + ' no existe'
 		rollback
@@ -720,9 +714,7 @@ end else if @Tip_Actual	= @Act_CamSuc begin
 			Err_Mensaj	= 'Usuario Actualizado'
 end else if @Tip_Actual	= @Act_CamFec begin
 	
-	if not exists (select	Usu_Numero
-					from SOUSUARI noholdlock
-					where	Usu_Numero	= @Usu_Numero) begin
+	if isnull(@Usu_NumAux, @Str_Vacio) = @Str_Vacio begin
 		select	Err_Codigo	= '000001',
 				Err_Mensaj	= 'El Usuario ' + @Usu_Numero + ' no existe'
 		rollback
