@@ -32,15 +32,13 @@ declare @Int_Uno int
 select  @Int_Uno = 1
 
 insert into SORIBGEN
-	(Rig_Numero,	Rig_NumRib,		Rig_ActCre,		Rig_TiDeGo,		Rig_DepGob,
-	Rig_TieExp,		Rig_Export,		Rig_TiGeDi,		Rig_GeCoMa,		Rig_Activo,
-	NumTransac,		Transaccio,		Usuario,		FechaSis,		SucOrigen,
-	SucDestino)
+	(Rig_NumRib,	Rig_ActCre,		Rig_TiDeGo,		Rig_DepGob,		Rig_TieExp,
+	Rig_Export,		Rig_TiGeDi,		Rig_GeCoMa,		Rig_Activo,		NumTransac,
+	Transaccio,		Usuario,		FechaSis,		SucOrigen,		SucDestino)
 	values (
-	@Rig_Numero,	@Rig_NumRib,	@Rig_ActCre,	@Rig_TiDeGo,	@Rig_DepGob,
-	@Rig_TieExp,	@Rig_Export,	@Rig_TiGeDi,	@Rig_GeCoMa,	@Rig_Activo,
-	@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,
-	@SucDestino)
+	@Rig_NumRib,	@Rig_ActCre,	@Rig_TiDeGo,	@Rig_DepGob,	@Rig_TieExp,
+	@Rig_Export,	@Rig_TiGeDi,	@Rig_GeCoMa,	@Rig_Activo,	@NumTransac,
+	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino)
 
 select @Rig_Numero = @@IDENTITY 
 
