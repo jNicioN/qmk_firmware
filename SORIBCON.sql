@@ -16,6 +16,12 @@ as
 /****************************************************************/
 /* DESCRIPCION: Consulta de Reporte de Informacion Basica		*/
 /****************************************************************/
+/** Modifica:		Raul Muniz									*/
+/** Descripcion:	Se agrega L2 para buscar rib por numero de	*/
+/* 					persona										*/
+/** Fecha:			06/01/2021                               	*/
+/** Help:			1433413					 					*/
+/****************************************************************/
 /** Modifica:		Edwin Dennis								*/
 /** Descripcion:	Se agrega campo Adi_FeNaAp					*/
 /* 					Modificacion en Consulta Tipo C4			*/
@@ -208,6 +214,18 @@ end else begin
 			Rib_FeInOp,		Rib_EmOtCr,		Rib_EmSuRe,		Rib_DurSoc,		Rib_CotBol,
 			Rib_NumApo,		Rib_NumCon,		Rib_CliSuc,		Rib_EdoCiv,		Rib_NumExt,
 			Rib_LugCon,		Rib_ZonUsu, 	FechaSis
-     from SORIB noholdlock 
-   end
+		from SORIB noholdlock 
+	end
+	else if @Tip_ConCon = @Str_Dos begin	/* L2 */
+		select
+			Rib_Numero,		Rib_NumPer,		Rib_NumInt,		Rib_NumSol,		Rib_TipSol,
+			Rib_TipRib,		Rib_FecEla,		Rib_SucSol,		Rib_ConNom,		Rib_ConPue,
+			Rib_PagWeb,		Rib_ActCat,		Rib_ActEsp,		Rib_MerObj,		Rib_LlViOc,
+			Rib_UsuCap,		Rib_NoAlGo,		Rib_PaEnPo,		Rib_CabCon,		Rib_FeCaPo,
+			Rib_FeInOp,		Rib_EmOtCr,		Rib_EmSuRe,		Rib_DurSoc,		Rib_CotBol,
+			Rib_NumApo,		Rib_NumCon,		Rib_CliSuc,		Rib_EdoCiv,		Rib_NumExt,
+			Rib_LugCon,		Rib_ZonUsu, 	FechaSis
+		from SORIB noholdlock
+		where Rib_NumPer = @Rib_NumPer
+   	end
 end
