@@ -45,5 +45,5 @@ select @Rig_Numero = @@IDENTITY
 if @@nestlevel = @Int_Uno begin 
      select Err_Codigo = '000000', 
 			Err_Mensaj = 'Relacion agregada correctamente', 
-			Ric_Numero = @Rig_Numero 
+			Rig_Numero = @Rig_Numero 
 end
