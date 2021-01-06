@@ -38,7 +38,6 @@ if not exists (select Rig_Numero
 end
 
 update SORIBGEN set
-	Rig_Numero	= @Rig_Numero,
 	Rig_NumRib	= @Rig_NumRib,
 	Rig_TiDeGo	= @Rig_TiDeGo,
 	Rig_DepGob	= @Rig_DepGob,
