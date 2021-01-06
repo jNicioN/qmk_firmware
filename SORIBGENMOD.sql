@@ -57,4 +57,4 @@ where Rig_Numero = @Rig_Numero
 
 select Err_Codigo = '000000',
        Err_Mensaj = 'Registro Modificado Correctamente',
-       Ric_Numero = @Rig_Numero
+       Rig_Numero = @Rig_Numero
