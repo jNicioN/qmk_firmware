@@ -41,19 +41,27 @@ declare	@Tip_ConTip	char(1),
 declare	@Str_Vacio	char(1),
 		@Ent_Cero	int,
 		@Ent_Uno	int,
-		@Sta_Activo	char(1)
+		@Sta_Activo	char(1),
+		@Str_C		char(1),
+		@Str_L	    char(1),
+		@Str_Uno	char(1),
+		@Str_Dos	char(1)
 
 /* Asignacion de Constantes */
 select	@Str_Vacio	= '',			-- String Vacio
 		@Ent_Cero	= 0,			-- Entero : 0
 		@Ent_Uno	= 1,			-- Entero : 1
-		@Sta_Activo	= 'A'			-- Status: Activo
+		@Sta_Activo	= 'A',			-- Status: Activo
+		@Str_C		= 'C',			-- Letra C
+		@Str_L		= 'L',			-- Letra L
+		@Str_Uno	= '1',			-- String 1
+		@Str_Dos	= '2'			-- String 2
 		
 select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
 		@Tip_ConCon	= substring(@Tip_Consul, 2, 1)
 
-if @Tip_ConTip = 'C' begin
-	if @Tip_ConCon	= '1' begin
+if @Tip_ConTip = @Str_C begin
+	if @Tip_ConCon = @Str_Uno begin
 		/* consulta por folio de compra venta por rango de fecha*/
 		select 	Biu_FolUsu, Biu_Estatus, Biu_FecEst, Biu_Usuari, Biu_Sucurs, 
 				Biu_Canal,   Biu_DesEst
@@ -63,10 +71,10 @@ if @Tip_ConTip = 'C' begin
 			and Biu_FecEst < @Biu_FecFin
 			order by Biu_FecEst
 	end
-end	else if @Tip_ConTip	= 'L' begin	
+end	else if @Tip_ConTip	= @Str_L begin	
 	
 	/* conuslta todo por rango de fecha */
-	if @Tip_ConCon	= '1' begin
+	if @Tip_ConCon = @Str_Uno begin
 		select 	Biu_FolUsu, Biu_Estatus, Biu_FecEst, Biu_Usuari, Biu_Sucurs, 
 				Biu_Canal,   Biu_DesEst
 			from SOBITUSU noholdlock
@@ -76,7 +84,7 @@ end	else if @Tip_ConTip	= 'L' begin
 	end
 	
 	/* conuslta por sucursal y rango de fecha */
-	if @Tip_ConCon	= '2' begin
+	if @Tip_ConCon = @Str_Dos begin
 		select 	Biu_FolUsu, Biu_Estatus, Biu_FecEst, Biu_Usuari, Biu_Sucurs, 
 				Biu_Canal,   Biu_DesEst
 			from SOBITUSU noholdlock

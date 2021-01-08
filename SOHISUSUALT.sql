@@ -1,4 +1,4 @@
-create procedure SOHISUSUALT (
+ccreate procedure SOHISUSUALT (
 	@Hiu_FolUsu		int,					
 	@Hiu_Estatus	char(1),			
 	@Hiu_FecEst		smalldatetime,		
@@ -36,12 +36,14 @@ declare	@Ent_Existe	int,
 								/* Declaracion de constantes */
 declare	@Str_Vacio char(1),
 		@Ent_Cero  int,
-		@Ent_Uno   int
+		@Ent_Uno   int,
+		@Fec_invali varchar(10)
 
 								/* Asignacion de valores a constantes */
 select	@Str_Vacio = '',		/* String Vacio */
 		@Ent_Cero  = 0,			/* Entero cero */
-		@Ent_Uno   = 1			/* Entero uno */
+		@Ent_Uno   = 1,			/* Entero uno */
+		@Fec_invali = 'Jan 1 1990'  /* Fecha invalida */
 
 /* Validacion general de parametros vacios */
 
@@ -59,7 +61,7 @@ if isnull(@Hiu_Estatus, @Str_Vacio) = @Str_Vacio begin
 	return @Ent_Uno
 end 
 
-if @Hiu_FecEst <= 'Jan 1 1990' begin
+if @Hiu_FecEst <= @Fec_invali begin
 	select	Err_Codigo	= '000003',
 			Err_Mensaj	= 'Fecha de Estatus incorrecta',
 			Err_Variab  = 'Biu_FecEst'

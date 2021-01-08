@@ -51,18 +51,28 @@ declare	@Tip_ActEst 	varchar(1),			/* Declaración de Constantes */
 		@Sta_Bloque		varchar(1),
 		@Cue_CashBa		char(2),
 		@Cue_Refere		char(2),
-		@Biu_Canal		int
+		@Biu_Canal		int,
+		@Str_Uno		char(1),
+		@Str_Dos		char(1),
+		@Str_A			char(1),
+		@Str_I			char(1)
 
-											/* Asignación de valores a constantes 	*/
-select	@Tip_ActEst	= 'A',					/*	Tipo Act Estatus de Usuario			*/					
-		@Str_Vacio	= '',					/*	String Vacio						*/	
-		@Ent_Cero	= 0,					/*	Entero Cero							*/	
-		@Ent_Uno	= 1,					/*	Entero Uno							*/
-		@Sta_Activo = 'A',					/*	Status Activo						*/
-		@Sta_Bloque	= 'B',					/*	Status Bloqueado					*/
+											-- Asignación de valores a constantes 	
+select	@Tip_ActEst	= 'A',					--	Tipo Act Estatus de Usuario								
+		@Str_Vacio	= '',					--	String Vacio							
+		@Ent_Cero	= 0,					--	Entero Cero								
+		@Ent_Uno	= 1,					--	Entero Uno							
+		@Sta_Activo = 'A',					--	Status Activo						
+		@Sta_Bloque	= 'B',					--	Status Bloqueado					
 		@Cue_CashBa = '31',					-- Tipo de Cuenta: Cashback
 		@Cue_Refere = '50',					-- Tipo de Cuenta: Referenciado
-		@Biu_Canal  = 5						/* Canal de actualizacion del usuario correspondiente a Apertura*/
+		@Biu_Canal  = 5,					-- Canal de actualizacion del usuario correspondiente a Apertura
+		@Str_Uno	= '1',					-- String 1
+		@Str_Dos	= '2',					-- String 2
+		@Str_A		= 'A',					-- Letra I
+		@Str_I		= 'I'					-- Leta A
+
+select @FechaSis = getdate()
 
 if isnull(@Tip_Actual, @Str_Vacio) = @Str_Vacio  begin
 		select	Err_Codigo = '000001',
@@ -96,7 +106,7 @@ if @Tip_ActTip = @Tip_ActEst begin
 	where Une_Identi = @Une_Identi
 	
 	/* Se obtiene el nombre y fecha de nacimiento en su tabla de origen para buscar despues si hay homonimo activo */
-	if @Une_TabOri = '1' begin
+	if @Une_TabOri = @Str_Uno begin
 		select @Use_NoCoUs = Per_Comple,
 			   @Use_FecNac = Adi_FecNac
 		from SOUSNAEX noholdlock 
@@ -106,7 +116,7 @@ if @Tip_ActTip = @Tip_ActEst begin
 		and Une_Identi = @Une_Identi
 	end
 	
-	if @Une_TabOri = '2' begin
+	if @Une_TabOri = @Str_Dos begin
 		select @Use_NoCoUs = Use_NoCoUs,
 			   @Use_FecNac = Use_FecNac
 		from SOUSNAEX noholdlock 
@@ -160,7 +170,7 @@ if @Tip_ActTip = @Tip_ActEst begin
 	end
 	
 	/* se checa si el cambio del estatus es activacion o inactivacion, si es inactivacion no hace la validacion de cuenta activa */
-	if @Tip_ActAct = 'A' begin 
+	if @Tip_ActAct = @Str_A begin 
 	
 		if @Cliente = @Ent_Uno begin
 			select	@Mensaje = 'No se ha podido activar porque existe un Cliente con cuentas Activas o Bloqueadas con el nombre ' + @Use_NoCoUs
@@ -176,9 +186,9 @@ if @Tip_ActTip = @Tip_ActEst begin
 			return @Ent_Uno
 		end
 		
-	select @Biu_DesEst = 'Activacion de estatus de Usuario de compra venta'  /* Descripcion para la bitacora */
+	select @Biu_DesEst = 'Reactivacion de estatus de Usuario de compra venta'  /* Descripcion para la bitacora */
 	
-	end else if @Tip_ActAct = 'I' begin 
+	end else if @Tip_ActAct = @Str_I begin 
 		
 		select @Biu_DesEst = 'Inactivacion de Usuario de compra venta por actvacion de Cuenta'  /* Descripcion para la bitacora */
 	
@@ -194,19 +204,15 @@ if @Tip_ActTip = @Tip_ActEst begin
 		SucDestino	= @SucDestino
 	where	Une_Identi	= @Une_Identi
 	
-	exec @Status = SOBITUSUALT 
+	exec SOBITUSUALT 
 	@Une_Identi, @Une_Estatu, @FechaSis,   @Usuario,    @SucOrigen,  
 	@Biu_Canal,  @Biu_DesEst, @NumTransac, @Transaccio, @Usuario,	  
 	@FechaSis,	 @SucOrigen,  @SucDestino, @Modulo
 	
-	if @Status <> @Ent_Cero begin
-		rollback
-		return @Ent_Uno
-	end
-	
-	if @@nestlevel = @Ent_Uno 
+	if @@nestlevel = @Ent_Uno and @Une_Estatu = @Sta_Activo
 		select	Err_Codigo	= '000000',
 				Err_Mensaj	= 'Usuario Activado',
 				Use_Numero	= @Une_Identi
 		return @Ent_Uno
+		
 end
