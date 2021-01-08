@@ -21,7 +21,7 @@ as
 ****************************************************************************
 ** Modificó:	Juan Jose Sandoval Marin								****
 ** Fecha:		07/Ene/2021												****
-** Help:		1306640													****
+** Help:		1381544													****
 ** Descripcion:	Se elimina begin tran en final del SP					****
 ****************************************************************************
 ** Modificó:	Juan Jose Sandoval Marin								****
