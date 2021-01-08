@@ -190,9 +190,9 @@ declare	@Tab_Nombre char(8),		/* Declaracion de Constantes */
 		@Act_CamFec char(1),
 		@Mod_Ventan	char(2),
 		@Act_Correo	char(30), 
-		@Usu_Uno    char, 
-		@Usu_SWAT   char,
-		@Usu_Java	char
+		@Usu_Uno    char(6), 
+		@Usu_SWAT   char(6),
+		@Usu_Java	char(6)
 
 
 /* Asignación de Constantes */
