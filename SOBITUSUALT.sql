@@ -1,6 +1,6 @@
 create procedure SOBITUSUALT (
 	@Biu_FolUsu		int,				
-	@Biu_Estatus	char(1),				
+	@Biu_Estatu		char(1),				
 	@Biu_FecEst		smalldatetime,		
 	@Biu_Usuari		char(6),			
 	@Biu_Sucurs		char(3),			
@@ -28,10 +28,6 @@ as
 ** Help Desk:	1376175										 			****
 ****************************************************************************
 **/
-
-								/* Declaracion de Variables */
-declare	@Ent_Existe	int,
-		@Une_IdeInt int
 		
 								/* Declaracion de constantes */
 declare	@Str_Vacio char(1),
@@ -54,7 +50,7 @@ if isnull(@Biu_FolUsu, @Ent_Cero) = @Ent_Cero begin
 	return @Ent_Uno
 end 
 
-if isnull(@Biu_Estatus, @Str_Vacio) = @Str_Vacio begin
+if isnull(@Biu_Estatu, @Str_Vacio) = @Str_Vacio begin
 	select	Err_Codigo = '000002',
 			Err_Mensaj = 'El Estatus no puede ir vacio.'
 	rollback
@@ -98,10 +94,10 @@ if isnull(@Biu_DesEst, @Str_Vacio) = @Str_Vacio begin
 end 
 
 insert into SOBITUSU ( 
-	Biu_FolUsu, Biu_Estatus, Biu_FecEst, Biu_Usuari, Biu_Sucurs, 
+	Biu_FolUsu, Biu_Estatu, Biu_FecEst, Biu_Usuari, Biu_Sucurs, 
 	Biu_Canal,   Biu_DesEst, NumTransac, Transaccio, Usuario,	 
 	FechaSis,	 SucOrigen,	 SucDestino)
 	values (
-	@Biu_FolUsu, @Biu_Estatus, 	@Biu_FecEst, @Biu_Usuari, @Biu_Sucurs, 
+	@Biu_FolUsu, @Biu_Estatu, 	@Biu_FecEst, @Biu_Usuari, @Biu_Sucurs, 
 	@Biu_Canal,  @Biu_DesEst, 	@NumTransac, @Transaccio, @Usuario,	 
 	@FechaSis,	 @SucOrigen,	@SucDestino)

@@ -29,7 +29,7 @@ select	@Ent_Cero  = 0			/* Entero cero */
 begin transaction
 
 	insert into SOHISUSU 
-	select 	Biu_FolUsu, Biu_Estatus, Biu_FecEst, Biu_Usuari, Biu_Sucurs, 
+	select 	Biu_FolUsu, Biu_Estatu, Biu_FecEst, Biu_Usuari, Biu_Sucurs, 
 			Biu_Canal, Biu_DesEst, @NumTransac, @Transaccio, @Usuario, 
 			@FechaSis, @SucOrigen, @SucDestino
 	from SOBITUSU noholdlock

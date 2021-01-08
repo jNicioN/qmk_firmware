@@ -1,6 +1,6 @@
-ccreate procedure SOHISUSUALT (
+create procedure SOHISUSUALT (
 	@Hiu_FolUsu		int,					
-	@Hiu_Estatus	char(1),			
+	@Hiu_Estatu		char(1),			
 	@Hiu_FecEst		smalldatetime,		
 	@Hiu_Usuari		char(6),				
 	@Hiu_Sucurs		char(3),				
@@ -29,10 +29,6 @@ as
 ****************************************************************************
 **/
 
-								/* Declaracion de Variables */
-declare	@Ent_Existe	int,
-		@Une_IdeInt int
-		
 								/* Declaracion de constantes */
 declare	@Str_Vacio char(1),
 		@Ent_Cero  int,
@@ -54,7 +50,7 @@ if isnull(@Hiu_FolUsu, @Ent_Cero) = @Ent_Cero begin
 	return @Ent_Uno
 end 
 
-if isnull(@Hiu_Estatus, @Str_Vacio) = @Str_Vacio begin
+if isnull(@Hiu_Estatu, @Str_Vacio) = @Str_Vacio begin
 	select	Err_Codigo = '000002',
 			Err_Mensaj = 'El Estatus no puede ir vacio.'
 	rollback
@@ -98,11 +94,11 @@ if isnull(@Hiu_DesEst, @Str_Vacio) = @Str_Vacio begin
 end 
 
 insert into SOHISUSU ( 
-	Hiu_FolUsu, Hiu_Estatus, Hiu_FecEst, Hiu_Usuari, Hiu_Sucurs, 
+	Hiu_FolUsu, Hiu_Estatu, Hiu_FecEst, Hiu_Usuari, Hiu_Sucurs, 
 	Hiu_Canal,  Hiu_DesEst,  NumTransac, Transaccio, Usuario,	 
 	FechaSis,	SucOrigen,	 SucDestino)
 	values (
-	@Hiu_FolUsu, @Hiu_Estatus, @Hiu_FecEst, @Hiu_Usuari, @Hiu_Sucurs, 
+	@Hiu_FolUsu, @Hiu_Estatu, @Hiu_FecEst, @Hiu_Usuari, @Hiu_Sucurs, 
 	@Hiu_Canal,  @Hiu_DesEst,  @NumTransac, @Transaccio, @Usuario,	   
 	@FechaSis,	 @SucOrigen,   @SucDestino)
 	
