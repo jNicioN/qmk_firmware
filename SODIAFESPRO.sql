@@ -20,6 +20,11 @@ as
 ****************************************************************************
 ****************************************************************************
 ** Modificó:	Juan Jose Sandoval Marin								****
+** Fecha:		07/Ene/2021												****
+** Help:		1381544													****
+** Descripcion:	Se elimina begin tran en final del SP					****
+****************************************************************************
+** Modificó:	Juan Jose Sandoval Marin								****
 ** Fecha:		02/Oct/2019												****
 ** Help:		1306640													****
 ** Descripcion:	Se agrega tabla BEFADOCU								****
@@ -4412,6 +4417,3 @@ if @Var_Contin = @Sta_Si begin
 	
 	commit
 end
-
-
-begin transaction
