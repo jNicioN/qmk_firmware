@@ -23,6 +23,11 @@ as
 /***************************************************************************
 ** Descripción:	 Modificación de Descripcion							****
 ****************************************************************************
+** Modifico:		Carlos Ramirez										****
+** Fecha:		    17-12-2020											****
+** Help:		    1437949												****
+** Descripcion:		Se agrega validacion para @Dim_NumCP				****
+****************************************************************************
 ** Modifico:			Norma Tijerina									****
 ** Fecha:		    31-05-2017											****
 ** Help:		    00946339											****
@@ -37,29 +42,32 @@ as
 ** Help:		    00909908											****
 ****************************************************************************/
 
+										/* Declaracion de variables */
+declare @Val_Existe int
+
 										/* Declaración de constantes */
 declare	@Status		int,
 		@Str_Vacio	char(1),
 		@Ent_Cero	int,
 		@Ent_Uno	int,
-		@Bdp_TipDir 	int,
-		@Bdp_Calle		char(40), 
-		@Bdp_NumExt    	char(10),
-		@Bdp_NumInt    	char(10),
-		@Bdp_NumCP     	char(6),
-		@Bdp_EntCa1    	varchar(255),
-		@Bdp_EntCa2    	varchar(255),
-		@Bdp_Refere    	varchar(255),
-		@Bdp_Status		char(1),
-		@Bdp_FecCam		smalldatetime,
-		@Bdp_NumTra		char(10),
-		@Bdp_Transa		char(3),
-		@Bdp_Usuari		char(6),
-		@Bdp_FecSis		smalldatetime,
-		@Bdp_SucOri		char(3),
-		@Bdp_SucDes		char(3),
-		@Str_A			char(1), 
-		@Bdp_Modulo		char(2)
+		@Bdp_TipDir int,
+		@Bdp_Calle	char(40), 
+		@Bdp_NumExt char(10),
+		@Bdp_NumInt char(10),
+		@Bdp_NumCP  char(6),
+		@Bdp_EntCa1 varchar(255),
+		@Bdp_EntCa2 varchar(255),
+		@Bdp_Refere varchar(255),
+		@Bdp_Status	char(1),
+		@Bdp_FecCam	smalldatetime,
+		@Bdp_NumTra	char(10),
+		@Bdp_Transa	char(3),
+		@Bdp_Usuari	char(6),
+		@Bdp_FecSis	smalldatetime,
+		@Bdp_SucOri	char(3),
+		@Bdp_SucDes	char(3),
+		@Str_A		char(1), 
+		@Bdp_Modulo	char(2)
 										/* Asignación de constantes */
 select	@Str_Vacio	= '',				/* String vacío */
 		@Ent_Cero	= 0,				/* Entero en cero */
@@ -97,6 +105,19 @@ if @Dip_TipDir = @Ent_Cero begin
 	return @Ent_Uno
 
 end
+
+--Se agrega validacion para @Dip_NumCP
+select @Val_Existe = @Ent_Cero
+	select @Val_Existe = count(Cpc_Numero)
+		from CLCODPOS noholdlock
+			where	Cpc_Numero	= @Dip_NumCP
+		if @Val_Existe <= @Ent_Cero 
+		begin
+			select	Err_Codigo	= '000004',
+					Err_Mensaj	= 'El parámetro @Dip_NumCP no es valido.',
+					Err_Variab	= '@Dip_NumCP'
+			rollback
+		end
 
 select 
 	@Bdp_TipDir 	= Dip_TipDir,
