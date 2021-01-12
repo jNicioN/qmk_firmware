@@ -4,9 +4,14 @@ create procedure SOUSUARIACT (
 	@Usu_PassWo	char(32),			/*	Contraseña con 32 caracteres Encriptados por RACAL 				*/
 	@Usu_FeAcPa	smalldatetime,
 	@Usu_IPSesi	char(15),
-	@Tip_Actual	char(1),			/*  P. Cambio de Password, I. Inactivar Usuario, A. Activar Usuario
-										U. Fecha Ultimo Acceso, B. Baja de Usuario  
-										L. Limpiar Sesiones de Usuario, R. Reactivar Usuario 			*/
+	@Tip_Actual	char(1),			/*  P. Cambio de Password, 
+										I. Inactivar Usuario, 
+										A. Activar Usuario,
+										U. Fecha Ultimo Acceso,
+										B. Baja de Usuario  
+										L. Limpiar Sesiones de Usuario,
+										R. Reactivar Usuario, 
+										F. Cambiar fecha de caducidad de usuario */
 	@NumTransac	char(10),
 	@Transaccio	char(3),
 	@Usuario	char(6),
@@ -23,6 +28,12 @@ as
 /** REFERENCIAS: 
 ****************************************************************************
 ** Si se compila este stored en Prod, dar acceso a BLOQUEAR				****
+****************************************************************************
+** Modificó:	Eliel de la O Silva										****
+** Fecha:		11/12/2020												****
+** Descripción:	Modificacion para cambiar la fecha de caducidad de un  ****
+**				usuario													****
+** Help Desk:	1205794													****
 ****************************************************************************
 ** Modificó:	Eliel de la O Silva										****
 ** Fecha:		19/08/2020												****
@@ -147,7 +158,9 @@ declare	@Status		int,			/* Declaracion de Variables */
 		@Usu_MulSes	char(1),
 		@Sta_SesAct	char(1),
 		@IP_SesAct	char(15),
-		@Par_FecAct	smalldatetime
+		@Par_FecAct	smalldatetime,
+		@Usu_NumAux char,
+		@Usu_ClaAux char				
 
 declare	@Tab_Nombre char(8),		/* Declaracion de Constantes */
 		@Str_Vacio	char(1),
@@ -174,46 +187,58 @@ declare	@Tab_Nombre char(8),		/* Declaracion de Constantes */
 		@Act_MuSeAc	char(1),
 		@Act_MuSeIn	char(1),
 		@Act_CamSuc	char(1),
+		@Act_CamFec char(1),
 		@Mod_Ventan	char(2),
-		@Can_Correo	char(30)
-		
+		@Act_Correo	char(30), 
+		@Usu_Uno    char(6), 
+		@Usu_SWAT   char(6),
+		@Usu_Java	char(6)
+
 
 /* Asignación de Constantes */
-select	@Tab_Nombre	= 'SOUSUARI',	/* Nombre de la Tabla Local que se va actualizar	*/
-		@Str_Vacio	= '',			/* String Vacío										*/
-		@Str_Si		= 'S',			/* String Si										*/
-		@Str_No		= 'N',			/* String No										*/
-		@Ent_Cero	= 0,			/* Entero en Cero									*/
-		@Ent_Uno	= 1,			/* Entero en Uno									*/
-		@Si_Activo	= 'S',			/* Usuario Activo									*/
-		@No_Activo	= 'N',			/* Usuario No Activo								*/
-		@Sta_Inacti	= 'I',			/* Status de Usuario Inactivo						*/
-		@Sta_Activo	= 'A',			/* Status de Usuario Activo							*/
-		@Sta_Cancel	= 'C',			/* Status de Cancelado								*/
-		@Fec_Vacia	= '1900-01-01',	/* Fecha Vacía										*/
-		@Act_CamPas	= 'P',			/* Actualización de Cambio de Password				*/
-		@Act_InaUsu	= 'I',			/* Actualización de Inactivar Usuario				*/
-		@Act_ActUsu	= 'A',			/* Actualización de Activar Usuario					*/
-		@Act_UltAcc	= 'U',			/* Actualización de Fecha de último acceso			*/
-		@Act_BajSes	= 'S',			/* Actualización por Baja de Sesión					*/
-		@Act_Baja	= 'B',			/* Baja del Sistema									*/
-		@Act_Limpia	= 'L',			/* Actualización de Inicializacion de Sesión		*/
-		@Act_Sucurs	= 'C',			/* Actualización de Sucursal						*/
-		@Act_Reacti	= 'R',			/* Actualización de Reactivar Usuario Cancelado		*/
-		@Act_UlAcIn	= 'D',			/* Actualización de Fecha de último acceso Intranet	*/
-		@Act_MuSeAc	= 'M',			/* Actualización de Multisesión (Activar)			*/
-		@Act_MuSeIn	= 'Q',			/* Actualización de Multisesión (Desactivar)		*/
-		@Act_CamSuc	= 'Z',			/* Actualización de Cambio de Sucursal Sibamex3		*/
-		@Mod_Ventan	= 'VE',			/* Módulo Ventanilla								*/
-		@Can_Correo	= 'micorreo@banregio.com' /*Actualización baja Usuario              */
+select	@Tab_Nombre	= 'SOUSUARI',					/* Nombre de la Tabla Local que se va actualizar	*/
+		@Str_Vacio	= '',							/* String Vacío										*/
+		@Str_Si		= 'S',							/* String Si										*/
+		@Str_No		= 'N',							/* String No										*/
+		@Ent_Cero	= 0,							/* Entero en Cero									*/
+		@Ent_Uno	= 1,							/* Entero en Uno									*/
+		@Si_Activo	= 'S',							/* Usuario Activo									*/
+		@No_Activo	= 'N',							/* Usuario No Activo								*/
+		@Sta_Inacti	= 'I',							/* Status de Usuario Inactivo						*/
+		@Sta_Activo	= 'A',							/* Status de Usuario Activo							*/
+		@Sta_Cancel	= 'C',							/* Status de Cancelado								*/
+		@Fec_Vacia	= '1900-01-01',					/* Fecha Vacía										*/
+		@Act_CamPas	= 'P',							/* Actualización de Cambio de Password				*/
+		@Act_InaUsu	= 'I',							/* Actualización de Inactivar Usuario				*/
+		@Act_ActUsu	= 'A',							/* Actualización de Activar Usuario					*/
+		@Act_UltAcc	= 'U',							/* Actualización de Fecha de último acceso			*/
+		@Act_BajSes	= 'S',							/* Actualización por Baja de Sesión					*/
+		@Act_Baja	= 'B',							/* Baja del Sistema									*/
+		@Act_Limpia	= 'L',							/* Actualización de Inicializacion de Sesión		*/
+		@Act_Sucurs	= 'C',							/* Actualización de Sucursal						*/
+		@Act_Reacti	= 'R',							/* Actualización de Reactivar Usuario Cancelado		*/
+		@Act_UlAcIn	= 'D',							/* Actualización de Fecha de último acceso Intranet	*/
+		@Act_MuSeAc	= 'M',							/* Actualización de Multisesión (Activar)			*/
+		@Act_MuSeIn	= 'Q',							/* Actualización de Multisesión (Desactivar)		*/
+		@Act_CamSuc	= 'Z',							/* Actualización de Cambio de Sucursal Sibamex3		*/
+		@Act_CamFec	= 'F',							/* Cambiar Fecha de Caducidad de Usuario			*/
+		@Mod_Ventan	= 'VE',							/* Módulo Ventanilla								*/
+		@Act_Correo	= 'micorreo@banregio.com',		/*Actualización baja Usuario       				    */
+		@Usu_Uno 	= '000001',   					/* Usu_Clave = BRM98888								*/
+		@Usu_SWAT   = '000662',						/* Usu_Clave = BRMDSWAT								*/
+		@Usu_Java	= '001104'						/* Usu_Clave = JAVA 								*/
+		
 
 select	@FechaSis	= getdate()
 
+select		@Usu_NumAux  = Usu_Numero, 
+			@Usu_ClaAux  = Usu_Clave
+	from SOUSUARI noholdlock
+	where	Usu_Numero	 = @Usu_Numero
+
 if @Tip_Actual = @Act_CamPas begin
 
-	if not exists (select	Usu_Numero
-					from SOUSUARI noholdlock
-					where	Usu_Numero	= @Usu_Numero) begin
+	if isnull(@Usu_NumAux, @Str_Vacio) = @Str_Vacio begin
 		select	Err_Codigo	= '000001',
 				Err_Mensaj	= 'El Usuario ' + @Usu_Numero + ' no existe'
 		rollback
@@ -235,7 +260,7 @@ if @Tip_Actual = @Act_CamPas begin
 	exec @Status = SOHISPASALT
 		@Usu_Numero,	@Usu_PassWo,	@NumTransac,	@Transaccio,	@Usuario,
 		@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
-	if @Status <> 0 begin
+	if @Status <> @Ent_Cero begin
 		rollback
 		return 1
 	end
@@ -245,9 +270,7 @@ if @Tip_Actual = @Act_CamPas begin
 
 end else if @Tip_Actual = @Act_InaUsu begin
 
-	if not exists (select	Usu_Clave
-					from SOUSUARI noholdlock
-					where	Usu_Clave	= @Usu_Clave) begin
+	if isnull(@Usu_Clave, @Str_Vacio) = @Str_Vacio begin
 		select	Err_Codigo	= '000001',
 				Err_Mensaj	= 'El Usuario con Clave ' + @Usu_Clave + ' no existe'
 		rollback
@@ -269,7 +292,7 @@ end else if @Tip_Actual = @Act_InaUsu begin
 	exec @Status = SYTABLOCACT
 		@Tab_Nombre,	@NumTransac,	@Transaccio,	@Usuario,	@FechaSis,
 		@SucOrigen,		@SucDestino,	@Modulo
-	if @Status <> 0 begin
+	if @Status <> @Ent_Cero begin
 		rollback
 		return 1
 	end
@@ -279,9 +302,7 @@ end else if @Tip_Actual = @Act_InaUsu begin
 
 end else if @Tip_Actual = @Act_ActUsu begin
 
-	if not exists (select	Usu_Numero
-					from SOUSUARI noholdlock
-					where	Usu_Numero	= @Usu_Numero) begin
+	if isnull(@Usu_NumAux, @Str_Vacio) = @Str_Vacio begin
 		select	Err_Codigo	= '000001',
 				Err_Mensaj	= 'El Usuario no existe',
 				Err_Variab	= 'Usu_Numero'
@@ -304,7 +325,7 @@ end else if @Tip_Actual = @Act_ActUsu begin
 	execute @Status = SYTABLOCACT
 		@Tab_Nombre,	@NumTransac,	@Transaccio,	@Usuario,	@FechaSis,
 		@SucOrigen,		@SucDestino,	@Modulo
-	if @Status <> 0 begin
+	if @Status <> @Ent_Cero begin
 		rollback
 		return 1
 	end
@@ -329,7 +350,7 @@ end else if @Tip_Actual = @Act_UltAcc begin
 		return 1
 	end
 
-	if @Usu_Numero <> '000001' and @Usu_Numero <> '000662' and @Usu_Numero <> '001104' begin
+	if @Usu_Numero <> @Usu_Uno and @Usu_Numero <> @Usu_SWAT and @Usu_Numero <> @Usu_Java begin
 
 		/* Sacar la IP si no se mandó de parámetro (en Fox no se envía) */
 		if isnull(@Usu_IPSesi, @Str_Vacio) = @Str_Vacio
@@ -373,7 +394,7 @@ end else if @Tip_Actual = @Act_UltAcc begin
 	execute @Status = RHASIGRAALT
 		@Usu_Numero,	@Par_FecAct,	@NumTransac,	@Transaccio,	@Usuario,
 		@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
-	if @Status <> 0 begin
+	if @Status <> @Ent_Cero begin
 		rollback
 		return 1
 	end
@@ -415,7 +436,7 @@ end else if @Tip_Actual = @Act_BajSes begin
 	execute @Status = SYTABLOCACT
 		@Tab_Nombre,	@NumTransac,	@Transaccio,	@Usuario,	@FechaSis,
 		@SucOrigen,		@SucDestino,	@Modulo
-	if @Status <> 0 begin
+	if @Status <> @Ent_Cero begin
 		rollback
 		return 1
 	end
@@ -425,9 +446,7 @@ end else if @Tip_Actual = @Act_BajSes begin
 
 end else if @Tip_Actual = @Act_Baja begin
 
-	if not exists (select	Usu_Numero
-					from SOUSUARI noholdlock
-					where	Usu_Numero	= @Usu_Numero) begin
+	if isnull(@Usu_NumAux, @Str_Vacio) = @Str_Vacio begin
 		select	Err_Codigo	= '000001',
 				Err_Mensaj	= 'El Usuario no existe',
 				Err_Variab	= 'Usu_Numero'
@@ -439,7 +458,7 @@ end else if @Tip_Actual = @Act_Baja begin
 		Usu_Status	= @Sta_Cancel,
 		Usu_Activo	= @No_Activo,
 		Usu_FecDes	= @FechaSis,
-		Usu_EMail  = @Can_Correo,
+		Usu_EMail   = @Act_Correo,
 
 		NumTransac	= @NumTransac,
 		Transaccio	= @Transaccio,
@@ -452,7 +471,7 @@ end else if @Tip_Actual = @Act_Baja begin
 	execute @Status = SYTABLOCACT
 		@Tab_Nombre,	@NumTransac,	@Transaccio,	@Usuario,	@FechaSis,
 		@SucOrigen,		@SucDestino,	@Modulo
-	if @Status <> 0 begin
+	if @Status <> @Ent_Cero begin
 		rollback
 		return 1
 	end
@@ -462,9 +481,7 @@ end else if @Tip_Actual = @Act_Baja begin
 
 end else if @Tip_Actual = @Act_Limpia begin
 
-	if not exists (select	Usu_Numero
-					from SOUSUARI noholdlock
-					where	Usu_Numero	= @Usu_Numero) begin
+	if isnull(@Usu_NumAux, @Str_Vacio) = @Str_Vacio begin
 		select	Err_Codigo	= '000001',
 				Err_Mensaj	= 'El Usuario no existe',
 				Err_Variab	= 'Usu_Numero'
@@ -488,7 +505,7 @@ end else if @Tip_Actual = @Act_Limpia begin
 	execute @Status = SYTABLOCACT
 		@Tab_Nombre,	@NumTransac,	@Transaccio,	@Usuario,	@FechaSis,
 		@SucOrigen,		@SucDestino,	@Modulo
-	if @Status <> 0 begin
+	if @Status <> @Ent_Cero begin
 		rollback
 		return 1
 	end
@@ -574,9 +591,7 @@ end else if @Tip_Actual = @Act_UlAcIn begin
 
 end else if @Tip_Actual = @Act_Reacti begin
 
-	if not exists (select	Usu_Numero
-					from SOUSUARI noholdlock
-					where	Usu_Numero	= @Usu_Numero) begin
+	if isnull(@Usu_NumAux, @Str_Vacio) = @Str_Vacio begin
 		select	Err_Codigo	= '000001',
 				Err_Mensaj	= 'El Usuario ' + @Usu_Numero + ' no existe'
 		rollback
@@ -599,7 +614,7 @@ end else if @Tip_Actual = @Act_Reacti begin
 	execute @Status = SYTABLOCACT
 		@Tab_Nombre,	@NumTransac,	@Transaccio,	@Usuario,	@FechaSis,
 		@SucOrigen,		@SucDestino,	@Modulo
-	if @Status <> 0 begin
+	if @Status <> @Ent_Cero begin
 		rollback
 		return 1
 	end
@@ -609,9 +624,7 @@ end else if @Tip_Actual = @Act_Reacti begin
 
 end else if @Tip_Actual = @Act_MuSeAc begin
 
-	if not exists (select	Usu_Numero
-					from SOUSUARI noholdlock
-					where	Usu_Numero	= @Usu_Numero) begin
+	if isnull(@Usu_Numero, @Str_Vacio) = @Str_Vacio begin
 		select	Err_Codigo	= '000001',
 				Err_Mensaj	= 'El Usuario ' + @Usu_Numero + ' no existe'
 		rollback
@@ -635,9 +648,7 @@ end else if @Tip_Actual = @Act_MuSeAc begin
 
 end else if @Tip_Actual = @Act_MuSeIn begin
 
-	if not exists (select	Usu_Numero
-					from SOUSUARI noholdlock
-					where	Usu_Numero	= @Usu_Numero) begin
+	if isnull(@Usu_NumAux, @Str_Vacio) = @Str_Vacio begin
 		select	Err_Codigo	= '000001',
 				Err_Mensaj	= 'El Usuario ' + @Usu_Numero + ' no existe'
 		rollback
@@ -661,9 +672,7 @@ end else if @Tip_Actual = @Act_MuSeIn begin
 
 end else if @Tip_Actual	= @Act_CamSuc begin
 	
-	if not exists (select	Usu_Numero
-					from SOUSUARI noholdlock
-					where	Usu_Numero	= @Usu_Numero) begin
+	if isnull(@Usu_NumAux, @Str_Vacio) = @Str_Vacio begin
 		select	Err_Codigo	= '000001',
 				Err_Mensaj	= 'El Usuario ' + @Usu_Numero + ' no existe'
 		rollback
@@ -703,4 +712,27 @@ end else if @Tip_Actual	= @Act_CamSuc begin
 
 	select	Err_Codigo	= '000000',
 			Err_Mensaj	= 'Usuario Actualizado'
+end else if @Tip_Actual	= @Act_CamFec begin
+	
+	if isnull(@Usu_NumAux, @Str_Vacio) = @Str_Vacio begin
+		select	Err_Codigo	= '000001',
+				Err_Mensaj	= 'El Usuario ' + @Usu_Numero + ' no existe'
+		rollback
+		return 1
+	end
+	/* Actualizar */
+	update SOUSUARI set
+		Usu_FeAcPa = @Usu_FeAcPa,
+
+		NumTransac	= @NumTransac,
+		Transaccio	= @Transaccio,
+		Usuario		= @Usuario,
+		FechaSis	= @FechaSis,
+		SucOrigen	= @SucOrigen,
+		SucDestino	= @SucDestino
+		where	Usu_Numero	= @Usu_Numero
+
+	select	Err_Codigo	= '000000',
+			Err_Mensaj	= 'Fecha Actualizada'
 end
+
