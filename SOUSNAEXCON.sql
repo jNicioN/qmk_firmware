@@ -34,6 +34,12 @@ as
 *********************************************************************************
 ** Referencias: 															  	*
 *********************************************************************************
+** Modifico:	Carlos Copto													*
+** Descripcion : Se agrego el retorno del campo Une_Estatu en la consulta 		*
+**				 cuando Une_TabCon es 1											*
+** Fecha:	18/11/2020															*
+** Help:	1376175     														*
+*********************************************************************************
 ** Creo:	Carlos Copto														*
 ** Fecha:	13/07/2020															*
 ** Help:	1376175     														*
@@ -81,7 +87,8 @@ if @Une_TabCon = '0' begin   /* Consultas propias a SOUSNAEX */
 		
 		/* se obtiene el id de la tabla de extranjeros */
 		select @Une_IdeUsu = Une_IdeUsu
-		from SOUSNAEX noholdlock inner join SOUSUEXT on Une_IdeUsu = Use_IdUsEx 
+		from SOUSNAEX noholdlock 
+		inner join SOUSUEXT noholdlock on Une_IdeUsu = Use_IdUsEx 
 		where Une_Identi = @Ent_Identi
 
 		if @Tip_ConCon = @Str_LetraI begin
@@ -124,7 +131,7 @@ if @Une_TabCon = '0' begin   /* Consultas propias a SOUSNAEX */
 
 end else if @Une_TabCon = '1' begin   /* Si la consulta es de compra venta nacional  */
 	
-	select Une_IdeUsu
+	select Une_IdeUsu, Une_Estatu
 	from SOUSNAEX noholdlock
 	where Une_Identi = @Une_Identi and Une_TabOri = @Une_TabCon
 
