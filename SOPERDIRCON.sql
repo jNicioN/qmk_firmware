@@ -187,7 +187,7 @@ CREATE INDEX CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 			inner join  CLCLIUNI clc noholdlock
 			on clu.Clu_Grupo = clc.Clu_Grupo  and clu.Clu_Grupo = clc.Clu_Client 
 			
-			delete from #CLCLIUNI
+			delete from #CLCLIUNI where Cli_ClieId is not null
 			
 			-- Buscamos su ID CLIENTE
 			INSERT INTO #CLCLIUNI (Cli_ClieId,Adi_Client, Adi_NumPer)
@@ -276,7 +276,7 @@ CREATE INDEX CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 		inner join  SOUNIPER so noholdlock
 		on p.Peu_Grupo = so.Peu_Grupo and p.Peu_Grupo = so.Peu_Person
 		
-		delete from #SOPERINF
+		delete from #SOPERINF where Per_Numero is not null
 		 
 		-- Busqueda de Persona por RFC
 		INSERT INTO #SOPERINF (Per_Numero,Per_Nombre,Per_ApePat,Per_ApeMat,
@@ -311,7 +311,7 @@ CREATE INDEX CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 			inner join  CLCLIUNI clc noholdlock
 			on clu.Clu_Grupo = clc.Clu_Grupo  and clu.Clu_Grupo = clc.Clu_Client 
 			
-			delete from #CLCLIUNI
+			delete from #CLCLIUNI where Cli_ClieId is not null
 			
 			-- Buscamos su ID CLIENTE
 			INSERT INTO #CLCLIUNI (Cli_ClieId,Adi_Client, Adi_NumPer)
@@ -397,7 +397,7 @@ CREATE INDEX CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 			inner join  SOUNIPER so noholdlock
 			on p.Peu_Grupo = so.Peu_Grupo and p.Peu_Grupo = so.Peu_Person
 			
-			delete from #SOPERINF
+			delete from #SOPERINF where Per_Numero is not null
 				
 		 -- Busqueda de Persona por RFC
 			INSERT INTO #SOPERINF (Per_Numero,Per_Nombre,Per_ApePat,Per_ApeMat,
@@ -432,7 +432,7 @@ CREATE INDEX CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 			inner join  CLCLIUNI clc noholdlock
 			on clu.Clu_Grupo = clc.Clu_Grupo  and clu.Clu_Grupo = clc.Clu_Client 
 			
-			delete from #CLCLIUNI
+			delete from #CLCLIUNI where Cli_ClieId is not null
 			
 			-- Buscamos su ID CLIENTE
 			INSERT INTO #CLCLIUNI (Cli_ClieId,Adi_Client, Adi_NumPer)
@@ -517,7 +517,7 @@ CREATE INDEX CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 			inner join  SOUNIPER so noholdlock
 			on p.Peu_Grupo = so.Peu_Grupo and p.Peu_Grupo = so.Peu_Person
 			
-			delete from #SOPERINF
+			delete from #SOPERINF where Per_Numero is not null
 			
 			 -- Busqueda de Persona por Nombre
 			INSERT INTO #SOPERINF (Per_Numero,Per_Nombre,Per_ApePat,Per_ApeMat,
