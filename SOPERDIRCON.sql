@@ -124,11 +124,11 @@ CREATE TABLE #CLCLIUNI (
     )
 CREATE INDEX CLCLIUNI ON #CLCLIUNI (Adi_Client)
 
-CREATE TABLE #Colonias (
+CREATE TABLE #CLCOLONI (
             Cpc_Numero  char(6)     not null,
             Cpc_Nombre  varchar(60) not null
     )
-CREATE INDEX Colonias ON #Colonias (Cpc_Nombre)
+CREATE INDEX CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 
 
 	if @Tip_ConTip = @Str_LetraC begin					/* 'C':  Consulta */
@@ -202,7 +202,7 @@ CREATE INDEX Colonias ON #Colonias (Cpc_Nombre)
 			where Per_Locali = Loc_Numero 
 			
 			-- Se obtiene colonias de acuerdo al codigo postal
-			INSERT INTO #Colonias (Cpc_Numero,Cpc_Nombre)	 
+			INSERT INTO #CLCOLONI (Cpc_Numero,Cpc_Nombre)	 
 			select Cpc_Numero,Cpc_Nombre 
 			from CLCODPOS noholdlock
 			inner join #SOPERINF 
@@ -210,7 +210,7 @@ CREATE INDEX Colonias ON #Colonias (Cpc_Nombre)
 			
 			-- Se setea el nombre de la colonia
 			update #SOPERINF set Per_Coloni = Cpc_Numero, Col_Nombre = Cpc_Nombre
-			from #Colonias where Cpc_Nombre = Per_Coloni
+			from #CLCOLONI where Cpc_Nombre = Per_Coloni
 		 
 		 
 			select 	Per_Numero,	rtrim(Per_Nombre) as Per_Nombre,	rtrim(Per_ApePat) as Per_ApePat,
@@ -228,7 +228,7 @@ CREATE INDEX Colonias ON #Colonias (Cpc_Nombre)
 			left join CLTIPSOC noholdlock
 			on Clp_TipSoc = Tis_Numero
 
-			drop table #SOPERINF,#CLPERSON,#CLCLIUNI,#Colonias
+			drop table #SOPERINF,#CLPERSON,#CLCLIUNI,#CLCOLONI
 
 		end
 		
@@ -304,7 +304,7 @@ CREATE INDEX Colonias ON #Colonias (Cpc_Nombre)
 			where Per_Locali = Loc_Numero 
 			
 			-- Se obtiene colonias de acuerdo al codigo postal
-			INSERT INTO #Colonias (Cpc_Numero,Cpc_Nombre)	 
+			INSERT INTO #CLCOLONI (Cpc_Numero,Cpc_Nombre)	 
 			select Cpc_Numero,Cpc_Nombre 
 			from CLCODPOS noholdlock
 			inner join #SOPERINF 
@@ -312,7 +312,7 @@ CREATE INDEX Colonias ON #Colonias (Cpc_Nombre)
 			
 			-- Se setea el nombre de la colonia
 			update #SOPERINF set Per_Coloni = Cpc_Numero, Col_Nombre = Cpc_Nombre
-			from #Colonias where Cpc_Nombre = Per_Coloni
+			from #CLCOLONI where Cpc_Nombre = Per_Coloni
 		 
 		 
 			select 	Per_Numero,	rtrim(Per_Nombre) as Per_Nombre,	rtrim(Per_ApePat) as Per_ApePat,
@@ -330,7 +330,7 @@ CREATE INDEX Colonias ON #Colonias (Cpc_Nombre)
 			left join CLTIPSOC noholdlock
 			on Clp_TipSoc = Tis_Numero
 
-			drop table #SOPERINF,#CLPERSON,#CLCLIUNI,#Colonias
+			drop table #SOPERINF,#CLPERSON,#CLCLIUNI,#CLCOLONI
 
 		end 
 		else if @Tip_ConCon = @Str_Dos begin				/* Consulta de RFC con HomoClave */
@@ -404,7 +404,7 @@ CREATE INDEX Colonias ON #Colonias (Cpc_Nombre)
 			where Per_Locali = Loc_Numero 
 			
 			-- Se obtiene colonias de acuerdo al codigo postal
-			INSERT INTO #Colonias (Cpc_Numero,Cpc_Nombre)	 
+			INSERT INTO #CLCOLONI (Cpc_Numero,Cpc_Nombre)	 
 			select Cpc_Numero,Cpc_Nombre 
 			from CLCODPOS noholdlock
 			inner join #SOPERINF 
@@ -412,7 +412,7 @@ CREATE INDEX Colonias ON #Colonias (Cpc_Nombre)
 			
 			-- Se setea el nombre de la colonia
 			update #SOPERINF set Per_Coloni = Cpc_Numero, Col_Nombre = Cpc_Nombre
-			from #Colonias where Cpc_Nombre = Per_Coloni
+			from #CLCOLONI where Cpc_Nombre = Per_Coloni
 		 
 		 
 			select 	Per_Numero,	rtrim(Per_Nombre) as Per_Nombre,	rtrim(Per_ApePat) as Per_ApePat,
@@ -430,7 +430,7 @@ CREATE INDEX Colonias ON #Colonias (Cpc_Nombre)
 			left join CLTIPSOC noholdlock
 			on Clp_TipSoc = Tis_Numero
 
-			drop table #SOPERINF,#CLPERSON,#CLCLIUNI,#Colonias
+			drop table #SOPERINF,#CLPERSON,#CLCLIUNI,#CLCOLONI
 
 			drop table #SOPERINF,#CLPERSON
 
@@ -505,7 +505,7 @@ CREATE INDEX Colonias ON #Colonias (Cpc_Nombre)
 			where Per_Locali = Loc_Numero 
 			
 			-- Se obtiene colonias de acuerdo al codigo postal
-			INSERT INTO #Colonias (Cpc_Numero,Cpc_Nombre)	 
+			INSERT INTO #CLCOLONI (Cpc_Numero,Cpc_Nombre)	 
 			select Cpc_Numero,Cpc_Nombre 
 			from CLCODPOS noholdlock
 			inner join #SOPERINF 
@@ -513,7 +513,7 @@ CREATE INDEX Colonias ON #Colonias (Cpc_Nombre)
 			
 			-- Se setea el nombre de la colonia
 			update #SOPERINF set Per_Coloni = Cpc_Numero, Col_Nombre = Cpc_Nombre
-			from #Colonias where Cpc_Nombre = Per_Coloni
+			from #CLCOLONI where Cpc_Nombre = Per_Coloni
 		 
 		 
 			select 	Per_Numero,	rtrim(Per_Nombre) as Per_Nombre,	rtrim(Per_ApePat) as Per_ApePat,
@@ -531,7 +531,7 @@ CREATE INDEX Colonias ON #Colonias (Cpc_Nombre)
 			left join CLTIPSOC noholdlock
 			on Clp_TipSoc = Tis_Numero
 
-			drop table #SOPERINF,#CLPERSON,#CLCLIUNI,#Colonias
+			drop table #SOPERINF,#CLPERSON,#CLCLIUNI,#CLCOLONI
 
 
 		end else if @Tip_ConCon = @Str_Cuatro begin /*Busqueda de colonias por parametros de entidad,estado y codigo postal*/
