@@ -80,7 +80,7 @@ begin
 			@Tip_ConCon	= substring(@Tip_Consul, 2, 1)
 			
 			
- CREATE TABLE #Persona (
+ CREATE TABLE #SOPERINF (
             Per_Numero char(8) not  null,
             Per_Nombre varchar(40)  null,
             Per_ApePat varchar(40)  null,
@@ -107,35 +107,35 @@ begin
 			Per_Activi char(10)     null,
 			Peu_Grupo  char(8)      null
 )
-CREATE INDEX Persona_Per_Numero ON #Persona (Per_Numero)
+CREATE INDEX SOPERINF ON #SOPERINF (Per_Numero)
 
-CREATE TABLE #ClientesPersona (
-            ClClientID int not null,
-            Adi_NumPer  char(8) not null,
-            Adi_Client  char(8) not null
+CREATE TABLE #CLPERSON (
+			Cli_ClieId  int 	null,
+            Adi_NumPer  char(8) null,
+            Adi_Client  char(8) null
 )
-CREATE INDEX ClientesPersona_ClClientID ON #ClientesPersona (ClClientID)
+CREATE INDEX CLPERSON ON #CLPERSON (Cli_ClieId)
 
-CREATE TABLE #ClientesUnicos (
-			ClClientID int     null,
+CREATE TABLE #CLCLIUNI (
+			Cli_ClieId int     null,
 			Adi_NumPer char(8) null,
             Adi_Client char(8) null,
             Cla_Numero int     null
     )
-CREATE INDEX ClientesUnicos_Adi_Client ON #ClientesUnicos (Adi_Client)
+CREATE INDEX CLCLIUNI ON #CLCLIUNI (Adi_Client)
 
 CREATE TABLE #Colonias (
             Cpc_Numero  char(6)     not null,
             Cpc_Nombre  varchar(60) not null
     )
-CREATE INDEX Colonias_Cpc_Nombre ON #Colonias (Cpc_Nombre)
+CREATE INDEX Colonias ON #Colonias (Cpc_Nombre)
 
 
 	if @Tip_ConTip = @Str_LetraC begin					/* 'C':  Consulta */
 		if @Tip_ConCon = @Str_Uno     begin				/* Consulta por numero de persona */
 			
 			-- Busqueda de Persona
-			INSERT INTO #Persona (Per_Numero,	Per_Nombre,	Per_ApePat,	Per_ApeMat,
+			INSERT INTO #SOPERINF (Per_Numero,	Per_Nombre,	Per_ApePat,	Per_ApeMat,
 								  Per_Comple,	Per_RFC,	Per_RazSoc,	Per_Calle,
 								  Per_CalNum,	Per_Coloni,	Per_Entida,	Per_Locali,
 								  Per_CodPos,	Per_Tipo,	Per_Email,	Per_LadTel,
@@ -150,54 +150,54 @@ CREATE INDEX Colonias_Cpc_Nombre ON #Colonias (Cpc_Nombre)
 					
 			 
 			-- Busqueda de Grupo por numero de persona
-			update #Persona set Peu_Grupo = su.Peu_Grupo
+			update #SOPERINF set Peu_Grupo = su.Peu_Grupo
 			from 	SOUNIPER su noholdlock
 			where	Per_Numero = Peu_Person 
 			
 			-- Borrando los numeros de persona que no son base
-			delete from #Persona where Per_Numero <> Peu_Grupo
+			delete from #SOPERINF where Per_Numero <> Peu_Grupo
 			            
 			-- Buscando los numeros de clientes por persona 
-			INSERT INTO #ClientesPersona (ClClientID,Adi_NumPer,Adi_Client)
+			INSERT INTO #CLPERSON (Cli_ClieId,Adi_NumPer,Adi_Client)
 			select cl.ClClientID,cl.Adi_NumPer,cl.Adi_Client
 			from CLADICIO cl noholdlock 
-			inner join #Persona
+			inner join #SOPERINF
 			on Adi_NumPer = Per_Numero
 			
 			-- Buscando los clientes unicos
-			INSERT INTO #ClientesUnicos (ClClientID,Adi_Client,Adi_NumPer)
-			select cl.ClClientID,cl.Adi_Client,cl.Adi_NumPer
-			from #ClientesPersona cl
+			INSERT INTO #CLCLIUNI (Cli_ClieId,Adi_Client,Adi_NumPer)
+			select cl.Cli_ClieId,cl.Adi_Client,cl.Adi_NumPer
+			from #CLPERSON cl
 			inner join CLCLIUNI noholdlock
 			on Clu_Client = Adi_Client
 			
 			-- Se setea la clasificacion de cada cliente
-			update #ClientesUnicos set
+			update #CLCLIUNI set
 			Cla_Numero = CLCLACLI.Clc_Clasif
 			from CLCLACLI noholdlock
-			where CLCLACLI.Clc_Client = #ClientesUnicos.ClClientID
+			where CLCLACLI.Clc_Client = #CLCLIUNI.Cli_ClieId
 					
 			-- Se eliminan clientes no Banregio		
-			delete from #ClientesUnicos where Cla_Numero <> @Int_Dos
+			delete from #CLCLIUNI where Cla_Numero <> @Int_Dos
 			
 			--Obteniendo informacion adicional de la persona
-			update #Persona set Adi_FecCon = so.Adi_FecCon ,Adi_FecNac = so.Adi_FecCon
+			update #SOPERINF set Adi_FecCon = so.Adi_FecCon ,Adi_FecNac = so.Adi_FecCon
 			from SOPERADI so noholdlock
 			where  Adi_PerNum = Per_Numero
 			
 			-- Seteando numero de cliente Unico
-			update #Persona set Adi_Client = cu.Adi_Client 
-			from #ClientesUnicos cu
+			update #SOPERINF set Adi_Client = cu.Adi_Client 
+			from #CLCLIUNI cu
 			where Per_Numero = cu.Adi_NumPer 
 			
 			
 			-- Se obtiene el nombre de la entidad
-			update #Persona  set Ent_Nombre = cl.Ent_Nombre
+			update #SOPERINF  set Ent_Nombre = cl.Ent_Nombre
 			from CLENTIDA cl noholdlock
 			where Per_Entida = Ent_Numero 
 		
 			-- Se obtiene el nombre del municipio
-			update #Persona  set Loc_Nombre = c.Loc_Nombre
+			update #SOPERINF  set Loc_Nombre = c.Loc_Nombre
 			from CLLOCALI c noholdlock
 			where Per_Locali = Loc_Numero 
 			
@@ -205,11 +205,11 @@ CREATE INDEX Colonias_Cpc_Nombre ON #Colonias (Cpc_Nombre)
 			INSERT INTO #Colonias (Cpc_Numero,Cpc_Nombre)	 
 			select Cpc_Numero,Cpc_Nombre 
 			from CLCODPOS noholdlock
-			inner join #Persona 
+			inner join #SOPERINF 
 			on Cpc_CodPos = Per_CodPos
 			
 			-- Se setea el nombre de la colonia
-			update #Persona set Per_Coloni = Cpc_Numero, Col_Nombre = Cpc_Nombre
+			update #SOPERINF set Per_Coloni = Cpc_Numero, Col_Nombre = Cpc_Nombre
 			from #Colonias where Cpc_Nombre = Per_Coloni
 		 
 		 
@@ -220,7 +220,7 @@ CREATE INDEX Colonias_Cpc_Nombre ON #Colonias (Cpc_Nombre)
 					Per_CodPos,			 Adi_Client, Per_Tipo,		Per_Email,
 					Per_LadTel , 		 Per_Telefo, Adi_FecCon, 	Adi_FecNac, Act_Numero, Act_Descri,
 					Tis_Numero, Tis_Descri
-			from #Persona
+			from #SOPERINF
 			inner join CLACTIVI noholdlock
 			on Act_Numero = Per_Activi
 			left join SOCLCAPE noholdlock
@@ -228,7 +228,7 @@ CREATE INDEX Colonias_Cpc_Nombre ON #Colonias (Cpc_Nombre)
 			left join CLTIPSOC noholdlock
 			on Clp_TipSoc = Tis_Numero
 
-			drop table #Persona,#ClientesPersona,#ClientesUnicos,#Colonias
+			drop table #SOPERINF,#CLPERSON,#CLCLIUNI,#Colonias
 
 		end
 		
@@ -237,7 +237,7 @@ CREATE INDEX Colonias_Cpc_Nombre ON #Colonias (Cpc_Nombre)
 		 if @Tip_ConCon = @Str_Uno begin				/* Consulta por RFC */
 		 
 		-- Busqueda de Persona por RFC
-			INSERT INTO #Persona (Per_Numero,Per_Nombre,Per_ApePat,Per_ApeMat,
+			INSERT INTO #SOPERINF (Per_Numero,Per_Nombre,Per_ApePat,Per_ApeMat,
 								 Per_Comple,Per_RFC,Per_RazSoc,Per_Calle,
 								 Per_CalNum,Per_Coloni,Per_Entida,Per_Locali,
 								 Per_CodPos,Per_Tipo,Per_Email,Per_LadTel,
@@ -252,54 +252,54 @@ CREATE INDEX Colonias_Cpc_Nombre ON #Colonias (Cpc_Nombre)
 					
 			 
 			-- Busqueda de Grupo por numero de persona
-			update #Persona set Peu_Grupo = su.Peu_Grupo
+			update #SOPERINF set Peu_Grupo = su.Peu_Grupo
 			from 	SOUNIPER su noholdlock
 			where	Per_Numero = Peu_Person 
 			
 			-- Borrando los numeros de persona que no son base
-			delete from #Persona where Per_Numero <> Peu_Grupo
+			delete from #SOPERINF where Per_Numero <> Peu_Grupo
 			            
 			-- Buscando los numeros de clientes por persona 
-			INSERT INTO #ClientesPersona (ClClientID,Adi_NumPer,Adi_Client)
+			INSERT INTO #CLPERSON (Cli_ClieId,Adi_NumPer,Adi_Client)
 			select cl.ClClientID,cl.Adi_NumPer,cl.Adi_Client
 			from CLADICIO cl noholdlock 
-			inner join #Persona
+			inner join #SOPERINF
 			on Adi_NumPer = Per_Numero
 			
 			-- Buscando los clientes unicos
-			INSERT INTO #ClientesUnicos (ClClientID,Adi_Client,Adi_NumPer)
-			select cl.ClClientID,cl.Adi_Client,cl.Adi_NumPer
-			from #ClientesPersona cl
+			INSERT INTO #CLCLIUNI (Cli_ClieId,Adi_Client,Adi_NumPer)
+			select cl.Cli_ClieId,cl.Adi_Client,cl.Adi_NumPer
+			from #CLPERSON cl
 			inner join CLCLIUNI noholdlock
 			on Clu_Client = Adi_Client
 			
 			-- Se setea la clasificacion de cada cliente
-			update #ClientesUnicos set
+			update #CLCLIUNI set
 			Cla_Numero = CLCLACLI.Clc_Clasif
 			from CLCLACLI noholdlock
-			where CLCLACLI.Clc_Client = #ClientesUnicos.ClClientID
+			where CLCLACLI.Clc_Client = #CLCLIUNI.Cli_ClieId
 					
 			-- Se eliminan clientes no Banregio		
-			delete from #ClientesUnicos where Cla_Numero <> @Int_Dos
+			delete from #CLCLIUNI where Cla_Numero <> @Int_Dos
 			
 			--Obteniendo informacion adicional de la persona
-			update #Persona set Adi_FecCon = so.Adi_FecCon ,Adi_FecNac = so.Adi_FecCon
+			update #SOPERINF set Adi_FecCon = so.Adi_FecCon ,Adi_FecNac = so.Adi_FecCon
 			from SOPERADI so noholdlock
 			where  Adi_PerNum = Per_Numero
 			
 			-- Seteando numero de cliente Unico
-			update #Persona set Adi_Client = cu.Adi_Client 
-			from #ClientesUnicos cu
+			update #SOPERINF set Adi_Client = cu.Adi_Client 
+			from #CLCLIUNI cu
 			where Per_Numero = cu.Adi_NumPer 
 			
 			
 			-- Se obtiene el nombre de la entidad
-			update #Persona  set Ent_Nombre = cl.Ent_Nombre
+			update #SOPERINF  set Ent_Nombre = cl.Ent_Nombre
 			from CLENTIDA cl noholdlock
 			where Per_Entida = Ent_Numero 
 		
 			-- Se obtiene el nombre del municipio
-			update #Persona  set Loc_Nombre = c.Loc_Nombre
+			update #SOPERINF  set Loc_Nombre = c.Loc_Nombre
 			from CLLOCALI c noholdlock
 			where Per_Locali = Loc_Numero 
 			
@@ -307,11 +307,11 @@ CREATE INDEX Colonias_Cpc_Nombre ON #Colonias (Cpc_Nombre)
 			INSERT INTO #Colonias (Cpc_Numero,Cpc_Nombre)	 
 			select Cpc_Numero,Cpc_Nombre 
 			from CLCODPOS noholdlock
-			inner join #Persona 
+			inner join #SOPERINF 
 			on Cpc_CodPos = Per_CodPos
 			
 			-- Se setea el nombre de la colonia
-			update #Persona set Per_Coloni = Cpc_Numero, Col_Nombre = Cpc_Nombre
+			update #SOPERINF set Per_Coloni = Cpc_Numero, Col_Nombre = Cpc_Nombre
 			from #Colonias where Cpc_Nombre = Per_Coloni
 		 
 		 
@@ -322,7 +322,7 @@ CREATE INDEX Colonias_Cpc_Nombre ON #Colonias (Cpc_Nombre)
 					Per_CodPos,			 Adi_Client, Per_Tipo,		Per_Email,
 					Per_LadTel , 		 Per_Telefo, Adi_FecCon, 	Adi_FecNac, Act_Numero, Act_Descri,
 					Tis_Numero, Tis_Descri
-			from #Persona
+			from #SOPERINF
 			inner join CLACTIVI noholdlock
 			on Act_Numero = Per_Activi
 			left join SOCLCAPE noholdlock
@@ -330,13 +330,13 @@ CREATE INDEX Colonias_Cpc_Nombre ON #Colonias (Cpc_Nombre)
 			left join CLTIPSOC noholdlock
 			on Clp_TipSoc = Tis_Numero
 
-			drop table #Persona,#ClientesPersona,#ClientesUnicos,#Colonias
+			drop table #SOPERINF,#CLPERSON,#CLCLIUNI,#Colonias
 
 		end 
 		else if @Tip_ConCon = @Str_Dos begin				/* Consulta de RFC con HomoClave */
 				
 		 -- Busqueda de Persona por RFC
-			INSERT INTO #Persona (Per_Numero,Per_Nombre,Per_ApePat,Per_ApeMat,
+			INSERT INTO #SOPERINF (Per_Numero,Per_Nombre,Per_ApePat,Per_ApeMat,
 								 Per_Comple,Per_RFC,Per_RazSoc,Per_Calle,
 								 Per_CalNum,Per_Coloni,Per_Entida,Per_Locali,
 								 Per_CodPos,Per_Tipo,Per_Email,Per_LadTel,
@@ -352,54 +352,54 @@ CREATE INDEX Colonias_Cpc_Nombre ON #Colonias (Cpc_Nombre)
 			 
 				 
 			-- Busqueda de Grupo por numero de persona
-			update #Persona set Peu_Grupo = su.Peu_Grupo
+			update #SOPERINF set Peu_Grupo = su.Peu_Grupo
 			from 	SOUNIPER su noholdlock
 			where	Per_Numero = Peu_Person 
 			
 			-- Borrando los numeros de persona que no son base
-			delete from #Persona where Per_Numero <> Peu_Grupo
+			delete from #SOPERINF where Per_Numero <> Peu_Grupo
 			            
 			-- Buscando los numeros de clientes por persona 
-			INSERT INTO #ClientesPersona (ClClientID,Adi_NumPer,Adi_Client)
+			INSERT INTO #CLPERSON (Cli_ClieId,Adi_NumPer,Adi_Client)
 			select cl.ClClientID,cl.Adi_NumPer,cl.Adi_Client
 			from CLADICIO cl noholdlock 
-			inner join #Persona
+			inner join #SOPERINF
 			on Adi_NumPer = Per_Numero
 			
 			-- Buscando los clientes unicos
-			INSERT INTO #ClientesUnicos (ClClientID,Adi_Client,Adi_NumPer)
-			select cl.ClClientID,cl.Adi_Client,cl.Adi_NumPer
-			from #ClientesPersona cl
+			INSERT INTO #CLCLIUNI (Cli_ClieId,Adi_Client,Adi_NumPer)
+			select cl.Cli_ClieId,cl.Adi_Client,cl.Adi_NumPer
+			from #CLPERSON cl
 			inner join CLCLIUNI noholdlock
 			on Clu_Client = Adi_Client
 			
 			-- Se setea la clasificacion de cada cliente
-			update #ClientesUnicos set
+			update #CLCLIUNI set
 			Cla_Numero = CLCLACLI.Clc_Clasif
 			from CLCLACLI noholdlock
-			where CLCLACLI.Clc_Client = #ClientesUnicos.ClClientID
+			where CLCLACLI.Clc_Client = #CLCLIUNI.Cli_ClieId
 					
 			-- Se eliminan clientes no Banregio		
-			delete from #ClientesUnicos where Cla_Numero <> @Int_Dos
+			delete from #CLCLIUNI where Cla_Numero <> @Int_Dos
 			
 			--Obteniendo informacion adicional de la persona
-			update #Persona set Adi_FecCon = so.Adi_FecCon ,Adi_FecNac = so.Adi_FecCon
+			update #SOPERINF set Adi_FecCon = so.Adi_FecCon ,Adi_FecNac = so.Adi_FecCon
 			from SOPERADI so noholdlock
 			where  Adi_PerNum = Per_Numero
 			
 			-- Seteando numero de cliente Unico
-			update #Persona set Adi_Client = cu.Adi_Client 
-			from #ClientesUnicos cu
+			update #SOPERINF set Adi_Client = cu.Adi_Client 
+			from #CLCLIUNI cu
 			where Per_Numero = cu.Adi_NumPer 
 			
 			
 			-- Se obtiene el nombre de la entidad
-			update #Persona  set Ent_Nombre = cl.Ent_Nombre
+			update #SOPERINF  set Ent_Nombre = cl.Ent_Nombre
 			from CLENTIDA cl noholdlock
 			where Per_Entida = Ent_Numero 
 		
 			-- Se obtiene el nombre del municipio
-			update #Persona  set Loc_Nombre = c.Loc_Nombre
+			update #SOPERINF  set Loc_Nombre = c.Loc_Nombre
 			from CLLOCALI c noholdlock
 			where Per_Locali = Loc_Numero 
 			
@@ -407,11 +407,11 @@ CREATE INDEX Colonias_Cpc_Nombre ON #Colonias (Cpc_Nombre)
 			INSERT INTO #Colonias (Cpc_Numero,Cpc_Nombre)	 
 			select Cpc_Numero,Cpc_Nombre 
 			from CLCODPOS noholdlock
-			inner join #Persona 
+			inner join #SOPERINF 
 			on Cpc_CodPos = Per_CodPos
 			
 			-- Se setea el nombre de la colonia
-			update #Persona set Per_Coloni = Cpc_Numero, Col_Nombre = Cpc_Nombre
+			update #SOPERINF set Per_Coloni = Cpc_Numero, Col_Nombre = Cpc_Nombre
 			from #Colonias where Cpc_Nombre = Per_Coloni
 		 
 		 
@@ -422,7 +422,7 @@ CREATE INDEX Colonias_Cpc_Nombre ON #Colonias (Cpc_Nombre)
 					Per_CodPos,			 Adi_Client, Per_Tipo,		Per_Email,
 					Per_LadTel , 		 Per_Telefo, Adi_FecCon, 	Adi_FecNac, Act_Numero, Act_Descri,
 					Tis_Numero, Tis_Descri
-			from #Persona
+			from #SOPERINF
 			inner join CLACTIVI noholdlock
 			on Act_Numero = Per_Activi
 			left join SOCLCAPE noholdlock
@@ -430,15 +430,15 @@ CREATE INDEX Colonias_Cpc_Nombre ON #Colonias (Cpc_Nombre)
 			left join CLTIPSOC noholdlock
 			on Clp_TipSoc = Tis_Numero
 
-			drop table #Persona,#ClientesPersona,#ClientesUnicos,#Colonias
+			drop table #SOPERINF,#CLPERSON,#CLCLIUNI,#Colonias
 
-			drop table #Persona,#ClientesPersona
+			drop table #SOPERINF,#CLPERSON
 
 			
 		end else if @Tip_ConCon = @Str_Tres begin /* Busqueda por Nombre Completo*/
 			
 			 -- Busqueda de Persona por Nombre
-			INSERT INTO #Persona (Per_Numero,Per_Nombre,Per_ApePat,Per_ApeMat,
+			INSERT INTO #SOPERINF (Per_Numero,Per_Nombre,Per_ApePat,Per_ApeMat,
 								 Per_Comple,Per_RFC,Per_RazSoc,Per_Calle,
 								 Per_CalNum,Per_Coloni,Per_Entida,Per_Locali,
 								 Per_CodPos,Per_Tipo,Per_Email,Per_LadTel,
@@ -453,54 +453,54 @@ CREATE INDEX Colonias_Cpc_Nombre ON #Colonias (Cpc_Nombre)
 					 
 				 
 			-- Busqueda de Grupo por numero de persona
-			update #Persona set Peu_Grupo = su.Peu_Grupo
+			update #SOPERINF set Peu_Grupo = su.Peu_Grupo
 			from 	SOUNIPER su noholdlock
 			where	Per_Numero = Peu_Person 
 			
 			-- Borrando los numeros de persona que no son base
-			delete from #Persona where Per_Numero <> Peu_Grupo
+			delete from #SOPERINF where Per_Numero <> Peu_Grupo
 			            
 			-- Buscando los numeros de clientes por persona 
-			INSERT INTO #ClientesPersona (ClClientID,Adi_NumPer,Adi_Client)
+			INSERT INTO #CLPERSON (Cli_ClieId,Adi_NumPer,Adi_Client)
 			select cl.ClClientID,cl.Adi_NumPer,cl.Adi_Client
 			from CLADICIO cl noholdlock 
-			inner join #Persona
+			inner join #SOPERINF
 			on Adi_NumPer = Per_Numero
 			
 			-- Buscando los clientes unicos
-			INSERT INTO #ClientesUnicos (ClClientID,Adi_Client,Adi_NumPer)
-			select cl.ClClientID,cl.Adi_Client,cl.Adi_NumPer
-			from #ClientesPersona cl
+			INSERT INTO #CLCLIUNI (Cli_ClieId,Adi_Client,Adi_NumPer)
+			select cl.Cli_ClieId,cl.Adi_Client,cl.Adi_NumPer
+			from #CLPERSON cl
 			inner join CLCLIUNI noholdlock
 			on Clu_Client = Adi_Client
 			
 			-- Se setea la clasificacion de cada cliente
-			update #ClientesUnicos set
+			update #CLCLIUNI set
 			Cla_Numero = CLCLACLI.Clc_Clasif
 			from CLCLACLI noholdlock
-			where CLCLACLI.Clc_Client = #ClientesUnicos.ClClientID
+			where CLCLACLI.Clc_Client = #CLCLIUNI.Cli_ClieId
 					
 			-- Se eliminan clientes no Banregio		
-			delete from #ClientesUnicos where Cla_Numero <> @Int_Dos
+			delete from #CLCLIUNI where Cla_Numero <> @Int_Dos
 			
 			--Obteniendo informacion adicional de la persona
-			update #Persona set Adi_FecCon = so.Adi_FecCon ,Adi_FecNac = so.Adi_FecCon
+			update #SOPERINF set Adi_FecCon = so.Adi_FecCon ,Adi_FecNac = so.Adi_FecCon
 			from SOPERADI so noholdlock
 			where  Adi_PerNum = Per_Numero
 			
 			-- Seteando numero de cliente Unico
-			update #Persona set Adi_Client = cu.Adi_Client 
-			from #ClientesUnicos cu
+			update #SOPERINF set Adi_Client = cu.Adi_Client 
+			from #CLCLIUNI cu
 			where Per_Numero = cu.Adi_NumPer 
 			
 			
 			-- Se obtiene el nombre de la entidad
-			update #Persona  set Ent_Nombre = cl.Ent_Nombre
+			update #SOPERINF  set Ent_Nombre = cl.Ent_Nombre
 			from CLENTIDA cl noholdlock
 			where Per_Entida = Ent_Numero 
 		
 			-- Se obtiene el nombre del municipio
-			update #Persona  set Loc_Nombre = c.Loc_Nombre
+			update #SOPERINF  set Loc_Nombre = c.Loc_Nombre
 			from CLLOCALI c noholdlock
 			where Per_Locali = Loc_Numero 
 			
@@ -508,11 +508,11 @@ CREATE INDEX Colonias_Cpc_Nombre ON #Colonias (Cpc_Nombre)
 			INSERT INTO #Colonias (Cpc_Numero,Cpc_Nombre)	 
 			select Cpc_Numero,Cpc_Nombre 
 			from CLCODPOS noholdlock
-			inner join #Persona 
+			inner join #SOPERINF 
 			on Cpc_CodPos = Per_CodPos
 			
 			-- Se setea el nombre de la colonia
-			update #Persona set Per_Coloni = Cpc_Numero, Col_Nombre = Cpc_Nombre
+			update #SOPERINF set Per_Coloni = Cpc_Numero, Col_Nombre = Cpc_Nombre
 			from #Colonias where Cpc_Nombre = Per_Coloni
 		 
 		 
@@ -523,7 +523,7 @@ CREATE INDEX Colonias_Cpc_Nombre ON #Colonias (Cpc_Nombre)
 					Per_CodPos,			 Adi_Client, Per_Tipo,		Per_Email,
 					Per_LadTel , 		 Per_Telefo, Adi_FecCon, 	Adi_FecNac, Act_Numero, Act_Descri,
 					Tis_Numero, Tis_Descri
-			from #Persona
+			from #SOPERINF
 			inner join CLACTIVI noholdlock
 			on Act_Numero = Per_Activi
 			left join SOCLCAPE noholdlock
@@ -531,7 +531,7 @@ CREATE INDEX Colonias_Cpc_Nombre ON #Colonias (Cpc_Nombre)
 			left join CLTIPSOC noholdlock
 			on Clp_TipSoc = Tis_Numero
 
-			drop table #Persona,#ClientesPersona,#ClientesUnicos,#Colonias
+			drop table #SOPERINF,#CLPERSON,#CLCLIUNI,#Colonias
 
 
 		end else if @Tip_ConCon = @Str_Cuatro begin /*Busqueda de colonias por parametros de entidad,estado y codigo postal*/
