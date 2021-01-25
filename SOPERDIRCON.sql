@@ -146,12 +146,12 @@ CREATE INDEX CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 			-- Buscamos el grupo de la persona base		
 			INSERT INTO #SOGRUPOS(Peu_Grupo, Peu_Person )
 			select  so.Peu_Grupo, so.Peu_Person
-			from SOUNIPER so
+			from SOUNIPER so noholdlock
 			where Peu_Person = @Per_Numero
 			
 			--Buscamos la persona base
 			select @Per_Numero = so.Peu_Person from #SOGRUPOS p
-			inner join  SOUNIPER so
+			inner join  SOUNIPER so noholdlock
 			on p.Peu_Grupo = so.Peu_Grupo and p.Peu_Grupo = so.Peu_Person
 			
 			-- Busqueda de Persona
@@ -184,7 +184,7 @@ CREATE INDEX CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 			
 			-- Seteamos el cliente unico
 			select @Per_Client = clc.Clu_Client from #CLCLIUNI clu
-			inner join  CLCLIUNI clc
+			inner join  CLCLIUNI clc noholdlock
 			on clu.Clu_Grupo = clc.Clu_Grupo  and clu.Clu_Grupo = clc.Clu_Client 
 			
 			delete from #CLCLIUNI
@@ -192,7 +192,7 @@ CREATE INDEX CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 			-- Buscamos su ID CLIENTE
 			INSERT INTO #CLCLIUNI (Cli_ClieId,Adi_Client, Adi_NumPer)
 			select ClClientID,Adi_Client,@Per_Numero
-			from CLADICIO
+			from CLADICIO noholdlock
 			where Adi_Client = @Per_Client
 									
 			-- Se setea la clasificacion de cada cliente
@@ -267,13 +267,13 @@ CREATE INDEX CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 		 -- Buscamos el grupo al que pertenece
 		 INSERT INTO #SOGRUPOS(Peu_Grupo, Peu_Person )
 		 select  so.Peu_Grupo, so.Peu_Person
-		 from SOUNIPER so
+		 from SOUNIPER so noholdlock
 		 inner join #SOPERINF
 		 on Peu_Person = Per_Numero
 			
 		-- Seteamos la persona base
 		select @Per_Numero = so.Peu_Person from #SOGRUPOS p
-		inner join  SOUNIPER so
+		inner join  SOUNIPER so noholdlock
 		on p.Peu_Grupo = so.Peu_Grupo and p.Peu_Grupo = so.Peu_Person
 		
 		delete from #SOPERINF
@@ -308,7 +308,7 @@ CREATE INDEX CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 			
 			-- Seteamos el cliente unico
 			select @Per_Client = clc.Clu_Client from #CLCLIUNI clu
-			inner join  CLCLIUNI clc
+			inner join  CLCLIUNI clc noholdlock
 			on clu.Clu_Grupo = clc.Clu_Grupo  and clu.Clu_Grupo = clc.Clu_Client 
 			
 			delete from #CLCLIUNI
@@ -316,7 +316,7 @@ CREATE INDEX CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 			-- Buscamos su ID CLIENTE
 			INSERT INTO #CLCLIUNI (Cli_ClieId,Adi_Client, Adi_NumPer)
 			select ClClientID,Adi_Client,@Per_Numero
-			from CLADICIO
+			from CLADICIO noholdlock
 			where Adi_Client = @Per_Client
 									
 			-- Se setea la clasificacion de cada cliente
@@ -335,7 +335,7 @@ CREATE INDEX CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 			
 			-- Seteando numero de cliente Unico
 			update #SOPERINF set Adi_Client = cu.Adi_Client 
-			from #CLCLIUNI cu
+			from #CLCLIUNI cu noholdlock
 			where Per_Numero = cu.Adi_NumPer 
 			
 			
@@ -388,13 +388,13 @@ CREATE INDEX CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 			 
 			 INSERT INTO #SOGRUPOS(Peu_Grupo, Peu_Person )
 			 select  so.Peu_Grupo, so.Peu_Person
-			 from SOUNIPER so
+			 from SOUNIPER so noholdlock
 			 inner join #SOPERINF
 			 on Peu_Person = Per_Numero
 				
 				
 			select @Per_Numero = so.Peu_Person from #SOGRUPOS p
-			inner join  SOUNIPER so
+			inner join  SOUNIPER so noholdlock
 			on p.Peu_Grupo = so.Peu_Grupo and p.Peu_Grupo = so.Peu_Person
 			
 			delete from #SOPERINF
@@ -429,7 +429,7 @@ CREATE INDEX CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 			
 			-- Seteamos el cliente unico
 			select @Per_Client = clc.Clu_Client from #CLCLIUNI clu
-			inner join  CLCLIUNI clc
+			inner join  CLCLIUNI clc noholdlock
 			on clu.Clu_Grupo = clc.Clu_Grupo  and clu.Clu_Grupo = clc.Clu_Client 
 			
 			delete from #CLCLIUNI
@@ -437,7 +437,7 @@ CREATE INDEX CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 			-- Buscamos su ID CLIENTE
 			INSERT INTO #CLCLIUNI (Cli_ClieId,Adi_Client, Adi_NumPer)
 			select ClClientID,Adi_Client,@Per_Numero
-			from CLADICIO
+			from CLADICIO noholdlock
 			where Adi_Client = @Per_Client
 									
 			-- Se setea la clasificacion de cada cliente
@@ -508,13 +508,13 @@ CREATE INDEX CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 			 
 			 INSERT INTO #SOGRUPOS(Peu_Grupo, Peu_Person )
 			 select  so.Peu_Grupo, so.Peu_Person
-			 from SOUNIPER so
+			 from SOUNIPER so noholdlock
 			 inner join #SOPERINF
 			 on Peu_Person = Per_Numero
 				
 				
 			select @Per_Numero = so.Peu_Person from #SOGRUPOS p
-			inner join  SOUNIPER so
+			inner join  SOUNIPER so noholdlock
 			on p.Peu_Grupo = so.Peu_Grupo and p.Peu_Grupo = so.Peu_Person
 			
 			delete from #SOPERINF
