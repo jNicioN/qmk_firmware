@@ -120,7 +120,8 @@ CREATE TABLE #CLCLIUNI (
 			Cli_ClieId int     null,
 			Adi_NumPer char(8) null,
             Adi_Client char(8) null,
-            Cla_Numero int     null
+            Cla_Numero int     null,
+            Clu_Grupo  char(8) null
     )
 CREATE INDEX CLCLIUNI ON #CLCLIUNI (Adi_Client)
 
@@ -148,7 +149,6 @@ CREATE INDEX CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 					from SOPERSON noholdlock
 					where  Per_Numero  = @Per_Numero
 					
-			 
 			-- Busqueda de Grupo por numero de persona
 			update #SOPERINF set Peu_Grupo = su.Peu_Grupo
 			from 	SOUNIPER su noholdlock
@@ -156,7 +156,7 @@ CREATE INDEX CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 			
 			-- Borrando los numeros de persona que no son base
 			delete from #SOPERINF where Per_Numero <> Peu_Grupo
-			            
+			
 			-- Buscando los numeros de clientes por persona 
 			INSERT INTO #CLPERSON (Cli_ClieId,Adi_NumPer,Adi_Client)
 			select cl.ClClientID,cl.Adi_NumPer,cl.Adi_Client
@@ -165,11 +165,14 @@ CREATE INDEX CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 			on Adi_NumPer = Per_Numero
 			
 			-- Buscando los clientes unicos
-			INSERT INTO #CLCLIUNI (Cli_ClieId,Adi_Client,Adi_NumPer)
-			select cl.Cli_ClieId,cl.Adi_Client,cl.Adi_NumPer
+			INSERT INTO #CLCLIUNI (Cli_ClieId,Adi_Client,Adi_NumPer,Clu_Grupo)
+			select cl.Cli_ClieId,cl.Adi_Client,cl.Adi_NumPer,Clu_Grupo
 			from #CLPERSON cl
 			inner join CLCLIUNI noholdlock
 			on Clu_Client = Adi_Client
+			
+			--Se borran los numeros de cliente que no son unicos
+			delete from #CLCLIUNI where Adi_Client <> Clu_Grupo
 			
 			-- Se setea la clasificacion de cada cliente
 			update #CLCLIUNI set
@@ -212,7 +215,6 @@ CREATE INDEX CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 			update #SOPERINF set Per_Coloni = Cpc_Numero, Col_Nombre = Cpc_Nombre
 			from #CLCOLONI where Cpc_Nombre = Per_Coloni
 		 
-		 
 			select 	Per_Numero,	rtrim(Per_Nombre) as Per_Nombre,	rtrim(Per_ApePat) as Per_ApePat,
 					rtrim(Per_ApeMat) as Per_ApeMat, Per_Comple,	Upper(Per_RFC) as Per_RFC,	rtrim(Per_Calle) as Per_Calle,
 					Per_CalNum,	Per_RazSoc,			 Per_Coloni,	rtrim(Col_Nombre) as Col_Nombre,Per_Entida,
@@ -221,7 +223,7 @@ CREATE INDEX CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 					Per_LadTel , 		 Per_Telefo, Adi_FecCon, 	Adi_FecNac, Act_Numero, Act_Descri,
 					Tis_Numero, Tis_Descri
 			from #SOPERINF
-			inner join CLACTIVI noholdlock
+			left join CLACTIVI noholdlock
 			on Act_Numero = Per_Activi
 			left join SOCLCAPE noholdlock
 			on Clp_NumPer = Per_Numero
@@ -267,11 +269,14 @@ CREATE INDEX CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 			on Adi_NumPer = Per_Numero
 			
 			-- Buscando los clientes unicos
-			INSERT INTO #CLCLIUNI (Cli_ClieId,Adi_Client,Adi_NumPer)
-			select cl.Cli_ClieId,cl.Adi_Client,cl.Adi_NumPer
+			INSERT INTO #CLCLIUNI (Cli_ClieId,Adi_Client,Adi_NumPer,Clu_Grupo)
+			select cl.Cli_ClieId,cl.Adi_Client,cl.Adi_NumPer,Clu_Grupo
 			from #CLPERSON cl
 			inner join CLCLIUNI noholdlock
 			on Clu_Client = Adi_Client
+			
+			--Se borran los numeros de cliente que no son unicos
+			delete from #CLCLIUNI where Adi_Client <> Clu_Grupo
 			
 			-- Se setea la clasificacion de cada cliente
 			update #CLCLIUNI set
@@ -323,7 +328,7 @@ CREATE INDEX CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 					Per_LadTel , 		 Per_Telefo, Adi_FecCon, 	Adi_FecNac, Act_Numero, Act_Descri,
 					Tis_Numero, Tis_Descri
 			from #SOPERINF
-			inner join CLACTIVI noholdlock
+			left join CLACTIVI noholdlock
 			on Act_Numero = Per_Activi
 			left join SOCLCAPE noholdlock
 			on Clp_NumPer = Per_Numero
@@ -367,11 +372,14 @@ CREATE INDEX CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 			on Adi_NumPer = Per_Numero
 			
 			-- Buscando los clientes unicos
-			INSERT INTO #CLCLIUNI (Cli_ClieId,Adi_Client,Adi_NumPer)
-			select cl.Cli_ClieId,cl.Adi_Client,cl.Adi_NumPer
+			INSERT INTO #CLCLIUNI (Cli_ClieId,Adi_Client,Adi_NumPer,Clu_Grupo)
+			select cl.Cli_ClieId,cl.Adi_Client,cl.Adi_NumPer,Clu_Grupo
 			from #CLPERSON cl
 			inner join CLCLIUNI noholdlock
 			on Clu_Client = Adi_Client
+			
+			--Se borran los numeros de cliente que no son unicos
+			delete from #CLCLIUNI where Adi_Client <> Clu_Grupo
 			
 			-- Se setea la clasificacion de cada cliente
 			update #CLCLIUNI set
@@ -423,7 +431,7 @@ CREATE INDEX CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 					Per_LadTel , 		 Per_Telefo, Adi_FecCon, 	Adi_FecNac, Act_Numero, Act_Descri,
 					Tis_Numero, Tis_Descri
 			from #SOPERINF
-			inner join CLACTIVI noholdlock
+			left join CLACTIVI noholdlock
 			on Act_Numero = Per_Activi
 			left join SOCLCAPE noholdlock
 			on Clp_NumPer = Per_Numero
@@ -468,11 +476,14 @@ CREATE INDEX CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 			on Adi_NumPer = Per_Numero
 			
 			-- Buscando los clientes unicos
-			INSERT INTO #CLCLIUNI (Cli_ClieId,Adi_Client,Adi_NumPer)
-			select cl.Cli_ClieId,cl.Adi_Client,cl.Adi_NumPer
+			INSERT INTO #CLCLIUNI (Cli_ClieId,Adi_Client,Adi_NumPer,Clu_Grupo)
+			select cl.Cli_ClieId,cl.Adi_Client,cl.Adi_NumPer,Clu_Grupo
 			from #CLPERSON cl
 			inner join CLCLIUNI noholdlock
 			on Clu_Client = Adi_Client
+			
+			--Se borran los numeros de cliente que no son unicos
+			delete from #CLCLIUNI where Adi_Client <> Clu_Grupo
 			
 			-- Se setea la clasificacion de cada cliente
 			update #CLCLIUNI set
@@ -524,7 +535,7 @@ CREATE INDEX CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 					Per_LadTel , 		 Per_Telefo, Adi_FecCon, 	Adi_FecNac, Act_Numero, Act_Descri,
 					Tis_Numero, Tis_Descri
 			from #SOPERINF
-			inner join CLACTIVI noholdlock
+			left join CLACTIVI noholdlock
 			on Act_Numero = Per_Activi
 			left join SOCLCAPE noholdlock
 			on Clp_NumPer = Per_Numero
