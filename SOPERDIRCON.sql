@@ -107,13 +107,13 @@ begin
 			Per_Activi char(10)     null,
 			Peu_Grupo  char(8)      null
 )
-CREATE INDEX SOPERINF ON #SOPERINF (Per_Numero)
+CREATE INDEX #SOPERINF ON #SOPERINF (Per_Numero)
 
 CREATE TABLE #SOGRUPOS (
             Peu_Person  char(8) null,
             Peu_Grupo   char(8) null
 )
-CREATE INDEX SOGRUPOS ON #SOGRUPOS (Peu_Grupo)
+CREATE INDEX #SOGRUPOS ON #SOGRUPOS (Peu_Grupo)
 
 
 
@@ -122,7 +122,7 @@ CREATE TABLE #CLPERSON (
             Adi_NumPer  char(8) null,
             Adi_Client  char(8) null
 )
-CREATE INDEX CLPERSON ON #CLPERSON (Cli_ClieId)
+CREATE INDEX #CLPERSON ON #CLPERSON (Cli_ClieId)
 
 CREATE TABLE #CLCLIUNI (
 			Cli_ClieId int     null,
@@ -131,13 +131,13 @@ CREATE TABLE #CLCLIUNI (
             Cla_Numero int     null,
             Clu_Grupo  char(8) null
     )
-CREATE INDEX CLCLIUNI ON #CLCLIUNI (Adi_Client)
+CREATE INDEX #CLCLIUNI ON #CLCLIUNI (Adi_Client)
 
 CREATE TABLE #CLCOLONI (
             Cpc_Numero  char(6)     not null,
             Cpc_Nombre  varchar(60) not null
     )
-CREATE INDEX CLCOLONI ON #CLCOLONI (Cpc_Nombre)
+CREATE INDEX #CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 
 
 	if @Tip_ConTip = @Str_LetraC begin					/* 'C':  Consulta */
