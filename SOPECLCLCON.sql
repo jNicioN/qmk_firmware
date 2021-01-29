@@ -96,7 +96,14 @@ if @Tip_ConTip = @Str_Consul begin
 				Per_Nombre, Per_ApePat, Per_ApeMat, Per_RazSoc, Per_Comple, 
 				Per_ComOrd, Per_RFC, 	Per_CURP, 	Per_Fecha, 	Per_Entida, 
 				Per_Locali, Per_ClaCli, 
-				Per_Client = case when Per_Client = @Str_Vacio then null else Per_Client end
+				Per_Client = case when Per_Client = @Str_Vacio then null else Per_Client end,
+				NumTransac = @NumTransac,	
+				Transaccio = @Transaccio,	
+				Usuario = @Usuario,
+				FechaSis = @FechaSis,	
+				SucOrigen = @SucOrigen,	
+				SucDestino = @SucDestino,	
+				Modulo = @Modulo	
 			from #PersonaClasificacion
 		
 		drop table #GrupoPersona
@@ -114,12 +121,11 @@ if @Tip_ConTip = @Str_Consul begin
 			where	P.Per_RFC = @Per_RFC
 		 
 		create table #ClientesClasificacion(
-			ClClientID int not null,
 			Cli_Numero char(8) not null,
 			Cli_Clasif int not null)
 		 
 		insert into #ClientesClasificacion
-		select ClClientID, Cli_Numero, Clc_Clasif
+		select Cli_Numero, Clc_Clasif
 			from CLCLIENT noholdlock,
 				 #PersonaClasificacion,
 				 CLCLACLI noholdlock
@@ -138,7 +144,14 @@ if @Tip_ConTip = @Str_Consul begin
 				Per_Nombre, Per_ApePat, Per_ApeMat, Per_RazSoc, Per_Comple, 
 				Per_ComOrd, Per_RFC, 	Per_CURP, 	Per_Fecha, 	Per_Entida, 
 				Per_Locali, Per_ClaCli, 
-				Per_Client = case when Per_Client = @Str_Vacio then null else Per_Client end
+				Per_Client = case when Per_Client = @Str_Vacio then null else Per_Client end,
+				NumTransac = @NumTransac,	
+				Transaccio = @Transaccio,	
+				Usuario = @Usuario,
+				FechaSis = @FechaSis,	
+				SucOrigen = @SucOrigen,	
+				SucDestino = @SucDestino,	
+				Modulo = @Modulo	
 		from #PersonaClasificacion 
 		where Per_ClaCli = @Cli_Clasif
 
