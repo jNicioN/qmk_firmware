@@ -19,7 +19,7 @@ as
 **************************************************************
 ** Creador:		Jaret Guanajuato Ruvalcaba					**
 ** Fecha:		22/01/2021									**
-** HelpDesk:	1069797										**
+** HelpDesk:	1058568										**
 ** Descripcion:	Creacion del procedimiento					**
 **************************************************************
 */
