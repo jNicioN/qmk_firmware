@@ -1,6 +1,7 @@
+
+
 create procedure SOBITFLUALT (
-	@Bif_Flujo	int,			-- Flujo
-	@Bif_Fecha	smalldatetime,	-- Fecha
+	@Bif_EjeFlu	int,			-- Ejecucion de Flujo
 	@Bif_ProFlu	int,			-- Proceso
 	@Bif_EjeExi	bit,			-- Ejecucion Exitosa
 	@Bif_FecHor	smalldatetime,	-- Fecha y hora de ejecucion
@@ -24,18 +25,10 @@ as
 ** Descripcion:	Alta de mensajes en Bitacora de Flujos									****
 ********************************************************************************************/
 		
---Variables
-
---Constantes
-declare	@Can_Cero   tinyint		-- Cantidad: Cero 
-
-select  @Can_Cero   = 0			-- Cantidad: Cero
-		
-insert into SOBITFLU	(	Bif_Flujo,	Bif_Fecha,	Bif_ProFlu, Bif_EjeExi, Bif_FecHor, 
-							Bif_Mensaj, NumTransac, Transaccio, Usuario,	FechaSis, 
-							SucOrigen,	SucDestino)
-values(						@Bif_Flujo,	@Bif_Fecha,	@Bif_ProFlu,@Bif_EjeExi,@Bif_FecHor, 
-							@Bif_Mensaj,@NumTransac,@Transaccio,@Usuario,	@FechaSis, 
-							@SucOrigen,	@SucDestino)
-
-return @Can_Cero
+insert into SOBITFLU	(	Bif_EjeFlu,	Bif_ProFlu, Bif_EjeExi, Bif_FecHor, Bif_Mensaj, 
+							NumTransac, Transaccio, Usuario,	FechaSis, 	SucOrigen,	
+							SucDestino)
+values(						@Bif_EjeFlu,@Bif_ProFlu,@Bif_EjeExi,@Bif_FecHor,@Bif_Mensaj,
+							@NumTransac,@Transaccio,@Usuario,	@FechaSis, 	@SucOrigen,	
+							@SucDestino)
+							

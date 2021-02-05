@@ -1,4 +1,4 @@
-create procedure SORENTASPRO (
+﻿create procedure SORENTASPRO (
 	@Amo_MonFin	double precision,	-- Monto a Financiar
 	@Amo_IVAFac	smallmoney,			-- Porcentaje de I.V.A. de Factura
 	@Amo_OpcCom	double precision,	-- opción de Compra
@@ -36,6 +36,12 @@ as
 **				de ArrendaRegio**										****
 ****************************************************************************
 ** REFERENCIAS:															****
+****************************************************************************
+** Modificó:		Eduardo Montoya										****
+** Fecha:			20/noviembre/2020			  						****
+** Help:			1418583												****
+** Descripción:		Se agregan criterios para valor futuro cuando la    ****
+**					unidad de negocio es Arrendamiento México			****
 ****************************************************************************
 ** Modifico:		Erick Martinez										****
 ** Fecha:			13/Mayo/2020			  							****
@@ -137,7 +143,9 @@ declare	@Ren_ResCap	double precision,		/*Resultado capital*/
 		@Tip_CobIVA	char(1),				/*Cobro de IVA S- SI N- NO	*/
 		@Coa_UniNeg	smallint,				/*Unidad de negocio	*/
 		@Adi_Tipo	char(2),				/*Tipo de Bien	*/
-		@Coa_ActFij	int						/*Tipo de activo fijo	*/
+		@Coa_ActFij	int,					/*Tipo de activo fijo	*/
+		@Cot_OpcCom money,					/* Monto de la Opcion de Compra */
+		@Opc_ComIVA money					/* Monto de la Opcion de Compra + IVA */
 
 declare	@Mon_Cero	smallint,				/*	Declaración de Constantes	*/
 		@Mon_Uno	smallint,
@@ -241,6 +249,8 @@ select	@Mon_Cero	= 0.00,			/*	Moneda Cero																	*/
 		@Cob_NoIVA	= 'N',			/*	No cobro de IVA																*/
 		@Cob_SiIVA	= 'S',			/*	Si cobro de IVA																*/																					 
 		@Str_SieCer	= '0000000'		/*	Cadena 7 ceros																*/
+
+select @Amo_TipRen = isnull(@Amo_TipRen,@Str_Vacio)
 		
 create table #Rentas (
 	Ren_Consec	smallint not null,
@@ -268,10 +278,10 @@ if @Num_Cotiza = @Str_SieCer begin
 end else	
 	select	@Zon_IVA	= Zon_IVA,  --Se obtiene el IVA en base a la zona de la cotizacion, 01 interior de la republica o 02 frontera 
 			@Cot_ExeIVA	= Caa_ExeIVA 
-	from ABCOTIZA noholdlock
-	inner join SOZONAS noholdlock on Cot_Zona = Zon_Numero
-	inner join ABCOADAR noholdlock on Cot_Numero = Caa_Cotiza
-	where	Cot_Numero	= @Num_Cotiza
+		from ABCOTIZA noholdlock
+		inner join SOZONAS noholdlock on Cot_Zona = Zon_Numero
+		inner join ABCOADAR noholdlock on Cot_Numero = Caa_Cotiza
+		where	Cot_Numero	= @Num_Cotiza
 
 select	@Zon_IVA	= isnull(@Zon_IVA, @Mon_Cero)
 
@@ -305,13 +315,19 @@ if @Amo_RenExt > @Mon_Cero begin
 	select	@Mon_CapREx	= round(@Amo_RenExt / (@Mon_Uno + (@Zon_IVA) ), @Ent_Dos),
 			@Mon_IvaREx	= @Amo_RenExt - round(@Amo_RenExt / (@Mon_Uno + (@Zon_IVA) ), @Ent_Dos)
 
-	insert into #Rentas 
-		values(	@Mon_Cero,	@Str_RenExt,	@Mon_CapREx,	@Mon_Cero,	@Mon_CapREx,
-				@Mon_Cero,	@Mon_IvaREx,	@Mon_Cero,		@Amo_RenExt)
+	insert into #Rentas
+		(Ren_Consec,	Ren_Numero,		Ren_Capita,		Ren_Intere,		Ren_TtCaIn,
+		Ren_IvaInt,		Ren_IvaFac,		Ren_IvaRen, 	Ren_Total)
+		values(	
+		@Mon_Cero,		@Str_RenExt,	@Mon_CapREx,	@Mon_Cero,		@Mon_CapREx,
+		@Mon_Cero,		@Mon_IvaREx,	@Mon_Cero,		@Amo_RenExt)
 end else
 	insert into #Rentas
-		values(	@Mon_Cero,	@Str_RenExt,	@Mon_Cero,	@Mon_Cero,	@Mon_Cero,
-				@Mon_Cero,	@Mon_Cero,		@Mon_Cero,	@Mon_Cero)
+		(Ren_Consec,	Ren_Numero,		Ren_Capita,		Ren_Intere,		Ren_TtCaIn,
+		Ren_IvaInt,		Ren_IvaFac,		Ren_IvaRen, 	Ren_Total)	
+		values(	
+		@Mon_Cero,		@Str_RenExt,	@Mon_Cero,		@Mon_Cero,		@Mon_Cero,
+		@Mon_Cero,		@Mon_Cero,		@Mon_Cero,		@Mon_Cero)
 
 
 -- Inserción de amortización cero "000" correspondiente al pago inicial
@@ -327,8 +343,11 @@ select	@Ren_Capita	= @Amo_ToPaIn
 select	@Ren_Capita	= @Ren_Capita
 
 insert into #Rentas
-	values(	@Mon_Cero,	@Ren_Numero,	@Ren_Capita,	@Mon_Cero,	@Ren_Capita,
-			@Mon_Cero,	@Mon_Cero,		@Mon_Cero,		@Ren_Capita)
+	(Ren_Consec,	Ren_Numero,		Ren_Capita,		Ren_Intere,		Ren_TtCaIn,
+	Ren_IvaInt,		Ren_IvaFac,		Ren_IvaRen, 	Ren_Total)
+	values(	
+	@Mon_Cero,		@Ren_Numero,	@Ren_Capita,	@Mon_Cero,		@Ren_Capita,
+	@Mon_Cero,		@Mon_Cero,		@Mon_Cero,		@Ren_Capita)
 
 select	@Frecuencia	= case @Amo_Frecue
 						when @Tip_FreSem then @Fre_Semest
@@ -354,8 +373,11 @@ end
 if @Amo_TipCon = @Con_ComPur/*Comercial Puro*/ begin
 	select	@Ren_Numero	= @Str_ValFut
 	insert into #Rentas
-		values(	@Mon_Cero,	@Ren_Numero,	@Amo_OpcCom,	@Mon_Cero,	@Amo_OpcCom,
-				@Mon_Cero,	@Mon_Cero,		@Mon_Cero,		@Amo_OpcCom)
+		(Ren_Consec,	Ren_Numero,		Ren_Capita,		Ren_Intere,		Ren_TtCaIn,
+		Ren_IvaInt,		Ren_IvaFac,		Ren_IvaRen, 	Ren_Total)
+		values(	
+		@Mon_Cero,		@Ren_Numero,	@Amo_OpcCom,	@Mon_Cero,		@Amo_OpcCom,
+		@Mon_Cero,		@Mon_Cero,		@Mon_Cero,		@Amo_OpcCom)
 end
 
 if @Amo_MonCer = @Cad_No begin
@@ -410,9 +432,9 @@ if @Amo_MonCer = @Cad_No begin
 				@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,			@SucOrigen,
 				@SucDestino,	@Modulo
 	
-			if @Status <> 0 begin
+			if @Status <> @Ent_Cero begin
 				rollback
-				return 1
+				return @Ent_Uno
 			end
 	
 			select	@Mon_InAPag	= @Amo_Mensua
@@ -580,15 +602,6 @@ if @Amo_MonCer = @Cad_No begin
 		end
 	end
 
-	/*Cuando la suma de los IVA's de la factura no es igual al IVA de la factura por cuestion de redondeo*/
-	/*if @Tot_IvaFac > @Res_IvaFac  begin
-		select	@Ren_IvaFac	= @Ren_IvaFac - (@Tot_IvaFac - @Res_IvaFac)
-	end else begin 
-		if @Tot_IvaFac < @Mon_IvaFac  begin
-			select	@Ren_IvaFac	= @Ren_IvaFac + (@Res_IvaFac -@Tot_IvaFac)
-		end
-	end*/
-
 	if @Mon_Intere > @Mon_Cero begin
 		if @Amo_TipAmo = @Amo_Nivela begin
 			select	@Ren_Intere	= @Ren_TtCaIn - @Ren_Capita
@@ -669,9 +682,9 @@ if @Amo_MonCer = @Cad_No begin
 				Ren_IvaFac	= #Rentas.Ren_IvaFac,
 				Ren_IvaRen	= #Rentas.Ren_IvaRen,
 				Ren_Total	= #Rentas.Ren_Total
-		from #Rentas
-			 inner join #RenMen on #Rentas.Ren_Numero = #RenMen.Ren_Numero
-		where	#Rentas.Ren_Numero	not in (@Str_RenExt, @Str_ValFut, @Amo_PagIni)
+			from #Rentas
+			inner join #RenMen on #Rentas.Ren_Numero = #RenMen.Ren_Numero
+			where	#Rentas.Ren_Numero	not in (@Str_RenExt, @Str_ValFut, @Amo_PagIni)
 
 	end else if @Amo_TipCal = @Cal_Report begin
 
@@ -726,6 +739,9 @@ if @Amo_MonCer = @Cad_No begin
 				inner join #RenMen on #Rentas.Ren_Numero = #RenMen.Ren_Numero
 
 			insert into #RenMen
+				(Ren_Cotiza,	Ren_Numero,		Ren_FecIni,		Ren_FecVen,		Ren_FecTer,
+				Ren_Capita,		Ren_Intere,		Ren_TtCaIn,		Ren_IvaInt,		Ren_IvaFac,
+				Ren_IvaRen,		Ren_Total)
 				select	Ren_Cotiza	= @Str_Vacio,
 						Ren_Numero	= @Cad_Totale,
 						Ren_FecIni	= null,
@@ -757,6 +773,9 @@ if @Amo_MonCer = @Cad_No begin
 				where	#Rentas.Ren_Numero <> @Amo_PagIni
 	
 			insert into #RenMen
+				(Ren_Cotiza,	Ren_Numero,		Ren_FecIni,		Ren_FecVen,		Ren_FecTer,
+				Ren_Capita,		Ren_Intere,		Ren_TtCaIn,		Ren_IvaInt,		Ren_IvaFac,
+				Ren_IvaRen,		Ren_Total)			
 				select	Ren_Cotiza	= @Str_Vacio,
 						Ren_Numero	= @Cad_Totale,
 						Ren_FecIni	= null,
@@ -780,6 +799,9 @@ end else begin
 	if @Amo_TipCal = @Cal_ConEsp begin
 		delete from #RenMen
 		insert into #RenMen
+			(Ren_Cotiza,	Ren_Numero,		Ren_FecIni,		Ren_FecVen,		Ren_FecTer,
+			Ren_Capita,		Ren_Intere,		Ren_TtCaIn,		Ren_IvaInt,		Ren_IvaFac,
+			Ren_IvaRen,		Ren_Total)
 			select	@Num_Cotiza,	Ren_Numero,	@Fec_Vacia,	@Fec_Vacia,	@Fec_Vacia,
 					Ren_Capita,		Ren_Intere,	Ren_TtCaIn,	Ren_IvaInt,	Ren_IvaFac,
 					Ren_IvaRen,		Ren_Total
@@ -791,6 +813,9 @@ end else begin
 
 			delete from #RenMen
 			insert into #RenMen
+				(Ren_Cotiza,	Ren_Numero,		Ren_FecIni,		Ren_FecVen,		Ren_FecTer,
+				Ren_Capita,		Ren_Intere,		Ren_TtCaIn,		Ren_IvaInt,		Ren_IvaFac,
+				Ren_IvaRen,		Ren_Total)					
 				select	@Num_Cotiza,	Ren_Numero,	@Fec_Vacia,	@Fec_Vacia,	@Fec_Vacia,
 						Ren_Capita,		Ren_Intere,	Ren_TtCaIn,	Ren_IvaInt,	Ren_IvaFac,
 						Ren_IvaRen,		Ren_Total
@@ -800,6 +825,9 @@ end else begin
 
 			delete from #RenMen
 			insert into #RenMen
+				(Ren_Cotiza,	Ren_Numero,		Ren_FecIni,		Ren_FecVen,		Ren_FecTer,
+				Ren_Capita,		Ren_Intere,		Ren_TtCaIn,		Ren_IvaInt,		Ren_IvaFac,
+				Ren_IvaRen,		Ren_Total)
 				select	@Num_Cotiza,	Ren_Numero,	@Fec_Vacia,	@Fec_Vacia,	@Fec_Vacia,
 						Ren_Capita,		Ren_Intere,	Ren_TtCaIn,	Ren_IvaInt,	Ren_IvaFac,
 						Ren_IvaRen,		Ren_Total
@@ -807,6 +835,29 @@ end else begin
 				where	Ren_Numero <> @Amo_PagIni
 	
 		end
+	end
+end
+
+/* PROM-54 */
+if @Amo_UniNeg = @Uni_TCC begin
+	if @Num_Cotiza <> @Str_SieCer begin 
+	
+		select @Cot_OpcCom	=	Cot_OpcCom
+			from ABCOTIZA noholdlock
+			where Cot_Numero	=	@Num_Cotiza
+		
+		if @Cot_ExeIVA = @Cob_SiIVA begin
+			select @Opc_ComIVA = @Cot_OpcCom + (@Cot_OpcCom * @Zon_IVA)
+		end else begin
+			select @Opc_ComIVA = @Cot_OpcCom
+		end
+	
+		update #RenMen set
+			Ren_Capita	=	@Cot_OpcCom,
+			Ren_Total	=	@Opc_ComIVA
+			where Ren_Numero = @Str_ValFut
+			  and Ren_Cotiza = @Num_Cotiza
+			  
 	end
 end
 

@@ -1,4 +1,3 @@
---drop procedure SODECOTIPRO
 create procedure SODECOTIPRO (
 	@Pro_Numero	smallint,		/* Proceso para el cual se ejecutarán sus Tipos de Movimientos */
 	@NumTransac	char(10),
@@ -14,7 +13,13 @@ as
 /***************************************************************************
 ** DESCRIPCION: Determinacion de Configuraciones de Tipos de Movimientos****
 ****************************************************************************
-** REFERENCIAS:															****
+** REFERENCIAS:		
+****************************************************************************
+** Modifico:	José Rivera												****
+** Fecha:		07/12/2020											    ****
+** Help:		1453282											    	****
+** Descripcion:	Se modifica procedimiento para conversión de enteros a  ****
+				alganúmericos en tabla CHGRUCLI							****
 ****************************************************************************
 ** Modifico:	Joel Gonzalez											****
 ** Fecha:		07/09/2020											    ****
@@ -41,7 +46,13 @@ declare	@Status		int,			-- Resultado de la ejecucion de subprocedimientos
 		@Str_Descri char(50),		-- Descripcion del proceso ejecutado 
 		@Fec_IniPro datetime,		-- Fecha de inicio de proceso ejecutado 
 		@Fec_FinPro datetime,		-- Fecha de finalizacion de proceso ejecutado 
-		@Can_TieEje int				-- Tiempo de ejecucion del proceso ejecutado 
+		@Can_TieEje int,			-- Tiempo de ejecucion del proceso ejecutado
+        @Contador   int,            --Contador para proceso while
+        @Tot_Regis  int,            --Total de registros para proceso while
+        @Int_Consec	int,
+        @GCh_Client char(8),
+        @GCh_Grupo  char(4),
+        @Ent_Grupo  int 
 
 -- Declaracion de Constantes
 declare	@Bit_Si		bit,			-- Activo Registro
@@ -56,7 +67,9 @@ declare	@Bit_Si		bit,			-- Activo Registro
 									-- asignado directamente                                  
 		@Sto_CieCom	varchar(11),	-- Proceso de Cierre de Comisiones 
 		@Sta_Activo char(1),		-- Status Activo 
-		@Ent_ProMod int				-- Numero de Producto Modalidad --
+		@Ent_ProMod int,			-- Numero de Producto Modalidad --
+		@Str_N      char(1),
+		@Str_CuaCer char(4)
 
 -- Asignacion de Constantes
 select	@Bit_Si		= 1,				-- Si (bit)
@@ -71,7 +84,9 @@ select	@Bit_Si		= 1,				-- Si (bit)
 										-- asignado directamente                                  
 		@Sto_CieCom	= 'SODECOTIPRO',	-- Proceso de Cierre de Comisiones 
 		@Sta_Activo = 'A',				-- Status Activo 
-		@Ent_ProMod = 29				-- Numero de Producto Modalidad 
+		@Ent_ProMod = 29,				-- Numero de Producto Modalidad     
+		@Str_N      = 'N',
+		@Str_CuaCer = '0000'
 
 create table #TiposMovPro 
 		(Tmp_TipMov char(6),			/* Tabla para guardar los Tipos de Movimientos a Procesar */
@@ -105,6 +120,11 @@ create table #GruposCli
 		(	Grc_CliEnt	int			not null,	-- Cliente en formato Entero
 			Grc_GruEnt	int			not null)	-- Grupo en formato Entero
 create index GruposCli on #GruposCli (Grc_CliEnt)
+
+create table #CHGRUCLI (
+    GCh_Client  char(8) not null,
+    GCh_Grupo   char(4) not null
+)
 
 -- Proceso principal
 
@@ -285,13 +305,51 @@ begin
 	select @Str_Descri = 'Preparacion de Grupos de Clientes ',	/* Descripcion del proceso ejecutado */
 			@Fec_IniPro = getdate()					/* Fecha de inicio de proceso ejecutado */
 
-	-- Obtener las Cuentas Activas junto con su Cliente, Tipo de Cuenta, Sucursal, Clasificacion de Cliente.
-	insert into #GruposCli	(	Grc_CliEnt,					Grc_GruEnt)
-		select					convert(int, GCh_Client),	convert(int, case when isnumeric(GCh_Grupo) = @Bit_Si then GCh_Grupo else @Car_Cero end)
-		from CHGRUCLI noholdlock
-	if @Status <> @Ent_Cero begin
-		return @Status
-	end
+    insert into #CHGRUCLI
+		select GCh_Client, GCh_Grupo
+			from CHGRUCLI noholdlock
+        
+    insert into #GruposCli	(Grc_CliEnt, Grc_GruEnt)
+		select convert(int,GCh_Client), convert(int,GCh_Grupo) 
+			from #CHGRUCLI noholdlock
+			where GCh_Grupo in (@Car_Cero, @Str_CuaCer)
+
+	delete from #CHGRUCLI
+		where GCh_Grupo in (@Car_Cero, @Str_CuaCer)
+		
+	select @Tot_Regis = count(1)
+        from #CHGRUCLI noholdlock
+
+    while @Contador <= @Tot_Regis begin
+
+        select top 1 @GCh_Client = GCh_Client,
+                     @GCh_Grupo  = GCh_Grupo
+            from  #CHGRUCLI noholdlock
+
+        --Convierte alfanumerico a Entero
+            exec @Status = SOALFINTCON 
+                            @GCh_Grupo, 	@Int_Consec OUT , 	@Str_N, 		@NumTransac, 	@Transaccio,
+                            @Usuario,	 	@FechaSis,			@SucOrigen,		@SucDestino,	@Modulo	
+            if @Status <> @Ent_Cero begin
+                rollback
+                return 1
+            end
+
+			select @Ent_Grupo = @Int_Consec
+	
+		-- Obtener las Cuentas Activas junto con su Cliente, Tipo de Cuenta, Sucursal, Clasificacion de Cliente.
+		insert into #GruposCli	(Grc_CliEnt, Grc_GruEnt)
+		values (convert(int,@GCh_Client), @Ent_Grupo)
+		if @Status <> @Ent_Cero begin
+			return @Status
+		end
+	
+		delete from #CHGRUCLI 
+		where GCh_Client = @GCh_Client
+		   and GCh_Grupo =  @GCh_Grupo
+	
+		select @Contador = @Contador + 1
+    end
 
 	--Registrar ejecucion de Preparacion
 	select @Fec_FinPro = getdate()	/* Fecha de finalizacion de proceso ejecutado */
@@ -1225,5 +1283,6 @@ drop table #ConfiguracionProd
 drop table #TiposMovPro
 drop table #CuentasAct
 drop table #GruposCli
+drop table #CHGRUCLI
 
 return 0
