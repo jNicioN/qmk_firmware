@@ -16,6 +16,12 @@ as
 /****************************************************************/
 /* DESCRIPCION: Consulta de Reporte de Informacion Basica		*/
 /****************************************************************/
+/** Modifica:		Raul Muniz									*/
+/** Descripcion:	Se modifican C1, C2, C3 y C4 para regresar	*/
+/* 					duracion de sociedad indefinida				*/
+/** Fecha:			05/02/2020                               	*/
+/** Help:			1468599					 					*/
+/****************************************************************/
 /** Modifica:		Edwin Dennis								*/
 /** Descripcion:	Se agrega campo Adi_FeNaAp					*/
 /* 					Modificacion en Consulta Tipo C4			*/
@@ -47,7 +53,10 @@ declare @Str_Uno	char(1),		/* Caracter 1 */
 		@Str_Unico  varchar(30),	/* String Administrador Unico */
 		@Str_C char(1),				/* Caracter C */
 		@Fec_Vacia smalldatetime,	/* Fecha default */
-		@Str_ComSim varchar(2)		/* comillas simples */
+		@Str_ComSim varchar(2),		/* comillas simples */
+		@Ent_MenUno int,			/* Entero -1 */
+		@Ent_Cero int,				/* Entero 0 */
+		@Ent_Uno int				/* Entero 0 */		
 		
 
 select @Str_C = 'C',
@@ -60,7 +69,11 @@ select @Str_C = 'C',
 	   @Str_Consej  = 'CONSEJO DE ADMINISTRACION',
 	   @Str_Unico   = 'ADMINISTRADOR UNICO',
 	   @Fec_Vacia   = '1900-01-01',
-	   @Str_ComSim  = ''
+	   @Str_ComSim  = '',
+	   @Ent_MenUno	= -1,
+	   @Ent_Cero	= 0,
+	   @Ent_Uno		= 1
+	   
 
 select @Tip_ConTip = substring(@Tip_Consul, 1, 1),
        @Tip_ConCon = substring(@Tip_Consul, 2, 1)
@@ -73,9 +86,11 @@ if @Tip_ConTip	= @Str_C begin /* 'C': Consulta */
 			Rib_TipRib,		Rib_FecEla,		Rib_SucSol,		Rib_ConNom,		Rib_ConPue,
 			Rib_PagWeb,		Rib_ActCat,		Rib_ActEsp,		Rib_MerObj,		Rib_LlViOc,
 			Rib_UsuCap,		Rib_NoAlGo,		Rib_PaEnPo,		Rib_CabCon,		Rib_FeCaPo,
-			Rib_FeInOp,		Rib_EmOtCr,		Rib_EmSuRe,		Rib_DurSoc,		Rib_CotBol,
-			Rib_NumApo,		Rib_NumCon,		Rib_CliSuc,		Rib_EdoCiv,		Rib_NumExt,
-			Rib_LugCon,		Rib_ZonUsu, 	FechaSis
+			Rib_FeInOp,		Rib_EmOtCr,		Rib_EmSuRe,		
+			(CASE WHEN Rib_DurSoc = @Ent_MenUno THEN @Ent_Cero ELSE Rib_DurSoc END) as Rib_DurSoc,
+			(CASE WHEN Rib_DurSoc = @Ent_MenUno THEN @Ent_Uno ELSE @Ent_Cero END) as Rib_DurInd,
+			Rib_CotBol,		Rib_NumApo,		Rib_NumCon,		Rib_CliSuc,		Rib_EdoCiv,
+			Rib_NumExt,		Rib_LugCon,		Rib_ZonUsu, 	FechaSis
 		from SORIB noholdlock
 		where Rib_Numero = @Rib_Numero
 	end
@@ -85,9 +100,11 @@ if @Tip_ConTip	= @Str_C begin /* 'C': Consulta */
 			Rib_TipRib,		Rib_FecEla,		Rib_SucSol,		Rib_ConNom,		Rib_ConPue,
 			Rib_PagWeb,		Rib_ActCat,		Rib_ActEsp,		Rib_MerObj,		Rib_LlViOc,
 			Rib_UsuCap,		Rib_NoAlGo,		Rib_PaEnPo,		Rib_CabCon,		Rib_FeCaPo,
-			Rib_FeInOp,		Rib_EmOtCr,		Rib_EmSuRe,		Rib_DurSoc,		Rib_CotBol,
-			Rib_NumApo,		Rib_NumCon,		Rib_CliSuc,		Rib_EdoCiv,		Rib_NumExt,
-			Rib_LugCon,		Rib_ZonUsu, 	FechaSis
+			Rib_FeInOp,		Rib_EmOtCr,		Rib_EmSuRe,		
+			(CASE WHEN Rib_DurSoc = @Ent_MenUno THEN @Ent_Cero ELSE Rib_DurSoc END) as Rib_DurSoc,
+			(CASE WHEN Rib_DurSoc = @Ent_MenUno THEN @Ent_Uno ELSE @Ent_Cero END) as Rib_DurInd,
+			Rib_CotBol,		Rib_NumApo,		Rib_NumCon,		Rib_CliSuc,		Rib_EdoCiv,
+			Rib_NumExt,		Rib_LugCon,		Rib_ZonUsu, 	FechaSis
 		from SORIB noholdlock
 		where Rib_NumPer = @Rib_NumPer
 		  and Rib_NumSol = @Rib_NumSol
@@ -98,9 +115,11 @@ if @Tip_ConTip	= @Str_C begin /* 'C': Consulta */
 			Rib_TipRib,		Rib_FecEla,		Rib_SucSol,		Rib_ConNom,		Rib_ConPue,
 			Rib_PagWeb,		Rib_ActCat,		Rib_ActEsp,		Rib_MerObj,		Rib_LlViOc,
 			Rib_UsuCap,		Rib_NoAlGo,		Rib_PaEnPo,		Rib_CabCon,		Rib_FeCaPo,
-			Rib_FeInOp,		Rib_EmOtCr,		Rib_EmSuRe,		Rib_DurSoc,		Rib_CotBol,
-			Rib_NumApo,		Rib_NumCon,		Rib_CliSuc,		Rib_EdoCiv,		Rib_NumExt,
-			Rib_LugCon,		Rib_ZonUsu, 	FechaSis
+			Rib_FeInOp,		Rib_EmOtCr,		Rib_EmSuRe,		
+			(CASE WHEN Rib_DurSoc = @Ent_MenUno THEN @Ent_Cero ELSE Rib_DurSoc END) as Rib_DurSoc,
+			(CASE WHEN Rib_DurSoc = @Ent_MenUno THEN @Ent_Uno ELSE @Ent_Cero END) as Rib_DurInd,
+			Rib_CotBol,		Rib_NumApo,		Rib_NumCon,		Rib_CliSuc,		Rib_EdoCiv,
+			Rib_NumExt,		Rib_LugCon,		Rib_ZonUsu, 	FechaSis
 		from SORIB noholdlock
 		where Rib_NumSol = @Rib_NumSol
 		  and Rib_NumInt = @Rib_NumInt
@@ -118,12 +137,14 @@ if @Tip_ConTip	= @Str_C begin /* 'C': Consulta */
 				Rii_PlPoIn, 	Rii_VePoIn, 	Rii_MoCoIn, 	Rii_MCInMo, 	Rii_CubInc, 
 				Rii_CubTer, 	Rii_CubHur, 	Rii_CubInu, 	Rii_CubOtr, 	Rii_CuOtEs, 
 				Rii_PrePor, 	Rii_RMInVa, 	Rii_RMIVaM, 	Rii_RMInPa, 	Rii_RMIPaM, 
-				Rib_DurSoc as Rib_Duraci, 		Rib_NumPer, 	
+				(CASE WHEN Rib_DurSoc = @Ent_MenUno THEN @Ent_Cero ELSE Rib_DurSoc END) as Rib_Duraci,
+				Rib_NumPer,
 				Adi_FecCon = @Fec_Vacia,
 				Rca_TipAdm = replicate(@Str_ComSim , 180), 
 				Adi_FecNac = @Fec_Vacia, Adi_FeNaAp = @Fec_Vacia,
 				Adm_Comple = replicate(@Str_ComSim , 180), 
 				Per_Entida = replicate(@Str_ComSim , 180),
+				(CASE WHEN Rib_DurSoc = @Ent_MenUno THEN @Ent_Uno ELSE @Ent_Cero END) as Rib_DurInd,
 				sor.NumTransac, sor.Transaccio, sor.Usuario, 	sor.FechaSis, 	sor.SucOrigen,
 				sor.SucDestino
 			into #ReporteInfBas
@@ -188,10 +209,11 @@ if @Tip_ConTip	= @Str_C begin /* 'C': Consulta */
 		   Rii_MoCoIn, Rii_MCInMo, Rii_CubInc, Rii_CubTer, Rii_CubHur, 
 		   Rii_CubInu, Rii_CubOtr, Rii_CuOtEs, Rii_PrePor, Rii_RMInVa, 
 		   Rii_RMIVaM, Rii_RMInPa, Rii_RMIPaM, Rib_Duraci, Rib_NumPer, 
-		   Adi_FecCon, Rca_TipAdm, Adi_FecNac, Rrh_NumPer, Adm_Comple, Adi_FeNaAp, Rpf_Politi, 
-		   Rpf_DCPoCo, Rpf_DiaInv, Rpf_DiaPro, Rpf_PerPic, Rpf_PerRec, 
-		   Rpf_ComCic, Rpf_PolInv, Per_Entida, sor.NumTransac, sor.Transaccio, 
-		   sor.Usuario, sor.FechaSis, sor.SucOrigen, sor.SucDestino
+		   Adi_FecCon, Rca_TipAdm, Adi_FecNac, Rrh_NumPer, Adm_Comple,
+		   Adi_FeNaAp, Rpf_Politi, Rpf_DCPoCo, Rpf_DiaInv, Rpf_DiaPro,
+		   Rpf_PerPic, Rpf_PerRec, Rpf_ComCic, Rpf_PolInv, Per_Entida,
+		   Rib_DurInd, sor.NumTransac, sor.Transaccio, sor.Usuario, sor.FechaSis,
+		   sor.SucOrigen, sor.SucDestino
 		FROM #ReporteInfBas sor
 		LEFT JOIN SORIPOFI sopf noholdlock
 			ON Rpf_NumRib = Rib_Numero
