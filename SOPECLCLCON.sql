@@ -1,3 +1,4 @@
+
 create procedure SOPECLCLCON(
 	@Per_RFC	char(15),
 	@Per_Client	char(8),
