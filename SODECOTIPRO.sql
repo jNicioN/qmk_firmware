@@ -24,6 +24,12 @@ as
 **  Ptc_TipCue y Ptc_Moneda ya que ahora son char y no se				****
 **  necesita las conversiones  											****
 ****************************************************************************
+** Modifico:	José Rivera												****
+** Fecha:		07/12/2020											    ****
+** Help:		1453282											    	****
+** Descripcion:	Se modifica procedimiento para conversión de enteros a  ****
+				alganúmericos en tabla CHGRUCLI							****
+****************************************************************************
 ** Modifico:	Joel Gonzalez											****
 ** Fecha:		07/09/2020											    ****
 ** Help:		1286068											    	****
