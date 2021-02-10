@@ -21,6 +21,11 @@ as
 ****************************************************************************
 **	REFERENCIAS:														****
 ****************************************************************************
+** Modifico:	Adriana Gomez											****
+** Fecha:		03/02/2021   											****
+** Descripcion: Valida Rfc que no este vacio 							****
+** Help Desk:	1376175										 			****
+****************************************************************************
 ** Modifico:	Carlos Copto											****
 ** Fecha:		27/11/2020   											****
 ** Descripcion: Se agrego validacion de estatus 'B' bloqueado			****
@@ -110,7 +115,7 @@ select 	@Per_ID = Per_Numero,
 		where Adi_FecNac = @Per_Fecha and  Per_Comple = @Str_Comple
 		
 /* Si existe un prospecto revisa si tiene un cliente con cuentas activas */
-if( @Persona = @Ent_Uno ) begin
+if @Per_RFC <> @Str_Vacio and @Persona = @Ent_Uno begin
 
 	select  @Cliente = @Ent_Uno
 		from CLCLIENT noholdlock
@@ -118,8 +123,8 @@ if( @Persona = @Ent_Uno ) begin
 		where Cli_RFC	= @Per_RFC
 		and Cue_Status in (@Sta_Bloque, @Sta_Activo) 
 		and Cue_Tipo not in  (@Cue_CashBa , @Cue_Refere)
-			
-end 
+
+end
 
 /* si no es cliente se procede a buscar como usuario*/
 if ( @Cliente <> @Ent_Uno ) begin
