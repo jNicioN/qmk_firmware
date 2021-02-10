@@ -1,6 +1,8 @@
+-- drop  procedure SOTMPPTCALT
 create procedure SOTMPPTCALT (
-	@Ptc_TipCue	smallint,
-	@Ptc_Moneda	int,
+    @Ptc_Numero int,
+	@Ptc_TipCue	char(2),
+	@Ptc_Moneda	char(2),
 	@Ptc_Produc	int,
 	@Ptc_FecCon	smalldatetime,
 
@@ -17,6 +19,14 @@ as
 /****************************************************************************
 ** Descripción:	** Alta de Catalogo producto tipo cuenta				****
 ****************************************************************************
+** Referencias:															****
+****************************************************************************
+**	Modificó:	Frank canul												****
+**  Fecha:		23/12/2020												****
+**  Help:		1286068													****
+**	Descripción: se cambia Ptc_TipCue y Ptc_Moneda a char(2). Se agrega ****
+**               el campo  Ptc_Numero 									****
+****************************************************************************
 ** Creó:			Frank Canul				****
 ** Fecha:		20-05-2020									****
 ** Help:		1286068										****
@@ -30,5 +40,7 @@ as
 
 
 /* Alta de Catalogo */
-insert into SOTMPPTC values(
-	@Ptc_TipCue,		@Ptc_Moneda,		@Ptc_Produc,		@Ptc_FecCon)
+insert into SOTMPPTC 
+		(Ptc_Numero,	Ptc_TipCue,		Ptc_Moneda,		Ptc_Produc,		Ptc_FecCon) 
+		values
+		(@Ptc_Numero,    @Ptc_TipCue,	@Ptc_Moneda,	@Ptc_Produc,	@Ptc_FecCon)

@@ -1,3 +1,4 @@
+-- drop procedure SOPERSONCON
 create procedure SOPERSONCON (
 	@Per_Numero	char(8),
 	@Per_Comple	varchar(181),
@@ -19,6 +20,13 @@ as
 ** DESCRIPCION:  ** Consulta de Personas **						****
 ********************************************************************
 ** REFERENCIAS:													****
+********************************************************************
+**	Modificó:	Frank canul										****
+**  Fecha:		23/12/2020										****
+**  Help:		1286068											****
+**	Descripción: se elimina el convert para la columna 			****
+**  Ptc_TipCue ya que ahora son char y no se necesita           ****
+**  las conversiones  									        ****																
 ********************************************************************
 ** Modifico:		Adriana Gomez								****
 ** Fecha:			30/10/2020									****
@@ -1552,7 +1560,7 @@ end else begin
 				Cli_Banreg = @Sta_Si
 			from #ClientesPorNumeroCliente
 			inner join CHCUENTA noholdlock on Per_Numero = Cue_Client
-			inner join SOPRTICU noholdlock on Cue_Tipo =  right(@Str_CuaCer + convert(varchar, Ptc_TipCue ),2)
+			inner join SOPRTICU noholdlock on Cue_Tipo =  Ptc_TipCue
 			inner join SOCLAPRO noholdlock on Ptc_Produc  =  Clp_Produc 
 			where	Clp_Clasif  = @Cla_Banreg
 			  and	Cue_Tipo not in  (@Cue_CashBa)
@@ -1636,7 +1644,7 @@ end else begin
 				Cli_Banreg = @Sta_Si
 			from #ClientesAperturaSucursal
 			inner join CHCUENTA noholdlock on Cli_Numero = Cue_Client
-			inner join SOPRTICU noholdlock on Cue_Tipo =  right(@Str_CuaCer + convert(varchar, Ptc_TipCue ),2)
+			inner join SOPRTICU noholdlock on Cue_Tipo =  Ptc_TipCue
 			inner join SOCLAPRO noholdlock on Ptc_Produc  =  Clp_Produc 
 			where	Clp_Clasif  = @Cla_Banreg
 			  and	Cue_Tipo not in  (@Cue_CashBa)
