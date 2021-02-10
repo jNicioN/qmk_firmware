@@ -25,7 +25,7 @@ as
 ****************************************************************************
 ** Modificó:	Manuel Adrián Flores Félix								****
 ** Fecha:		09/Febrero/2021											****
-** Help:		1434868													****
+** Help:		1476177													****
 ** Descripción:	Se corrige consulta de fecha actual por tabla de		****
 **				parámetros de soporte.									****
 ****************************************************************************
