@@ -144,7 +144,7 @@ if @Tip_ConTip	= @Str_C begin /* 'C': Consulta */
 				Adi_FecNac = @Fec_Vacia, Adi_FeNaAp = @Fec_Vacia,
 				Adm_Comple = replicate(@Str_ComSim , 180), 
 				Per_Entida = replicate(@Str_ComSim , 180),
-				(CASE WHEN Rib_DurSoc = @Ent_MenUno THEN @Ent_Uno ELSE @Ent_Cero END) as Rib_DurInd,
+				(CASE WHEN Rib_DurSoc = @Ent_MenUno THEN @Ent_Uno ELSE @Ent_Cero END) as Rib_Indefi,
 				sor.NumTransac, sor.Transaccio, sor.Usuario, 	sor.FechaSis, 	sor.SucOrigen,
 				sor.SucDestino
 			into #ReporteInfBas
@@ -212,7 +212,7 @@ if @Tip_ConTip	= @Str_C begin /* 'C': Consulta */
 		   Adi_FecCon, Rca_TipAdm, Adi_FecNac, Rrh_NumPer, Adm_Comple,
 		   Adi_FeNaAp, Rpf_Politi, Rpf_DCPoCo, Rpf_DiaInv, Rpf_DiaPro,
 		   Rpf_PerPic, Rpf_PerRec, Rpf_ComCic, Rpf_PolInv, Per_Entida,
-		   Rib_DurInd, sor.NumTransac, sor.Transaccio, sor.Usuario, sor.FechaSis,
+		   Rib_Indefi, sor.NumTransac, sor.Transaccio, sor.Usuario, sor.FechaSis,
 		   sor.SucOrigen, sor.SucDestino
 		FROM #ReporteInfBas sor
 		LEFT JOIN SORIPOFI sopf noholdlock
