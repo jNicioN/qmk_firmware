@@ -26,6 +26,11 @@ as
 *****************************************************************
 ** Referencias: 												*
 *****************************************************************
+** Modifico:	Adriana Gomez								 ****
+** Fecha:		03/02/2021   								 ****
+** Descripcion: Se corta la busqueda a 8 digitos 			 ****
+** Help Desk:	1376175							 			 ****
+*****************************************************************
 ** modifico: 	Carlos Copto									*
 ** Fecha:	 	10/12/2020										*
 ** Help:		1376175 										*
@@ -53,7 +58,8 @@ declare	@Tip_ConTip	char(1),
 		@Use_LuNaUs varchar(50),
 		@Ent_Total  int,
 		@Ent_Consec int,
-		@Une_Estatu char(1)
+		@Une_Estatu char(1),
+		@Usu_Numero varchar(8)
 
 /* Declaracion de Constantes */
 declare	@Str_Vacio	char(1),
@@ -61,6 +67,7 @@ declare	@Str_Vacio	char(1),
 		@Str_Coma	char(1),
 		@Ent_Cero	int,
 		@Ent_Uno	int,
+		@Ent_Ocho	int,
 		@Sta_Activo	char(1),
 		@Tip_TabNac char(1),
 		@Tip_TabExt char(1)
@@ -71,6 +78,7 @@ select	@Str_Vacio	= '',			-- String Vacio
 		@Str_Coma	= ',',			-- String Coma
 		@Ent_Cero	= 0,			-- Entero : 0
 		@Ent_Uno	= 1,			-- Entero : 1
+		@Ent_Ocho	= 8,			-- Entero : 8
 		@Sta_Activo	= 'A',			-- Status: Activo
 		@Tip_TabNac = '1',			/* Tabla Usuarios Nacionales SOPERSON */
 		@Tip_TabExt = '2'           /* Tabla Usuarios Extrajeros SOUSUEXT */
@@ -195,9 +203,14 @@ end	else begin
 			Use_LugNac  varchar(50),
 			Une_Estatu  varchar(1)
 		)
+	
 		
 		if ISNUMERIC(@Use_NoCoUs) = @Ent_Uno begin
-		/*Usuarios Compra Venta de Dlls Extranjeros*/
+			/*Usuarios Compra Venta de Dlls Extranjeros*/
+			if char_length(ltrim(rtrim(@Use_NoCoUs))) > @Ent_Ocho begin
+				select	@Use_NoCoUs = substring(@Use_NoCoUs,@Ent_Uno,@Ent_Ocho)
+			end
+
 			insert into #UsuarioCompVentDola
 				select	 right('00000000' + ltrim(rtrim(convert(char, Une_Identi))), 8) as 
 						Use_FolUsu, right('00000000' + ltrim(rtrim(convert(char,  Une_IdeUsu ))), 8) as 
@@ -339,3 +352,4 @@ end	else begin
 	end
 	drop table #UsuarioCompVentDola 
 end
+
