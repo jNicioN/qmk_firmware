@@ -24,7 +24,13 @@ as
 ** REFERENCIAS:															****
 ****************************************************************************
 ** Modificó:	Manuel Adrián Flores Félix								****
-** Fecha:		28/ENero/2020											****
+** Fecha:		09/Febrero/2021											****
+** Help:		1476177													****
+** Descripción:	Se corrige consulta de fecha actual por tabla de		****
+**				parámetros de soporte.									****
+****************************************************************************
+** Modificó:	Manuel Adrián Flores Félix								****
+** Fecha:		28/Enero/2020											****
 ** Help:		1149607													****
 ** Descripción:	Se agrega PaCaVa a resultset.							****
 ****************************************************************************
@@ -117,8 +123,9 @@ if @TipConTip = @Chr_Lista begin						/* Consultar lista */
 	end
 
 	if @TipConCon = @Chr_Tres begin						/* Consulta lista registros por confirmar */
-		select	@FechaHoy	= Par_Fecha
-		from DEPARAMS noholdlock
+		select	@FechaHoy	= Par_FecAct
+		from	SOPARAMS noholdlock
+		where	Par_Sucurs = @SucOrigen
 
 		select	Cot_Numero,	Cot_TasNum,	Cot_Descri,	Cot_Abrevi,	Cot_Valor,
 				Cot_PaCaVa,	Cot_Fecha,	Cot_Moneda,	Cot_Extemp,	Cot_SelPar,
