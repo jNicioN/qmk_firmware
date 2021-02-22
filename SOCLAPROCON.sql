@@ -1,4 +1,4 @@
-create procedure SOCLAPROCON (
+create or replace procedure SOCLAPROCON (
 	@Clp_Numero int,
 	@Clp_Clasif int,
 	@Clp_Produc int,
@@ -21,6 +21,11 @@ as
 /* DESCRIPCION:   Consulta de clasificacion de producto  	   	       */
 /** REFERENCIAS:
 *****************************************************************************
+** Modifico:	Oscar Daniel Trevino Quintanilla							****
+** Fecha:	09/09/2020													****
+** Help:	01415639													****
+** Descripcion: Agrego consulta 4 y 5 para productos de credito	****
+*****************************************************************************
 ** Creo:	Oscar Daniel Trevino Quintanilla							****
 ** Fecha:	07/08/2020													****
 ** Help:	01415639													****
@@ -35,14 +40,18 @@ declare	@Ent_Uno	int,
 		@Str_Uno	char(1),
 		@Str_Dos	char(1),
 		@Str_Tres	char(1),
+		@Str_Cuatro	char(1),
+		@Str_Cinco	char(1),
 		@Str_TipCon	char(1),
 		@Str_TipLis	char(1)
 
 /* Asignacion de Constantes */
 select	@Ent_Uno	= 1,			/* Entero Uno*/
-		@Str_Uno	= '1',			/* Caracter Uno*/
-		@Str_Dos	= '2',			/* Caracter Dos*/
-		@Str_Tres	= '3',			/* Caracter Tres*/
+		@Str_Uno	= '1',			/* Uno - Consulta por producto global*/
+		@Str_Dos	= '2',			/* Dos - Consulta por producto de cheques*/
+		@Str_Tres	= '3',			/* Tres - Consulta por producto de tarjeta*/
+		@Str_Cuatro	= '4',			/* Cuatro - Consulta por producto de CR*/
+		@Str_Cinco	= '5',			/* Cinco - Consulta por producto de CC*/
 		@Str_TipCon	= 'C',			/* Tipo consulta*/
 		@Str_TipLis	= 'L'			/* Tipo lista	*/
 
@@ -72,5 +81,22 @@ if @Tip_ConTip = @Str_TipLis begin			/* Listas */
 			where Ptt_TipTar = @Clp_TarPro
 				and Clp_Produc =   Ptt_Produc  
 
+	end if @Tip_ConCon = @Str_Cuatro begin			/* Consulta por producto de CR*/
+
+		select distinct Clp_Numero, Clp_Clasif, Clp_Produc, Ptc_TipCre
+			from SOCLAPRO noholdlock,
+					 SOPRTICR noholdlock
+			where Ptc_TipCre = @Clp_CrePro
+				and Clp_Produc =   Ptc_Produc  
+
+	end  if @Tip_ConCon = @Str_Cinco begin			/* Consulta por producto de CC*/
+
+		select distinct Clp_Numero, Clp_Clasif, Clp_Produc, Ptc_TipCre
+			from SOCLAPRO noholdlock,
+					 SOPRTICC noholdlock
+			where Ptc_TipCre = @Clp_CrePro
+				and Clp_Produc =   Ptc_Produc  
+
 	end
 end 
+
