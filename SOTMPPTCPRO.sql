@@ -1,3 +1,4 @@
+--drop procedure SOTMPPTCPRO
 create procedure SOTMPPTCPRO (
 	@NumTransac	char(10),
 	@Transaccio	char(3),
@@ -13,6 +14,11 @@ as
 ** Descripción:    Migracion de la Información de Comisiones            ****
 ****************************************************************************
 ** Referencias:															****
+****************************************************************************
+** Modifico:        Frank Canul Moo                                     ****
+** Fecha:		    23/12/2020									        ****
+** Help:			1286068  									        ****
+** Descripción:	  Se agrega el campo Ptc_Numero para la tabla SOPRTICU  ****
 ****************************************************************************
 ** Elaboró: 		CODE4U Jonathan Perez Tiburcio                      ****
 ** Fecha:		    11/01/2020									        ****
@@ -60,11 +66,11 @@ begin transaction
 
 
 	insert into SOPRTICU(
-		Ptc_TipCue,   Ptc_Moneda, Ptc_Produc, NumTransac,   Transaccio, 
-        Usuario,      FechaSis,   SucOrigen,  SucDestino)
+		Ptc_Numero ,    Ptc_TipCue,   Ptc_Moneda, Ptc_Produc, NumTransac,   
+        Transaccio,     Usuario,      FechaSis,   SucOrigen,  SucDestino)
 		select  
-		tmp.Ptc_TipCue,   tmp.Ptc_Moneda, tmp.Ptc_Produc, @NumTransac,    @Transaccio,
-        @Usuario,         @FechaSis,      @SucOrigen,     @SucDestino
+		tmp.Ptc_Numero, tmp.Ptc_TipCue,   tmp.Ptc_Moneda, tmp.Ptc_Produc, @NumTransac,
+        @Transaccio,    @Usuario,         @FechaSis,      @SucOrigen,     @SucDestino
 		from SOTMPPTC tmp noholdlock 
 		left join SOPRTICU des on tmp.Ptc_TipCue = des.Ptc_TipCue
         and tmp.Ptc_Moneda = des.Ptc_Moneda

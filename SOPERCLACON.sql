@@ -1,3 +1,4 @@
+-- drop procedure SOPERCLACON
 create procedure SOPERCLACON (
 	@Per_Numero	char(8),
 	@Per_Comple	varchar(181),
@@ -20,6 +21,14 @@ as
 ** DESCRIPCION:  ** Consulta de Personas y Clasificacion **		****
 ********************************************************************
 ** REFERENCIAS:													****
+********************************************************************
+********************************************************************
+**	Modificó:	Frank canul										****
+**  Fecha:		23/12/2020										****
+**  Help:		1286068											****
+**	Descripción: se elimina el convert para la columna			****
+**  Ptc_TipCue  ya que ahora es char y no se					****
+**  necesita las conversiones  									****
 ********************************************************************
 ** Creo:			Adriana Gomez								****
 ** Fecha:			28/nov/2020									****
@@ -151,7 +160,7 @@ if @Tip_ConTip = @Str_L begin
 				Cli_TieCla = @Sta_Si
 			from #ClientesPorNumeroCliente
 			inner join CHCUENTA noholdlock on Per_Numero = Cue_Client
-			inner join SOPRTICU noholdlock on Cue_Tipo =  right(@Str_CuaCer + convert(varchar, Ptc_TipCue ),2)
+			inner join SOPRTICU noholdlock on Cue_Tipo   =  Ptc_TipCue
 			inner join SOCLAPRO noholdlock on Ptc_Produc  =  Clp_Produc 
 			where	Clp_Clasif  = @Per_ClaCom
 			  and	Cue_Tipo not in  (@Cue_CashBa)
@@ -236,7 +245,7 @@ if @Tip_ConTip = @Str_L begin
 				Cli_TieCla = @Sta_Si
 			from #ClientesAperturaSucursal
 			inner join CHCUENTA noholdlock on Cli_Numero = Cue_Client
-			inner join SOPRTICU noholdlock on Cue_Tipo =  right(@Str_CuaCer + convert(varchar, Ptc_TipCue ),2)
+			inner join SOPRTICU noholdlock on Cue_Tipo =   Ptc_TipCue
 			inner join SOCLAPRO noholdlock on Ptc_Produc  =  Clp_Produc 
 			where	Clp_Clasif  = @Per_ClaCom
 			  and	Cue_Tipo not in  (@Cue_CashBa)

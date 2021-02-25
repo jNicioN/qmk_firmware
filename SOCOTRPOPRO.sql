@@ -16,6 +16,12 @@ as
 ** REFERENCIAS:															    ****
 ********************************************************************************
 ** Modifico:	Joel Gonzalez											    ****
+** Fecha:		05/01/2021											        ****
+** Help:		1286068											    	    ****
+** Descripcion:	Ajustes por cambio de tipo de dato a char(2) de Ptc_TipCue  ****
+**              y Ptc_Moneda de SOPRTICU.                                   ****
+********************************************************************************
+** Modifico:	Joel Gonzalez											    ****
 ** Fecha:		15/10/2020											        ****
 ** Help:		1286068											    	    ****
 ** Descripcion:	Creacion del procedimiento							        ****
@@ -24,8 +30,6 @@ as
 -- Tablas temporales
 -- Productos a procesar con Tipo de Cuenta, Personalidad Fiscal, Comision --
 create table #ProductosPro(	Prp_Produc int not null,
-							Prp_TiCuEn int not null,
-							Prp_MonEnt smallint not null,
 							Prp_TipCue char(2) not null,
 							Prp_Moneda char(2) not null,
 							Prp_PrPeFi int not null,
@@ -264,12 +268,10 @@ end
 
 
 -- Productos a procesar con Tipo de Cuenta, Personalidad Fiscal, Comision
-insert into #ProductosPro(	Prp_Produc, Prp_TiCuEn, Prp_MonEnt, Prp_TipCue, Prp_Moneda,
-							Prp_PrPeFi,	Prp_PeFiEn,	Prp_PerFis,	Prp_PrTiMo,	Prp_TiMoEn,
-							Prp_TipMov,	Prp_TiCaMo,	Prp_CheGra)
-select	Pro_Numero, Prp_TiCuEn	= Ptc_TipCue, Prp_MonEnt	= Ptc_Moneda, 
-		Prp_TipCue	= substring(@Str_Ceros, 1, 2 - len(rtrim(convert(char(2), Ptc_TipCue)))) + rtrim(convert(char(2), Ptc_TipCue)),
-		Prp_Moneda	= substring(@Str_Ceros, 1, 2 - len(rtrim(convert(char(2), Ptc_Moneda)))) + rtrim(convert(char(2), Ptc_Moneda)),
+insert into #ProductosPro(	Prp_Produc, Prp_TipCue, Prp_Moneda,	Prp_PrPeFi,	Prp_PeFiEn,	
+							Prp_PerFis,	Prp_PrTiMo,	Prp_TiMoEn,	Prp_TipMov,	Prp_TiCaMo,	
+							Prp_CheGra)
+select	Pro_Numero, Ptc_TipCue,	Ptc_Moneda,
 		Prp_PrPeFi	= Ppf_Numero,	Prp_PeFiEn	= Ppf_PerFis,
 		Prp_PerFis	= rtrim(convert(char(1), Ppf_PerFis)),
 		Prp_PrTiMo	= Ptm_Numero,	Prp_TiMoEn	= Ptm_TipMov,
@@ -762,4 +764,3 @@ drop table #ClientesNue
 drop table #ClientesBan
 drop table #CuentasCam
 drop table #ClientesCam
-
