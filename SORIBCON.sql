@@ -19,7 +19,7 @@ as
 /** Modifica:		Raul Muniz									*/
 /** Descripcion:	Se modifican C1, C2, C3 y C4 para regresar	*/
 /* 					duracion de sociedad indefinida				*/
-/** Fecha:			05/02/2020                               	*/
+/** Fecha:			05/02/2021                               	*/
 /** Help:			1468599					 					*/
 /****************************************************************/
 /** Modifica:		Edwin Dennis								*/
