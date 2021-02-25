@@ -1,5 +1,6 @@
+--drop procedure SODECOTIPRO
 create procedure SODECOTIPRO (
-	@Pro_Numero	smallint,		/* Proceso para el cual se ejecutarán sus Tipos de Movimientos */
+	@Pro_Numero	smallint,		/* Proceso para el cual se ejecutaran sus Tipos de Movimientos */
 	@NumTransac	char(10),
 	@Transaccio	char(3),
 	@Usuario	char(6),
@@ -13,7 +14,15 @@ as
 /***************************************************************************
 ** DESCRIPCION: Determinacion de Configuraciones de Tipos de Movimientos****
 ****************************************************************************
-** REFERENCIAS:		
+** REFERENCIAS:															****
+****************************************************************************
+*****************************************************************************
+**	Modificó:	Frank canul												****
+**  Fecha:		23/12/2020												****
+**  Help:		1286068													****
+**	Descripción: se elimina el convert para las columnas				****
+**  Ptc_TipCue y Ptc_Moneda ya que ahora son char y no se				****
+**  necesita las conversiones  											****
 ****************************************************************************
 ** Modifico:	José Rivera												****
 ** Fecha:		07/12/2020											    ****
@@ -46,13 +55,7 @@ declare	@Status		int,			-- Resultado de la ejecucion de subprocedimientos
 		@Str_Descri char(50),		-- Descripcion del proceso ejecutado 
 		@Fec_IniPro datetime,		-- Fecha de inicio de proceso ejecutado 
 		@Fec_FinPro datetime,		-- Fecha de finalizacion de proceso ejecutado 
-		@Can_TieEje int,			-- Tiempo de ejecucion del proceso ejecutado
-        @Contador   int,            --Contador para proceso while
-        @Tot_Regis  int,            --Total de registros para proceso while
-        @Int_Consec	int,
-        @GCh_Client char(8),
-        @GCh_Grupo  char(4),
-        @Ent_Grupo  int 
+		@Can_TieEje int				-- Tiempo de ejecucion del proceso ejecutado 
 
 -- Declaracion de Constantes
 declare	@Bit_Si		bit,			-- Activo Registro
@@ -67,9 +70,7 @@ declare	@Bit_Si		bit,			-- Activo Registro
 									-- asignado directamente                                  
 		@Sto_CieCom	varchar(11),	-- Proceso de Cierre de Comisiones 
 		@Sta_Activo char(1),		-- Status Activo 
-		@Ent_ProMod int,			-- Numero de Producto Modalidad --
-		@Str_N      char(1),
-		@Str_CuaCer char(4)
+		@Ent_ProMod int				-- Numero de Producto Modalidad --
 
 -- Asignacion de Constantes
 select	@Bit_Si		= 1,				-- Si (bit)
@@ -84,9 +85,7 @@ select	@Bit_Si		= 1,				-- Si (bit)
 										-- asignado directamente                                  
 		@Sto_CieCom	= 'SODECOTIPRO',	-- Proceso de Cierre de Comisiones 
 		@Sta_Activo = 'A',				-- Status Activo 
-		@Ent_ProMod = 29,				-- Numero de Producto Modalidad     
-		@Str_N      = 'N',
-		@Str_CuaCer = '0000'
+		@Ent_ProMod = 29				-- Numero de Producto Modalidad 
 
 create table #TiposMovPro 
 		(Tmp_TipMov char(6),			/* Tabla para guardar los Tipos de Movimientos a Procesar */
@@ -109,8 +108,8 @@ create table #ConfiguracionProd			-- Configuraciones por Productos - Personalida
 create table #CuentasAct
 		(	Cua_Cuenta	char(12)	not null,
 			Cua_CliEnt	int			not null,	-- Cliente en formato Entero
-			Cua_TiCuEn	int			not null,	-- Tipo de Cuenta en formato Entero
-			Cua_MonEnt	int			not null,	-- Moneda en formato Entero
+			Cua_TipCue	char(2)		not null,	-- Tipo de Cuenta en formato Char -- FACM 23/12/2020
+			Cua_Moneda	char(2)		not null,	-- Moneda en formato char -- FACM 23/12/2020
 			Cua_ClClEn	int			not null,	-- Clasificacion de Cliente en formato Entero
 			Cua_SucEnt	int			not null	-- Sucursal en formato Entero
 		)
@@ -118,13 +117,8 @@ create table #CuentasAct
 -- Tabla Temporal para obtener los Grupos de Clientes.
 create table #GruposCli
 		(	Grc_CliEnt	int			not null,	-- Cliente en formato Entero
-			Grc_GruEnt	int			not null)	-- Grupo en formato Entero
+			Grc_Grupo	char(4)		not null)	-- Grupo de Cliente
 create index GruposCli on #GruposCli (Grc_CliEnt)
-
-create table #CHGRUCLI (
-    GCh_Client  char(8) not null,
-    GCh_Grupo   char(4) not null
-)
 
 -- Proceso principal
 
@@ -159,7 +153,8 @@ begin
 			@Fec_IniPro = getdate()					/* Fecha de inicio de proceso ejecutado */
 
 	--Eliminar registros de tablas temporales
-	truncate table SOTMPPRP
+	delete SOTMPPRP
+		where Prp_NumTra = @NumTransac
 	truncate table SOTMPCUC
 	truncate table SOTMPCCN
 	truncate table SOTMPCUL
@@ -196,18 +191,13 @@ begin
 
 	-- Obtener informacion de Producto, Personalidad Fiscal y Tipo de Movimiento
 	-- Y en los casos en que se necesite hacer conversion de tipo de dato aplicar la conversion
-	insert into SOTMPPRP 
-		(Prp_Produc,	Prp_TipCue,	Prp_Moneda,	Prp_PerFis,	Prp_TipMov,
-		Prp_TiCuCa,		Prp_MonCar,	Prp_PeFiCa,	Prp_TiMoCa, Prp_NuPeCl, 
-		Prp_ActEmp) 
-		select	distinct Ppf_Produc,	Ptc_TipCue,	Ptc_Moneda,	Ppf_PerFis,	Dat_TipMov,
-				substring('000000', 1, 2 - len(rtrim(convert(char(2), Ptc_TipCue)))) + rtrim(convert(char(2), Ptc_TipCue)),
-				substring('000000', 1, 2 - len(rtrim(convert(char(2), Ptc_Moneda)))) + rtrim(convert(char(2), Ptc_Moneda)),
-				convert(char(1), Ppf_PerFis),
-				substring('000000', 1, 6 - len(rtrim(convert(char(6), Dat_TipMov)))) + rtrim(convert(char(6), Dat_TipMov)),
-				--***Corregir tipo de dato de Pfc_NuPeCl
-				convert(char(1), Pfc_NuPeCl), 
-				Pfc_ActEmp
+	insert into SOTMPPRP(	Prp_NumTra,	Prp_Produc,	Prp_TipCue,	Prp_Moneda,	Prp_PerFis,	
+							Prp_TipMov,	Prp_PeFiCa,	Prp_TiMoCa, Prp_NuPeCl, Prp_ActEmp) 
+		select	distinct	@NumTransac,Ppf_Produc,	Ptc_TipCue,	Ptc_Moneda,	Ppf_PerFis,	
+							Dat_TipMov,	convert(char(1), Ppf_PerFis),
+							substring('000000', 1, 6 - len(rtrim(convert(char(6), Dat_TipMov)))) + rtrim(convert(char(6), Dat_TipMov)),
+							convert(char(1), Pfc_NuPeCl), 
+							Pfc_ActEmp
 		from SODAADTI noholdlock	--Comisiones con Configuraciones en el Módulo de Cheques
 		inner join SOPRTIMO noholdlock	--Productos - Personalidades Fiscales con Configuraciones
 				on Ptm_TipMov	=	Dat_TipMov
@@ -261,9 +251,9 @@ begin
 			@Fec_IniPro = getdate()					/* Fecha de inicio de proceso ejecutado */
 
 	-- Obtener las Cuentas Activas junto con su Cliente, Tipo de Cuenta, Sucursal, Clasificacion de Cliente.
-	insert into #CuentasAct	(	Cua_Cuenta,	Cua_CliEnt,					Cua_TiCuEn,				Cua_MonEnt,					Cua_ClClEn,
+	insert into #CuentasAct	(	Cua_Cuenta,	Cua_CliEnt,					Cua_TipCue,				Cua_Moneda,					Cua_ClClEn,
 								Cua_SucEnt)
-		select					Cue_Numero,	convert(int, Cue_Client),	convert(int, Cue_Tipo),	convert(int, Cue_Moneda),	convert(int, Cli_Clasif),
+		select					Cue_Numero,	convert(int, Cue_Client),	Cue_Tipo,	            Cue_Moneda,	        convert(int, Cli_Clasif),
 								convert(int, Cue_Sucurs)
 		from CHCUENTA noholdlock
 		inner join CLCLIENT noholdlock
@@ -305,51 +295,13 @@ begin
 	select @Str_Descri = 'Preparacion de Grupos de Clientes ',	/* Descripcion del proceso ejecutado */
 			@Fec_IniPro = getdate()					/* Fecha de inicio de proceso ejecutado */
 
-    insert into #CHGRUCLI
-		select GCh_Client, GCh_Grupo
-			from CHGRUCLI noholdlock
-        
-    insert into #GruposCli	(Grc_CliEnt, Grc_GruEnt)
-		select convert(int,GCh_Client), convert(int,GCh_Grupo) 
-			from #CHGRUCLI noholdlock
-			where GCh_Grupo in (@Car_Cero, @Str_CuaCer)
-
-	delete from #CHGRUCLI
-		where GCh_Grupo in (@Car_Cero, @Str_CuaCer)
-		
-	select @Tot_Regis = count(1)
-        from #CHGRUCLI noholdlock
-
-    while @Contador <= @Tot_Regis begin
-
-        select top 1 @GCh_Client = GCh_Client,
-                     @GCh_Grupo  = GCh_Grupo
-            from  #CHGRUCLI noholdlock
-
-        --Convierte alfanumerico a Entero
-            exec @Status = SOALFINTCON 
-                            @GCh_Grupo, 	@Int_Consec OUT , 	@Str_N, 		@NumTransac, 	@Transaccio,
-                            @Usuario,	 	@FechaSis,			@SucOrigen,		@SucDestino,	@Modulo	
-            if @Status <> @Ent_Cero begin
-                rollback
-                return 1
-            end
-
-			select @Ent_Grupo = @Int_Consec
-	
-		-- Obtener las Cuentas Activas junto con su Cliente, Tipo de Cuenta, Sucursal, Clasificacion de Cliente.
-		insert into #GruposCli	(Grc_CliEnt, Grc_GruEnt)
-		values (convert(int,@GCh_Client), @Ent_Grupo)
-		if @Status <> @Ent_Cero begin
-			return @Status
-		end
-	
-		delete from #CHGRUCLI 
-		where GCh_Client = @GCh_Client
-		   and GCh_Grupo =  @GCh_Grupo
-	
-		select @Contador = @Contador + 1
-    end
+	-- Obtener las Cuentas Activas junto con su Cliente, Tipo de Cuenta, Sucursal, Clasificacion de Cliente.
+	insert into #GruposCli	(	Grc_CliEnt,					Grc_Grupo)
+		select					convert(int, GCh_Client),	GCh_Grupo
+		from CHGRUCLI noholdlock
+	if @Status <> @Ent_Cero begin
+		return @Status
+	end
 
 	--Registrar ejecucion de Preparacion
 	select @Fec_FinPro = getdate()	/* Fecha de finalizacion de proceso ejecutado */
@@ -389,8 +341,8 @@ begin
 		select Cua_Cuenta, Ctp_CoTiMo
 		from #CuentasAct noholdlock
 		inner join SOPRTICU noholdlock
-				on Ptc_TipCue = Cua_TiCuEn
-				and Ptc_Moneda = Cua_MonEnt
+				on Ptc_TipCue = Cua_TipCue
+				and Ptc_Moneda = Cua_Moneda
 		inner join SOCOTIPR noholdlock
 				on Ctp_Produc = Ptc_Produc
 				and Ctp_Activo = @Bit_Si
@@ -402,8 +354,8 @@ begin
 			select Cua_Cuenta, Ctp_CoTiMo
 			from #CuentasAct noholdlock
 			inner join SOPRTICU noholdlock
-					on Ptc_TipCue = Cua_TiCuEn
-					and Ptc_Moneda = Cua_MonEnt
+					on Ptc_TipCue = Cua_TipCue
+					and Ptc_Moneda = Cua_Moneda
 			inner join SOCOTIPR noholdlock
 					on Ctp_Produc = Ptc_Produc
 					and Ctp_Activo = @Bit_Si
@@ -521,7 +473,7 @@ begin
 			inner join #GruposCli noholdlock
 					on Grc_CliEnt	= Cua_CliEnt
 			inner join SOCOTIGR noholdlock
-					on Ctg_Grupos	= Grc_GruEnt
+					on Ctg_Grupos	= Grc_Grupo
 					and Ctg_Activo	= @Bit_Si
 			inner join SOCOTIMO noholdlock
 					on Ctm_Numero	= Ctg_CoTiMo
@@ -533,7 +485,7 @@ begin
 				inner join #GruposCli noholdlock
 						on Grc_CliEnt	= Cua_CliEnt
 				inner join SOCOTIGR noholdlock
-						on Ctg_Grupos	= Grc_GruEnt
+						on Ctg_Grupos	= Grc_Grupo
 						and Ctg_Activo	= @Bit_Si
 				inner join SOCOTIMO noholdlock
 						on Ctm_Numero	= Ctg_CoTiMo
@@ -956,8 +908,9 @@ begin
 			inner join CLCLIENT (index CLCLIENT) noholdlock			
 					on Cli_Numero	=	Cue_Client
 			inner join SOTMPPRP noholdlock
-					on Prp_TiCuCa	=	Cue_Tipo
-					and Prp_MonCar	=	Cue_Moneda
+					on	Prp_NumTra	=	@NumTransac
+					and Prp_TipCue	=	Cue_Tipo
+					and Prp_Moneda	=	Cue_Moneda
 					and Prp_NuPeCl	=	Cli_Tipo		--- Condición por Personalidad Fiscal del Cliente
 					and Prp_ActEmp	=	Cli_ActEmp		--- Condición por Personalidad Fiscal del Cliente
 					and Prp_TiMoCa	=	@Pro_TipMov		--- Filtrado por Tipo de Movimiento
@@ -1279,10 +1232,9 @@ begin
 	select	@Reg_CoTiMo	=	@Reg_CoTiMo	+	@Ent_Uno
 end 
 
+delete SOTMPPRP
+	where Prp_NumTra = @NumTransac
 drop table #ConfiguracionProd
 drop table #TiposMovPro
 drop table #CuentasAct
 drop table #GruposCli
-drop table #CHGRUCLI
-
-return 0

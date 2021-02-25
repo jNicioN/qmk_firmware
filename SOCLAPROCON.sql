@@ -1,3 +1,4 @@
+-- drop procedure SOCLAPROCON
 create or replace procedure SOCLAPROCON (
 	@Clp_Numero int,
 	@Clp_Clasif int,
@@ -21,6 +22,12 @@ as
 /* DESCRIPCION:   Consulta de clasificacion de producto  	   	       */
 /** REFERENCIAS:
 *****************************************************************************
+**	Modificó:	Frank canul												****
+**  Fecha:		23/12/2020												****
+**  Help:		1286068													****
+**	Descripción: se elimina el convert para la columna Ptc_TipCue ya   ****
+				 que ahora es char y no se necesita las conversiones   ****
+****************************************************************************
 ** Modifico:	Oscar Daniel Trevino Quintanilla							****
 ** Fecha:	09/09/2020													****
 ** Help:	01415639													****
@@ -43,7 +50,8 @@ declare	@Ent_Uno	int,
 		@Str_Cuatro	char(1),
 		@Str_Cinco	char(1),
 		@Str_TipCon	char(1),
-		@Str_TipLis	char(1)
+		@Str_TipLis	char(1),
+		@Str_Ceros varchar(4)
 
 /* Asignacion de Constantes */
 select	@Ent_Uno	= 1,			/* Entero Uno*/
@@ -53,7 +61,8 @@ select	@Ent_Uno	= 1,			/* Entero Uno*/
 		@Str_Cuatro	= '4',			/* Cuatro - Consulta por producto de CR*/
 		@Str_Cinco	= '5',			/* Cinco - Consulta por producto de CC*/
 		@Str_TipCon	= 'C',			/* Tipo consulta*/
-		@Str_TipLis	= 'L'			/* Tipo lista	*/
+		@Str_TipLis	= 'L'	,		/* Tipo lista	*/
+		@Str_Ceros	= '0000' /* String: Cuatro ceros */
 
 select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
 			@Tip_ConCon	= substring(@Tip_Consul, 2, 1)
@@ -70,7 +79,7 @@ if @Tip_ConTip = @Str_TipLis begin			/* Listas */
 		select Clp_Numero, Clp_Clasif, Clp_Produc, Ptc_TipCue			/* Consulta por producto de cheques*/
 			from SOCLAPRO noholdlock,
 					SOPRTICU noholdlock
-			where Ptc_TipCue = convert(int,@Clp_CuePro)
+			where   Ptc_TipCue = @Clp_CuePro
 				and Clp_Produc =  Ptc_Produc 
 
 	end if @Tip_ConCon = @Str_Tres begin			/* Consulta por producto de tarjeta*/
@@ -98,5 +107,4 @@ if @Tip_ConTip = @Str_TipLis begin			/* Listas */
 				and Clp_Produc =   Ptc_Produc  
 
 	end
-end 
-
+end                                                                                                                                                                                                                                     
