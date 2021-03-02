@@ -1,3 +1,4 @@
+-- drop procedure SOEJEPROPRO
 create procedure SOEJEPROPRO (
 	@Num_EjeFlu int,					-- Numero de Ejecucion de Flujo
 	@Num_ProFlu int,					-- Numero de Proceso de Flujo
@@ -14,6 +15,11 @@ as
 ** Descripcion: Ejecucion de Procesos definidos en Flujos								****
 ********************************************************************************************
 ** Referencias:																	  		****
+********************************************************************************************
+** Elaboro: 	Frank Canul		                     									****
+** Fecha:		10/02/2021									        					****
+** Help:		1394242						        									****
+** Descripcion:	Se agrega la ejecucion del proceso 	TATMPALTMAE							****
 ********************************************************************************************
 ** Elaboro: 	Joel Gonzalez	                     									****
 ** Fecha:		13/11/2020									        					****
@@ -37,7 +43,8 @@ declare	@Ent_Uno	tinyint,		-- Cantidad: Uno
 		@Pro_BlDeLi	varchar(11),	-- Procedimiento de Bloqueo y Desbloqueo de Lineas y Tarjetas. TATMPBLOMAE.
 		@Pro_LiPeLi	varchar(11),	-- Procedimiento de Aplicacion de limites personal de lineas de crédito. TATMPLIMMAE.
 		@Pro_InDeLi	varchar(11),	-- Procedimiento de incremento y decremento de lineas de credito. TATMPMIDMAE.
-		@Pro_CanLin	varchar(11)		-- Procedimiento de Aplicacion de Cancelacion de lineas. TATMPSUSMAE.
+		@Pro_CanLin	varchar(11),	-- Procedimiento de Aplicacion de Cancelacion de lineas. TATMPSUSMAE.
+        @Pro_AltLin varchar(11)     -- Procedimiento de Alta de lineas hey. TATMPALTMAE
 
 select  @Ent_Uno	= 1,				-- Cantidad: Uno
 		@Ent_Cero	= 0,				-- Cantidad: Cero
@@ -47,7 +54,8 @@ select  @Ent_Uno	= 1,				-- Cantidad: Uno
 		@Pro_BlDeLi	= 'TATMPBLOMAE',	-- Procedimiento de Bloqueo y Desbloqueo de Lineas y Tarjetas. TATMPBLOMAE.
 		@Pro_LiPeLi	= 'TATMPLIMMAE',	-- Procedimiento de Aplicacion de limites personal de lineas de crédito. TATMPLIMMAE.
 		@Pro_InDeLi	= 'TATMPMIDMAE',	-- Procedimiento de incremento y decremento de lineas de credito. TATMPMIDMAE.
-		@Pro_CanLin	= 'TATMPSUSMAE'		-- Procedimiento de Aplicacion de Cancelacion de lineas. TATMPSUSMAE.
+		@Pro_CanLin	= 'TATMPSUSMAE',	-- Procedimiento de Aplicacion de Cancelacion de lineas. TATMPSUSMAE.
+        @Pro_AltLin = 'TATMPALTMAE'     -- Procedimiento de Alta de lineas Hey. TATMPALTMAE
 --
 select	@Pro_ExiEje	= @Bit_No
 
@@ -243,7 +251,54 @@ end else if @Stp_Proced	= @Pro_BlDeLi begin
 	end
 	
 	select	@Pro_ExiEje	= @Bit_Si
-end
+end else if @Stp_Proced	= @Pro_AltLin begin
+
+	select @Par_EntUno	= convert(int, isnull(Ppe_Valor, Ppf_Valor))
+	from SOPAPRFL noholdlock
+	left join SOPAPREJ noholdlock
+			on Ppe_EjeFlu	= @Num_EjeFlu
+			and Ppe_PaPrFl	= Ppf_Numero
+	where Ppf_ProFlu = @Num_ProFlu
+	  and Ppf_NomPar = @Par_TipEje
+	  and Ppf_Activo = @Bit_Si
+	
+	select	@Res_EjeIns	= @@error
+	if @Res_EjeIns	<> @Ent_Cero begin
+		select @Men_Error = 'Error al obtener valor del Parametro [' + @Par_TipEje + '] Codigo: ' + convert(varchar(10), @Res_EjeIns)
+		return @Ent_Uno
+	end
+	
+	if @Par_EntUno	is null begin
+		select @Men_Error = 'Error al obtener valor del Parametro [' + @Par_TipEje + '] Valor: null'
+		return @Ent_Uno
+	end
+
+	execute	@Status	= TATMPALTMAE
+		@Num_EjeFlu	= @Num_EjeFlu,
+		@Num_ProFlu	= @Num_ProFlu,
+		@Tip_Ejecuc	= @Par_EntUno,	-- Tipo de Ejecucion: 1.- Validacion 2.- Ejecucion
+		@NumTransac	= @NumTransac, 
+		@Transaccio	= @Transaccio,  
+		@Usuario	= @Usuario, 
+		@FechaSis	= @FechaSis, 
+		@SucOrigen	= @SucOrigen,
+		@SucDestino	= @SucDestino,
+		@Modulo		= @Modulo
+
+	--Si se detecta un error de ejecucion del procedimiento, reporta el Codigo de error.
+	select @Res_EjeIns = @@error
+	if @Res_EjeIns <> @Ent_Cero begin
+		select	@Men_Error = 'ERROR de ejecucion (Sybase) Codigo: ' + convert(varchar(10), @Res_EjeIns)
+		return	@Res_EjeIns
+	end
+	--Si el procedimiento respondio con error, registrar que el error fue dentro del proceso ejecutado
+	if @Status <> @Ent_Cero begin
+		select	@Men_Error = 'ERROR dentro del proceso de [' + @Stp_Proced + ']. Codigo: ' + convert(varchar(10), @Status)
+		return	@Status
+	end
+	
+	select	@Pro_ExiEje	= @Bit_Si
+end 
 
 if 	@Pro_ExiEje	= @Bit_No begin
 	select @Men_Error = 'El procedimiento [' + @Stp_Proced + '] no esta configuracion para ejecucion en SOEJEPROPRO'
