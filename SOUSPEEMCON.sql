@@ -16,6 +16,11 @@ as
 ********************************************************************
 ** Referencias:													****
 ********************************************************************
+** Modifico:	Marcelo Bautista Hernandez						****
+** Fecha:		19/Enero/2021									****
+** Help:		01379522										****
+** Descripcion:	Se optimiza consulta de SOUSUARI				****
+********************************************************************
 ** Creó:		Francisco Javier Carrillo Rojas					****
 ** Fecha:		05/Jun/2020										****
 ** Help:		01379522										****
@@ -33,7 +38,8 @@ declare	@Str_Vacio	char(1),
 		@Int_Tres	smallint,
 		@Int_Cuatro	smallint,
 		@Int_Seis	smallint,
-		@Str_Cero	char(1)
+		@Str_Cero	char(1),
+		@Str_BRM	char(3)
 		
 /* Asignacion de Constantes */
 select	@Str_Vacio	= '',	/* String vacío */
@@ -42,7 +48,8 @@ select	@Str_Vacio	= '',	/* String vacío */
 		@Int_Tres	= 3,	/* Entero en tres */
 		@Int_Cuatro	= 4,	/* Entero en cuatro */
 		@Int_Seis	= 6,	/* Entero en seis */
-		@Str_Cero	= '0'	/*String 0*/
+		@Str_Cero	= '0',	/*String 0*/
+		@Str_BRM	= 'BRM'
 
 create table #Personas(
 	Per_Numero  char(8)  not null
@@ -50,15 +57,8 @@ create table #Personas(
 	
 create table #UsuarioClave(
 	Usc_NumCli	char(8),
-	Usc_NumEmp	char(6)
-)
-
-create table #Usuario(
-	Usu_Numero	char(6),
-	Usu_Clave	char(15),
-	Usu_Sucurs	char(3)	,
-	Usu_NumEmp	varchar(6),
-	Usu_Nombre  varchar(50)
+	Usc_NumEmp	char(6),
+	Usc_NumBrm	char(8)
 )
 
 select	@Peu_Grupo = Peu_Grupo
@@ -71,13 +71,14 @@ insert into #Personas
 		where Peu_Grupo	= @Peu_Grupo
 		
 insert into #UsuarioClave
-	select 	Cli_Numero,	@Str_Vacio
+	select 	Cli_Numero,	@Str_Vacio,	@Str_Vacio
 	from #Personas per
 		inner join CLADICIO adi noholdlock on adi.Adi_NumPer	= per.Per_Numero
 		inner join CLCLIENT cli noholdlock on cli.ClClientID	= adi.ClClientID
 		
 update #UsuarioClave set 
-	Usc_NumEmp	= Emp_Numero			
+	Usc_NumEmp	= Emp_Numero,
+	Usc_NumBrm	= @Str_BRM+right(Emp_Numero,5)			
 	from RHEMPLEA noholdlock
 	where Emp_Client	= Usc_NumCli
 
@@ -88,20 +89,11 @@ select @Ent_Encont = @Int_Uno
 	from #UsuarioClave
 	
 if isnull(@Ent_Encont, @Int_Cero) > @Int_Cero begin
-		insert into #Usuario
-			select 	Usu_Numero,	Usu_Clave,	Usu_Sucurs,	Usu_Clave, Usu_Nombre
-				from SOUSUARI noholdlock 
-
-		update #Usuario set 
-			Usu_NumEmp	= isnull(substring(Usu_Clave, @Int_Cuatro, (len(Usu_Clave)- @Int_Tres)), @Str_Vacio)
-
-		update #Usuario set 
-			Usu_NumEmp	= replicate(@Str_Cero, @Int_Seis - len(Usu_NumEmp)) + Usu_NumEmp
 					
-		select top 1 Usu_Numero,	Usu_Clave,	Usu_Sucurs,	Usu_NumEmp,	Usu_Nombre,	Usc_NumCli
+		select top 1 Usu_Numero,	Usu_Clave,	Usu_Sucurs,	Usc_NumEmp,	Usu_Nombre,
+			Usc_NumCli,	Usu_EMail
 			from #UsuarioClave
-				 inner join #Usuario on Usu_NumEmp	= Usc_NumEmp						 
+			inner join SOUSUARI noholdlock on Usc_NumBrm = Usu_Clave	
 end 
 drop table #UsuarioClave
-drop table #Usuario
 drop table #Personas
