@@ -230,6 +230,7 @@ end else begin
 			Rib_FeInOp,		Rib_EmOtCr,		Rib_EmSuRe,		Rib_DurSoc,		Rib_CotBol,
 			Rib_NumApo,		Rib_NumCon,		Rib_CliSuc,		Rib_EdoCiv,		Rib_NumExt,
 			Rib_LugCon,		Rib_ZonUsu, 	FechaSis
-     from SORIB noholdlock 
+     from SORIB noholdlock
+     where	Rib_NumSol = @Rib_NumSol
    end
 end
