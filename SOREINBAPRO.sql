@@ -17,6 +17,11 @@ as
 /* DESCRIPCION: Procesamiento de copia de registros de Reporte	*/
 /*				de Informacion Basica							*/
 /****************************************************************/
+/** Modifico:		Raul Muniz									*/
+/** Descripcion:	Se agregan generalidades a la copia de RIB	*/
+/** Fecha:			06/01/2021                               	*/
+/** Help:			1433413					 					*/
+/****************************************************************/
 /** Modifico:		Claudia Sandoval							*/
 /** Descripcion:	Corrige copia si es RIB Base				*/
 /** Fecha:			07/06/2019                               	*/
@@ -365,6 +370,17 @@ if @Tip_Proces	= @Str_A begin /* 'A': Proceso para realizar la copia de RIB cuan
 				@SucDestino
 		from SORIBINS noholdlock
 		where Rii_NumRib = @Int_RibBas
+		
+		
+		insert into SORIBGEN (
+				Rig_NumRib,		Rig_TiDeGo,		Rig_DepGob,		Rig_TieExp,		Rig_Export,
+				Rig_PorExp,		Rig_TiGeDi,		Rig_GeCoMa,		Rig_Activo,		NumTransac,
+				Transaccio,		Usuario,		FechaSis,		SucOrigen,		SucDestino)
+		select	@Int_RibCop,	Rig_TiDeGo,		Rig_DepGob,		Rig_TieExp,		Rig_Export,
+				Rig_PorExp,		Rig_TiGeDi,		Rig_GeCoMa,		Rig_Activo,		@NumTransac,
+				@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
+		from SORIBGEN noholdlock
+		where Rig_NumRib = @Int_RibBas
 
 	end else begin
 	/* Si no existe Rib Persona Base, se crea Rib Base y copia para Rib Persona por Solicitud */
