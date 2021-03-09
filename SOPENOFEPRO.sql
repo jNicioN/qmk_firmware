@@ -21,6 +21,11 @@ as
 ****************************************************************************
 **	REFERENCIAS:														****
 ****************************************************************************
+** Modifico:	Adriana Gomez 											****
+** Fecha:		05/03/2021												****
+** Help Desk:	1468365										 			****
+** Descripción:	Se modifica validacion de usuarios y clientes existentes****
+****************************************************************************
 ** Modifico:	Adriana Gomez											****
 ** Fecha:		03/02/2021   											****
 ** Descripcion: Valida Rfc que no este vacio 							****
@@ -107,21 +112,35 @@ end
 select @Str_Comple = (ltrim(rtrim(@Per_ApePat))+' '+ltrim(rtrim(@Per_ApeMat))+' '+ltrim(rtrim(@Per_Nombre)))
 
 /* primero busca en SOPERSON si existe la persona */
-select 	@Per_ID = Per_Numero, 
-		@Per_RFC = Per_RFC,
-		@Persona = @Ent_Uno			/* si lo encuentra en este punto signfica que al menos existe como prospecto */
+
+select 	Per_ID =   PerPersoID ,
+		Per_Numero = Per_Numero,
+		Per_RFC = Per_RFC
+		into #Personas
 		from SOPERSON noholdlock 
-		inner join SOPERADI noholdlock on Adi_PerNum = Per_Numero
-		where Adi_FecNac = @Per_Fecha and  Per_Comple = @Str_Comple
+		where Per_Comple = @Str_Comple
 		
+select 	Per_ID =  Per_ID,
+		Per_Numero = Per_Numero,
+		Per_RFC = Per_RFC
+		into #PersonasConMismoNombre
+		from #Personas noholdlock 
+		inner join SOPERADI noholdlock on Adi_PerNum = Per_Numero
+		where  Adi_FecNac  = @Per_Fecha
+		
+select  @Persona = count(*) from #PersonasConMismoNombre noholdlock
+
+drop table 	#Personas	
+
 /* Si existe un prospecto revisa si tiene un cliente con cuentas activas */
-if @Per_RFC <> @Str_Vacio and @Persona = @Ent_Uno begin
+if @Persona > @Ent_Cero begin
 
 	select  @Cliente = @Ent_Uno
-		from CLCLIENT noholdlock
+		from #PersonasConMismoNombre noholdlock
+		inner join  CLCLIENT noholdlock on  Cli_RFC  = Per_RFC
 		inner join CHCUENTA noholdlock on Cli_Numero = Cue_Client
-		where Cli_RFC	= @Per_RFC
-		and Cue_Status in (@Sta_Bloque, @Sta_Activo) 
+		where Cli_RFC <> @Str_Vacio
+		 and Cue_Status in (@Sta_Bloque, @Sta_Activo) 
 		and Cue_Tipo not in  (@Cue_CashBa , @Cue_Refere)
 
 end
@@ -133,10 +152,11 @@ if ( @Cliente <> @Ent_Uno ) begin
 	if ( @Persona = @Ent_Uno) begin
 		select  @Per_ID = convert(char, Une_Identi),
 				@Tab_Ori = Une_TabOri,
-				@Estatus = Une_Estatu,
 				@UsuarioCV = @Ent_Uno
-		from SOUSNAEX noholdlock
-		where Une_IdeUsu = convert(int, str_replace(ltrim(str_replace( @Per_ID , '0', ' ')),' ', '0') )
+		from #PersonasConMismoNombre noholdlock
+		inner join SOUSNAEX noholdlock on Une_IdeUsu = Per_ID
+		where Une_Estatu= @Sta_Activo
+		
 	end
 	
 	/* si no lo encontro como usuario nacional y tampoco es cliente busca en extranjeros */
@@ -147,18 +167,14 @@ if ( @Cliente <> @Ent_Uno ) begin
 				@UsuarioCV = @Ent_Uno
 		from SOUSNAEX noholdlock
 		inner join SOUSUEXT noholdlock on Une_IdeUsu = Use_IdUsEx 
-		where Use_FecNac = @Per_Fecha and Use_NoCoUs = @Str_Comple
+		where Use_FecNac = @Per_Fecha 
+		and Use_NoCoUs = @Str_Comple
+		and Une_Estatu = @Sta_Activo
 	end 
 
 end
 
-/* solo cuando existe un usuario con estatus activo se mantiene la variable como uno, 
-ya que puede exitsir un usuario inactivo y no debe tomarse en cuenta para la validacion  */
-if @UsuarioCV = @Ent_Uno and @Estatus = @Sta_Activo begin
-	select @UsuarioCV = @Ent_Uno
-end else if @UsuarioCV = @Ent_Uno and @Estatus = @Sta_Inacti begin
-	select @UsuarioCV = @Ent_Cero
-end
+drop table #PersonasConMismoNombre
 
 if @Cliente = @Ent_Uno begin
 	select	@Mensaje = 'Ya existe un Cliente con el nombre ' + @Per_Nombre + ' ' + @Per_ApePat + ' ' + @Per_ApeMat

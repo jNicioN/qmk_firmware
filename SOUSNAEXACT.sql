@@ -1,3 +1,4 @@
+
 create procedure SOUSNAEXACT (
 	@Une_Identi	int,
 	@Une_Estatu	varchar(1),
@@ -15,6 +16,11 @@ as
 ** DESCRIPCION: ** Actualizacion de Tabla Usuarios Nacionales y Extranjeros **
 ******************************************************************************/
 /* REFERENCIAS:
+****************************************************************************
+** Modifico:	Adriana Gomez 											****
+** Fecha:		05/03/2021												****
+** Help Desk:	1468365										 			****
+** Descripción:	Se modifica validacion de usuarios y clientes existentes****
 ****************************************************************************
 ** Modifico:	Carlos Copto 											****
 ** Fecha:		15/Diciembre/2020										****
@@ -126,60 +132,80 @@ if @Tip_ActTip = @Tip_ActEst begin
 	end
 	
 		/* primero busca en SOPERSON si existe la persona */
-	select 	@Per_ID = Per_Numero, 
-			@Per_RFC = Per_RFC,
-			@Persona = @Ent_Uno			/* si lo encuentra en este punto signfica que al menos existe como prospecto */
+	select @Persona= @Ent_Cero
+	select @Cliente = @Ent_Cero
+	select @UsuarioCV = @Ent_Cero
+	
+	select 	PerPersoID,
+			Per_Numero, 
+			Per_RFC
+			into #Personas 
 			from SOPERSON noholdlock 
 			inner join SOPERADI noholdlock on Adi_PerNum = Per_Numero
 			where Adi_FecNac = @Use_FecNac and  Per_Comple = @Use_NoCoUs
 			
+	select @Persona = count (*) from #Personas noholdlock
+			
 	/* Si existe un prospecto revisa si tiene un cliente con cuentas activas o bloqueadas*/
-	if( @Persona = @Ent_Uno ) begin
-		select  @Cliente = @Ent_Uno
-			from CLCLIENT noholdlock
-			inner join CHCUENTA noholdlock on Cli_Numero = Cue_Client
-			where Cli_RFC	= @Per_RFC
-			and Cue_Status in (@Sta_Bloque, @Sta_Activo) 
-			and Cue_Tipo not in  (@Cue_CashBa , @Cue_Refere)	
+	if @Persona > @Ent_Cero begin		
+		select Adi_Client 
+			into #Clientes
+			from #Personas noholdlock
+			inner join CLADICIO noholdlock on Per_Numero = Adi_NumPer 
+			inner join CHCUENTA noholdlock on Adi_Client = Cue_Client
+			where Cue_Status in (@Sta_Bloque, @Sta_Activo) 
+			and Cue_Tipo not in  (@Cue_CashBa , @Cue_Refere)
+				
+		select @Cliente = count (*) from #Clientes noholdlock
+		drop table #Clientes
 	end 
 	
 	/* si no es cliente se procede a buscar como usuario*/
-	if ( @Cliente <> @Ent_Uno ) begin
-		
+	if @Cliente = @Ent_Cero begin
 		/* si es usuario nacional */
-		if ( @Persona = @Ent_Uno) begin
-			select  @Per_ID = convert(char, Une_Identi),
-					@Tab_Ori = Une_TabOri,
-					@Estatus = Une_Estatu,
-					@UsuarioCV = @Ent_Uno
-			from SOUSNAEX noholdlock
-			where Une_IdeUsu = convert(int, str_replace(ltrim(str_replace( @Per_ID , '0', ' ')),' ', '0') )
+		if @Persona = @Ent_Cero begin			
+			select  Une_Identi,
+					Une_TabOri
+				into #UsuariosNacionales
+				from #Personas noholdlock
+				inner join SOUSNAEX noholdlock on PerPersoID = Une_IdeUsu
+				where Une_Estatu = @Sta_Activo
+				
+			select @UsuarioCV = count (*) from #UsuariosNacionales noholdlock
+			drop table #UsuariosNacionales
 		end
 		
 		/* si no lo encontro como usuario nacional y tampoco es cliente busca en extranjeros */
-		if( @Cliente <> @Ent_Uno and @UsuarioCV <> @Ent_Uno ) begin
-			select  @Per_ID = convert(char, Une_Identi),
-					@Tab_Ori = Une_TabOri,
-					@Estatus = Une_Estatu,
-					@UsuarioCV = @Ent_Uno
-			from SOUSNAEX noholdlock
-			inner join SOUSUEXT noholdlock on Une_IdeUsu = Use_IdUsEx 
-			where Use_FecNac = @Use_FecNac and Use_NoCoUs = @Use_NoCoUs
+		if( @Cliente = @Ent_Cero and @UsuarioCV = @Ent_Cero ) begin
+			select  Une_Identi,
+					Une_TabOri
+				into #UsuariosExtranjeros
+				from SOUSNAEX noholdlock
+				inner join SOUSUEXT noholdlock on Une_IdeUsu = Use_IdUsEx 
+				where Use_FecNac = @Use_FecNac 
+				and Use_NoCoUs = @Use_NoCoUs
+				and Une_Estatu = @Sta_Activo
+
+			select @UsuarioCV = count (*) from #UsuariosExtranjeros noholdlock
+			drop table #UsuariosExtranjeros
 		end 
 	
 	end
 	
+	drop table #Personas
+	
+	
 	/* se checa si el cambio del estatus es activacion o inactivacion, si es inactivacion no hace la validacion de cuenta activa */
 	if @Tip_ActAct = @Str_A begin 
 	
-		if @Cliente = @Ent_Uno begin
+		if @Cliente > @Ent_Cero  begin
 			select	@Mensaje = 'No se ha podido activar porque existe un Cliente con cuentas Activas o Bloqueadas con el nombre ' + @Use_NoCoUs
-		end else if @UsuarioCV = @Ent_Uno and @Estatus = @Sta_Activo begin
+		end else if @UsuarioCV > @Ent_Cero  begin
 			select	@Mensaje = 'No se ha podido activar porque ya existe un Usuario Activo con el nombre ' + @Use_NoCoUs
 		end
 		
 		/* Si encontro algun homonimo usuario activo se evita la activacion*/
-		if @UsuarioCV = @Ent_Uno and @Estatus = @Sta_Activo or @Cliente = @Ent_Uno begin
+		if @UsuarioCV > @Ent_Cero or @Cliente > @Ent_Cero  begin
 			select	Err_Codigo	= '000004',
 					Err_Mensaj = @Mensaje	
 			rollback
@@ -193,6 +219,8 @@ if @Tip_ActTip = @Tip_ActEst begin
 		select @Biu_DesEst = 'Inactivacion de Usuario de compra venta por actvacion de Cuenta'  /* Descripcion para la bitacora */
 	
 	end
+	
+	
 	
 	update SOUSNAEX set 
 		Une_Estatu  = @Une_Estatu,
@@ -216,3 +244,4 @@ if @Tip_ActTip = @Tip_ActEst begin
 		return @Ent_Uno
 		
 end
+
