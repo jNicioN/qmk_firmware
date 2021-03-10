@@ -183,8 +183,8 @@ if @Tip_ActTip = @Tip_ActEst begin
 			select  Une_Identi,
 					Une_TabOri
 				into #UsuariosExtranjeros
-				from SOUSNAEX noholdlock
-				inner join SOUSUEXT noholdlock on Une_IdeUsu = Use_IdUsEx and Une_TabOri = @Une_TaOrEx
+				from SOUSUEXT noholdlock
+				inner join SOUSNAEX noholdlock on Une_IdeUsu = Use_IdUsEx and Une_TabOri = @Une_TaOrEx
 				where Use_FecNac = @Use_FecNac 
 				and Use_NoCoUs = @Use_NoCoUs
 				and Une_Estatu = @Sta_Activo
