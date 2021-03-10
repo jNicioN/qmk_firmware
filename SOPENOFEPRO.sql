@@ -69,7 +69,9 @@ declare	@Str_Vacio 	char(1),
 		@Sta_Inacti varchar(1),
 		@Cue_CashBa	char(2),
 		@Cue_Refere	char(2),
-		@Sta_Bloque varchar(1)		
+		@Sta_Bloque varchar(1),
+		@Une_TaOrNa	char(1),	
+		@Une_TaOrEx	char(1)	
 
 								/* Asignacion de valores a constantes */
 select	@Str_Vacio  = '',		/* String vacio */
@@ -79,7 +81,9 @@ select	@Str_Vacio  = '',		/* String vacio */
 		@Sta_Inacti = 'I',		/* Estatus inactivo */
 		@Cue_CashBa = '31',		-- Tipo de Cuenta: Cashback
 		@Cue_Refere = '50',		-- Tipo de Cuenta: Referenciado
-		@Sta_Bloque = 'B'		/* Estatus bloqueado */
+		@Sta_Bloque = 'B',		/* Estatus bloqueado */
+		@Une_TaOrNa	= '1',		/*tabla origen nacionales SOPERSON */
+		@Une_TaOrEx	= '2'		/*tabla origen extranjeros SOUSUEXT*/
 
 if isnull(@Per_Nombre, @Str_Vacio) = @Str_Vacio  begin
 	select	Err_Codigo = '000002',
@@ -154,7 +158,7 @@ if ( @Cliente <> @Ent_Uno ) begin
 				@Tab_Ori = Une_TabOri,
 				@UsuarioCV = @Ent_Uno
 		from #PersonasConMismoNombre noholdlock
-		inner join SOUSNAEX noholdlock on Une_IdeUsu = Per_ID
+		inner join SOUSNAEX noholdlock on Une_IdeUsu = Per_ID and Une_TabOri = @Une_TaOrNa
 		where Une_Estatu= @Sta_Activo
 		
 	end
@@ -166,7 +170,7 @@ if ( @Cliente <> @Ent_Uno ) begin
 				@Estatus = Une_Estatu,
 				@UsuarioCV = @Ent_Uno
 		from SOUSNAEX noholdlock
-		inner join SOUSUEXT noholdlock on Une_IdeUsu = Use_IdUsEx 
+		inner join SOUSUEXT noholdlock on Une_IdeUsu = Use_IdUsEx and Une_TabOri = @Une_TaOrEx
 		where Use_FecNac = @Per_Fecha 
 		and Use_NoCoUs = @Str_Comple
 		and Une_Estatu = @Sta_Activo

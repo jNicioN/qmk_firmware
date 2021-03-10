@@ -1,4 +1,3 @@
-
 create procedure SOUSNAEXACT (
 	@Une_Identi	int,
 	@Une_Estatu	varchar(1),
@@ -61,7 +60,9 @@ declare	@Tip_ActEst 	varchar(1),			/* Declaración de Constantes */
 		@Str_Uno		char(1),
 		@Str_Dos		char(1),
 		@Str_A			char(1),
-		@Str_I			char(1)
+		@Str_I			char(1),
+		@Une_TaOrNa	char(1),	
+		@Une_TaOrEx	char(1)	
 
 											-- Asignación de valores a constantes 	
 select	@Tip_ActEst	= 'A',					--	Tipo Act Estatus de Usuario								
@@ -76,7 +77,9 @@ select	@Tip_ActEst	= 'A',					--	Tipo Act Estatus de Usuario
 		@Str_Uno	= '1',					-- String 1
 		@Str_Dos	= '2',					-- String 2
 		@Str_A		= 'A',					-- Letra I
-		@Str_I		= 'I'					-- Leta A
+		@Str_I		= 'I',					-- Leta A
+		@Une_TaOrNa	= '1',		/*tabla origen nacionales SOPERSON */
+		@Une_TaOrEx	= '2'		/*tabla origen extranjeros SOUSUEXT*/
 
 select @FechaSis = getdate()
 
@@ -115,9 +118,9 @@ if @Tip_ActTip = @Tip_ActEst begin
 	if @Une_TabOri = @Str_Uno begin
 		select @Use_NoCoUs = Per_Comple,
 			   @Use_FecNac = Adi_FecNac
-		from SOUSNAEX noholdlock 
-		join SOPERSON noholdlock on PerPersoID = Une_IdeUsu  
+		from SOPERSON noholdlock 
 		join SOPERADI noholdlock on Adi_PerNum = Per_Numero
+		join SOUSNAEX noholdlock on Une_IdeUsu = PerPersoID 
 		where Une_TabOri = @Une_TabOri
 		and Une_Identi = @Une_Identi
 	end
@@ -126,7 +129,7 @@ if @Tip_ActTip = @Tip_ActEst begin
 		select @Use_NoCoUs = Use_NoCoUs,
 			   @Use_FecNac = Use_FecNac
 		from SOUSNAEX noholdlock 
-		join SOUSUEXT noholdlock on Une_IdeUsu = Use_IdUsEx  
+		join SOUSUEXT noholdlock on Une_IdeUsu = Use_IdUsEx 
 		where Une_TabOri = @Une_TabOri
 		and  Une_Identi = @Une_Identi
 	end
@@ -168,7 +171,7 @@ if @Tip_ActTip = @Tip_ActEst begin
 					Une_TabOri
 				into #UsuariosNacionales
 				from #Personas noholdlock
-				inner join SOUSNAEX noholdlock on PerPersoID = Une_IdeUsu
+				inner join SOUSNAEX noholdlock on PerPersoID = Une_IdeUsu and Une_TabOri = @Une_TaOrNa
 				where Une_Estatu = @Sta_Activo
 				
 			select @UsuarioCV = count (*) from #UsuariosNacionales noholdlock
@@ -181,7 +184,7 @@ if @Tip_ActTip = @Tip_ActEst begin
 					Une_TabOri
 				into #UsuariosExtranjeros
 				from SOUSNAEX noholdlock
-				inner join SOUSUEXT noholdlock on Une_IdeUsu = Use_IdUsEx 
+				inner join SOUSUEXT noholdlock on Une_IdeUsu = Use_IdUsEx and Une_TabOri = @Une_TaOrEx
 				where Use_FecNac = @Use_FecNac 
 				and Use_NoCoUs = @Use_NoCoUs
 				and Une_Estatu = @Sta_Activo
