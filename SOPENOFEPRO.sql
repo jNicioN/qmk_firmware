@@ -169,8 +169,8 @@ if ( @Cliente <> @Ent_Uno ) begin
 				@Tab_Ori = Une_TabOri,
 				@Estatus = Une_Estatu,
 				@UsuarioCV = @Ent_Uno
-		from SOUSNAEX noholdlock
-		inner join SOUSUEXT noholdlock on Une_IdeUsu = Use_IdUsEx and Une_TabOri = @Une_TaOrEx
+		from SOUSUEXT noholdlock
+		inner join SOUSNAEX noholdlock on Une_IdeUsu = Use_IdUsEx and Une_TabOri = @Une_TaOrEx
 		where Use_FecNac = @Per_Fecha 
 		and Use_NoCoUs = @Str_Comple
 		and Une_Estatu = @Sta_Activo
