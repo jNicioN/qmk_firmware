@@ -40,13 +40,9 @@ as
 declare	@Use_NoCoUs 	varchar(150),			/* Declaración de Variables */
 		@Use_FecNac		smalldatetime,
 		@Une_TabOri		char(1),
-		@Per_ID 		char(8),
 		@Persona		int,
-		@Tab_Ori		char(1),
 		@Cliente		int,
 		@UsuarioCV		int,
-		@Estatus		char(1),
-		@Per_RFC 		char(15),
 		@Mensaje		varchar(150),
 		@Status			int,
 		@Tip_ActTip		char(1),
@@ -107,11 +103,14 @@ select	@Tip_ActEst	= 'A',					--	Tipo Act Estatus de Usuario
 		@Str_Guion	= '-',					/* String: Guion							*/
 		@Sta_Cancel = 'C'
 
-select @FechaSis = getdate()
+/*Consulta de fecha del sistema */
+select @Fec_Actual = Par_FecAct
+from SOPARAMS noholdlock
+where Par_Sucurs = @SucOrigen
 
-select 	@Fec_Actual	= str_replace (convert( char(10), getdate(), @Ent_CieDos), @Str_Punto, @Str_Guion)
-select	@Fec_IniMes	= dateadd(dd, 1, dateadd(dd, - datepart(dd, @FechaSis), @FechaSis))
-select	@Fec_FinMes	= dateadd(dd, -1, dateadd(mm, 1, @Fec_IniMes))
+/*Fecha de inicio y fin de mes*/
+select @Fec_IniMes = dateadd(dd, 1 - datepart(dd, @Fec_Actual), @Fec_Actual)
+select @Fec_FinMes = dateadd(dd, -1, dateadd(mm,  1, @Fec_IniMes))					
 					
 
 if isnull(@Tip_Actual, @Str_Vacio) = @Str_Vacio  begin
@@ -321,10 +320,15 @@ if @Tip_ActTip = @Tip_ActEst begin
 		SucDestino	= @SucDestino
 	where	Une_Identi	= @Une_Identi
 	
-	exec SOBITUSUALT 
+	exec @Status = SOBITUSUALT 
 	@Une_Identi,	@Une_Estatu,	@FechaSis,		@Usuario,		@SucOrigen,  
 	@Biu_Canal,		@Biu_DesEst,	@NumTransac,	@Transaccio,	@Usuario,	  
 	@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
+	
+	if @Status <> @Ent_Uno begin
+		rollback
+		return @Ent_Uno
+	end
 	
 	if @@nestlevel = @Ent_Uno and @Une_Estatu = @Sta_Activo
 		select	Err_Codigo	= '000000',

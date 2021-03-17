@@ -33,8 +33,7 @@ as
 **/
 
 								/* Declaracion de Variables */
-declare	@Estatus	char(1),
-		@Fec_Actual		smalldatetime,	
+declare	@Fec_Actual		smalldatetime,	
 		@Fec_IniMes		smalldatetime,
 		@Fec_FinMes		smalldatetime
 									
@@ -49,7 +48,9 @@ declare	@Sta_Activo		char(1),
 		@Str_Client		char(1),
 		@Ent_CieDos		smallint,
 		@Str_Punto		char(1),
-		@Str_Guion		char(1)
+		@Str_Guion		char(1),
+		@Str_Ceros		char(8),
+		@Ent_Ocho		int
 
 								/* Asignacion de valores a constantes */
 select	@Sta_Activo	= 'A',		/* Estatus activo */
@@ -62,14 +63,18 @@ select	@Sta_Activo	= 'A',		/* Estatus activo */
 		@Str_Usuari	= 'U',		/*Tipo Usuario */
 		@Ent_CieDos	= 102,		/* Entero: CientoDos						*/
 		@Str_Punto	= '.',		/* String: Punto							*/
-		@Str_Guion	= '-'		/* String: Guion							*/
-		
+		@Str_Guion	= '-',		/* String: Guion							*/
+		@Str_Ceros	= '00000000',/*String ceros*/
+		@Ent_Ocho	= 8
 
+/*Consulta de fecha del sistema */
+select @Fec_Actual = Par_FecAct
+from SOPARAMS noholdlock
+where Par_Sucurs = @SucOrigen
 
-select 	@Fec_Actual	= str_replace (convert( char(10), getdate(), @Ent_CieDos), @Str_Punto, @Str_Guion)
-select	@Fec_IniMes	= dateadd(dd, 1, dateadd(dd, - datepart(dd, @FechaSis), @FechaSis))
-select	@Fec_FinMes	= dateadd(dd, -1, dateadd(mm, 1, @Fec_IniMes))
-					
+/*Fecha de inicio y fin de mes*/
+select @Fec_IniMes = dateadd(dd, 1 - datepart(dd, @Fec_Actual), @Fec_Actual)
+select @Fec_FinMes = dateadd(dd, -1, dateadd(mm,  1, @Fec_IniMes))					
 
 /*se buscan concidencias en personas */
 insert into SOBITUSU	(Biu_FolUsu,	Biu_Estatu,	Biu_FecEst,	Biu_Usuari,	Biu_Sucurs, 
@@ -107,7 +112,7 @@ insert into VEBITADD	(Bit_Client,	Bit_Usuari,	Bit_NumTra,	Bit_Monto,	Bit_Fecha,
 			@SucOrigen,		@SucDestino	
 		from  SOBITUSU s noholdlock 
 			 inner join  VEACUDLL noholdlock on Adl_Fecha >= @Fec_IniMes and Adl_Fecha <= @Fec_FinMes  
-											 and Adl_NumCli = right('00000000' + ltrim(rtrim(convert(char, Biu_FolUsu))), 8) and Adl_TipCli	= @Str_Usuari
+											 and Adl_NumCli = right(@Str_Ceros + ltrim(rtrim(convert(char, Biu_FolUsu))), 8) and Adl_TipCli	= @Str_Usuari
 		where	s.NumTransac	= @NumTransac 
 		  
 /*Actulizar movimientos de usuarios a cliente*/  
