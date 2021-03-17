@@ -16,6 +16,11 @@ as
 /****************************************************************/
 /* DESCRIPCION: Consulta de Reporte de Informacion Basica		*/
 /****************************************************************/
+/** Modifica:		Jose R. Rodriguez Zenteno					*/
+/** Descripcion:	Se modifica C4 para regresar Tipo de Rib	*/
+/** Fecha:			24/02/2021                               	*/
+/** Help:			1468599					 					*/
+/****************************************************************/
 /** Modifica:		Raul Muniz									*/
 /** Descripcion:	Se modifican C1, C2, C3 y C4 para regresar	*/
 /* 					duracion de sociedad indefinida				*/
@@ -138,7 +143,7 @@ if @Tip_ConTip	= @Str_C begin /* 'C': Consulta */
 				Rii_CubTer, 	Rii_CubHur, 	Rii_CubInu, 	Rii_CubOtr, 	Rii_CuOtEs, 
 				Rii_PrePor, 	Rii_RMInVa, 	Rii_RMIVaM, 	Rii_RMInPa, 	Rii_RMIPaM, 
 				(CASE WHEN Rib_DurSoc = @Ent_MenUno THEN @Ent_Cero ELSE Rib_DurSoc END) as Rib_Duraci,
-				Rib_NumPer,
+				Rib_NumPer, Rib_TipRib,
 				Adi_FecCon = @Fec_Vacia,
 				Rca_TipAdm = replicate(@Str_ComSim , 180), 
 				Adi_FecNac = @Fec_Vacia, Adi_FeNaAp = @Fec_Vacia,
@@ -212,8 +217,8 @@ if @Tip_ConTip	= @Str_C begin /* 'C': Consulta */
 		   Adi_FecCon, Rca_TipAdm, Adi_FecNac, Rrh_NumPer, Adm_Comple,
 		   Adi_FeNaAp, Rpf_Politi, Rpf_DCPoCo, Rpf_DiaInv, Rpf_DiaPro,
 		   Rpf_PerPic, Rpf_PerRec, Rpf_ComCic, Rpf_PolInv, Per_Entida,
-		   Rib_Indefi, sor.NumTransac, sor.Transaccio, sor.Usuario, sor.FechaSis,
-		   sor.SucOrigen, sor.SucDestino
+		   Rib_Indefi, Rib_TipRib, sor.NumTransac, sor.Transaccio, sor.Usuario, 
+		   sor.FechaSis, sor.SucOrigen, sor.SucDestino
 		FROM #ReporteInfBas sor
 		LEFT JOIN SORIPOFI sopf noholdlock
 			ON Rpf_NumRib = Rib_Numero
