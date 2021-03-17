@@ -112,7 +112,7 @@ insert into VEBITADD	(Bit_Client,	Bit_Usuari,	Bit_NumTra,	Bit_Monto,	Bit_Fecha,
 			@SucOrigen,		@SucDestino	
 		from  SOBITUSU s noholdlock 
 			 inner join  VEACUDLL noholdlock on Adl_Fecha >= @Fec_IniMes and Adl_Fecha <= @Fec_FinMes  
-											 and Adl_NumCli = right(@Str_Ceros + ltrim(rtrim(convert(char, Biu_FolUsu))), 8) and Adl_TipCli	= @Str_Usuari
+											 and Adl_NumCli = right(@Str_Ceros + ltrim(rtrim(convert(char, Biu_FolUsu))), @Ent_Ocho) and Adl_TipCli	= @Str_Usuari
 		where	s.NumTransac	= @NumTransac 
 		  
 /*Actulizar movimientos de usuarios a cliente*/  
