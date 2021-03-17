@@ -113,7 +113,14 @@ insert into VEBITADD	(Bit_Client,	Bit_Usuari,	Bit_NumTra,	Bit_Monto,	Bit_Fecha,
 /*Actulizar movimientos de usuarios a cliente*/  
 update VEACUDLL set
 	Adl_TipCli	= @Str_Client,
-	Adl_NumCli	= @Cli_Numero
+	Adl_NumCli	= @Cli_Numero,
+	
+	NumTransac	= @NumTransac,
+	Transaccio	= @Transaccio,
+	Usuario		= @Usuario,
+	FechaSis	= @FechaSis,
+	SucOrigen	= @SucOrigen,
+	SucDestino	= @SucDestino
 	from VEBITADD v noholdlock 
 	where	Adl_NumTra	= Bit_NumTra
 	  and  v.NumTransac	= @NumTransac 
