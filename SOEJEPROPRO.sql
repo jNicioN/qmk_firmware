@@ -1,4 +1,3 @@
--- drop procedure SOEJEPROPRO
 create procedure SOEJEPROPRO (
 	@Num_EjeFlu int,					-- Numero de Ejecucion de Flujo
 	@Num_ProFlu int,					-- Numero de Proceso de Flujo
@@ -17,9 +16,15 @@ as
 ** Referencias:																	  		****
 ********************************************************************************************
 ** Elaboro: 	Frank Canul		                     									****
+** Fecha:		01/03/2021									        					****
+** Help:		1394242						        									****
+** Descripcion:	Se agrega los nuevos nombres de los store procedure que tenian la       ****
+**                terminación MAE							                            ****
+********************************************************************************************
+** Elaboro: 	Frank Canul		                     									****
 ** Fecha:		10/02/2021									        					****
 ** Help:		1394242						        									****
-** Descripcion:	Se agrega la ejecucion del proceso 	TATMPALTMAE							****
+** Descripcion:	Se agrega la ejecucion del proceso 	TAMAALHEPRO							****
 ********************************************************************************************
 ** Elaboro: 	Joel Gonzalez	                     									****
 ** Fecha:		13/11/2020									        					****
@@ -40,22 +45,22 @@ declare	@Ent_Uno	tinyint,		-- Cantidad: Uno
 		@Bit_Si		bit,			-- Bit: Si
 		@Bit_No		bit,			-- Bit: No
 		@Par_TipEje	varchar(20),	-- Parametro: Tip_Ejecuc
-		@Pro_BlDeLi	varchar(11),	-- Procedimiento de Bloqueo y Desbloqueo de Lineas y Tarjetas. TATMPBLOMAE.
-		@Pro_LiPeLi	varchar(11),	-- Procedimiento de Aplicacion de limites personal de lineas de crédito. TATMPLIMMAE.
-		@Pro_InDeLi	varchar(11),	-- Procedimiento de incremento y decremento de lineas de credito. TATMPMIDMAE.
-		@Pro_CanLin	varchar(11),	-- Procedimiento de Aplicacion de Cancelacion de lineas. TATMPSUSMAE.
-        @Pro_AltLin varchar(11)     -- Procedimiento de Alta de lineas hey. TATMPALTMAE
+		@Pro_BlDeLi	varchar(11),	-- Procedimiento de Bloqueo y Desbloqueo de Lineas y Tarjetas. TAMABLDEPRO.
+		@Pro_LiPeLi	varchar(11),	-- Procedimiento de Aplicacion de limites personal de lineas de crédito. TAMALIPEPRO.
+		@Pro_InDeLi	varchar(11),	-- Procedimiento de incremento y decremento de lineas de credito. TAMAINDEPRO.
+		@Pro_CanLin	varchar(11),	-- Procedimiento de Aplicacion de Cancelacion de lineas. TAMACALIPRO.
+        @Pro_AltLin varchar(11)     -- Procedimiento de Alta de lineas hey. TAMAALHEPRO
 
 select  @Ent_Uno	= 1,				-- Cantidad: Uno
 		@Ent_Cero	= 0,				-- Cantidad: Cero
 		@Bit_Si		= 1,				-- Bit: Si
 		@Bit_No		= 0,				-- Bit: No
 		@Par_TipEje	= 'Tip_Ejecuc',		-- Parametro: Tip_Ejecuc
-		@Pro_BlDeLi	= 'TATMPBLOMAE',	-- Procedimiento de Bloqueo y Desbloqueo de Lineas y Tarjetas. TATMPBLOMAE.
-		@Pro_LiPeLi	= 'TATMPLIMMAE',	-- Procedimiento de Aplicacion de limites personal de lineas de crédito. TATMPLIMMAE.
-		@Pro_InDeLi	= 'TATMPMIDMAE',	-- Procedimiento de incremento y decremento de lineas de credito. TATMPMIDMAE.
-		@Pro_CanLin	= 'TATMPSUSMAE',	-- Procedimiento de Aplicacion de Cancelacion de lineas. TATMPSUSMAE.
-        @Pro_AltLin = 'TATMPALTMAE'     -- Procedimiento de Alta de lineas Hey. TATMPALTMAE
+		@Pro_BlDeLi	= 'TAMABLDEPRO',	-- Procedimiento de Bloqueo y Desbloqueo de Lineas y Tarjetas. TAMABLDEPRO.
+		@Pro_LiPeLi	= 'TAMALIPEPRO',	-- Procedimiento de Aplicacion de limites personal de lineas de crédito. TAMALIPEPRO.
+		@Pro_InDeLi	= 'TAMAINDEPRO',	-- Procedimiento de incremento y decremento de lineas de credito. TAMAINDEPRO.
+		@Pro_CanLin	= 'TAMACALIPRO',	-- Procedimiento de Aplicacion de Cancelacion de lineas. TAMACALIPRO.
+        @Pro_AltLin = 'TAMAALHEPRO'     -- Procedimiento de Alta de lineas Hey. TAMAALHEPRO
 --
 select	@Pro_ExiEje	= @Bit_No
 
@@ -85,7 +90,7 @@ if @Stp_Proced	= @Pro_LiPeLi begin
 		return @Ent_Uno
 	end
 
-	execute	@Status	= TATMPLIMMAE
+	execute	@Status	= TAMALIPEPRO
 		@Num_EjeFlu	= @Num_EjeFlu,
 		@Num_ProFlu	= @Num_ProFlu,
 		@Tip_Ejecuc	= @Par_EntUno,	-- Tipo de Ejecucion: 1.- Validacion 2.- Ejecucion
@@ -132,7 +137,7 @@ end else if @Stp_Proced	= @Pro_InDeLi begin
 		return @Ent_Uno
 	end
 
-	execute	@Status	= TATMPMIDMAE
+	execute	@Status	= TAMAINDEPRO
 		@Num_EjeFlu	= @Num_EjeFlu,
 		@Num_ProFlu	= @Num_ProFlu,
 		@Tip_Ejecuc	= @Par_EntUno,	-- Tipo de Ejecucion: 1.- Validacion 2.- Ejecucion
@@ -179,7 +184,7 @@ end else if @Stp_Proced	= @Pro_CanLin begin
 		return @Ent_Uno
 	end
 
-	execute	@Status	= TATMPSUSMAE
+	execute	@Status	= TAMACALIPRO
 		@Num_EjeFlu	= @Num_EjeFlu,
 		@Num_ProFlu	= @Num_ProFlu,
 		@Tip_Ejecuc	= @Par_EntUno,	-- Tipo de Ejecucion: 1.- Validacion 2.- Ejecucion
@@ -226,7 +231,7 @@ end else if @Stp_Proced	= @Pro_BlDeLi begin
 		return @Ent_Uno
 	end
 
-	execute	@Status	= TATMPBLOMAE
+	execute	@Status	= TAMABLDEPRO
 		@Num_EjeFlu	= @Num_EjeFlu,
 		@Num_ProFlu	= @Num_ProFlu,
 		@Tip_Ejecuc	= @Par_EntUno,	-- Tipo de Ejecucion: 1.- Validacion 2.- Ejecucion
@@ -273,7 +278,7 @@ end else if @Stp_Proced	= @Pro_AltLin begin
 		return @Ent_Uno
 	end
 
-	execute	@Status	= TATMPALTMAE
+	execute	@Status	= TAMAALHEPRO
 		@Num_EjeFlu	= @Num_EjeFlu,
 		@Num_ProFlu	= @Num_ProFlu,
 		@Tip_Ejecuc	= @Par_EntUno,	-- Tipo de Ejecucion: 1.- Validacion 2.- Ejecucion
