@@ -19,6 +19,11 @@ as
 ****************************************************************************
 **	REFERENCIAS:														****
 ****************************************************************************
+** Modifico:	Erika Báez	 											****
+** Fecha:		17/Diciembre/2020										****
+** Help Desk:	1376175										 			****
+** Descripción:	Se cambia mensaje de error								****
+****************************************************************************
 ** Modifico:	Carlos Copto 											****
 ** Fecha:		15/Diciembre/2020										****
 ** Help Desk:	1376175										 			****
@@ -32,57 +37,57 @@ as
 
 								/* Declaracion de Variables */
 declare	@Ent_Existe	int,
-		@Une_IdeInt int,
+		@Une_IdeInt	int,
 		@Status		int
 		
 								/* Declaracion de constantes */
-declare	@Str_Vacio 	char(1),
-		@Ent_Cero  	int,
-		@Ent_Uno   	int,
-		@Str_Cero  	varchar(1),
+declare	@Str_Vacio	char(1),
+		@Ent_Cero	int,
+		@Ent_Uno	int,
+		@Str_Cero	varchar(1),
 		@Str_LetraA varchar(1),
 		@Biu_Canal	int,
 		@Biu_DesEst	varchar(180)
 
 								/* Asignacion de valores a constantes */
-select	@Str_Vacio = '',		/* String Vacio */
-		@Ent_Cero  = 0,			/* Entero cero */
-		@Ent_Uno = 1,			/* Entero uno */
-		@Str_Cero = '0',		/* String Cero */
-		@Str_LetraA = 'A',		/* String Letra A */
-		@Biu_Canal = 5,			/* Canal de originacion del usuario correspondiente a Apertura*/
-		@Biu_DesEst = 'Creacion de Usuario de compra venta'  /* Descripcion para la bitacora */
+select	@Str_Vacio	= '',		/* String Vacio */
+		@Ent_Cero	= 0,			/* Entero cero */
+		@Ent_Uno	= 1,			/* Entero uno */
+		@Str_Cero	= '0',		/* String Cero */
+		@Str_LetraA	= 'A',		/* String Letra A */
+		@Biu_Canal	= 5,			/* Canal de originacion del usuario correspondiente a Apertura*/
+		@Biu_DesEst	= 'Creacion de Usuario de compra venta'  /* Descripcion para la bitacora */
 
 select @Une_IdeInt = (convert(int, str_replace(ltrim(str_replace(@Une_IdeUsu , '0', ' ')),' ', '0') ))
 
 /* Validacion general de parametros vacios */
 if isnull(@Une_Identi, @Ent_Cero) = @Ent_Cero begin
-	select	Err_Codigo = '000001',
-			Err_Mensaj = 'El ID no puede ir vacio.'
+	select	Err_Codigo	= '000001',
+			Err_Mensaj	= 'El ID no puede ir vacio.'
 	rollback
 	return @Ent_Uno
 end 
 
 if isnull(@Une_IdeUsu, @Str_Vacio) = @Str_Vacio begin
-	select	Err_Codigo = '000002',
-			Err_Mensaj = 'El ID de la tabla del usuario no puede ir vacio.'
+	select	Err_Codigo	= '000002',
+			Err_Mensaj	= 'El ID de la tabla del usuario no puede ir vacio.'
 	rollback
 	return @Ent_Uno
 end
 
 if isnull(@Une_TabOri, @Str_Vacio) = @Str_Vacio begin
-	select	Err_Codigo = '000003',
-			Err_Mensaj = 'La tabla de Origen no debe ir vacia'
+	select	Err_Codigo	= '000003',
+			Err_Mensaj	= 'La tabla de Origen no debe ir vacia'
 	rollback
 	return @Ent_Uno
 end 
 
 /*  Revisar si ya existe la relacion  */	
 select	@Ent_Existe	= @Ent_Cero
-select	@Ent_Existe = @Ent_Uno
+select	@Ent_Existe	= @Ent_Uno
 	from SOUSNAEX noholdlock
-	where Une_IdeUsu = @Une_IdeInt and 
-		  Une_TabOri = @Une_TabOri
+	where	Une_IdeUsu	= @Une_IdeInt 
+	  and	Une_TabOri = @Une_TabOri
 	
 if @Ent_Existe = @Ent_Uno begin
 	select	Err_Codigo = '000004',
@@ -93,17 +98,17 @@ end
 
 insert into SOUSNAEX ( 
 	Une_Identi,	Une_IdeUsu,	Une_TabOri,	Une_Estatu, Une_Migrad,	
-	Une_FecReg, Une_FecEst, NumTransac, Transaccio,	Usuario,	
+	Une_FecReg,	Une_FecEst,	NumTransac,	Transaccio,	Usuario,	
 	FechaSis,	SucOrigen,	SucDestino)
 	values (
-	@Une_Identi, @Une_IdeInt, @Une_TabOri, @Str_LetraA, @Str_Cero, 
-	@FechaSis, 	 @FechaSis,   @NumTransac, @Transaccio, @Usuario,	   
-	@FechaSis,	 @SucOrigen,  @SucDestino)
+	@Une_Identi,	@Une_IdeInt,	@Une_TabOri,	@Str_LetraA,	@Str_Cero, 
+	@FechaSis,		@FechaSis,		@NumTransac,	@Transaccio,	@Usuario,	   
+	@FechaSis,		@SucOrigen,		@SucDestino)
 
 exec @Status = SOBITUSUALT 
-	@Une_Identi, @Str_LetraA, @FechaSis,   @Usuario,    @SucOrigen,  
-	@Biu_Canal,  @Biu_DesEst, @NumTransac, @Transaccio, @Usuario,	  
-	@FechaSis,	 @SucOrigen,  @SucDestino, @Modulo
+	@Une_Identi,	@Str_LetraA,	@FechaSis,		@Usuario,		@SucOrigen,  
+	@Biu_Canal,		@Biu_DesEst,	@NumTransac,	@Transaccio,	@Usuario,	  
+	@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
 	
 if @Status <> @Ent_Cero begin
 	rollback
@@ -113,4 +118,3 @@ end
 if @@nestlevel = @Ent_Uno
 select	Err_Codigo	= '000000',
 		Err_Mensaj	= 'Registro realizado'
-		
