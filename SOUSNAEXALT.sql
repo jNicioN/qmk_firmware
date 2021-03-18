@@ -20,7 +20,7 @@ as
 **	REFERENCIAS:														****
 ****************************************************************************
 ** Modifico:	Erika Báez	 											****
-** Fecha:		17/Diciembre/2020										****
+** Fecha:		17/Marzo/2021											****
 ** Help Desk:	1376175										 			****
 ** Descripción:	Se cambia mensaje de error								****
 ****************************************************************************
@@ -91,7 +91,7 @@ select	@Ent_Existe	= @Ent_Uno
 	
 if @Ent_Existe = @Ent_Uno begin
 	select	Err_Codigo = '000004',
-			Err_Mensaj = 'La relacion del usuario ya existe'
+			Err_Mensaj = 'No se puede dar de alta usuario, favor aperturar cliente'
 	rollback
 	return @Ent_Uno
 end
