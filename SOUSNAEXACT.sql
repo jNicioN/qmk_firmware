@@ -18,6 +18,11 @@ as
 ****************************************************************************
 ** Modifico:	Adriana Gomez 											****
 ** Fecha:		05/03/2021												****
+** Help Desk:	1376175 									 			****
+** Descripción:	Se agrega validación para reactivar usuario				****
+****************************************************************************
+** Modifico:	Adriana Gomez 											****
+** Fecha:		05/03/2021												****
 ** Help Desk:	1468365										 			****
 ** Descripción:	Se modifica validacion de usuarios y clientes existentes****
 ****************************************************************************
@@ -35,18 +40,22 @@ as
 declare	@Use_NoCoUs 	varchar(150),			/* Declaración de Variables */
 		@Use_FecNac		smalldatetime,
 		@Une_TabOri		char(1),
-		@Per_ID 		char(8),
 		@Persona		int,
-		@Tab_Ori		char(1),
 		@Cliente		int,
 		@UsuarioCV		int,
-		@Estatus		char(1),
-		@Per_RFC 		char(15),
 		@Mensaje		varchar(150),
 		@Status			int,
 		@Tip_ActTip		char(1),
 		@Tip_ActAct		char(1),
-		@Biu_DesEst		varchar(180)
+		@Biu_DesEst		varchar(180),
+		@Fec_Actual  	smalldatetime,	
+		@Fec_IniMes		smalldatetime,
+		@Fec_FinMes 	smalldatetime,
+		@CliIna			int,
+		@Acumul			int,
+		@Per_Numero		char(8),
+		@PerPersoID		int
+		
 
 declare	@Tip_ActEst 	varchar(1),			/* Declaración de Constantes */
 		@Str_Vacio	 	varchar(1),			
@@ -61,8 +70,15 @@ declare	@Tip_ActEst 	varchar(1),			/* Declaración de Constantes */
 		@Str_Dos		char(1),
 		@Str_A			char(1),
 		@Str_I			char(1),
-		@Une_TaOrNa	char(1),	
-		@Une_TaOrEx	char(1)	
+		@Une_TaOrNa		char(1),	
+		@Une_TaOrEx		char(1), 
+		@Tip_Client		char(1),
+		@Tip_Nomina		char(1),
+		@Ent_CieDos		smallint,
+		@Str_Punto		char(1),
+		@Str_Guion		char(1),
+		@Sta_Cancel		char(1)
+		
 
 											-- Asignación de valores a constantes 	
 select	@Tip_ActEst	= 'A',					--	Tipo Act Estatus de Usuario								
@@ -78,10 +94,24 @@ select	@Tip_ActEst	= 'A',					--	Tipo Act Estatus de Usuario
 		@Str_Dos	= '2',					-- String 2
 		@Str_A		= 'A',					-- Letra I
 		@Str_I		= 'I',					-- Leta A
-		@Une_TaOrNa	= '1',		/*tabla origen nacionales SOPERSON */
-		@Une_TaOrEx	= '2'		/*tabla origen extranjeros SOUSUEXT*/
+		@Une_TaOrNa	= '1',					/*tabla origen nacionales SOPERSON */
+		@Une_TaOrEx	= '2',					/*tabla origen extranjeros SOUSUEXT*/
+		@Tip_Client	= 'C',					/* Tipo: Cliente					*/
+		@Tip_Nomina	= 'N',					/* Tipo: Cliente Nomina				*/
+		@Ent_CieDos	= 102,					/* Entero: CientoDos						*/
+		@Str_Punto	= '.',					/* String: Punto							*/
+		@Str_Guion	= '-',					/* String: Guion							*/
+		@Sta_Cancel = 'C'
 
-select @FechaSis = getdate()
+/*Consulta de fecha del sistema */
+select @Fec_Actual = Par_FecAct
+from SOPARAMS noholdlock
+where Par_Sucurs = @SucOrigen
+
+/*Fecha de inicio y fin de mes*/
+select @Fec_IniMes = dateadd(dd, 1 - datepart(dd, @Fec_Actual), @Fec_Actual)
+select @Fec_FinMes = dateadd(dd, -1, dateadd(mm,  1, @Fec_IniMes))					
+					
 
 if isnull(@Tip_Actual, @Str_Vacio) = @Str_Vacio  begin
 		select	Err_Codigo = '000001',
@@ -110,56 +140,111 @@ if @Tip_ActTip = @Tip_ActEst begin
 	end
 	
 	/* Se obtiene la tabla origen del usuario para consultar su nombre y fecha*/
-	select @Une_TabOri = Une_TabOri
+	select	@Une_TabOri	= Une_TabOri
 	from SOUSNAEX noholdlock 
-	where Une_Identi = @Une_Identi
+	where	Une_Identi	= @Une_Identi
 	
 	/* Se obtiene el nombre y fecha de nacimiento en su tabla de origen para buscar despues si hay homonimo activo */
 	if @Une_TabOri = @Str_Uno begin
-		select @Use_NoCoUs = Per_Comple,
-			   @Use_FecNac = Adi_FecNac
-		from SOPERSON noholdlock 
-		join SOPERADI noholdlock on Adi_PerNum = Per_Numero
-		join SOUSNAEX noholdlock on Une_IdeUsu = PerPersoID 
-		where Une_TabOri = @Une_TabOri
-		and Une_Identi = @Une_Identi
+		
+		select	@PerPersoID	=  Une_IdeUsu  
+			from SOUSNAEX noholdlock 
+			where	Une_Identi	= @Une_Identi 
+			  and	Une_TabOri	= @Une_TabOri
+			
+		select	@Use_NoCoUs	= Per_Comple,
+				@Per_Numero	= Per_Numero 
+			from SOPERSON noholdlock 
+			where	PerPersoID	= @PerPersoID
+			
+		select	@Use_FecNac	= Adi_FecNac
+			from SOPERADI noholdlock 
+			where	Adi_PerNum	= @Per_Numero 
+		
 	end
 	
 	if @Une_TabOri = @Str_Dos begin
-		select @Use_NoCoUs = Use_NoCoUs,
-			   @Use_FecNac = Use_FecNac
+		select	@Use_NoCoUs	= Use_NoCoUs,
+				@Use_FecNac	= Use_FecNac
 		from SOUSNAEX noholdlock 
 		join SOUSUEXT noholdlock on Une_IdeUsu = Use_IdUsEx 
-		where Une_TabOri = @Une_TabOri
-		and  Une_Identi = @Une_Identi
+		where	Une_Identi	= @Une_Identi 
+		  and	Une_TabOri	= @Une_TabOri
 	end
 	
 		/* primero busca en SOPERSON si existe la persona */
-	select @Persona= @Ent_Cero
-	select @Cliente = @Ent_Cero
-	select @UsuarioCV = @Ent_Cero
+	select	@Persona= @Ent_Cero
+	select	@Cliente = @Ent_Cero
+	select	@UsuarioCV = @Ent_Cero
 	
-	select 	PerPersoID,
+	select	PerPersoID,
 			Per_Numero, 
 			Per_RFC
-			into #Personas 
-			from SOPERSON noholdlock 
-			inner join SOPERADI noholdlock on Adi_PerNum = Per_Numero
-			where Adi_FecNac = @Use_FecNac and  Per_Comple = @Use_NoCoUs
+		into #PersonasMismoNombre
+		from SOPERSON noholdlock 
+		where	Per_Comple	= @Use_NoCoUs
 			
-	select @Persona = count (*) from #Personas noholdlock
+	select	PerPersoID,
+			Per_Numero, 
+			Per_RFC
+		into #Personas 
+		from #PersonasMismoNombre noholdlock 
+		inner join SOPERADI noholdlock on Adi_PerNum = Per_Numero
+		where	Adi_FecNac	= @Use_FecNac 
+
+	drop table #PersonasMismoNombre
+	
+	select	@Persona	= count (*) from #Personas noholdlock
 			
 	/* Si existe un prospecto revisa si tiene un cliente con cuentas activas o bloqueadas*/
 	if @Persona > @Ent_Cero begin		
-		select Adi_Client 
+		select	Adi_Client 
 			into #Clientes
 			from #Personas noholdlock
 			inner join CLADICIO noholdlock on Per_Numero = Adi_NumPer 
 			inner join CHCUENTA noholdlock on Adi_Client = Cue_Client
-			where Cue_Status in (@Sta_Bloque, @Sta_Activo) 
-			and Cue_Tipo not in  (@Cue_CashBa , @Cue_Refere)
+			where	Cue_Status in (@Sta_Bloque, @Sta_Activo) 
+			  and	Cue_Tipo not in  (@Cue_CashBa , @Cue_Refere)
 				
-		select @Cliente = count (*) from #Clientes noholdlock
+		select	@Cliente	= count (*) 
+			from #Clientes noholdlock
+		
+		if @Cliente = @Ent_Cero begin	
+			select	Adi_Client 
+				into #ClientesInactivos
+				from #Personas noholdlock
+				inner join CLADICIO noholdlock on Per_Numero = Adi_NumPer 
+				inner join CHCUENTA noholdlock on Adi_Client = Cue_Client
+				where	Cue_Status	= @Sta_Cancel
+				  and	Cue_Tipo not in  (@Cue_CashBa , @Cue_Refere)
+				
+			select	@CliIna	= count (*) 
+				from #ClientesInactivos noholdlock
+				
+			if @CliIna > @Ent_Cero begin	
+				select	Clu_Grupo,
+						Clu_Client
+					into #GrupoClientes
+					from CLCLIUNI noholdlock
+					inner join #ClientesInactivos on Clu_Client = Adi_Client
+				
+				select	@Acumul	= count(*)
+					from VEACUDLL noholdlock
+					inner join #GrupoClientes noholdlock on Adl_Fecha >= @Fec_IniMes
+					  and	Adl_Fecha	<= @Fec_FinMes and Clu_Client = Adl_NumCli
+					  and	Adl_TipCli	in (@Tip_Client, @Tip_Nomina)
+					  
+				if @Acumul > @Ent_Cero begin	
+					select	Err_Codigo	= '000006',
+							Err_Mensaj = 'No se puede activar/reactivar usuario hasta el próximo mes calendario'	
+					rollback
+					return @Ent_Uno
+				end 				
+		
+			end
+		
+		end 
+		
 		drop table #Clientes
 	end 
 	
@@ -167,14 +252,14 @@ if @Tip_ActTip = @Tip_ActEst begin
 	if @Cliente = @Ent_Cero begin
 		/* si es usuario nacional */
 		if @Persona = @Ent_Cero begin			
-			select  Une_Identi,
+			select	Une_Identi,
 					Une_TabOri
 				into #UsuariosNacionales
 				from #Personas noholdlock
 				inner join SOUSNAEX noholdlock on PerPersoID = Une_IdeUsu and Une_TabOri = @Une_TaOrNa
-				where Une_Estatu = @Sta_Activo
+				where	Une_Estatu	= @Sta_Activo
 				
-			select @UsuarioCV = count (*) from #UsuariosNacionales noholdlock
+			select	@UsuarioCV	= count (*) from #UsuariosNacionales noholdlock
 			drop table #UsuariosNacionales
 		end
 		
@@ -185,11 +270,13 @@ if @Tip_ActTip = @Tip_ActEst begin
 				into #UsuariosExtranjeros
 				from SOUSUEXT noholdlock
 				inner join SOUSNAEX noholdlock on Une_IdeUsu = Use_IdUsEx and Une_TabOri = @Une_TaOrEx
-				where Use_FecNac = @Use_FecNac 
-				and Use_NoCoUs = @Use_NoCoUs
-				and Une_Estatu = @Sta_Activo
+				where	Use_FecNac	= @Use_FecNac 
+				  and	Use_NoCoUs	= @Use_NoCoUs
+				  and	Une_Estatu	= @Sta_Activo
 
-			select @UsuarioCV = count (*) from #UsuariosExtranjeros noholdlock
+			select	@UsuarioCV	= count (*)
+				from #UsuariosExtranjeros noholdlock
+				
 			drop table #UsuariosExtranjeros
 		end 
 	
@@ -202,43 +289,46 @@ if @Tip_ActTip = @Tip_ActEst begin
 	if @Tip_ActAct = @Str_A begin 
 	
 		if @Cliente > @Ent_Cero  begin
-			select	@Mensaje = 'No se ha podido activar porque existe un Cliente con cuentas Activas o Bloqueadas con el nombre ' + @Use_NoCoUs
+			select	@Mensaje	= 'No se ha podido activar porque existe un Cliente con cuentas Activas o Bloqueadas con el nombre ' + @Use_NoCoUs
 		end else if @UsuarioCV > @Ent_Cero  begin
-			select	@Mensaje = 'No se ha podido activar porque ya existe un Usuario Activo con el nombre ' + @Use_NoCoUs
+			select	@Mensaje	= 'No se ha podido activar porque ya existe un Usuario Activo con el nombre ' + @Use_NoCoUs
 		end
 		
 		/* Si encontro algun homonimo usuario activo se evita la activacion*/
 		if @UsuarioCV > @Ent_Cero or @Cliente > @Ent_Cero  begin
 			select	Err_Codigo	= '000004',
-					Err_Mensaj = @Mensaje	
+					Err_Mensaj	= @Mensaje	
 			rollback
 			return @Ent_Uno
 		end
 		
-	select @Biu_DesEst = 'Reactivacion de estatus de Usuario de compra venta'  /* Descripcion para la bitacora */
+	select	@Biu_DesEst	= 'Reactivacion de estatus de Usuario de compra venta'  /* Descripcion para la bitacora */
 	
 	end else if @Tip_ActAct = @Str_I begin 
 		
-		select @Biu_DesEst = 'Inactivacion de Usuario de compra venta por actvacion de Cuenta'  /* Descripcion para la bitacora */
+		select	@Biu_DesEst	= 'Inactivacion de Usuario de compra venta por actvacion de Cuenta'  /* Descripcion para la bitacora */
 	
 	end
 	
-	
-	
 	update SOUSNAEX set 
-		Une_Estatu  = @Une_Estatu,
-		NumTransac  = @NumTransac,
-		Transaccio  = @Transaccio, 
+		Une_Estatu	= @Une_Estatu,
+		NumTransac	= @NumTransac,
+		Transaccio	= @Transaccio, 
 		Usuario 	= @Usuario,	  
 		FechaSis	= @FechaSis,	
 		SucOrigen	= @SucOrigen,	
 		SucDestino	= @SucDestino
 	where	Une_Identi	= @Une_Identi
 	
-	exec SOBITUSUALT 
-	@Une_Identi, @Une_Estatu, @FechaSis,   @Usuario,    @SucOrigen,  
-	@Biu_Canal,  @Biu_DesEst, @NumTransac, @Transaccio, @Usuario,	  
-	@FechaSis,	 @SucOrigen,  @SucDestino, @Modulo
+	exec @Status = SOBITUSUALT 
+	@Une_Identi,	@Une_Estatu,	@FechaSis,		@Usuario,		@SucOrigen,  
+	@Biu_Canal,		@Biu_DesEst,	@NumTransac,	@Transaccio,	@Usuario,	  
+	@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
+	
+	if @Status <> @Ent_Uno begin
+		rollback
+		return @Ent_Uno
+	end
 	
 	if @@nestlevel = @Ent_Uno and @Une_Estatu = @Sta_Activo
 		select	Err_Codigo	= '000000',
