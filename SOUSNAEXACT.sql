@@ -17,6 +17,11 @@ as
 /* REFERENCIAS:
 ****************************************************************************
 ** Modifico:	Adriana Gomez 											****
+** Fecha:		24/03/2021												****
+** Help Desk:	1376175 									 			****
+** Descripción:	Se corrige validacion 									****
+****************************************************************************
+** Modifico:	Adriana Gomez 											****
 ** Fecha:		05/03/2021												****
 ** Help Desk:	1376175 									 			****
 ** Descripción:	Se agrega validación para reactivar usuario				****
