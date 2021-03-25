@@ -17,6 +17,11 @@ as
 /* REFERENCIAS:
 ****************************************************************************
 ** Modifico:	Adriana Gomez 											****
+** Fecha:		24/03/2021												****
+** Help Desk:	1376175 									 			****
+** Descripción:	Se modifica validacion mensaje de Usuario Actuvado		****
+****************************************************************************
+** Modifico:	Adriana Gomez 											****
 ** Fecha:		05/03/2021												****
 ** Help Desk:	1376175 									 			****
 ** Descripción:	Se agrega validación para reactivar usuario				****
@@ -325,7 +330,7 @@ if @Tip_ActTip = @Tip_ActEst begin
 	@Biu_Canal,		@Biu_DesEst,	@NumTransac,	@Transaccio,	@Usuario,	  
 	@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
 	
-	if @Status <> @Ent_Uno begin
+	if @Status <> @Ent_Cero begin
 		rollback
 		return @Ent_Uno
 	end
@@ -337,4 +342,3 @@ if @Tip_ActTip = @Tip_ActEst begin
 		return @Ent_Uno
 		
 end
-
