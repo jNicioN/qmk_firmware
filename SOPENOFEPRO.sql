@@ -1,4 +1,4 @@
-create procedure SOPENOFEPRO (
+ï»¿create procedure SOPENOFEPRO (
 	@Per_Nombre	varchar(40),
 	@Per_ApePat	varchar(40),
 	@Per_ApeMat	varchar(40),
@@ -24,13 +24,13 @@ as
 ** Modifico:	Carlos Copto											****
 ** Fecha:		23/03/2021												****
 ** Help Desk:	1376175 									 			****
-** Descripción:	Se modifica validacion de clientes con cuntas ctivas	****
+** DescripciÃ³n:	Se modifica validacion de clientes con cuntas ctivas	****
 				y bloqueadas, se agrega tomar en cuenta acumulados		****
 ****************************************************************************
 ** Modifico:	Adriana Gomez 											****
 ** Fecha:		05/03/2021												****
 ** Help Desk:	1468365										 			****
-** Descripción:	Se modifica validacion de usuarios y clientes existentes****
+** DescripciÃ³n:	Se modifica validacion de usuarios y clientes existentes****
 ****************************************************************************
 ** Modifico:	Adriana Gomez											****
 ** Fecha:		03/02/2021   											****
@@ -205,7 +205,7 @@ if @Persona > @Ent_Cero begin
 					  
 				if @Acumul > @Ent_Cero begin	
 					select	Err_Codigo	= '000000',
-							Err_Mensaj = 'No se puede crear usuario hasta el próximo mes calendario'	
+							Err_Mensaj = 'No se puede crear usuario hasta el prÃ³ximo mes calendario'	
 					rollback
 					return @Ent_Uno
 				end 				
