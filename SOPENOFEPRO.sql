@@ -21,10 +21,16 @@ as
 ****************************************************************************
 **	REFERENCIAS:														****
 ****************************************************************************
+** Modifico:	Carlos Copto											****
+** Fecha:		23/03/2021												****
+** Help Desk:	1376175 									 			****
+** Descripción:	Se modifica validacion de clientes con cuntas ctivas	****
+				y bloqueadas, se agrega tomar en cuenta acumulados		****
+****************************************************************************
 ** Modifico:	Adriana Gomez 											****
 ** Fecha:		05/03/2021												****
 ** Help Desk:	1468365										 			****
-** DescripciÃ³n:	Se modifica validacion de usuarios y clientes existentes****
+** Descripción:	Se modifica validacion de usuarios y clientes existentes****
 ****************************************************************************
 ** Modifico:	Adriana Gomez											****
 ** Fecha:		03/02/2021   											****
@@ -59,7 +65,12 @@ declare	@Str_Comple	char(180),
 		@UsuarioCV int,
 		@Persona int,
 		@Estatus varchar(1),
-		@Mensaje varchar(150)
+		@Mensaje varchar(150),
+		@Fec_Actual  	smalldatetime,	
+		@Fec_IniMes		smalldatetime,
+		@Fec_FinMes 	smalldatetime,
+		@CliIna			int,
+		@Acumul			int
 								
 								/* Declaracion de constantes */
 declare	@Str_Vacio 	char(1),
@@ -71,7 +82,10 @@ declare	@Str_Vacio 	char(1),
 		@Cue_Refere	char(2),
 		@Sta_Bloque varchar(1),
 		@Une_TaOrNa	char(1),	
-		@Une_TaOrEx	char(1)	
+		@Une_TaOrEx	char(1),
+		@Tip_Client	char(1),
+		@Tip_Nomina	char(1),
+		@Sta_Cancel	char(1)
 
 								/* Asignacion de valores a constantes */
 select	@Str_Vacio  = '',		/* String vacio */
@@ -83,7 +97,21 @@ select	@Str_Vacio  = '',		/* String vacio */
 		@Cue_Refere = '50',		-- Tipo de Cuenta: Referenciado
 		@Sta_Bloque = 'B',		/* Estatus bloqueado */
 		@Une_TaOrNa	= '1',		/*tabla origen nacionales SOPERSON */
-		@Une_TaOrEx	= '2'		/*tabla origen extranjeros SOUSUEXT*/
+		@Une_TaOrEx	= '2',		/*tabla origen extranjeros SOUSUEXT*/
+		@Tip_Client	= 'C',		/* Tipo: Cliente					*/
+		@Tip_Nomina	= 'N',		/* Tipo: Cliente Nomina				*/
+		@Sta_Cancel = 'C'		/* Status cancelado */
+		
+		
+/*Consulta de fecha del sistema */
+select @Fec_Actual = Par_FecAct
+from SOPARAMS noholdlock
+where Par_Sucurs = @SucOrigen
+
+/*Fecha de inicio y fin de mes*/
+select @Fec_IniMes = dateadd(dd, 1 - datepart(dd, @Fec_Actual), @Fec_Actual)
+select @Fec_FinMes = dateadd(dd, -1, dateadd(mm,  1, @Fec_IniMes))	
+
 
 if isnull(@Per_Nombre, @Str_Vacio) = @Str_Vacio  begin
 	select	Err_Codigo = '000002',
@@ -139,21 +167,62 @@ drop table 	#Personas
 /* Si existe un prospecto revisa si tiene un cliente con cuentas activas */
 if @Persona > @Ent_Cero begin
 
-	select  @Cliente = @Ent_Uno
-		from #PersonasConMismoNombre noholdlock
-		inner join  CLCLIENT noholdlock on  Cli_RFC  = Per_RFC
-		inner join CHCUENTA noholdlock on Cli_Numero = Cue_Client
-		where Cli_RFC <> @Str_Vacio
-		 and Cue_Status in (@Sta_Bloque, @Sta_Activo) 
-		and Cue_Tipo not in  (@Cue_CashBa , @Cue_Refere)
+		select	Adi_Client 
+			into #Clientes
+			from #PersonasConMismoNombre noholdlock
+			inner join CLADICIO noholdlock on Per_Numero = Adi_NumPer 
+			inner join CHCUENTA noholdlock on Adi_Client = Cue_Client
+			where	Cue_Status in (@Sta_Bloque, @Sta_Activo) 
+			  and	Cue_Tipo not in  (@Cue_CashBa , @Cue_Refere)
+				
+		select	@Cliente	= count (*) 
+			from #Clientes noholdlock
+		
+		if @Cliente = @Ent_Cero begin	
+			select	Adi_Client 
+				into #ClientesInactivos
+				from #PersonasConMismoNombre noholdlock
+				inner join CLADICIO noholdlock on Per_Numero = Adi_NumPer 
+				inner join CHCUENTA noholdlock on Adi_Client = Cue_Client
+				where	Cue_Status	= @Sta_Cancel
+				  and	Cue_Tipo not in  (@Cue_CashBa , @Cue_Refere)
+				
+			select	@CliIna	= count (*) 
+				from #ClientesInactivos noholdlock
+				
+			if @CliIna > @Ent_Cero begin	
+				select	Clu_Grupo,
+						Clu_Client
+					into #GrupoClientes
+					from CLCLIUNI noholdlock
+					inner join #ClientesInactivos on Clu_Client = Adi_Client
+				
+				select	@Acumul	= count(*)
+					from VEACUDLL noholdlock
+					inner join #GrupoClientes noholdlock on Adl_Fecha >= @Fec_IniMes
+					  and	Adl_Fecha	<= @Fec_FinMes and Clu_Client = Adl_NumCli
+					  and	Adl_TipCli	in (@Tip_Client, @Tip_Nomina)
+					  
+				if @Acumul > @Ent_Cero begin	
+					select	Err_Codigo	= '000000',
+							Err_Mensaj = 'No se puede crear usuario hasta el próximo mes calendario'	
+					rollback
+					return @Ent_Uno
+				end 				
+		
+			end
+		
+		end 
+		
+		drop table #Clientes
 
 end
 
 /* si no es cliente se procede a buscar como usuario*/
-if ( @Cliente <> @Ent_Uno ) begin
+if isnull(@Cliente, @Ent_Cero) = @Ent_Cero begin
 	
 	/* si es usuario nacional */
-	if ( @Persona = @Ent_Uno) begin
+	if ( @Persona > @Ent_Cero ) begin
 		select  @Per_ID = convert(char, Une_Identi),
 				@Tab_Ori = Une_TabOri,
 				@UsuarioCV = @Ent_Uno
@@ -164,7 +233,7 @@ if ( @Cliente <> @Ent_Uno ) begin
 	end
 	
 	/* si no lo encontro como usuario nacional y tampoco es cliente busca en extranjeros */
-	if( @Cliente <> @Ent_Uno and @UsuarioCV <> @Ent_Uno ) begin
+	if( isnull(@Cliente, @Ent_Cero) = @Ent_Cero and isnull(@UsuarioCV, @Ent_Cero) = @Ent_Cero ) begin
 		select  @Per_ID = convert(char, Une_Identi),
 				@Tab_Ori = Une_TabOri,
 				@Estatus = Une_Estatu,
@@ -175,18 +244,18 @@ if ( @Cliente <> @Ent_Uno ) begin
 		and Use_NoCoUs = @Str_Comple
 		and Une_Estatu = @Sta_Activo
 	end 
-
+	
 end
 
 drop table #PersonasConMismoNombre
 
-if @Cliente = @Ent_Uno begin
+if @Cliente > @Ent_Cero begin
 	select	@Mensaje = 'Ya existe un Cliente con el nombre ' + @Per_Nombre + ' ' + @Per_ApePat + ' ' + @Per_ApeMat
 end else if @UsuarioCV = @Ent_Uno begin
 	select	@Mensaje = 'Ya existe un Usuario activo con el nombre ' + @Per_Nombre + ' ' + @Per_ApePat + ' ' + @Per_ApeMat + ' favor de dar salida como Cliente.'
 end
 
-if @Cliente = @Ent_Uno or @UsuarioCV = @Ent_Uno begin
+if @Cliente > @Ent_Cero or @UsuarioCV = @Ent_Uno begin
 		select	Err_Codigo	= '000000',
 			Err_Mensaj  = @Mensaje,
 			Per_Numero	= ltrim(rtrim(@Per_ID)),
@@ -198,3 +267,4 @@ end else begin
 			Err_Mensaj = 'No se encuentra la persona'
 	return @Ent_Uno
 end
+
