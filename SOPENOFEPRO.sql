@@ -14,7 +14,7 @@
 
 as
 
-/**
+/** 
 ****************************************************************************
 ** DESCRIPCION: ** Consulta de persona unica por nombre y 			    ****
 ** 				   fecha de nacimiento									****
