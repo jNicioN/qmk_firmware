@@ -197,7 +197,7 @@ if @Persona > @Ent_Cero begin
 					from CLCLIUNI noholdlock
 					inner join #ClientesInactivos on Clu_Client = Adi_Client
 				
-				select	@Acumul	= count(*)
+				select	@Acumul	= count(@Ent_Uno)
 					from VEACUDLL noholdlock
 					inner join #GrupoClientes noholdlock on Adl_Fecha >= @Fec_IniMes
 					  and	Adl_Fecha	<= @Fec_FinMes and Clu_Client = Adl_NumCli
