@@ -24,6 +24,12 @@ create procedure SOPERDIRCON (
 ** REFERENCIAS:															****
 ****************************************************************************
 ** Modifico: 	Edwin Santiago											  **
+** Fecha:		06/04/2021						                    	  **
+** HelpDesk:	1299445						                    	      **
+** Descripcion:	Se agrega fecha de nacimiento para la consulta de   	  **
+**              personas					                              **
+****************************************************************************
+** Modifico: 	Edwin Santiago											  **
 ** Fecha:		24/01/2021						                    	  **
 ** HelpDesk:	1299445						                    	      **
 ** Descripcion:	Se modifican consultas para contemplar unicamente tipos   **
@@ -205,7 +211,7 @@ CREATE INDEX #CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 			delete from #CLCLIUNI where Cla_Numero <> @Int_Dos
 			
 			--Obteniendo informacion adicional de la persona
-			update #SOPERINF set Adi_FecCon = so.Adi_FecCon ,Adi_FecNac = so.Adi_FecCon
+			update #SOPERINF set Adi_FecCon = so.Adi_FecCon ,Adi_FecNac = so.Adi_FecNac
 			from SOPERADI so noholdlock
 			where  Adi_PerNum = Per_Numero
 			
@@ -329,7 +335,7 @@ CREATE INDEX #CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 			delete from #CLCLIUNI where Cla_Numero <> @Int_Dos
 			
 			--Obteniendo informacion adicional de la persona
-			update #SOPERINF set Adi_FecCon = so.Adi_FecCon ,Adi_FecNac = so.Adi_FecCon
+			update #SOPERINF set Adi_FecCon = so.Adi_FecCon ,Adi_FecNac = so.Adi_FecNac
 			from SOPERADI so noholdlock
 			where  Adi_PerNum = Per_Numero
 			
@@ -450,7 +456,7 @@ CREATE INDEX #CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 			delete from #CLCLIUNI where Cla_Numero <> @Int_Dos
 			
 			--Obteniendo informacion adicional de la persona
-			update #SOPERINF set Adi_FecCon = so.Adi_FecCon ,Adi_FecNac = so.Adi_FecCon
+			update #SOPERINF set Adi_FecCon = so.Adi_FecCon ,Adi_FecNac = so.Adi_FecNac
 			from SOPERADI so noholdlock
 			where  Adi_PerNum = Per_Numero
 			
@@ -569,7 +575,7 @@ CREATE INDEX #CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 			delete from #CLCLIUNI where Cla_Numero <> @Int_Dos
 			
 			--Obteniendo informacion adicional de la persona
-			update #SOPERINF set Adi_FecCon = so.Adi_FecCon ,Adi_FecNac = so.Adi_FecCon
+			update #SOPERINF set Adi_FecCon = so.Adi_FecCon ,Adi_FecNac = so.Adi_FecNac
 			from SOPERADI so noholdlock
 			where  Adi_PerNum = Per_Numero
 			
