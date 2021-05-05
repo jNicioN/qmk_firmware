@@ -1,4 +1,4 @@
-create procedure SOUSNAEXPRO (
+﻿create procedure SOUSNAEXPRO (
 	@Une_Nombre	varchar(180),
 	@Une_FecNac	smalldatetime,
 	@ClClientID	int,
@@ -19,6 +19,11 @@ as
 ** DESCRIPCION: ** Inactiva Usuarios de Compra Venta					****
 ****************************************************************************
 **	REFERENCIAS:														****
+****************************************************************************
+** Modifico:	Erika Báez	 											****
+** Fecha:		17/03/2021												****
+** Help Desk:	1376175										 			****
+** Descri:		Se agregan parametros generales para tabla SOSUNAEX		****
 ****************************************************************************
 ** Modifico:	Erika Báez	 											****
 ** Fecha:		17/03/2021												****
@@ -132,9 +137,15 @@ update VEACUDLL set
 	  	
 		
 update SOUSNAEX set 
-		Une_Estatu	= @Sta_Inacti
+	Une_Estatu	= @Sta_Inacti,
+		
+	NumTransac	= @NumTransac,
+	Transaccio	= @Transaccio,
+	Usuario		= @Usuario,
+	FechaSis	= @FechaSis,
+	SucOrigen	= @SucOrigen,
+	SucDestino	= @SucDestino
 	from SOBITUSU noholdlock
 	inner join SOUSNAEX noholdlock on	Biu_FolUsu	= Une_Identi 
 	where	SOBITUSU.NumTransac	= @NumTransac 
 	
-
