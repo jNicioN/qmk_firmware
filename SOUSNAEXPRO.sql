@@ -1,4 +1,4 @@
-﻿create procedure SOUSNAEXPRO (
+create procedure SOUSNAEXPRO (
 	@Une_Nombre	varchar(180),
 	@Une_FecNac	smalldatetime,
 	@ClClientID	int,
@@ -19,6 +19,11 @@ as
 ** DESCRIPCION: ** Inactiva Usuarios de Compra Venta					****
 ****************************************************************************
 **	REFERENCIAS:														****
+****************************************************************************
+** Modifico:	Adriana Gomez											****
+** Fecha:		05/05/2021												****
+** Help Desk:	1376175 									 			****
+** Descripción:	Se  ajusta validacion de fecha de nacimiento			****
 ****************************************************************************
 ** Modifico:	Erika Báez	 											****
 ** Fecha:		17/03/2021												****
@@ -92,7 +97,7 @@ insert into SOBITUSU	(Biu_FolUsu,	Biu_Estatu,	Biu_FecEst,	Biu_Usuari,	Biu_Sucurs
 		inner join SOPERADI noholdlock on	Adi_PerNum	= Per_Numero 
 		inner join SOUSNAEX noholdlock on	PerPersoID	= Une_IdeUsu and Une_TabOri	= @Une_TaOrNa
 		where	Per_Comple	= @Une_Nombre 
-		  and	Adi_FecNac	= @Une_FecNac
+		  and   convert(date, Adi_FecNac) = convert(date, @Une_FecNac)
 		  and	Une_Estatu	= @Sta_Activo
 	
 /* se busca en extranjeros el numero de usuario por nombre y fecha de nacimiento*/
@@ -105,7 +110,7 @@ insert into SOBITUSU	(Biu_FolUsu,	Biu_Estatu,	Biu_FecEst,	Biu_Usuari,	Biu_Sucurs
 	from SOUSUEXT noholdlock 
 	inner join SOUSNAEX noholdlock on	Une_IdeUsu	= Use_IdUsEx and	Une_TabOri =@Une_TaOrEx
 	where	Use_NoCoUs	= @Une_Nombre
-	  and	Use_FecNac	= @Une_FecNac
+	  and   convert(date, Use_FecNac)	= convert(date, @Une_FecNac)
 	  and	Une_Estatu	= @Sta_Activo
 	  	  
 /*Buscar movimientos de usuarios para pasarlos a la bitacora*/
