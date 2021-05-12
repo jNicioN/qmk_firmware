@@ -67,7 +67,7 @@ select  @Ent_Uno	= 1,				-- Cantidad: Uno
 		@Pro_InDeLi	= 'TAMAINDEPRO',	-- Procedimiento de incremento y decremento de lineas de credito. TAMAINDEPRO.
 		@Pro_CanLin	= 'TAMACALIPRO',	-- Procedimiento de Aplicacion de Cancelacion de lineas. TAMACALIPRO.
         @Pro_AltLin = 'TAMAALHEPRO',     -- Procedimiento de Alta de lineas Hey. TAMAALHEPRO
-        @Pro_VerCli = 'CLMAVECLPRO'     -- Procedimiento de Alta de lineas Hey. TAMAALHEPRO
+        @Pro_VerCli = 'CLMAVECLPRO'     -- Procedimiento de Verificacion de Clientes. CLMAVECLPRO
 --
 select	@Pro_ExiEje	= @Bit_No
 
