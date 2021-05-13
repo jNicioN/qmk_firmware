@@ -1,4 +1,4 @@
-﻿create procedure SOPENOFEPRO (
+create procedure SOPENOFEPRO (
 	@Per_Nombre	varchar(40),
 	@Per_ApePat	varchar(40),
 	@Per_ApeMat	varchar(40),
@@ -20,6 +20,11 @@ as
 ** 				   fecha de nacimiento									****
 ****************************************************************************
 **	REFERENCIAS:														****
+****************************************************************************
+** Modifico:	Adriana Gomez											****
+** Fecha:		05/05/2021												****
+** Help Desk:	1376175 									 			****
+** Descripción:	Se  ajusta validacion de fecha de nacimiento			****
 ****************************************************************************
 ** Modifico:	Carlos Copto											****
 ** Fecha:		23/03/2021												****
@@ -102,7 +107,6 @@ select	@Str_Vacio  = '',		/* String vacio */
 		@Tip_Nomina	= 'N',		/* Tipo: Cliente Nomina				*/
 		@Sta_Cancel = 'C'		/* Status cancelado */
 		
-		
 /*Consulta de fecha del sistema */
 select @Fec_Actual = Par_FecAct
 from SOPARAMS noholdlock
@@ -158,8 +162,8 @@ select 	Per_ID =  Per_ID,
 		into #PersonasConMismoNombre
 		from #Personas noholdlock 
 		inner join SOPERADI noholdlock on Adi_PerNum = Per_Numero
-		where  Adi_FecNac  = @Per_Fecha
-		
+		where convert(date, Adi_FecNac) = convert(date, @Per_Fecha)
+
 select  @Persona = count(*) from #PersonasConMismoNombre noholdlock
 
 drop table 	#Personas	
@@ -240,8 +244,8 @@ if isnull(@Cliente, @Ent_Cero) = @Ent_Cero begin
 				@UsuarioCV = @Ent_Uno
 		from SOUSUEXT noholdlock
 		inner join SOUSNAEX noholdlock on Une_IdeUsu = Use_IdUsEx and Une_TabOri = @Une_TaOrEx
-		where Use_FecNac = @Per_Fecha 
-		and Use_NoCoUs = @Str_Comple
+		where Use_NoCoUs = @Str_Comple
+		and convert(date,Use_FecNac)= convert(date, @Per_Fecha)
 		and Une_Estatu = @Sta_Activo
 	end 
 	
@@ -267,4 +271,3 @@ end else begin
 			Err_Mensaj = 'No se encuentra la persona'
 	return @Ent_Uno
 end
-
