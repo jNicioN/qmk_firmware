@@ -1,8 +1,8 @@
-﻿create procedure SOPARAMSMOD (
+create procedure SOPARAMSMOD (
 	@Par_Sucurs	char(3),  		
 	@Par_CheCaj	int,           
-	@Par_IVA	smallmoney, 
-	@Par_ISR	smallmoney,  		
+	@Par_IVA	float, 
+	@Par_ISR	float,  		
 	@Par_DiBaIn	int,          
 	@Par_DiBISR	int,          
 	@Par_DiBaCr	int, 
@@ -12,13 +12,13 @@
  	@Par_ChLey3	varchar(80),  	
  	@Par_CheCer	char(2),	   
  	@Par_DiaRem	smallint,
- 	@Par_LimAut	money,    		
+ 	@Par_LimAut	float,    		
  	@Par_TranBR	char(11),      
  	@Par_CliInd	int,	 
  	@Par_BanFol	int,      		
  	@Par_FecAct	smalldatetime, 
- 	@Par_CoCoIn	smallmoney,
- 	@Par_CoReme	smallmoney, 	
+ 	@Par_CoCoIn	float,
+ 	@Par_CoReme	float, 	
  	@Par_OpeBan	int,	       
  	@Par_ConPap	int,
  	@Par_MonCom	char(2),   	
@@ -58,7 +58,20 @@ as
 /***************************************************************************
 ** DESCRIPCION: ** Modificacion de Parametros  de Soporte 				****
 ****************************************************************************
+** Modificó:	Fatima Sanchez 										 	****
+** Fecha:		28/May/2021											    ****
+** Help: 		1471507												    ****
+** Descripcion:	Se agrega convert a tipo money a los parametros de		****
+**				entrada @Par_LimAut y a smallmoney @Par_IVA, @Par_ISR, 	****
+**				@Par_CoCoIn, @Par_CoReme que fueron cambiados a float	****
+****************************************************************************
 ** REFERENCIAS: 														****
+** Modificó:	Moises Ake Uc											****
+** Fecha:		07/05/2021												****
+** Help:		1471507													****
+** Descripción: Se cambia tipo de dato smallmoney a float  del 			****
+**				parametro de  entrada @Par_IVA,@Par_ISR,@Par_CoCoIn,	****
+**				@Par_CoReme y como money a @Par_LimAut					****
 ****************************************************************************
 ** Modificó:		Ricardo Rivas 						****
 ** Fecha:		15/Julio/2019								****
@@ -102,6 +115,12 @@ select	@Cue_Compan	= '001',		/* Compañia Contable BANREGIO */
 		@Ent_Anio	= 360,				/* Anio */
 		@Ent_365	= 365,				/* 365 Dias del anio */
 		@Fec_Vacia	= '1990-01-01'		/* Fecha Vacia  */
+
+select	@Par_IVA	= convert(smallmoney, @Par_IVA),
+		@Par_ISR	= convert(smallmoney, @Par_ISR),	
+		@Par_LimAut	= convert(money, @Par_LimAut),		
+		@Par_CoCoIn	= convert(smallmoney, @Par_CoCoIn),
+		@Par_CoReme	= convert(smallmoney, @Par_CoReme)	
 
 if @Par_IVA <= @Ent_Cero begin
 	select	Err_Codigo	= '000001', 
