@@ -1,8 +1,8 @@
 ﻿create procedure SOPARAMSALT (
 	@Par_Sucurs	char(3),	
 	@Par_CheCaj	int,			
-	@Par_IVA	smallmoney,
- 	@Par_ISR	smallmoney,	
+	@Par_IVA	float,
+ 	@Par_ISR	float,	
  	@Par_DiBaIn	int, 			
  	@Par_DiBISR	int, 			
  	@Par_DiBaCr	int, 
@@ -12,13 +12,13 @@
  	@Par_ChLey3	varchar(80),	
  	@Par_CheCer	char(2),	
  	@Par_DiaRem	smallint,
- 	@Par_LimAut	money,		
+ 	@Par_LimAut	float,		
  	@Par_TranBR	char(11),		
  	@Par_CliInd	int,	 
  	@Par_BanFol	int,		
  	@Par_FecAct	smalldatetime,	
- 	@Par_CoCoIn	smallmoney,
- 	@Par_CoReme	smallmoney,	
+ 	@Par_CoCoIn	float,
+ 	@Par_CoReme	float,	
  	@Par_OpeBan	int,		
  	@Par_ConPap	int,
  	@Par_MonCom	char(2),	
@@ -54,10 +54,30 @@
 as
 
 /***************************************************************************
-** DESCRIPCION: ** Alta de Parametros  de Soporte 								****
+** DESCRIPCION: ** Alta de Parametros  de Soporte 						****
 ****************************************************************************
 ** REFERENCIAS: 														****
 ****************************************************************************
+** Modificó:	Fatima Sanchez 										 	****
+** Fecha:		27/May/2021											    ****
+** Help: 		1471507												    ****
+** Descripcion:	Se agrega convert a tipo money a los parametros de		****
+**				entrada @Par_LimAut y a smallmoney @Par_IVA, @Par_ISR, 	****
+**				@Par_CoCoIn, @Par_CoReme que fueron cambiados a float	****
+****************************************************************************
+* Modificó:     David Carmona                                           ****
+* Fecha:        07/Mayo/2021                                            ****
+* Help:                                                                 ****
+* Descripcion:  Se cambia tipo de dato money a float                    ****
+*				del parametro de                                        ****
+*               entrada:                                                ****
+*                         @Par_LimAut                                   ****
+*				Se cambia tipo de dato smallmoney a float               ****
+*				del parametro de                                        ****
+*               entrada:                                                ****
+*                         @Par_IVA, @Par_ISR, @Par_CoCoIn, @Par_CoReme  ****
+****************************************************************************
+
 ** Modificó:		Ricardo Rivas 						****
 ** Fecha:		12/Julio/2019								****
 ** Help Desk:	00726428									****
@@ -148,6 +168,12 @@ select	@Cue_Compan	= '001',			/* Compañia Contable BANREGIO */
 
 select @Par_HorEnv	= Par_HorEnv
 	from SPPARAMS noholdlock
+	
+select	@Par_IVA	= convert(smallmoney, @Par_IVA),
+		@Par_ISR	= convert(smallmoney, @Par_ISR),	
+		@Par_LimAut	= convert(money, @Par_LimAut),		
+		@Par_CoCoIn	= convert(smallmoney, @Par_CoCoIn),
+		@Par_CoReme	= convert(smallmoney, @Par_CoReme)
 
 if @Par_IVA <= @Ent_Cero begin
 	select	Err_Codigo	= '000001', 
