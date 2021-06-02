@@ -3,7 +3,7 @@ create procedure SOCALCOMPRO (
     @Cal_CheExp int,                /* Cantidad de Cheques Expedidos */
 	@Cal_FecApe smalldatetime,      /* Fecha de Apertura de la Cuenta */
 	@Cal_MesIna int,                /* Cantidad de Meses de Inactividad de la Cuenta */
-    @Cal_SalPro money,              /* Saldo Promedio de la Cuenta */
+    @Cal_SalPro float,              /* Saldo Promedio de la Cuenta */
     @Cal_NumCon int,                /* Numero de Configuracion */
     @NumTransac	char(10),			/* Auditoria */
 	@Transaccio	char(3),			/* Auditoria */
@@ -20,6 +20,19 @@ as
 **                 modulo de comision next                              ****
 ****************************************************************************
 ** Referencias:															****
+****************************************************************************
+** Modificó:	Fatima Sanchez 										 	****
+** Fecha:		28/May/2021											    ****
+** Help: 		1471507												    ****
+** Descripcion:	Se agrega convert a tipo money a los parametros de		****
+**				entrada @Cal_SalPro que fueron cambiados a float		****
+****************************************************************************
+* Modificó:     David Carmona                                           ****
+* Fecha:        07/Mayo/2021                                            ****
+* Help:                                                                 ****
+* Descripcion:  Se cambia tipo de dato money a float  del parametro de  ****
+*               entrada:                                                ****
+                          @Cal_SalPro                                   ****
 ****************************************************************************
 ** Elaboró: 		CODE4U Jonathan Perez                      			****
 ** Fecha:		    29/01/2020									        ****
@@ -54,6 +67,9 @@ select  @Com_CheLib = 'C1',         /* Cheques Librados */
 
 /* Inicializacion */
 select @Mon_Comisi = @Mon_Cero
+
+select @Cal_SalPro = convert(money, @Cal_SalPro)
+
 
 if @Cal_Tipo = @Com_CheLib begin
     /* Calculo de Comision de Tipo Cheques Librados */
