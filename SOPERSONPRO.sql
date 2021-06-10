@@ -468,7 +468,6 @@ end else if @Tip_Proces = @Tip_Email begin
 		FechaSis	= @FechaSis,
 		SucOrigen	= @SucOrigen,
 		SucDestino	= @SucDestino
-	from SOUNIPER noholdlock
 	where	Per_Numero	= @Per_Numero
 
 end
