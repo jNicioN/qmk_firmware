@@ -31,6 +31,12 @@ as
 /*******************************************************************/
 /** REFERENCIAS:
 ********************************************************************
+** Modifico:	Karla Morfín									****
+** Fecha:		10/junio/2021									****
+** Help:		1482775											****
+** Descripcion: Eliminar from innecesario, quitar variable no	****
+				usada, uso de constante y código duplicado.		****
+********************************************************************
 ** Modifico:	CODE4U-Eliezer Catalino Xul Canche				****
 ** Fecha:		11/Marzo/2020									****
 ** Help:		1343720											****
