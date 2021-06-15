@@ -1,4 +1,3 @@
--- drop procedure SOPERSONCON
 create procedure SOPERSONCON (
 	@Per_Numero	char(8),
 	@Per_Comple	varchar(181),
@@ -20,6 +19,11 @@ as
 ** DESCRIPCION:  ** Consulta de Personas **						****
 ********************************************************************
 ** REFERENCIAS:													****
+********************************************************************
+**	Modifico:	Marcelo Bautista Hernandez						****
+**  Fecha:		03/06/2021										****
+**  Help:		1482775											****
+**	Descripcion: optimizar CB, L9, quitar L8, LB	 			****
 ********************************************************************
 **	Modificó:	Frank canul										****
 **  Fecha:		23/12/2020										****
@@ -324,7 +328,8 @@ declare	@Tip_ConTip	char(1),
 		@Busqueda	varchar(100),
 		@Suc_Numero	varchar(3),
 		@Int_Client	int,
-		@Rfc_Like	varchar(15)
+		@Rfc_Like	varchar(15),
+		@Ent_NumReg	int
 
 /* Declaracion de Constantes */
 declare	@Str_Vacio	char(1),
@@ -731,20 +736,12 @@ if @Tip_ConTip = 'C' begin
 	end else if @Tip_ConCon	= 'B' begin   /* Consulta Móvil por Nombre Completo**/
 		select @Per_Comple = @Per_Comple + @Str_Porcen -- El porcentaje se debe poner antes de usarse en la consulta para que sea rapido
 		
-		select top 100 Peu_Grupo
-		  into #MovilPersonaNombre
-	  	  from SOPERSON noholdlock
-	  	 inner join SOUNIPER noholdlock on Per_Numero = Peu_Person
-	  	 where Per_Comple like @Per_Comple
-	  	 group by Peu_Grupo
-         order by Peu_Grupo
-
-		select Per_Numero, Per_Comple, Per_ComOrd, Per_RFC, Per_CURP,
+		select distinct top 100 Peu_Grupo Per_Numero, Per_Comple, Per_ComOrd, Per_RFC, Per_CURP,
 			   Per_Nombre, Per_ApePat, Per_ApeMat
-		  from #MovilPersonaNombre
-		 inner join SOPERSON noholdlock on Peu_Grupo = Per_Numero
+		  from SOPERSON noholdlock
+	  	 inner join SOUNIPER noholdlock on Per_Numero = Peu_Grupo
+		 where Per_Comple like @Per_Comple
 
-		drop table #MovilPersonaNombre
 	end else if @Tip_ConCon = 'C' begin /*Consulta por persona registrada en internacional para tercero autorizado*/
 		select @Int_Client = ClClientID 
 		from CLCLIENT noholdlock
@@ -884,14 +881,10 @@ end else begin
 	end
 	if @Tip_ConCon = '4' begin
 		if @Per_Comple = @Str_Vacio begin
-			select	Per_Numero,	Per_Comple,	Per_Nombre,	Per_ApePat,	Per_ApeMat,
-					Per_Entida,	Per_Locali,	Per_Coloni,	Per_CodPos,	Per_Calle,
-					Per_CalNum,	Per_Telefo,	Per_RFC,	Adi_FecNac,	Adi_CaNuIn,
-					day(Adi_FecNac) DiaNac, month(Adi_FecNac) as MesNac, year(Adi_FecNac) as AnioNac,
-					Per_Titulo,	Adi_NacExt
-				from SOPERSON noholdlock,
-					 SOPERADI noholdlock
-				where	Per_Numero	*= Adi_PerNum
+			select	Err_Codigo	= '000001',
+					Err_Mensaj	= @Msj_MasInf,
+					Err_Variab	= 'Per_Comple'
+			return 1
 		end else begin
 
 			if char_length(ltrim(rtrim(@Per_Comple))) < @Ent_Cinco begin
@@ -1106,272 +1099,7 @@ end else begin
 
 		drop table #PersonasExis 
 	end
-	if @Tip_ConCon = '8' begin /* busqueda de personas-apertura nueva cuenta-sibamex3 */
-		select	@Suc_Numero = ltrim(rtrim(@Per_Numero))
-		if ISNUMERIC(@Busqueda) = @Ent_Uno begin--Busqueda por numero de cliente/persona 
-			if char_length(ltrim(rtrim(@Busqueda))) < @Ent_Ocho begin
-				select	Err_Codigo	= '000001',
-						Err_Mensaj	= 'El número de cliente debe ser de 8 digitos',
-						Err_Variab	= 'Per_Comple'
-				return 1
-			end
-			if char_length(ltrim(rtrim(@Busqueda))) > @Ent_Ocho begin
-				select	@Busqueda = substring(@Busqueda,@Ent_Uno,@Ent_Ocho)
-			end
-
-			select	Cli_Numero as Per_Numero,
-					Cli_Numero as Per_NumTra,
-					cast(@Ent_Uno as varchar) as Per_Titulo,
-					Cli_ComOrd as Per_ComOrd,
-					space(3) as Per_Nacion,
-					Cli_RFC as Per_RFC,
-					rtrim(ltrim(Cli_Calle)) + @Str_Coma + space(1) + Cli_CalNum + @Str_Coma + space(1) + Cli_Coloni + @Str_Coma + space(1) +
-					Loc_Nombre + @Str_Coma + space(1) + Ent_Nombre as Per_Calle,
-					case when Cli_Tipo = @Tip_Fisica and Cli_ActEmp = @Sta_Si then
-						@Str_Tres
-					else
-						Cli_Tipo
-					end as Per_Tipo,
-					case when Cli_Tipo = @Tip_Moral then
-						isnull(Con_NomSoc, @Str_Vacio)
-					else
-						Cli_Nombre
-					end as Per_Nombre,
-					isnull(Cli_ApePat, @Str_Vacio) as Per_ApePat,
-					isnull(Cli_ApeMat, @Str_Vacio) as Per_ApeMat,
-					isnull(Con_TipSoc, @Str_Vacio) as Per_RazSoc,
-					case when Cli_Tipo = @Tip_Moral then
-						isnull(con.Con_FeEsCl, cla.Adi_FecNac)
-					else
-						cla.Adi_FecNac
-					end as Adi_FecNac,
-					con.Con_TipIde as Adi_TipIde,
-
-					con.Con_NumIde as Adi_NumIde,
-					cla.Adi_NumPer as Per_NumPer,
-					Cli_CURP as Per_CURP
-					into #ClientesPorNumero
-			from CLCLIENT clc noholdlock
-					left join CLADICIO cla noholdlock on Cli_Numero = Adi_Client
-					left join CLCONTRA con noholdlock on Cli_Numero =  Con_Client
-					left join CLLOCALI noholdlock on Cli_Locali = Loc_Numero
-					left join CLENTIDA noholdlock on Cli_Entida = Ent_Numero
-			where	Cli_Numero = @Busqueda and Cli_SucAti = isnull(@Suc_Numero,Cli_SucAti)
-			
-			--Obtener las personas por el numero
-			select	Per_Comple, Per_RFC,  Per_Nacion ,	max(FechaSis) FechaSis
-				into #PersonasPorNumeroRecientes
-				from SOPERSON noholdlock
-				where	Per_Numero	= @Busqueda
-				group by Per_Comple,	Per_RFC
-
-			select	spe.Per_Numero,	Per_ComOrd,	spe.Per_RFC, 					
-					(CASE when (Per_Calle <> @Str_Vacio and  Per_CalNum <> @Str_Vacio and Per_Coloni <> @Str_Vacio) THEN 
-					rtrim(ltrim(Per_Calle)) + @Str_Coma + space(1) + Per_CalNum 
-					+ @Str_Coma + space(1) + Per_Coloni + @Str_Coma + space(1) +
-					Loc_Nombre + @Str_Coma + space(1) + Ent_Nombre ELSE @Sin_Direcc END) as Per_Calle,
-					
-					Per_Coloni,		Per_Locali,	Per_Entida,	Per_Tipo,	Per_ActEmp,
-					Per_Nombre,		Per_ApePat,	Per_ApeMat,	Adi_FecNac,	Adi_TipIde,
-					Adi_NumIde,		@Str_Vacio as Clp_TipSoc, @Str_Vacio as Clp_NomSoc,  per.Per_Nacion,
-					Per_CURP
-				into #PersonaPorNumero
-				from #PersonasPorNumeroRecientes per
-					inner join SOPERSON spe noholdlock on per.Per_Comple = spe.Per_Comple and per.Per_RFC = spe.Per_RFC and per.FechaSis = spe.FechaSis
-					inner join SOPERADI spa noholdlock on spe.Per_Numero = Adi_PerNum					
-					left join CLLOCALI noholdlock on Per_Locali = Loc_Numero
-					left join CLENTIDA noholdlock on Per_Entida = Ent_Numero
-					
-				select Per_Numero,	Per_ComOrd,	Per_RFC, Per_Calle ,					
-					Per_Coloni,		Per_Locali,	Per_Entida,	Per_Tipo,	Per_ActEmp,
-					Per_Nombre,		Per_ApePat,	Per_ApeMat,	Adi_FecNac,	Adi_TipIde,
-					Adi_NumIde,		Clp_TipSoc,  Clp_NomSoc,  Per_Nacion,
-					DaP_CoVeDi,		Per_CURP
-				into #PersonaNumero
-				from #PersonaPorNumero
-					left join SOPEDACO noholdlock on DaP_Person = Per_Numero
-
-			--Agrupar Clientes y Personas por numero 			
-			select	Per_Numero, Per_NumTra, Per_Titulo, Per_ComOrd, Per_RFC, 
-					Per_Calle, Per_Tipo, Per_Nombre, Per_ApePat, Per_ApeMat, 
-					Per_RazSoc, Adi_FecNac, Adi_TipIde, Adi_NumIde, Per_Nacion,
-					Per_NumPer, Per_CURP
-			  from  #ClientesPorNumero
-			union all
-			select distinct Per_Numero, case when DaP_CoVeDi=@Sta_Termin then @Str_Usuari else @Str_Prospe 	end as Per_NumTra, 
-					@Tip_Fisica as Per_Titulo, 
-					Per_ComOrd, Per_RFC, Per_Calle, Per_Tipo, Per_Nombre, 
-					Per_ApePat, Per_ApeMat, @Str_Vacio as Per_RazSoc, Adi_FecNac, 
-					Adi_TipIde, Adi_NumIde, Per_Nacion, Per_Numero as Per_NumPer, Per_CURP
-			  from  #PersonaNumero
-				
-					
-			drop table #PersonasPorNumeroRecientes
-			drop table #PersonaPorNumero
-			drop table #ClientesPorNumero
-			drop table #PersonaNumero
-			
-		end else begin-- Busqueda por nombre cliente/persona
-			if char_length(ltrim(rtrim(@Per_Comple))) < @Ent_Cinco begin
-				select	Err_Codigo	= '000001',
-						Err_Mensaj	= 'Se requieren mínimo 4 letras para obtener resultados',
-						Err_Variab	= 'Per_Comple'
-				return 1
-			end
-			
-			--Se busca al cliente por el nombre
-			select	Cli_Numero,	Cli_ComOrd,	Cli_RFC,	Cli_Calle,	Cli_CalNum,
-					Cli_Coloni,	Cli_Locali,	Cli_Entida,	Cli_Tipo,	Cli_ActEmp,
-					Cli_Nombre,	Cli_ApePat,	Cli_ApeMat,	Adi_FecNac,	Con_NomSoc,
-					Con_TipSoc,	Con_FeEsCl,	Con_TipIde,	Con_NumIde, Adi_NumPer as Per_NumPer,
-					Cli_CURP
-				into #Clientes
-				from CLCLIENT clc noholdlock
-					left join CLADICIO cla noholdlock on Cli_Numero = Adi_Client
-					left join CLCONTRA con noholdlock on Cli_Numero =  Con_Client
-				where	Cli_SucAti = isnull(@Suc_Numero,Cli_SucAti) and Cli_Comple	like @Per_Comple
-
-			select	Cli_Numero as Per_Numero,
-					Cli_Numero + space(1) as Per_NumTra,
-					cast(@Ent_Uno as varchar) as Per_Titulo,
-					Cli_ComOrd as Per_ComOrd,
-					space(3) as Per_Nacion, 
-					Cli_RFC as Per_RFC,
-
-					(CASE when (Cli_Calle <> @Str_Vacio and  Cli_CalNum <> @Str_Vacio and Cli_Coloni <> @Str_Vacio) THEN 
-					rtrim(ltrim(Cli_Calle)) + @Str_Coma + space(1) + Cli_CalNum + @Str_Coma + space(1) + Cli_Coloni + @Str_Coma + space(1) +
-					Loc_Nombre + @Str_Coma + space(1) + Ent_Nombre ELSE @Sin_Direcc END) as Per_Calle ,
-					case when Cli_Tipo = @Tip_Fisica and Cli_ActEmp = @Sta_Si then
-						@Str_Tres
-					else
-						Cli_Tipo
-					end as Per_Tipo,
-					case when Cli_Tipo = @Tip_Moral then
-						isnull(Con_NomSoc, @Str_Vacio)
-					else
-						Cli_Nombre
-					end as Per_Nombre,
-					isnull(Cli_ApePat, @Str_Vacio) as Per_ApePat,
-					isnull(Cli_ApeMat, @Str_Vacio) as Per_ApeMat,
-					isnull(Con_TipSoc, @Str_Vacio) as Per_RazSoc,
-					case when Cli_Tipo = @Tip_Moral then
-						isnull(Con_FeEsCl, Adi_FecNac)
-					else
-						Adi_FecNac
-					end as Adi_FecNac,
-					Con_TipIde as Adi_TipIde,
-					Con_NumIde as Adi_NumIde,
-					cli.Per_NumPer,
-					cli.Cli_CURP as Per_CURP
-				into #ClientesProspectos
-				from #Clientes cli
-					inner join CLLOCALI noholdlock on Cli_Locali = Loc_Numero
-					inner join CLENTIDA noholdlock on Cli_Entida = Ent_Numero
-					
-					
-					
-					--Se busca se a la persona por el nombre
-			select	Per_Comple, Per_RFC,  Per_Nacion ,	max(FechaSis) FechaSis
-				into #PersonasRecientes
-				from SOPERSON noholdlock
-				where	Per_Comple	like @Per_Comple
-				group by Per_Comple,	Per_RFC
-
-			select	spe.Per_Numero,	Per_ComOrd,	spe.Per_RFC,	Per_Calle,	Per_CalNum,
-					Per_Coloni,		Per_Locali,	Per_Entida,	Per_Tipo,	Per_ActEmp,
-					Per_Nombre,		Per_ApePat,	Per_ApeMat,	Adi_FecNac,	Adi_TipIde,
-					Adi_NumIde,		Clp_TipSoc, Clp_NomSoc,  per.Per_Nacion, Per_CURP 
-				into #Persona
-				from #PersonasRecientes per
-					inner join SOPERSON spe noholdlock on per.Per_Comple = spe.Per_Comple and per.Per_RFC = spe.Per_RFC and per.FechaSis = spe.FechaSis
-					inner join SOPERADI spa noholdlock on spe.Per_Numero = Adi_PerNum
-					left join SOCLCAPE cla noholdlock on spe.Per_Numero =  Clp_NumPer
-			
-			--Se inserta al prospecto
-			insert into #ClientesProspectos
-			select	Per_Numero,
-					@Str_Prospe as Per_NumTra,
-					@Tip_Fisica as Per_Titulo,
-					Per_ComOrd,					
-					Per_Nacion,
-					Per_RFC,
-					
-					(CASE when (Per_Calle <> @Str_Vacio and  Per_CalNum <> @Str_Vacio and Per_Coloni <> @Str_Vacio) THEN 
-					rtrim(ltrim(Per_Calle)) + @Str_Coma + space(1) + Per_CalNum + @Str_Coma + space(1) + Per_Coloni + @Str_Coma + space(1) +
-					Loc_Nombre + @Str_Coma + space(1) + Ent_Nombre  ELSE @Sin_Direcc END) as Per_Calle ,
-					case when Per_Tipo = @Tip_Fisica and Per_ActEmp = @Sta_Si then
-						@Str_Tres
-					else
-						Per_Tipo
-					end as Per_Tipo,
-					case when Per_Tipo = @Tip_Moral then
-						isnull(Clp_NomSoc, @Str_Vacio)
-					else
-						Per_Nombre
-					end as Per_Nombre,
-					Per_ApePat,
-					Per_ApeMat,
-					isnull(Clp_TipSoc, @Str_Vacio) as Per_RazSoc,
-					Adi_FecNac,
-					Adi_TipIde,
-					Adi_NumIde,
-					Per_Numero as Per_NumPer,
-					Per_CURP
-				from #Persona
-					left join CLLOCALI noholdlock on Per_Locali = Loc_Numero
-					left join CLENTIDA noholdlock on Per_Entida = Ent_Numero
-					
-					
-					--se inserta al usuario de compra venta si existe
-		insert into #ClientesProspectos
-			select	Per_Numero,
-					@Str_Usuari as Per_NumTra,
-					@Tip_Fisica as Per_Titulo,
-					Per_ComOrd,					
-					Per_Nacion,
-					Per_RFC,
-					
-					(CASE when (Per_Calle <> @Str_Vacio and  Per_CalNum <> @Str_Vacio and Per_Coloni <> @Str_Vacio) THEN 
-					rtrim(ltrim(Per_Calle)) + @Str_Coma + space(1) + Per_CalNum + @Str_Coma + space(1) + Per_Coloni + @Str_Coma + space(1) +
-					Loc_Nombre + @Str_Coma + space(1) + Ent_Nombre  ELSE @Sin_Direcc END) as Per_Calle ,
-					case when Per_Tipo = @Tip_Fisica and Per_ActEmp = @Sta_Si then
-						@Str_Tres
-					else
-						Per_Tipo
-					end as Per_Tipo,
-					case when Per_Tipo = @Tip_Moral then
-						isnull(Clp_NomSoc, @Str_Vacio)
-					else
-						Per_Nombre
-					end as Per_Nombre,
-					Per_ApePat,
-					Per_ApeMat,
-					isnull(Clp_TipSoc, @Str_Vacio) as Per_RazSoc,
-					Adi_FecNac,
-					Adi_TipIde,
-					Adi_NumIde,
-					Per_Numero as Per_NumPer,
-					Per_CURP
-				from #Persona
-					left join CLLOCALI noholdlock on Per_Locali = Loc_Numero
-					left join CLENTIDA noholdlock on Per_Entida = Ent_Numero
-					left join SOPEDACO noholdlock on DaP_Person = Per_Numero
-					    where DaP_CoVeDi in (@Sta_Termin)
-			
-			select	distinct
-					Per_Numero,	Per_NumTra,	Per_Titulo,	Per_ComOrd,	Per_RFC,
-					Per_Calle,	Per_Tipo,	Per_Nombre,	Per_ApePat,	Per_ApeMat,
-					Per_RazSoc,	Adi_FecNac,	Adi_TipIde,	Adi_NumIde, Per_Nacion, 
-					Per_NumPer, Per_CURP
-				from #ClientesProspectos
-				
-			drop table #ClientesProspectos
-			drop table #Clientes
-			drop table #Persona
-			drop table #PersonasRecientes
-		end
-		
-	end
+	
 	if @Tip_ConCon = '9' begin /* L9 - Busqueda y/o RFC que incluye el numero de cliente */
 	
 		/* Creamos la tabla temporal */
@@ -1418,10 +1146,9 @@ end else begin
 			end
 			
 				/* Buscamos el RFC completo en SOPERSON */
-				if exists(select 1 from SOPERSON noholdlock
-								where Per_RFC = @Per_RFC
-								and ((@Per_Tipo = @Tip_Moral and Per_Tipo = @Per_Tipo)
-								or (Per_Tipo = @Tip_Fisica or Per_Tipo = @Tip_FisAE)))
+			select	@Ent_NumReg=1 from SOPERSON noholdlock
+			where Per_RFC = @Per_RFC and Per_Tipo in (@Tip_Moral, @Tip_Fisica, @Tip_FisAE)
+				if (@Ent_NumReg > 0)
 					begin
 						insert into #PersonasRfc
 							select	Per_Numero,	Per_Tipo,	Per_Nombre,	Per_ApePat,	Per_ApeMat,
@@ -1430,9 +1157,7 @@ end else begin
 									Per_Telefo,	Per_Email,	Per_ActEmp,	@Fec_Vacio,	@Str_Vacio,
 									null,		Per_NumTra,	Per_Fecha,	null,		null
 						from SOPERSON noholdlock
-							where Per_RFC = @Per_RFC
-							and ((@Per_Tipo = @Tip_Moral and Per_Tipo = @Per_Tipo)
-							or (Per_Tipo = @Tip_Fisica or Per_Tipo = @Tip_FisAE))
+							where Per_RFC = @Per_RFC and Per_Tipo in (@Tip_Moral, @Tip_Fisica, @Tip_FisAE)
 							
 					end else begin
 						
@@ -1446,9 +1171,7 @@ end else begin
 									Per_Telefo,	Per_Email,	Per_ActEmp,	@Fec_Vacio,	@Str_Vacio,
 									null,		Per_NumTra,	Per_Fecha,	null,		null
 							from SOPERSON noholdlock
-							where	Per_RFC	like @Per_RFC
-							and ((@Per_Tipo = @Tip_Moral and Per_Tipo = @Per_Tipo)
-							or (Per_Tipo = @Tip_Fisica or Per_Tipo = @Tip_FisAE))
+							where	Per_Tipo in (@Tip_Moral, @Tip_Fisica, @Tip_FisAE) and Per_RFC	like @Per_RFC
 				end
 			end else begin
 			insert into #PersonasRfc
@@ -1495,266 +1218,5 @@ end else begin
 		select Per_RFC, Per_Comple
 		from SOPERSON noholdlock
 		where Per_RFC like @Rfc_Like
-	end
-	if @Tip_ConCon = @Str_B begin /* LB - busqueda de personas-apertura nueva cuenta-sibamex3 solo Adi_ApeSuc='S' */
-		select	@Suc_Numero = ltrim(rtrim(@Per_Numero))
-		if ISNUMERIC(@Busqueda) = @Ent_Uno begin--Busqueda por numero de cliente/persona 
-			if char_length(ltrim(rtrim(@Busqueda))) < @Ent_Ocho begin
-				select	Err_Codigo	= '000001',
-						Err_Mensaj	= 'El número de cliente debe ser de 8 digitos',
-						Err_Variab	= 'Per_Comple'
-				return 1
-			end
-			if char_length(ltrim(rtrim(@Busqueda))) > @Ent_Ocho begin
-				select	@Busqueda = substring(@Busqueda,@Ent_Uno,@Ent_Ocho)
-			end
-
-			select	Cli_Numero as Per_Numero,
-					Cli_Numero as Per_NumTra,
-					cast(@Ent_Uno as varchar) as Per_Titulo,
-					Cli_ComOrd as Per_ComOrd,
-					space(3) as Per_Nacion,
-					Cli_RFC as Per_RFC,
-					rtrim(ltrim(Cli_Calle)) + @Str_Coma + space(1) + Cli_CalNum + @Str_Coma + space(1) + Cli_Coloni + @Str_Coma + space(1) +
-					Loc_Nombre + @Str_Coma + space(1) + Ent_Nombre as Per_Calle,
-					case when Cli_Tipo = @Tip_Fisica and Cli_ActEmp = @Sta_Si then
-						@Str_Tres
-					else
-						Cli_Tipo
-					end as Per_Tipo,
-					case when Cli_Tipo = @Tip_Moral then
-						isnull(Con_NomSoc, @Str_Vacio)
-					else
-						Cli_Nombre
-					end as Per_Nombre,
-					isnull(Cli_ApePat, @Str_Vacio) as Per_ApePat,
-					isnull(Cli_ApeMat, @Str_Vacio) as Per_ApeMat,
-					isnull(Con_TipSoc, @Str_Vacio) as Per_RazSoc,
-					case when Cli_Tipo = @Tip_Moral then
-						isnull(con.Con_FeEsCl, cla.Adi_FecNac)
-					else
-						cla.Adi_FecNac
-					end as Adi_FecNac,
-					con.Con_TipIde as Adi_TipIde,
-
-					con.Con_NumIde as Adi_NumIde,
-					cla.Adi_NumPer as Per_NumPer,
-					Cli_CURP as Per_CURP,
-					@Str_Vacio as Cli_HeyBiz,
-					@Str_Vacio as Cli_Banreg
-					into #ClientesPorNumeroCliente
-			from CLCLIENT clc noholdlock
-					left join CLADICIO cla noholdlock on Cli_Numero = Adi_Client
-					left join CLCONTRA con noholdlock on Cli_Numero =  Con_Client
-					left join CLLOCALI noholdlock on Cli_Locali = Loc_Numero
-					left join CLENTIDA noholdlock on Cli_Entida = Ent_Numero
-			where	Cli_Numero = @Busqueda and Cli_SucAti = isnull(@Suc_Numero,Cli_SucAti)
-			
-			update #ClientesPorNumeroCliente set 
-				Cli_HeyBiz = @Sta_Si
-			from #ClientesPorNumeroCliente
-			inner join CHCUENTA noholdlock on Per_Numero = Cue_Client 
-			where	Cue_Tipo in  (@Cue_HeyBiz)
-
-			update #ClientesPorNumeroCliente set 
-				Cli_Banreg = @Sta_Si
-			from #ClientesPorNumeroCliente
-			inner join CHCUENTA noholdlock on Per_Numero = Cue_Client
-			inner join SOPRTICU noholdlock on Cue_Tipo =  Ptc_TipCue
-			inner join SOCLAPRO noholdlock on Ptc_Produc  =  Clp_Produc 
-			where	Clp_Clasif  = @Cla_Banreg
-			  and	Cue_Tipo not in  (@Cue_CashBa)
-			
-			delete from #ClientesPorNumeroCliente
-			where	Cli_HeyBiz = @Str_Vacio 
-			  and	Cli_Banreg = @Str_Vacio
-			
-			--Obtener las personas por el numero
-			select	Per_Comple, Per_RFC,  Per_Nacion ,	max(FechaSis) FechaSis
-				into #PersonasPorNumeroPersona
-				from SOPERSON noholdlock
-				where	Per_Numero	= @Busqueda
-				group by Per_Comple,	Per_RFC
-
-			select	spe.Per_Numero,	Per_ComOrd,	spe.Per_RFC, 					
-					(CASE when (Per_Calle <> @Str_Vacio and  Per_CalNum <> @Str_Vacio and Per_Coloni <> @Str_Vacio) THEN 
-					rtrim(ltrim(Per_Calle)) + @Str_Coma + space(1) + Per_CalNum 
-					+ @Str_Coma + space(1) + Per_Coloni + @Str_Coma + space(1) +
-					Loc_Nombre + @Str_Coma + space(1) + Ent_Nombre ELSE @Sin_Direcc END) as Per_Calle,
-					
-					Per_Coloni,		Per_Locali,	Per_Entida,	Per_Tipo,	Per_ActEmp,
-					Per_Nombre,		Per_ApePat,	Per_ApeMat,	Adi_FecNac,	Adi_TipIde,
-					Adi_NumIde,		@Str_Vacio as Clp_TipSoc, @Str_Vacio as Clp_NomSoc,  per.Per_Nacion,
-					Per_CURP
-				into #PersonaPorNumeroPersona
-				from #PersonasPorNumeroPersona per
-					inner join SOPERSON spe noholdlock on per.Per_Comple = spe.Per_Comple and per.Per_RFC = spe.Per_RFC and per.FechaSis = spe.FechaSis
-					inner join SOPERADI spa noholdlock on spe.Per_Numero = Adi_PerNum					
-					left join CLLOCALI noholdlock on Per_Locali = Loc_Numero
-					left join CLENTIDA noholdlock on Per_Entida = Ent_Numero
-					
-			--Agrupar Clientes y Personas por numero 			
-			select	Per_Numero, Per_NumTra, Per_Titulo, Per_ComOrd, Per_RFC, 
-					Per_Calle, Per_Tipo, Per_Nombre, Per_ApePat, Per_ApeMat, 
-					Per_RazSoc, Adi_FecNac, Adi_TipIde, Adi_NumIde, Per_Nacion,
-					Per_NumPer, Per_CURP
-			  from  #ClientesPorNumeroCliente
-			union all
-			select distinct Per_Numero, @Str_Prospe as Per_NumTra, 
-					@Tip_Fisica as Per_Titulo, 
-					Per_ComOrd, Per_RFC, Per_Calle, Per_Tipo, Per_Nombre, 
-					Per_ApePat, Per_ApeMat, @Str_Vacio as Per_RazSoc, Adi_FecNac, 
-					Adi_TipIde, Adi_NumIde, Per_Nacion, Per_Numero as Per_NumPer, Per_CURP
-			  from  #PersonaPorNumeroPersona
-				
-					
-			drop table #PersonasPorNumeroPersona
-			drop table #PersonaPorNumeroPersona
-			drop table #ClientesPorNumeroCliente
-			
-		end else begin-- Busqueda por nombre cliente/persona
-			if char_length(ltrim(rtrim(@Per_Comple))) < @Ent_Cinco begin
-				select	Err_Codigo	= '000001',
-						Err_Mensaj	= 'Se requieren mínimo 4 letras para obtener resultados',
-						Err_Variab	= 'Per_Comple'
-				return 1
-			end
-			
-			--Se busca al cliente por el nombre
-			select	Cli_Numero,	Cli_ComOrd,	Cli_RFC,	Cli_Calle,	Cli_CalNum,
-					Cli_Coloni,	Cli_Locali,	Cli_Entida,	Cli_Tipo,	Cli_ActEmp,
-					Cli_Nombre,	Cli_ApePat,	Cli_ApeMat,	Adi_FecNac,	Con_NomSoc,
-					Con_TipSoc,	Con_FeEsCl,	Con_TipIde,	Con_NumIde, Adi_NumPer as Per_NumPer,
-					Cli_CURP,	
-					@Str_Vacio as Cli_HeyBiz, 
-					@Str_Vacio as Cli_Banreg
-				into #ClientesAperturaSucursal
-				from CLCLIENT clc noholdlock
-					left join CLADICIO cla noholdlock on Cli_Numero = Adi_Client
-					left join CLCONTRA con noholdlock on Cli_Numero =  Con_Client
-				where	Cli_SucAti = isnull(@Suc_Numero,Cli_SucAti) and Cli_Comple	like @Per_Comple
-			
-			update #ClientesAperturaSucursal set 
-				Cli_HeyBiz = @Sta_Si
-			from #ClientesAperturaSucursal
-			inner join CHCUENTA noholdlock on Cli_Numero = Cue_Client
-			where	Cue_Tipo in  (@Cue_HeyBiz)
-
-			update #ClientesAperturaSucursal set 
-				Cli_Banreg = @Sta_Si
-			from #ClientesAperturaSucursal
-			inner join CHCUENTA noholdlock on Cli_Numero = Cue_Client
-			inner join SOPRTICU noholdlock on Cue_Tipo =  Ptc_TipCue
-			inner join SOCLAPRO noholdlock on Ptc_Produc  =  Clp_Produc 
-			where	Clp_Clasif  = @Cla_Banreg
-			  and	Cue_Tipo not in  (@Cue_CashBa)
-			
-			delete from #ClientesAperturaSucursal
-			where	Cli_HeyBiz = @Str_Vacio 
-			  and	Cli_Banreg = @Str_Vacio
-
-			select	Cli_Numero as Per_Numero,
-					Cli_Numero + space(1) as Per_NumTra,
-					cast(@Ent_Uno as varchar) as Per_Titulo,
-					Cli_ComOrd as Per_ComOrd,
-					space(3) as Per_Nacion, 
-					Cli_RFC as Per_RFC,
-
-					(CASE when (Cli_Calle <> @Str_Vacio and  Cli_CalNum <> @Str_Vacio and Cli_Coloni <> @Str_Vacio) THEN 
-					rtrim(ltrim(Cli_Calle)) + @Str_Coma + space(1) + Cli_CalNum + @Str_Coma + space(1) + Cli_Coloni + @Str_Coma + space(1) +
-					Loc_Nombre + @Str_Coma + space(1) + Ent_Nombre ELSE @Sin_Direcc END) as Per_Calle ,
-					case when Cli_Tipo = @Tip_Fisica and Cli_ActEmp = @Sta_Si then
-						@Str_Tres
-					else
-						Cli_Tipo
-					end as Per_Tipo,
-					case when Cli_Tipo = @Tip_Moral then
-						isnull(Con_NomSoc, @Str_Vacio)
-					else
-						Cli_Nombre
-					end as Per_Nombre,
-					isnull(Cli_ApePat, @Str_Vacio) as Per_ApePat,
-					isnull(Cli_ApeMat, @Str_Vacio) as Per_ApeMat,
-					isnull(Con_TipSoc, @Str_Vacio) as Per_RazSoc,
-					case when Cli_Tipo = @Tip_Moral then
-						isnull(Con_FeEsCl, Adi_FecNac)
-					else
-						Adi_FecNac
-					end as Adi_FecNac,
-					Con_TipIde as Adi_TipIde,
-					Con_NumIde as Adi_NumIde,
-					cli.Per_NumPer,
-					cli.Cli_CURP as Per_CURP
-				into #ClientesProspectosApertura
-				from #ClientesAperturaSucursal cli
-					inner join CLLOCALI noholdlock on Cli_Locali = Loc_Numero
-					inner join CLENTIDA noholdlock on Cli_Entida = Ent_Numero
-					
-					
-					
-					--Se busca se a la persona por el nombre
-			select	Per_Comple, Per_RFC,  Per_Nacion ,	max(FechaSis) FechaSis
-				into #PersonasRecientesApertura
-				from SOPERSON noholdlock
-				where	Per_Comple	like @Per_Comple
-				group by Per_Comple,	Per_RFC
-
-			select	spe.Per_Numero,	Per_ComOrd,	spe.Per_RFC,	Per_Calle,	Per_CalNum,
-					Per_Coloni,		Per_Locali,	Per_Entida,	Per_Tipo,	Per_ActEmp,
-					Per_Nombre,		Per_ApePat,	Per_ApeMat,	Adi_FecNac,	Adi_TipIde,
-					Adi_NumIde,		Clp_TipSoc, Clp_NomSoc,  per.Per_Nacion, Per_CURP 
-				into #PersonaAperturaSucursal
-				from #PersonasRecientesApertura per
-					inner join SOPERSON spe noholdlock on per.Per_Comple = spe.Per_Comple and per.Per_RFC = spe.Per_RFC and per.FechaSis = spe.FechaSis
-					inner join SOPERADI spa noholdlock on spe.Per_Numero = Adi_PerNum
-					left join SOCLCAPE cla noholdlock on spe.Per_Numero =  Clp_NumPer
-			
-			--Se inserta al prospecto
-			insert into #ClientesProspectosApertura
-			select	Per_Numero,
-					@Str_Prospe as Per_NumTra,
-					@Tip_Fisica as Per_Titulo,
-					Per_ComOrd,					
-					Per_Nacion,
-					Per_RFC,
-					
-					(CASE when (Per_Calle <> @Str_Vacio and  Per_CalNum <> @Str_Vacio and Per_Coloni <> @Str_Vacio) THEN 
-					rtrim(ltrim(Per_Calle)) + @Str_Coma + space(1) + Per_CalNum + @Str_Coma + space(1) + Per_Coloni + @Str_Coma + space(1) +
-					Loc_Nombre + @Str_Coma + space(1) + Ent_Nombre  ELSE @Sin_Direcc END) as Per_Calle ,
-					case when Per_Tipo = @Tip_Fisica and Per_ActEmp = @Sta_Si then
-						@Str_Tres
-					else
-						Per_Tipo
-					end as Per_Tipo,
-					case when Per_Tipo = @Tip_Moral then
-						isnull(Clp_NomSoc, @Str_Vacio)
-					else
-						Per_Nombre
-					end as Per_Nombre,
-					Per_ApePat,
-					Per_ApeMat,
-					isnull(Clp_TipSoc, @Str_Vacio) as Per_RazSoc,
-					Adi_FecNac,
-					Adi_TipIde,
-					Adi_NumIde,
-					Per_Numero as Per_NumPer,
-					Per_CURP
-				from #PersonaAperturaSucursal
-					left join CLLOCALI noholdlock on Per_Locali = Loc_Numero
-					left join CLENTIDA noholdlock on Per_Entida = Ent_Numero
-			
-			select	distinct
-					Per_Numero,	Per_NumTra,	Per_Titulo,	Per_ComOrd,	Per_RFC,
-					Per_Calle,	Per_Tipo,	Per_Nombre,	Per_ApePat,	Per_ApeMat,
-					Per_RazSoc,	Adi_FecNac,	Adi_TipIde,	Adi_NumIde, Per_Nacion, 
-					Per_NumPer, Per_CURP
-				from #ClientesProspectosApertura
-				
-			drop table #ClientesProspectosApertura
-			drop table #ClientesAperturaSucursal
-			drop table #PersonaAperturaSucursal
-			drop table #PersonasRecientesApertura
-		end
-		
 	end
 end
