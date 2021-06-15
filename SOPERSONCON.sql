@@ -326,10 +326,10 @@ declare	@Tip_ConTip	char(1),
 		@Ent_PreCom	int,
 		@Loc_Pais	char(3),
 		@Busqueda	varchar(100),
-		@Suc_Numero	varchar(3),
 		@Int_Client	int,
 		@Rfc_Like	varchar(15),
-		@Ent_NumReg	int
+		@Ent_NumReg	int,
+		@Status		int
 
 /* Declaracion de Constantes */
 declare	@Str_Vacio	char(1),
@@ -741,6 +741,7 @@ if @Tip_ConTip = 'C' begin
 		  from SOPERSON noholdlock
 	  	 inner join SOUNIPER noholdlock on Per_Numero = Peu_Grupo
 		 where Per_Comple like @Per_Comple
+		 order by Per_Numero
 
 	end else if @Tip_ConCon = 'C' begin /*Consulta por persona registrada en internacional para tercero autorizado*/
 		select @Int_Client = ClClientID 
@@ -917,7 +918,7 @@ end else begin
 		end
 
 		/*Consultar SOPRAPCO*/
-		exec SOPRAPCOCON
+		exec @Status = SOPRAPCOCON
 		 @Pre_Prefij 	= @Per_Comple,
 		 @Existencia	= @Ent_PreCom output,
 		 @NumTransac	= @NumTransac,
@@ -927,6 +928,13 @@ end else begin
 		 @SucOrigen		= @SucOrigen,
 		 @SucDestino	= @SucDestino,
 		 @Modulo		= @Modulo
+		 
+		 if @Status <> @Ent_Cero  begin
+			select	Err_Codigo = '000001', 	
+					Err_Mensaj = 'Error en consulta apellidos comunes '
+			rollback
+			return 1
+		end	 
 
 		if @Ent_PreCom  > @Ent_Cero begin
 			select	Err_Codigo	= '000002',
@@ -961,8 +969,8 @@ end else begin
 			Per_RFC		varchar(15),
 			Per_LadTel	varchar(8),
 			Per_Telefo	char(15),
-			_Tipo	char(1),
-			_ActEmp	char(1),
+			Pes_Tipo	char(1),
+			Pes_ActEmp	char(1),
 			Adi_FecNac	smalldatetime,
 			Per_Ciudad	char(40),
 			Per_Estado	char(30))
@@ -1010,7 +1018,7 @@ end else begin
 		end
 
 		update #Personas set
-			Adi_FecNac = case when _Tipo <> @Tip_Moral then SOPERADI.Adi_FecNac
+			Adi_FecNac = case when Pes_Tipo <> @Tip_Moral then SOPERADI.Adi_FecNac
 						 else Adi_FecCon end
 			from SOPERADI noholdlock 
 			where	Per_Numero	= Adi_PerNum
@@ -1028,12 +1036,12 @@ end else begin
 		select	Per_Numero,	Per_Comple,	Per_Nombre,	Per_ApePat,	Per_ApeMat,
 				Per_RazSoc, Per_Entida,	Per_Locali,	Per_Coloni,	Per_CodPos,
 				Per_Calle,	Per_CalNum,	Per_RFC,	Per_LadTel,	Per_Telefo,
-				Adi_FecNac,	Per_Ciudad, Per_Estado,	_Tipo,	_ActEmp,
-				Per_Tipo	= case _Tipo when @Tip_Moral then @Per_Moral else @Per_Fisica end,
+				Adi_FecNac,	Per_Ciudad, Per_Estado,	Pes_Tipo as _Tipo,	Pes_ActEmp as _ActEmp,
+				Per_Tipo	= case Pes_Tipo when @Tip_Moral then @Per_Moral else @Per_Fisica end,
 				Per_ActEmp	= case 
-								when _Tipo = @Tip_Moral then @Str_Vacio
-								when _Tipo <> @Tip_Moral and _ActEmp = @Sta_Si then @Str_Si
-								when _Tipo <> @Tip_Moral and _ActEmp <> @Sta_Si then @Str_No  end
+								when Pes_Tipo = @Tip_Moral then @Str_Vacio
+								when Pes_Tipo <> @Tip_Moral and Pes_ActEmp = @Sta_Si then @Str_Si
+								when Pes_Tipo <> @Tip_Moral and Pes_ActEmp <> @Sta_Si then @Str_No  end
 			from #Personas
 			order by Per_Comple
 
