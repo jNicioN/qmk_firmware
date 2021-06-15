@@ -16,7 +16,12 @@ as
 ****************************************************************************
 ** REFERENCIAS:															****
 ****************************************************************************
-*****************************************************************************
+**	Modificó:	Fatima Sanchez											****
+**  Fecha:		30/04/2021												****
+**  Help:		1286068													****
+**	Descripción: se elimina el convert y tipo de dato de los campos		****
+**  Cop_PerFis y Ppf_PerFis que pasaron de smallint a char				****
+****************************************************************************
 **	Modificó:	Frank canul												****
 **  Fecha:		23/12/2020												****
 **  Help:		1286068													****
@@ -98,7 +103,7 @@ create table #ConfiguracionProd			-- Configuraciones por Productos - Personalida
 			Cop_NivEnt	smallint not null,
 			Cop_Vigenc	tinyint not null,
 			Cop_Produc	int not null,
-			Cop_PerFis	smallint not null,
+			Cop_PerFis	char(1) not null,
 			Cop_Elemen	int not null,
 			Cop_Priori	smallint not null,
 			Cop_PrPeCo	int not null,
@@ -194,7 +199,7 @@ begin
 	insert into SOTMPPRP(	Prp_NumTra,	Prp_Produc,	Prp_TipCue,	Prp_Moneda,	Prp_PerFis,	
 							Prp_TipMov,	Prp_PeFiCa,	Prp_TiMoCa, Prp_NuPeCl, Prp_ActEmp) 
 		select	distinct	@NumTransac,Ppf_Produc,	Ptc_TipCue,	Ptc_Moneda,	Ppf_PerFis,	
-							Dat_TipMov,	convert(char(1), Ppf_PerFis),
+							Dat_TipMov,	Ppf_PerFis,
 							substring('000000', 1, 6 - len(rtrim(convert(char(6), Dat_TipMov)))) + rtrim(convert(char(6), Dat_TipMov)),
 							convert(char(1), Pfc_NuPeCl), 
 							Pfc_ActEmp
