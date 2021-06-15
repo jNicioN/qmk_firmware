@@ -466,7 +466,7 @@ if @Tip_ConTip = 'C' begin
 				Eje_Depart	= space(50),
 				Eje_Email	= space(20)
 			into #Person
-			from SOPERSON noholdlock
+			from SOPERSON noholdlock  
 			where	Per_RFC	= @Per_RFC
 
 		update #Person set
@@ -509,8 +509,8 @@ if @Tip_ConTip = 'C' begin
 				Per_CalNum,	Per_Coloni,	Per_Locali,	Per_CodPos,	Per_Telefo,
 				Per_EstCiv,	Per_Nacion,	Per_ActEmp,	Per_Activi,
 				Per_FecNac	= Adi_FecNac
-			from SOPERSON noholdlock,
-				 SOPERADI noholdlock
+			from SOPERSON noholdlock ,
+				  SOPERADI noholdlock
 			where	Per_Numero	*= Adi_PerNum
 			  and	Per_RFC		= @Per_RFC
 	end
@@ -741,7 +741,7 @@ if @Tip_ConTip = 'C' begin
 		  from SOPERSON noholdlock
 	  	 inner join SOUNIPER noholdlock on Per_Numero = Peu_Grupo
 		 where Per_Comple like @Per_Comple
-		 order by Per_Numero
+		 order by Peu_Grupo
 
 	end else if @Tip_ConCon = 'C' begin /*Consulta por persona registrada en internacional para tercero autorizado*/
 		select @Int_Client = ClClientID 
@@ -969,8 +969,8 @@ end else begin
 			Per_RFC		varchar(15),
 			Per_LadTel	varchar(8),
 			Per_Telefo	char(15),
-			Pes_Tipo	char(1),
-			Pes_ActEmp	char(1),
+			Per_StrTip	char(1),
+			Per_StAcEm	char(1),
 			Adi_FecNac	smalldatetime,
 			Per_Ciudad	char(40),
 			Per_Estado	char(30))
@@ -1018,7 +1018,7 @@ end else begin
 		end
 
 		update #Personas set
-			Adi_FecNac = case when Pes_Tipo <> @Tip_Moral then SOPERADI.Adi_FecNac
+			Adi_FecNac = case when Per_StrTip <> @Tip_Moral then SOPERADI.Adi_FecNac
 						 else Adi_FecCon end
 			from SOPERADI noholdlock 
 			where	Per_Numero	= Adi_PerNum
@@ -1036,12 +1036,12 @@ end else begin
 		select	Per_Numero,	Per_Comple,	Per_Nombre,	Per_ApePat,	Per_ApeMat,
 				Per_RazSoc, Per_Entida,	Per_Locali,	Per_Coloni,	Per_CodPos,
 				Per_Calle,	Per_CalNum,	Per_RFC,	Per_LadTel,	Per_Telefo,
-				Adi_FecNac,	Per_Ciudad, Per_Estado,	Pes_Tipo as _Tipo,	Pes_ActEmp as _ActEmp,
-				Per_Tipo	= case Pes_Tipo when @Tip_Moral then @Per_Moral else @Per_Fisica end,
+				Adi_FecNac,	Per_Ciudad, Per_Estado,	Per_StrTip as _Tipo,	Per_StAcEm as _ActEmp,
+				Per_Tipo	= case Per_StrTip when @Tip_Moral then @Per_Moral else @Per_Fisica end,
 				Per_ActEmp	= case 
-								when Pes_Tipo = @Tip_Moral then @Str_Vacio
-								when Pes_Tipo <> @Tip_Moral and Pes_ActEmp = @Sta_Si then @Str_Si
-								when Pes_Tipo <> @Tip_Moral and Pes_ActEmp <> @Sta_Si then @Str_No  end
+								when Per_StrTip = @Tip_Moral then @Str_Vacio
+								when Per_StrTip <> @Tip_Moral and Per_StAcEm = @Sta_Si then @Str_Si
+								when Per_StrTip <> @Tip_Moral and Per_StAcEm <> @Sta_Si then @Str_No  end
 			from #Personas
 			order by Per_Comple
 
