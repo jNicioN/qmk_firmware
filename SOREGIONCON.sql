@@ -13,16 +13,22 @@ create procedure SOREGIONCON (
 	@SucDestino	char(3),
 	@Modulo		char(2))
 as
-/******************************************************************/
-/* DESCRIPCION: Consulta de Regiones							  */
-/******************************************************************/
-/* Modifico:	Edwin Santiago   							    ****
+/*******************************************************************
+** DESCRIPCION: Consulta de Regiones							  **
+********************************************************************
+** Modifico:	Esthepny Aguilar   							    ****
+** Fecha:		07/04/2021									    ****
+** Descripcion:	Se agrega consulta C4 para recuperar el campo	****
+**              Reg_SegNum por Reg_Numero						****
+** Help Desk:	1468596 										****
+********************************************************************
+** Modifico:	Edwin Santiago   							    ****
 ** Fecha:		09/07/2019									    ****
 ** Descripcion:	Se modifica consulta L3 eliminando el 			****
 **              segmento como filtro							****
-** Help Desk:	1212881 										***
-********************************************************************/
-/* Modifico:	Edwin Santiago   							    ****
+** Help Desk:	1212881 										****
+********************************************************************
+** Modifico:	Edwin Santiago   							    ****
 ** Fecha:		10/06/2019									    ****
 ** Descripcion:	Se agrega consulta L3,C3 para obtener todas las ****
 **              regiones independientemente del estatus			****
@@ -55,7 +61,8 @@ declare	@Str_Vacio	char(1),
 		@Str_Cons2	char(1),
 		@Str_Cons3	char(1),
 		@Str_Cons4	char(1),
-		@Str_ConsC	char(1)
+		@Str_ConsC	char(1),
+		@Str_Porce 	char(1)
 
 
 /* Asignacion de Constantes */
@@ -65,7 +72,8 @@ select	@Str_Vacio	= '',			/* Caracter Vacio	*/
 		@Str_Cons2	= '2',          /* Caracter 2	*/
 		@Str_Cons3	= '3',          /* Caracter 3	*/
 		@Str_Cons4	= '4',          /* Caracter 4	*/
-		@Str_ConsC	= 'C'           /* Caracter C	*/
+		@Str_ConsC	= 'C',          /* Caracter C	*/
+		@Str_Porce	= '%'			/* Porcentaje	*/
 
 /*Asignacion de Variables*/
 select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
@@ -89,14 +97,18 @@ if @Tip_ConTip	= @Str_ConsC begin			/* 'C': Consulta */
 			from SOREGION reg noholdlock
 			inner join SOSEGMEN seg noholdlock on (seg.Seg_Numero = reg.Reg_SegNum )
 	end
-
+	if @Tip_ConCon	= @Str_Cons4 begin		/* C4 */
+	    select reg.Reg_Numero,	reg.Reg_Descri,	reg.Reg_Status, reg.Reg_SegNum
+			from SOREGION reg noholdlock
+			where Reg_Numero	= @Reg_Numero
+	end
 
 end else begin
 	if @Tip_ConCon	= @Str_Cons1 begin		/* L1 */
 		select	Reg_Numero,	Reg_Descri
 			from SOREGION noholdlock
 			where	Reg_Status	= @Str_Activo
-			and     Reg_Descri like ltrim(@Reg_Descri)+'%'
+			and     Reg_Descri like ltrim(@Reg_Descri)+@Str_Porce
 			order by Reg_Descri
 	end
 	if @Tip_ConCon	= @Str_Cons2 begin		/* L2 */
@@ -104,7 +116,7 @@ end else begin
 			from SOREGION reg noholdlock
 			inner join SOSEGMEN seg noholdlock on (seg.Seg_Numero = reg.Reg_SegNum )
 			where	reg.Reg_Status	= @Str_Activo
-			and     reg.Reg_Descri like '%'+ltrim(@Reg_Descri)+'%'
+			and     reg.Reg_Descri like @Str_Porce+ltrim(@Reg_Descri)+@Str_Porce
 			and     reg.Reg_SegNum = @Reg_SegNum
 			order by reg.Reg_Descri
 	end
@@ -112,7 +124,7 @@ end else begin
 		select	reg.Reg_Numero,	reg.Reg_Descri,	reg.Reg_Status,	seg.Seg_Nombre, reg.Reg_SegNum
 			from SOREGION reg noholdlock
 			inner join SOSEGMEN seg noholdlock on (seg.Seg_Numero = reg.Reg_SegNum )
-			and     reg.Reg_Descri like ltrim(@Reg_Descri)+'%'
+			and     reg.Reg_Descri like ltrim(@Reg_Descri)+@Str_Porce
 			order by reg.Reg_Descri
 	end
 	
