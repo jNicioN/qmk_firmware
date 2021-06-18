@@ -61,5 +61,6 @@ end else begin
      from SORIBPRO noholdlock 
       where Rip_NumRib = @Rip_NumRib 
 	  and Rip_Activo = @Int_Uno
+	  order by 1
    end 
 end

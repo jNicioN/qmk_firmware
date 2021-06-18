@@ -61,5 +61,6 @@ end else begin
      from SORIBCLI noholdlock 
       where Ric_NumRib = @Ric_NumRib 
 	  and Ric_Activo = @Int_Uno
+	  order by 1
    end 
 end
