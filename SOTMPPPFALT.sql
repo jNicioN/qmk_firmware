@@ -1,7 +1,7 @@
 create procedure SOTMPPPFALT (
 	@Ppf_Numero	int,
 	@Ppf_Produc	int,
-	@Ppf_PerFis	smallint,
+	@Ppf_PerFis	char(1),
 	@Ppf_Activo	bit,
 	@Ppf_FecCon	smalldatetime,
 
@@ -18,9 +18,15 @@ as
 /****************************************************************************
 ** Descripción:	** Alta de Catalogo producto personalidad fiscal 		****
 ****************************************************************************
-** Creó:			Frank Canul				****
-** Fecha:		20-05-2020									****
-** Help:		1286068										****
+** Creó:			Frank Canul				                            ****
+** Fecha:		20-05-2020									            ****
+** Help:		1286068										            ****
+** Descripcion: se cambia el tipo de dato @Ppf_PerFis de smallint a 	****
+**				char(1)        											****
+****************************************************************************
+** Creó:			Frank Canul				                            ****
+** Fecha:		20-05-2020									            ****
+** Help:		1286068										            ****
 ****************************************************************************/
 
 										/* Declaración de variables */

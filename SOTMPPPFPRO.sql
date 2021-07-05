@@ -14,6 +14,11 @@ as
 ****************************************************************************
 ** Referencias:															****
 ****************************************************************************
+** Elaboró: 		Frank Alberto canul Moo                      ****
+** Fecha:		    20-05-2020									        ****
+** Help:			1286068  									        ****
+** Descripción:	    Se cambia condicion en la consulta del update                    ****
+****************************************************************************
 ** Elaboró: 		CODE4U Jonathan Perez Tiburcio                      ****
 ** Fecha:		    11/01/2020									        ****
 ** Help:			1286068  									        ****
@@ -55,10 +60,8 @@ begin transaction
 		SucOrigen   =  @SucOrigen, 
 		SucDestino  =  @SucDestino 
 		from SOTMPPPF tmp
-		inner join SOPRPEFI des on (tmp.Ppf_Numero = des.Ppf_Numero
-        and tmp.Ppf_Produc = des.Ppf_Produc
-        and tmp.Ppf_PerFis = des.Ppf_PerFis)
-		where convert(date, tmp.Ppf_FecCon) between @IniMes and @FinMes
+		inner join SOPRPEFI des on tmp.Ppf_Numero = des.Ppf_Numero
+		where tmp.Ppf_FecCon between @IniMes and @FinMes
 
 
 	insert into SOPRPEFI(
@@ -70,5 +73,5 @@ begin transaction
 		from SOTMPPPF tmp noholdlock 
 		left join SOPRPEFI des on tmp.Ppf_Numero = des.Ppf_Numero
         where des.Ppf_Numero is null 
-          and convert(date, tmp.Ppf_FecCon) between @IniMes and @FinMes
+          and tmp.Ppf_FecCon between @IniMes and @FinMes
 commit

@@ -15,6 +15,13 @@ as
 ********************************************************************************
 ** REFERENCIAS:															    ****
 ********************************************************************************
+**	Modificó:	Fatima Sanchez												****
+**  Fecha:		30/04/2021													****
+**  Help:		1286068														****
+**	Descripción: se elimina el convert y tipo de dato de los campos			****
+**  Prp_PeFiEn, Cca_PerFis, Per_PerMor y Prp_PerFis  que pasaron de smallint****
+**	 a char																	****	
+********************************************************************************
 ** Modifico:	Joel Gonzalez											    ****
 ** Fecha:		05/01/2021											        ****
 ** Help:		1286068											    	    ****
@@ -33,7 +40,7 @@ create table #ProductosPro(	Prp_Produc int not null,
 							Prp_TipCue char(2) not null,
 							Prp_Moneda char(2) not null,
 							Prp_PrPeFi int not null,
-							Prp_PeFiEn smallint not null,
+							Prp_PeFiEn char(1) not null,
 							Prp_PerFis char(1) not null,
 							Prp_PrTiMo int not null,
 							Prp_TiMoEn int not null,
@@ -71,7 +78,7 @@ create table #CuentasCam
 					Cca_Client	char(8) 		not null,
 					Cca_TipCli	char(1) 		not null,
 					Cca_TiAcEm	char(1) 		not null,
-					Cca_PerFis	smallint		not null,
+					Cca_PerFis	char(1)			not null,
 					Cca_TiCuAn	char(2)			not null,
 					Cca_MonAnt	char(2)			not null,
 					Cca_TiCuNu	char(2)			not null,
@@ -85,7 +92,7 @@ create table #ClientesCam
 					Clc_CliNum	int				not null,
 					Clc_TipCli	char(1) 		not null,
 					Clc_TiAcEm	char(1) 		not null,
-					Clc_PerFis	smallint		not null,
+					Clc_PerFis	char(1)			not null,
 					Clc_TiCuAn	char(2)			not null,
 					Clc_MonAnt	char(2)			not null,
 					Clc_TiCuNu	char(2)			not null,
@@ -118,7 +125,7 @@ declare	@Str_Ceros	varchar(10),	-- String de Ceros para conversiones de numeros 
 		@Str_Si		char(1),		-- String: Si
 		@Str_No		char(1),		-- String: No
 		@Mod_Cheque	char(2),		-- Modulo: Cheques
-		@Per_PerMor	int,			-- Personalidad Fiscal: Persona Moral
+		@Per_PerMor	char(1),			-- Personalidad Fiscal: Persona Moral
 		@Sta_CueAct	char(1),		-- Status Cuenta: Activa
 		@Tip_CoCuNu	tinyint,		-- Tipo de Configuracion: Cuenta Nueva
 		@Tip_CoCaTi	tinyint,		-- Tipo de Configuracion: Cuenta Cambia de Tipo de Cuenta
@@ -150,7 +157,7 @@ select	@Str_Ceros	= '0000000000',	-- String de Ceros para conversiones de numero
 		@Str_Si		= 'S',			-- String: Si
 		@Str_No		= 'N',			-- String: No
 		@Mod_Cheque	= 'CH',			-- Modulo: Cheques
-		@Per_PerMor	= 1,			-- Personalidad Fiscal: Persona Moral
+		@Per_PerMor	= '1',			-- Personalidad Fiscal: Persona Moral
 		@Sta_CueAct	= 'A',			-- Status Cuenta: Activa
 		@Tip_CoCuNu	= 1,			-- Tipo de Configuracion: Cuenta Nueva
 		@Tip_CoCaTi	= 2,			-- Tipo de Configuracion: Cuenta Cambia de Tipo de Cuenta
@@ -273,7 +280,7 @@ insert into #ProductosPro(	Prp_Produc, Prp_TipCue, Prp_Moneda,	Prp_PrPeFi,	Prp_P
 							Prp_CheGra)
 select	Pro_Numero, Ptc_TipCue,	Ptc_Moneda,
 		Prp_PrPeFi	= Ppf_Numero,	Prp_PeFiEn	= Ppf_PerFis,
-		Prp_PerFis	= rtrim(convert(char(1), Ppf_PerFis)),
+		Prp_PerFis	= Ppf_PerFis,
 		Prp_PrTiMo	= Ptm_Numero,	Prp_TiMoEn	= Ptm_TipMov,
 		Prp_TipMov	= substring(@Str_Ceros, 1, 6 - len(rtrim(convert(char(6), Ptm_TipMov)))) + rtrim(convert(char(6), Ptm_TipMov)),
 		Dat_TiCaMo,	Prp_CheGra	= @Ent_Cero 
