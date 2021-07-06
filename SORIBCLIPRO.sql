@@ -15,6 +15,11 @@ as
 /** Descripcion :	Procesamiento de registros de Clientes		*/
 /**					Asociados a RIB								*/
 /****************************************************************/
+/* Modifico:	Raul Muniz										*/
+/* Fecha:		06/07/2021										*/
+/* Descripcion:	Se agrego order by en copia de informacion		*/
+/* Help:		1504301											*/
+/****************************************************************/
 /** Creo:		Victor Osorio									*/
 /** Fecha:		02/05/2017                               		*/
 /** Help:		929417 					 						*/
@@ -61,6 +66,7 @@ as
 				from SORIBCLI noholdlock
 				where Ric_NumRib = @Ric_NumRib
 				  and Ric_Activo = @Int_Uno
+				order by Ric_Numero
 			end
 		end
 	end
