@@ -1,4 +1,4 @@
-create procedure SOPERCLACON (
+ï»¿create procedure SOPERCLACON (
 	@Per_Numero	char(8),
 	@Per_Comple	varchar(181),
 	@Per_Tipo	char(1),
@@ -21,18 +21,18 @@ as
 ********************************************************************
 ** REFERENCIAS:													****
 ********************************************************************
-**	Modificó:	Carlos Copto									****
+**	ModificÃ³:	Carlos Copto									****
 **  Fecha:		14/04/2021										****
 **  Help:														****
-**	Descripción: Se crean consultas L2 (para bd produccion, sin ****
+**	DescripciÃ³n: Se crean consultas L2 (para bd produccion, sin ****
 **	filtro de sucursal, aumenta a 8 letras para busqueda de 	****
 **	nombre y limitado a fecha de hoy) y L3 (para bd de reportes,****
 **	lo mismo que la L2 pero sin limitarlo al dia de hoy)		****
 ********************************************************************
-**	Modificó:	Frank canul										****
+**	ModificÃ³:	Frank canul										****
 **  Fecha:		23/12/2020										****
 **  Help:		1286068											****
-**	Descripción: se elimina el convert para la columna			****
+**	DescripciÃ³n: se elimina el convert para la columna			****
 **  Ptc_TipCue  ya que ahora es char y no se					****
 **  necesita las conversiones  									****
 ********************************************************************
@@ -117,7 +117,7 @@ if @Tip_ConTip = @Str_L begin
 		if ISNUMERIC(@Busqueda) = @Ent_Uno begin--Busqueda por numero de cliente/persona 
 			if char_length(ltrim(rtrim(@Busqueda))) < @Ent_Ocho begin
 				select	Err_Codigo	= '000001',
-						Err_Mensaj	= 'El número de cliente debe ser de 8 digitos',
+						Err_Mensaj	= 'El nÃºmero de cliente debe ser de 8 digitos',
 						Err_Variab	= 'Per_Comple'
 				return @Ent_Uno
 			end
@@ -232,7 +232,7 @@ if @Tip_ConTip = @Str_L begin
 		end else begin-- Busqueda por nombre cliente/persona
 			if char_length(ltrim(rtrim(@Per_Comple))) < @Ent_Cinco begin
 				select	Err_Codigo	= '000001',
-						Err_Mensaj	= 'Se requieren mínimo 4 letras para obtener resultados',
+						Err_Mensaj	= 'Se requieren mÃ­nimo 4 letras para obtener resultados',
 						Err_Variab	= 'Per_Comple'
 				return 1
 			end
@@ -375,7 +375,7 @@ if @Tip_ConTip = @Str_L begin
 		if ISNUMERIC(@Busqueda) = @Ent_Uno begin--Busqueda por numero de cliente/persona 
 			if char_length(ltrim(rtrim(@Busqueda))) < @Ent_Ocho begin
 				select	Err_Codigo	= '000001',
-						Err_Mensaj	= 'El número de cliente debe ser de 8 digitos',
+						Err_Mensaj	= 'El nÃºmero de cliente debe ser de 8 digitos',
 						Err_Variab	= 'Per_Comple'
 				return @Ent_Uno
 			end
@@ -494,7 +494,7 @@ if @Tip_ConTip = @Str_L begin
 		
 			if char_length(ltrim(rtrim(@Per_Comple))) < @Ent_Ocho begin
 				select	Err_Codigo	= '000001',
-						Err_Mensaj	= 'Se requieren mínimo 8 letras para obtener resultados',
+						Err_Mensaj	= 'Se requieren mÃ­nimo 8 letras para obtener resultados',
 						Err_Variab	= 'Per_Comple'
 				return @Ent_Uno
 			end
@@ -640,7 +640,7 @@ if @Tip_ConTip = @Str_L begin
 		if ISNUMERIC(@Busqueda) = @Ent_Uno begin--Busqueda por numero de cliente/persona 
 			if char_length(ltrim(rtrim(@Busqueda))) < @Ent_Ocho begin
 				select	Err_Codigo	= '000001',
-						Err_Mensaj	= 'El número de cliente debe ser de 8 digitos',
+						Err_Mensaj	= 'El nÃºmero de cliente debe ser de 8 digitos',
 						Err_Variab	= 'Per_Comple'
 				return @Ent_Uno
 			end
@@ -756,7 +756,7 @@ if @Tip_ConTip = @Str_L begin
 		end else begin-- Busqueda por nombre cliente/persona
 			if char_length(ltrim(rtrim(@Per_Comple))) < @Ent_Ocho begin
 				select	Err_Codigo	= '000001',
-						Err_Mensaj	= 'Se requieren mínimo 8 letras para obtener resultados',
+						Err_Mensaj	= 'Se requieren mÃ­nimo 8 letras para obtener resultados',
 						Err_Variab	= 'Per_Comple'
 				return 1
 			end
