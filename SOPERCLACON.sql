@@ -23,7 +23,7 @@ as
 ********************************************************************
 **	Modificó:	Carlos Copto									****
 **  Fecha:		14/04/2021										****
-**  Help:														****
+**  Help:		1478014											****
 **	Descripción: Se crean consultas L2 (para bd produccion, sin ****
 **	filtro de sucursal, aumenta a 8 letras para busqueda de 	****
 **	nombre y limitado a fecha de hoy) y L3 (para bd de reportes,****
