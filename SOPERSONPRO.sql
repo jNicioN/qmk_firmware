@@ -31,6 +31,12 @@ as
 /*******************************************************************/
 /** REFERENCIAS:
 ********************************************************************
+** Modifico:	Karla Morfín									****
+** Fecha:		10/junio/2021									****
+** Help:		1482775											****
+** Descripcion: Eliminar from innecesario, quitar variable no	****
+				usada, uso de constante y código duplicado.		****
+********************************************************************
 ** Modifico:	CODE4U-Eliezer Catalino Xul Canche				****
 ** Fecha:		11/Marzo/2020									****
 ** Help:		1343720											****
@@ -83,7 +89,6 @@ as
 */
 
 declare	@Status		int,					/*	Declaracion de Variables	*/
-		@Str_PerNum	char(8),
 		@Bit_NumPer	char(8),
 		@Bit_Fecha	smalldatetime,
 		@Bit_NumTra	char(10),
@@ -124,6 +129,7 @@ declare	@Str_Vacio	char(1),				/*	Declaracion de Constantes	*/
 		@Tip_ProIne	char(1),
 		@Tip_Email	char(1),
 		@Tip_PerNum char(1),
+		@Tip_Docume	char(1),
 		@Ent_LonCur	smallint,
 		@Pai_Mexico	char(3),
 		@Nac_Nacion	char(1),
@@ -137,6 +143,7 @@ select	@Str_Vacio	= '',					/*	String Vacio				*/
 		@Tip_ProIne	= 'I',					/*	Tipo proceso para actualizar datos INE	*/
 		@Tip_Email	= 'C',					/*	Tipo proceso para actualizar email  */
 		@Tip_PerNum = 'F',					/*  Tipo proceso para actualizar el numero de folio*/
+		@Tip_Docume	= 'D',					/*	Tipo proceso para actualizar doctos para autenticación de personas */
 		@Ent_LonCur	= 18,					/*	Longitud CURP	*/
 		@Pai_Mexico	= '001',				/*	País de nacimiento México */
 		@Nac_Nacion	= 'N',					/*	Nacionalidad: Nacional */
@@ -313,7 +320,15 @@ if @Tip_Proces = @Tip_Renapo begin
 	
 end
 
-if @Tip_Proces = @Tip_ProIne begin
+if @Tip_Proces in (@Tip_ProIne, @Tip_Email) begin
+	if @Tip_Proces = @Tip_Email begin
+		if @Per_Email = @Str_Vacio begin
+			select	Err_Codigo	= '000001', 
+					Err_Mensaj	= 'Debe capturar el correo electronico del cliente'
+			rollback
+			return 1
+		end
+	end
 	/* Agrega a la bitácora de SOPERSON */
 	select	@Bit_NumPer	= Per_Numero,
 			@Bit_Fecha	= Per_Fecha,
@@ -365,9 +380,9 @@ if @Tip_Proces = @Tip_ProIne begin
 		return 1
 	end
 
-	/* En SOPERSON actualiza el CURP */
 	update SOPERSON
-		set	Per_CURP	= @Per_CURP,
+		set	Per_CURP	= (case @Tip_Proces	when @Tip_ProIne then @Per_CURP else Per_CURP end),
+			Per_Email	= (case @Tip_Proces	when @Tip_Email then @Per_Email else Per_Email end),
 				
 			NumTransac	= @NumTransac,
 			Transaccio	= @Transaccio,
@@ -377,103 +392,35 @@ if @Tip_Proces = @Tip_ProIne begin
 			SucDestino	= @SucDestino
 		where	Per_Numero	= @Per_Numero
 	
-	/* Se ejcuta el SOPERADIACT para actualizar el tipo de identificación y su número  */
-	exec @Status = SOPERADIACT
-				@Peu_Grupo,		@Per_Numero,	@Adi_TipIde,	@Adi_NumIde,	@Tip_ProIne,
-				@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,
-				@SucDestino,	@Modulo
+	if @Tip_Proces = @Tip_ProIne begin
+		/* Se ejecuta el SOPERADIACT para actualizar el tipo de identificación y su número */
+		exec @Status = SOPERADIACT
+					@Peu_Grupo,		@Per_Numero,	@Adi_TipIde,	@Adi_NumIde,	@Tip_ProIne,
+					@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,
+					@SucDestino,	@Modulo
 
-	if @Status <> @Ent_Cero begin
-		rollback
-		return 1
-	end
+		if @Status <> @Ent_Cero begin
+			rollback
+			return 1
+		end
 
-	/* Se ejcuta el SOPEDACOPRO para actualizar  */
-	exec @Status = SOPEDACOPRO
-				@Per_Numero,	@Str_Vacio,		@Str_Vacio,		@Str_Vacio,		@Str_Vacio,
-				@Str_Vacio,		@Str_Vacio,		@Str_Vacio,		@Str_Vacio,		@Str_Vacio,
-				@Str_Vacio,		@Str_Vacio,		@Str_Vacio,		@Str_Vacio,		@Str_Vacio,
-				@Str_Vacio,		@Str_Vacio,		@Str_Vacio,		@Fec_Vacia,		@Fec_Vacia,
-				@DaP_ClvEle,	@DaP_NumEmi,	@NumTransac,	@Transaccio,	@Usuario,
-				@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
-	
-	if @Status <> @Ent_Cero begin
-		rollback
-		return 1
-	end
-end else if @Tip_Proces = @Tip_Email begin
-	if @Per_Email = @Str_Vacio begin
-		select	Err_Codigo	= '000001', 
-				Err_Mensaj	= 'Debe capturar el correo electronico del cliente'
-		rollback
-		return 1
-	end
-	
-	select	@Bit_NumPer	= Per_Numero,
-			@Bit_Fecha	= Per_Fecha,
-			@Bit_NumTra	= Per_NumTra,
-			@Bit_Tipo	= Per_Tipo,
-			@Bit_NuSeFi	= Per_NuSeFi,
-			@Bit_Titulo	= Per_Titulo,
-			@Bit_Nombre	= Per_Nombre,
-			@Bit_ApePat	= Per_ApePat,
-			@Bit_ApeMat	= Per_ApeMat,
-			@Bit_RazSoc	= Per_RazSoc,
-			@Bit_Comple	= Per_Comple,
-			@Bit_ComOrd	= Per_ComOrd,
-			@Bit_RFC	= Per_RFC,
-			@Bit_CURP	= Per_CURP,
-			@Bit_Calle	= Per_Calle,
-			@Bit_CalNum	= Per_CalNum,
-			@Bit_Coloni	= Per_Coloni,
-			@Bit_Entida	= Per_Entida,
-			@Bit_Locali	= Per_Locali,
-			@Bit_CodPos	= Per_CodPos,
-			@Bit_ApaPos	= Per_ApaPos,
-			@Bit_LadTel	= Per_LadTel,
-			@Bit_Telefo	= Per_Telefo,
-			@Bit_Email	= Per_Email,
-			@Bit_ComDom	= Per_ComDom,
-			@Bit_EstCiv	= Per_EstCiv,
-			@Bit_Nacion	= Per_Nacion,
-			@Bit_ActEmp	= Per_ActEmp,
-			@Bit_Giro	= Per_Giro,
-			@Bit_Sector	= Per_Sector,
-			@Bit_Activi	= Per_Activi,
-			@Bit_ActINE	= Per_ActINE
-		from SOPERSON noholdlock
-		where	Per_Numero = @Per_Numero
+		/* Se ejecuta el SOPEDACOPRO para actualizar */
+		exec @Status = SOPEDACOPRO
+					@Per_Numero,	@Str_Vacio,		@Str_Vacio,		@Str_Vacio,		@Str_Vacio,
+					@Str_Vacio,		@Str_Vacio,		@Str_Vacio,		@Str_Vacio,		@Str_Vacio,
+					@Str_Vacio,		@Str_Vacio,		@Str_Vacio,		@Str_Vacio,		@Str_Vacio,
+					@Str_Vacio,		@Str_Vacio,		@Str_Vacio,		@Fec_Vacia,		@Fec_Vacia,
+					@DaP_ClvEle,	@DaP_NumEmi,	@NumTransac,	@Transaccio,	@Usuario,
+					@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
 		
-	exec @Status = SOBITPERALT
-		@Bit_NumPer,	@Bit_Fecha,		@Bit_NumTra,	@Bit_Tipo,		@Bit_NuSeFi,
-		@Bit_Titulo,	@Bit_Nombre,	@Bit_ApePat,	@Bit_ApeMat,	@Bit_RazSoc,
-		@Bit_Comple,	@Bit_ComOrd,	@Bit_RFC,		@Bit_CURP,		@Bit_Calle,
-		@Bit_CalNum,	@Bit_Coloni,	@Bit_Entida,	@Bit_Locali,	@Bit_CodPos,
-		@Bit_ApaPos,	@Bit_LadTel,	@Bit_Telefo,	@Bit_Email,		@Bit_ComDom,
-		@Bit_EstCiv,	@Bit_Nacion,	@Bit_ActEmp,	@Bit_Giro,		@Bit_Sector,
-		@Bit_Activi,	@Bit_ActINE,	@NumTransac,	@Transaccio,	@Usuario,
-		@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
-	
-	if @Status <> @Ent_Cero begin
-		rollback
-		return 1
+		if @Status <> @Ent_Cero begin
+			rollback
+			return 1
+		end
 	end
-	
-	update SOPERSON set
-		Per_Email	= @Per_Email,
-
-		NumTransac	= @NumTransac,
-		Transaccio	= @Transaccio,
-		Usuario		= @Usuario,
-		FechaSis	= @FechaSis,
-		SucOrigen	= @SucOrigen,
-		SucDestino	= @SucDestino
-	from SOUNIPER noholdlock
-	where	Per_Numero	= @Per_Numero
-
 end
 
-if @Tip_Proces = 'D' begin        /*Actualizacion de doctos para autenticacion de personas */	
+if @Tip_Proces = @Tip_Docume begin
 	select @Peu_Grupo =  Peu_Grupo 
 	from SOUNIPER noholdlock
 	where  Peu_Person  = @Per_Numero
