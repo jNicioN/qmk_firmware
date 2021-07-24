@@ -13,6 +13,11 @@ create procedure SORIBPROCON (
 /****************************************************************/
 /* DESCRIPCION: Consulta de registros de Proveedores de RIB		*/
 /****************************************************************/
+/* Modifico:	Romeo Rodriguez									*/
+/* Fecha:		23/06/2021										*/
+/* Descripcion:	Se modifico order by de L2						*/
+/* Help:		1504301											*/
+/****************************************************************/
 /* Creo:		Jorge Armando Garcia							*/
 /* Fecha:		24/02/2017										*/
 /* Help:		929417											*/
@@ -61,5 +66,6 @@ end else begin
      from SORIBPRO noholdlock 
       where Rip_NumRib = @Rip_NumRib 
 	  and Rip_Activo = @Int_Uno
+	  order by Rip_Numero
    end 
 end
