@@ -2,7 +2,7 @@ create procedure SOESFITICON (
    @Eft_Numero int,
    @Eft_EstFin int,
    @Eft_TipCue int,
-   @Eft_FilCue varchar(50),
+   @Eft_FilCue varchar(100),
    @Tip_Consul char(2),
    @NumTransac	char(10),
    @Transaccio	char(3),
@@ -17,6 +17,11 @@ create procedure SOESFITICON (
 /** DESCRIPCION: Consulta de registros de estado financiero		*/
 /**				tipo cuenta en SOESFITI							*/
 /****************************************************************/
+/****************************************************************/
+/** Modifico:		Jose R. Rodriguez Zenteno					*/
+/** Fecha:			15/07/2021                               	*/
+/** Help:			1504301 					 				*/
+/** Descripcion:	Se cambia tamaño parametro @Eft_FilCue		*/
 /****************************************************************/
 /** Modifico:		José Eduardo Sánchez Méndez					*/
 /** Fecha:			19/09/2018                               	*/
