@@ -279,7 +279,7 @@ CREATE INDEX #CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 		 
 		 select @RowCount =  count(1) from #SOPERINF
 		 
-		 if @RowCount = 0 begin
+		 if @RowCount = @Int_Cero begin
 		 	select	Err_Codigo	= '000004',
 					Err_Mensaj	= 'El RFC no existe',
 					Err_Variab	= '@Per_RFC'
@@ -411,7 +411,7 @@ CREATE INDEX #CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 			 
 		select @RowCount =  count(1) from #SOPERINF
 		 
-		 if @RowCount = 0 begin
+		 if @RowCount = @Int_Cero begin
 		 	select	Err_Codigo	= '000004',
 					Err_Mensaj	= 'El RFC no existe',
 					Err_Variab	= '@Per_RFC'
@@ -541,7 +541,7 @@ CREATE INDEX #CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 			 select Per_Numero from SOPERSON noholdlock
 			 where Per_Comple like @Per_Nombre
 			 
-			if @RowCount = 0 begin
+			if @RowCount = @Int_Cero begin
 				select	Err_Codigo	= '000004',
 						Err_Mensaj	= 'No se encontraron coincidencias de nombre',
 						Err_Variab	= '@Per_Nombre'
