@@ -18,6 +18,11 @@ as
 ****************************************************************************
 **                           Store CONVERTIDO 							****
 ****************************************************************************
+** Modifico:	Alan Santamaria								****
+** Fecha:		27/Julio/2021												****
+** HelpDesk:	1505299												****
+** Descripcion:	se agrega el campo de categoria en la consulta			****
+****************************************************************************
 ** Modifico:	Juan Pablo Mendez Cabrales								****
 ** Fecha:		06/Abr/2020												****
 ** HelpDesk:	01352603												****
@@ -428,7 +433,7 @@ end else begin													/* Cliente:  Visual Basic */
 		select	@Suc_Nombre	= ltrim(rtrim(@Suc_Nombre)) + @Str_Porcen
 		
 		if @Tip_ConCon = @Lis_Genera							/* Lista General L1*/
-			select	Suc_Numero,	Suc_Nombre, Suc_StaCre
+			select	Suc_Numero,	Suc_Nombre, Suc_StaCre, Suc_Catego
 				from SOSUCURS noholdlock
 				where	upper(Suc_Nombre)	like upper(@Suc_Nombre)
 				order by Suc_Nombre
