@@ -24,6 +24,11 @@ create procedure SOPERDIRCON (
 ** REFERENCIAS:															****
 ****************************************************************************
 ** Modifico: 	Edwin Santiago											  **
+** Fecha:		03/08/2021						                    	  **
+** HelpDesk:	1299445						                    	      **
+** Descripcion:	Se valida consulta de personas por RFC y Nombre		   	  **
+****************************************************************************
+** Modifico: 	Edwin Santiago											  **
 ** Fecha:		06/04/2021						                    	  **
 ** HelpDesk:	1299445						                    	      **
 ** Descripcion:	Se agrega fecha de nacimiento para la consulta de   	  **
@@ -57,6 +62,8 @@ create procedure SOPERDIRCON (
 **/
 
 begin
+	
+	declare	@RowCount	int		/* Declaración de Variables */
 	
 			
 	/* Declaracion de Constantes*/
@@ -270,6 +277,16 @@ CREATE INDEX #CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 		 select Per_Numero from SOPERSON noholdlock
 		 where Per_RFC = @Per_RFC
 		 
+		 select @RowCount =  count(1) from #SOPERINF
+		 
+		 if @RowCount = @Int_Cero begin
+		 	select	Err_Codigo	= '000004',
+					Err_Mensaj	= 'El RFC no existe',
+					Err_Variab	= '@Per_RFC'
+			rollback
+			return 1
+		 end else begin
+		 
 		 -- Buscamos el grupo al que pertenece
 		 INSERT INTO #SOGRUPOS(Peu_Grupo, Peu_Person )
 		 select  so.Peu_Grupo, so.Peu_Person
@@ -383,7 +400,7 @@ CREATE INDEX #CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 			on Clp_TipSoc = Tis_Numero
 
 			drop table #SOPERINF,#CLPERSON,#CLCLIUNI,#CLCOLONI,#SOGRUPOS
-
+			end
 		end 
 		else if @Tip_ConCon = @Str_Dos begin				/* Consulta de RFC con HomoClave */
 		
@@ -391,6 +408,16 @@ CREATE INDEX #CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 		     INSERT INTO #SOPERINF (Per_Numero)
 			 select Per_Numero from SOPERSON noholdlock
 			 where Per_RFC like  @Per_RFC + @Str_Porcen
+			 
+		select @RowCount =  count(1) from #SOPERINF
+		 
+		 if @RowCount = @Int_Cero begin
+		 	select	Err_Codigo	= '000004',
+					Err_Mensaj	= 'El RFC no existe',
+					Err_Variab	= '@Per_RFC'
+			rollback
+			return 1
+		 end else begin
 			 
 			 INSERT INTO #SOGRUPOS(Peu_Grupo, Peu_Person )
 			 select  so.Peu_Grupo, so.Peu_Person
@@ -505,12 +532,22 @@ CREATE INDEX #CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 
 			drop table #SOPERINF,#CLPERSON,#CLCLIUNI,#CLCOLONI,#SOGRUPOS
 			
+			end
+			
 		end else if @Tip_ConCon = @Str_Tres begin /* Busqueda por Nombre Completo*/
 		
 		
 			 INSERT INTO #SOPERINF (Per_Numero)
 			 select Per_Numero from SOPERSON noholdlock
 			 where Per_Comple like @Per_Nombre
+			 
+			if @RowCount = @Int_Cero begin
+				select	Err_Codigo	= '000004',
+						Err_Mensaj	= 'No se encontraron coincidencias de nombre',
+						Err_Variab	= '@Per_Nombre'
+				rollback
+				return 1
+			 end else begin
 			 
 			 INSERT INTO #SOGRUPOS(Peu_Grupo, Peu_Person )
 			 select  so.Peu_Grupo, so.Peu_Person
@@ -623,6 +660,8 @@ CREATE INDEX #CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 			on Clp_TipSoc = Tis_Numero
 
 			drop table #SOPERINF,#CLPERSON,#CLCLIUNI,#CLCOLONI,#SOGRUPOS
+			
+			end
 
 
 		end else if @Tip_ConCon = @Str_Cuatro begin /*Busqueda de colonias por parametros de entidad,estado y codigo postal*/
