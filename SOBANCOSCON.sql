@@ -18,16 +18,21 @@ as
 ** DESCRIPCION: ** Consulta alfabetica o consulta numerica de bancos.			  **
 ************************************************************************************
 ************************************************************************************
-**	REFERENCIAS:																****
+**	REFERENCIAS:
+************************************************************************************
+** Modificó:	Jesus Edwin Silva												****
+** Fecha:		27 de Julio del 2021											****
+** Help:		1438184															****
+** Descripción:	Se agrega consulta L4 y se estandariza							****											
 ************************************************************************************
 ** Modificó:	Mauricio Avalos Pérez											****
 ** Fecha:		08/Mar/2019														****
 ** Help:		1137159															****
 ** Descripción:	Se agrega la consulta por siglas C7								****
-****************************************************************************
-** Modificó:		Lucina Gonzalez Trejo						****
+************************************************************************************
+** Modificó:	Lucina Gonzalez Trejo											****
 ** Fecha:		15/Febrero/2007							****
-** Help:			20121										****
+** Help:		20121										****
 ** Descripción:	Agregar Ban_Direcc y ban_LocEnt 			****
 **				a Consula Vacia								****
 ****************************************************************************
@@ -84,20 +89,41 @@ declare	@Tip_ConTip	char(1),			/*	Declaracion De Variables	*/
 
 declare	@Str_Vacio	char(1),			/*	Declaracion De Constantes	*/
 		@Ban_Extran	char(1),
-		@Si_Status	char(1)
+		@Si_Status	char(1),
+		@Str_LetraC char(1),
+		@Str_LetraL char(1),
+		@Str_Uno char(1),
+		@Str_Dos char(1),
+		@Str_Tres char(1),
+		@Str_Cuatro char(1),
+		@Str_Cinco char(1),
+		@Str_Seis char(1),
+		@Str_Siete char(1),
+		@Str_Porcen char(1)
+		
 
 /*	Asignacion De Costantes	*/
 select	@Str_Vacio	= '',				/*	String Vacio	*/
 		@Ban_Extran	= 'E',				/*	Banco: Extranjero	*/
-		@Si_Status	= 'S'				/*	Si Tiene Servicio	*/
-
+		@Si_Status	= 'S',				/*	Si Tiene Servicio	*/
+		@Str_LetraC	= 'C',
+		@Str_LetraL = 'L',
+		@Str_Uno 	= '1',	
+		@Str_Dos 	= '2',	
+		@Str_Tres 	= '3',	
+		@Str_Cuatro = '4',	
+		@Str_Cinco 	= '5',	
+		@Str_Seis 	= '6',	
+		@Str_Siete 	= '7',
+		@Str_Porcen = '%'	
+		
 if @Tip_Consul = @Str_Vacio begin		/* Cliente:  FoxPro */
 	if (@Ban_Nombre = @Str_Vacio) and (@Ban_Numero = @Str_Vacio) and (@Ban_NumSis = @Str_Vacio)
 		select	Ban_Numero,	Ban_Nombre,	Ban_Siglas,	Ban_NumSis,	Ban_TipBan,
 				Ban_UsuCon,	Ban_CobRem,	Ban_Domici,	Ban_PagInt,	Ban_CodGru,
 				Ban_DiLiCa,	Ban_Direcc,	Ban_LocEnt
 			from SOBANCOS noholdlock
-			order by Ban_Nombre
+			order by Ban_Nombre, Ban_Numero
 	else
 		if (@Ban_Nombre = @Str_Vacio)
 			if @Ban_NumSis = @Str_Vacio
@@ -116,64 +142,70 @@ if @Tip_Consul = @Str_Vacio begin		/* Cliente:  FoxPro */
 			select	Ban_Numero,	Ban_Nombre,	Ban_Siglas,	Ban_NumSis,	Ban_TipBan,
 					Ban_UsuCon,	Ban_CobRem
 				from SOBANCOS noholdlock
-				where	Ban_Nombre like @Ban_Nombre + '%'
+				where	Ban_Nombre like @Ban_Nombre + @Str_Porcen
 				order by Ban_Nombre
 end else begin			/* Cliente:  Visual Basic	*/
 	select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
 			@Tip_ConCon	= substring(@Tip_Consul, 2, 1)
 	
-	if @Tip_ConTip = 'C' begin		/* 'C':  Consulta */
-		if @Tip_ConCon = '1' begin				/* Consulta de Llave Principal */
+	if @Tip_ConTip = @Str_LetraC begin		/* 'C':  Consulta */
+		if @Tip_ConCon = @Str_Uno begin				/* Consulta de Llave Principal */
 			select	Ban_Numero,	Ban_Nombre,	Ban_Siglas,	Ban_NumSis,	Ban_TipBan,
 					Ban_UsuCon,	Ban_CobRem
 				from SOBANCOS noholdlock
 				where	Ban_Numero = @Ban_Numero
-		end else if @Tip_ConCon = '2' begin		/* Consulta de Llave Foranea Numero */
+		end else if @Tip_ConCon = @Str_Dos begin		/* Consulta de Llave Foranea Numero */
 			select	Ban_Numero,	Ban_Nombre
 				from SOBANCOS noholdlock
 				where	Ban_Numero = @Ban_Numero
-		end else if @Tip_ConCon = '3' begin		/* Consulta de Llave Foranea NumSis */
+		end else if @Tip_ConCon = @Str_Tres begin		/* Consulta de Llave Foranea NumSis */
 			select	Ban_Numero,	Ban_Nombre,	Ban_NumSis, Ban_TipBan,	Ban_CoOPVe
 				from SOBANCOS noholdlock
 				where	Ban_NumSis = @Ban_NumSis
-		end else if @Tip_ConCon = '4' begin		/* Consulta de Llave Foranea Bancos del Extranjero */
+		end else if @Tip_ConCon = @Str_Cuatro begin		/* Consulta de Llave Foranea Bancos del Extranjero */
 			select	Ban_Nombre,	Ban_NumSis,	Ban_UsuCon
 				from SOBANCOS noholdlock
 				where	Ban_NumSis = @Ban_NumSis
 				and 	Ban_TipBan = @Ban_Extran
-		end else if @Tip_ConCon = '5' begin		/* Consulta De Todos Los Bancos */
+		end else if @Tip_ConCon = @Str_Cinco begin		/* Consulta De Todos Los Bancos */
 			select	Ban_Numero,	Ban_Nombre,	Ban_TipBan
 				from SOBANCOS noholdlock
-		end else if @Tip_ConCon = '6' begin		/* Consulta De Bancos Con Servicio De Domiciliar	*/
+				order by Ban_Numero
+		end else if @Tip_ConCon = @Str_Seis begin		/* Consulta De Bancos Con Servicio De Domiciliar	*/
 			select	Ban_Numero,	Ban_Nombre							/*	Consulta De Fox Pro		*/
 				from SOBANCOS noholdlock
 				where	Ban_Numero	= @Ban_Numero
 				  and	Ban_Domici	= @Si_Status
-		end else if @Tip_ConCon = '7' begin		/* Consulta De Bancos por Ban_Siglas	*/
+		end else if @Tip_ConCon = @Str_Siete begin		/* Consulta De Bancos por Ban_Siglas	*/
 			select	Ban_Numero,	Ban_Nombre	
 				from SOBANCOS noholdlock
 				where	Ban_Siglas	= @Ban_Nombre /* Se reutiliza el nombre del campo @Ban_Nombre, par abuscar por Sigla*/
 		end		  
 	end else begin					/* 'L':  Lista */
-		select	@Ban_Nombre	= ltrim(rtrim(@Ban_Nombre)) + '%'
+		select	@Ban_Nombre	= ltrim(rtrim(@Ban_Nombre)) + @Str_Porcen
 		
-		if @Tip_ConCon = '1' begin				/* Lista General */
+		if @Tip_ConCon = @Str_Uno begin				/* Lista General */
 			select	Ban_Numero,	Ban_Nombre,	Ban_NumSis
 				from SOBANCOS noholdlock
 				where	Ban_Nombre like @Ban_Nombre
 				order by Ban_Nombre
-		end else if @Tip_ConCon = '2' begin				/* Lista Bancos del Extranjero */
+		end else if @Tip_ConCon = @Str_Dos begin				/* Lista Bancos del Extranjero */
 			select	Ban_Nombre,	Ban_NumSis
 				from SOBANCOS noholdlock
 				where	Ban_Nombre like @Ban_Nombre
 				and 	Ban_TipBan = @Ban_Extran
 				order by Ban_Nombre
-		end else if @Tip_ConCon = '3' begin				/* Lista Bancos Con Servicio Domiciliar	*/
+		end else if @Tip_ConCon = @Str_Tres begin				/* Lista Bancos Con Servicio Domiciliar	*/
 			select	Ban_Numero,	Ban_NumSis,	Ban_Nombre			/*	Lista De Fox Pro		*/
 				from SOBANCOS noholdlock
 				where	Ban_Domici	= @Si_Status
 				  and	Ban_Nombre like @Ban_Nombre
 				order by Ban_Nombre
+		end else if @Tip_ConCon = @Str_Cuatro begin				/* Lista Bancos Con Servicio Domiciliar	*/
+			select	Ban_Numero,	Ban_NumSis,	Ban_Nombre, Ban_Siglas			/*	Lista De Fox Pro		*/
+				from SOBANCOS noholdlock
+				where	Ban_Siglas like @Ban_Nombre
+				order by Ban_Numero, Ban_Nombre
 		end
 	end
 end
