@@ -1,4 +1,4 @@
-create procedure SOPERCLACON (
+﻿create procedure SOPERCLACON (
 	@Per_Numero	char(8),
 	@Per_Comple	varchar(181),
 	@Per_Tipo	char(1),
@@ -185,7 +185,8 @@ if @Tip_ConTip = @Str_L begin
 			select top 50	
 				ClClientID, Cli_Numero
 				from  CLCLIENT noholdlock
-				where Cli_Numero = @Busqueda and Cli_SucAti = isnull(@Suc_Numero,Cli_SucAti)
+				where 	Cli_Numero = @Busqueda 
+				and 	Cli_SucAti = isnull(@Suc_Numero,Cli_SucAti)
 						
 			--solo si encontro reultado continua con las consultas
 			select @Conteo = count(*) from #AuxCientesPersonas noholdlock
@@ -243,7 +244,8 @@ if @Tip_ConTip = @Str_L begin
 							inner join CLCLIENT clc noholdlock on clc.ClClientID = ClientePersonaID
 							left join CLADICIO cla noholdlock on ClientePersonaID = cla.ClClientID 
 							left join CLCONTRA con noholdlock on ClientePersonaNum =  Con_Client
-					where	Cli_Numero = @Busqueda and Cli_SucAti = isnull(@Suc_Numero,Cli_SucAti)
+					where	Cli_Numero = @Busqueda 
+					and 	Cli_SucAti = isnull(@Suc_Numero,Cli_SucAti)
 					
 					--se crea indice para la tabla
 					create nonclustered index CPNumero on #CientesPersonas ( Per_Numero )
@@ -297,7 +299,7 @@ if @Tip_ConTip = @Str_L begin
 			select top 50	
 				ClClientID, Cli_Numero
 				from  CLCLIENT noholdlock
-				where	Cli_Comple	like @Per_Comple
+				where	Cli_Comple like @Per_Comple
 				and 	Cli_SucAti = isnull(@Suc_Numero,Cli_SucAti) 
 			
 			--se crean indices de la tabla temporal
@@ -355,8 +357,6 @@ if @Tip_ConTip = @Str_L begin
 							inner join CLCLIENT clc noholdlock on clc.ClClientID = ClientePersonaID
 							left join CLADICIO cla noholdlock on ClientePersonaID = cla.ClClientID 
 							left join CLCONTRA con noholdlock on ClientePersonaNum =  Con_Client
-					where	Cli_Comple	like @Per_Comple
-					and 	Cli_SucAti = isnull(@Suc_Numero,Cli_SucAti) 
 					
 					--se crea indice para la tabla
 					create nonclustered index CPNumero on #CientesPersonas ( Per_Numero )
@@ -394,8 +394,9 @@ if @Tip_ConTip = @Str_L begin
 					where	Cli_TieCla = @Str_Vacio
 			end
 			
-			-- se limpia la tabla auxiliar para buscar a las personas
+			-- se limpian las tablas auxiliares para buscar a las personas
 			truncate table #AuxCientesPersonas
+			truncate table #AuxPersonas
 					
 			-----Se obtienen solo los id de las personas
 			insert into #AuxPersonas(ClientePersonaID,ClientePersonaNum,FechaSis)		
@@ -475,8 +476,8 @@ if @Tip_ConTip = @Str_L begin
 				where Per_Calle = @Str_Vacio
 					
 			end
-	end				
-	end	else if @Tip_ConCon = @Str_Dos begin --CONSULTA L2 : BUSQUEDA DE CLIENTES Y PERSONAS SIN RESTRICCION DE SUCURSAL SOLO DIA DE HOY (BD PRODUCCION)
+		end				
+	end else if @Tip_ConCon = @Str_Dos begin --CONSULTA L2 : BUSQUEDA DE CLIENTES Y PERSONAS SIN RESTRICCION DE SUCURSAL Y SOLO DIA DE HOY (BD PRODUCCION)
 		
 		select	@Suc_Numero = ltrim(rtrim(@Per_Numero))
 		--Se obtiene la fecha actual de la sucursal
@@ -497,12 +498,12 @@ if @Tip_ConTip = @Str_L begin
 				select	@Busqueda = substring(@Busqueda,@Ent_Uno,@Ent_Ocho)
 			end
 			
-			--se consulta solo los id del cliente
+			--se consulta solo el numero del cliente
 			insert into #AuxCientesPersonas(ClientePersonaID,ClientePersonaNum)	
-			select top 50
+			select top 50	
 				ClClientID, Cli_Numero
 				from  CLCLIENT noholdlock
-				where	Cli_Numero = @Busqueda 
+				where 	Cli_Numero = @Busqueda 
 				and 	Cli_Fecha >= @Par_FecSuc
 						
 			--solo si encontro reultado continua con las consultas
@@ -613,11 +614,11 @@ if @Tip_ConTip = @Str_L begin
 			
 			--se consulta solo el numero del cliente
 			insert into #AuxCientesPersonas(ClientePersonaID,ClientePersonaNum)	
-			select 	top 50
-					ClClientID, Cli_Numero
+			select top 50	
+				ClClientID, Cli_Numero
 				from  CLCLIENT noholdlock
-				where	Cli_Comple	like @Per_Comple
-				and 	Cli_Fecha 	>= 	@Par_FecSuc
+				where	Cli_Comple like @Per_Comple
+				and 	Cli_Fecha >= @Par_FecSuc
 			
 			--se crean indices de la tabla temporal
 			create nonclustered index ACPID on #AuxCientesPersonas ( ClientePersonaID )
@@ -674,8 +675,6 @@ if @Tip_ConTip = @Str_L begin
 							inner join CLCLIENT clc noholdlock on clc.ClClientID = ClientePersonaID
 							left join CLADICIO cla noholdlock on ClientePersonaID = cla.ClClientID 
 							left join CLCONTRA con noholdlock on ClientePersonaNum =  Con_Client
-					where	Cli_Comple	like @Per_Comple
-					and 	Cli_Fecha 	>= 	@Par_FecSuc
 					
 					--se crea indice para la tabla
 					create nonclustered index CPNumero on #CientesPersonas ( Per_Numero )
@@ -714,25 +713,25 @@ if @Tip_ConTip = @Str_L begin
 			end
 			
 			-- se limpian las tablas auxiliares para buscar a las personas
-			truncate table #AuxPersonas
 			truncate table #AuxCientesPersonas
+			truncate table #AuxPersonas
 					
 			-----Se obtienen solo los id de las personas
 			insert into #AuxPersonas(ClientePersonaID,ClientePersonaNum,FechaSis)		
-			select		top 50
-						PerPersoID, Per_Numero, FechaSis  
+			select	top 50		
+					PerPersoID, Per_Numero, FechaSis
 				from 	SOPERSON noholdlock
 				where	Per_Comple like @Per_Comple
 				and 	Per_Fecha 	>= 	@Par_FecSuc
 				group by Per_Comple, Per_RFC
-				
+			
 			--se ordenan por los mas recientes
 			insert into #AuxCientesPersonas(ClientePersonaID,ClientePersonaNum)		
 			select	ClientePersonaID, ClientePersonaNum   
 				from 	#AuxPersonas noholdlock
 				order by FechaSis desc
 			
-			--solo si regreso resultados continua con las consultas de persona
+			--solo si regreso resultados continua con las consultas de cliente
 			select @Conteo = count(*) from #AuxCientesPersonas noholdlock
 			if @Conteo > @Ent_Cero begin  
 		
@@ -782,7 +781,7 @@ if @Tip_ConTip = @Str_L begin
 					inner join SOPERADI noholdlock on ClientePersonaNum = Adi_PerNum
 					left join SOCLCAPE noholdlock on ClientePersonaNum  = Clp_NumPer
 				
-				--se actualiza el campo Per_Calle con la direccion
+				--se actualiza el campo Per_Calle con la info faltante de entidad y localidad
 				update #CientesPersonas set  
 					Per_Calle = (CASE when (Cli_Calle <> @Str_Vacio and  Cli_CalNum <> @Str_Vacio and Cli_Coloni <> @Str_Vacio) THEN 
 								rtrim(ltrim(Cli_Calle)) + @Str_Coma + space(@Ent_Uno) + Cli_CalNum + @Str_Coma + space(@Ent_Uno) + Cli_Coloni + @Str_Coma + space(@Ent_Uno) +
@@ -790,9 +789,9 @@ if @Tip_ConTip = @Str_L begin
 				from #CientesPersonas noholdlock
 						inner join CLLOCALI noholdlock on Cli_Locali = Loc_Numero
 						inner join CLENTIDA noholdlock on Cli_Entida = Ent_Numero
-						
+				
 				update #CientesPersonas set  
-						Per_Calle = @Sin_Direcc
+					Per_Calle = @Sin_Direcc
 				where Per_Calle = @Str_Vacio
 					
 			end
@@ -800,7 +799,6 @@ if @Tip_ConTip = @Str_L begin
 	end else if @Tip_ConCon = @Str_Tres begin --CONSULTA L3 : BUSQUEDA DE CLIENTES Y PERSONAS SIN RESTRICCION DE SUCURSAL (BD REPORTES)
 		
 		select	@Suc_Numero = ltrim(rtrim(@Per_Numero))
-	
 		if ISNUMERIC(@Busqueda) = @Ent_Uno begin	--Busqueda por numero de cliente 
 		
 			if char_length(ltrim(rtrim(@Busqueda))) < @Ent_Ocho begin
@@ -814,12 +812,12 @@ if @Tip_ConTip = @Str_L begin
 				select	@Busqueda = substring(@Busqueda,@Ent_Uno,@Ent_Ocho)
 			end
 			
-			--se consulta solo los id del cliente
+			--se consulta solo el numero del cliente
 			insert into #AuxCientesPersonas(ClientePersonaID,ClientePersonaNum)	
-			select top 50
+			select top 50	
 				ClClientID, Cli_Numero
 				from  CLCLIENT noholdlock
-				where	Cli_Numero = @Busqueda
+				where 	Cli_Numero = @Busqueda
 						
 			--solo si encontro reultado continua con las consultas
 			select @Conteo = count(*) from #AuxCientesPersonas noholdlock
@@ -928,10 +926,10 @@ if @Tip_ConTip = @Str_L begin
 			
 			--se consulta solo el numero del cliente
 			insert into #AuxCientesPersonas(ClientePersonaID,ClientePersonaNum)	
-			select 	top 50
-					ClClientID, Cli_Numero
+			select top 50	
+				ClClientID, Cli_Numero
 				from  CLCLIENT noholdlock
-				where	Cli_Comple	like @Per_Comple
+				where	Cli_Comple like @Per_Comple
 			
 			--se crean indices de la tabla temporal
 			create nonclustered index ACPID on #AuxCientesPersonas ( ClientePersonaID )
@@ -988,7 +986,6 @@ if @Tip_ConTip = @Str_L begin
 							inner join CLCLIENT clc noholdlock on clc.ClClientID = ClientePersonaID
 							left join CLADICIO cla noholdlock on ClientePersonaID = cla.ClClientID 
 							left join CLCONTRA con noholdlock on ClientePersonaNum =  Con_Client
-					where	Cli_Comple	like @Per_Comple
 					
 					--se crea indice para la tabla
 					create nonclustered index CPNumero on #CientesPersonas ( Per_Numero )
@@ -1026,25 +1023,25 @@ if @Tip_ConTip = @Str_L begin
 					where	Cli_TieCla = @Str_Vacio
 			end
 			
-			-- se limpia la tabla auxiliar para buscar a las personas
+			-- se limpian las tablas auxiliares para buscar a las personas
 			truncate table #AuxCientesPersonas
 			truncate table #AuxPersonas
 					
 			-----Se obtienen solo los id de las personas
 			insert into #AuxPersonas(ClientePersonaID,ClientePersonaNum,FechaSis)		
-			select		top 50
-						PerPersoID, Per_Numero, FechaSis  
+			select	top 50		
+					PerPersoID, Per_Numero, FechaSis
 				from 	SOPERSON noholdlock
 				where	Per_Comple like @Per_Comple
 				group by Per_Comple, Per_RFC
-				
+			
 			--se ordenan por los mas recientes
 			insert into #AuxCientesPersonas(ClientePersonaID,ClientePersonaNum)		
 			select	ClientePersonaID, ClientePersonaNum   
 				from 	#AuxPersonas noholdlock
 				order by FechaSis desc
 			
-			--solo si regreso resultados continua con las consultas de persona
+			--solo si regreso resultados continua con las consultas de cliente
 			select @Conteo = count(*) from #AuxCientesPersonas noholdlock
 			if @Conteo > @Ent_Cero begin  
 		
@@ -1094,7 +1091,7 @@ if @Tip_ConTip = @Str_L begin
 					inner join SOPERADI noholdlock on ClientePersonaNum = Adi_PerNum
 					left join SOCLCAPE noholdlock on ClientePersonaNum  = Clp_NumPer
 				
-				--se actualiza el campo Per_Calle con la direccion
+				--se actualiza el campo Per_Calle con la info faltante de entidad y localidad
 				update #CientesPersonas set  
 					Per_Calle = (CASE when (Cli_Calle <> @Str_Vacio and  Cli_CalNum <> @Str_Vacio and Cli_Coloni <> @Str_Vacio) THEN 
 								rtrim(ltrim(Cli_Calle)) + @Str_Coma + space(@Ent_Uno) + Cli_CalNum + @Str_Coma + space(@Ent_Uno) + Cli_Coloni + @Str_Coma + space(@Ent_Uno) +
@@ -1104,12 +1101,12 @@ if @Tip_ConTip = @Str_L begin
 						inner join CLENTIDA noholdlock on Cli_Entida = Ent_Numero
 				
 				update #CientesPersonas set  
-						Per_Calle = @Sin_Direcc
+					Per_Calle = @Sin_Direcc
 				where Per_Calle = @Str_Vacio
 					
 			end
-		end				
-	end
+		end
+	end	
 	
 	select	distinct
 			Per_Numero, 	Per_NumTra, 	Per_Titulo, 	Per_ComOrd, 	Per_RFC, 
