@@ -1046,6 +1046,7 @@ if @Tip_ConTip = @Str_L begin
 		end
 	end	
 	
+	--Si llega a dejar vacio el Per_Calle donde va la direccion se vuelve a actualizar
 	update #CientesPersonas set  
 		Per_Calle = @Sin_Direcc
 	where Per_Calle = @Str_Vacio
@@ -1062,7 +1063,3 @@ if @Tip_ConTip = @Str_L begin
 			
 end 
 	
-
-
-
-
