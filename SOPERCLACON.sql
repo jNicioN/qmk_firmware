@@ -149,11 +149,6 @@ create table #CientesPersonas (
 
 create table #AuxCientesPersonas (
 	ClientePersonaID	int, 	
-	ClientePersonaNum	char(8)
-)
-
-create table #AuxPersonas (
-	ClientePersonaID	int, 	
 	ClientePersonaNum	char(8),
 	FechaSis			smalldatetime
 )
@@ -181,9 +176,9 @@ if @Tip_ConTip = @Str_L begin
 			end
 			
 			--se consulta solo el numero del cliente
-			insert into #AuxCientesPersonas(ClientePersonaID,ClientePersonaNum)	
+			insert into #AuxCientesPersonas(ClientePersonaID,ClientePersonaNum,FechaSis)
 			select top 50	
-				ClClientID, Cli_Numero
+				ClClientID, Cli_Numero, FechaSis
 				from  CLCLIENT noholdlock
 				where 	Cli_Numero = @Busqueda 
 				and 	Cli_SucAti = isnull(@Suc_Numero,Cli_SucAti)
@@ -260,10 +255,6 @@ if @Tip_ConTip = @Str_L begin
 							left join CLENTIDA noholdlock on Cli_Entida = Ent_Numero
 					where	Per_Numero = @Busqueda
 					
-					update #CientesPersonas set  
-						Per_Calle = @Sin_Direcc
-					where Per_Calle = @Str_Vacio
-					
 					--se actualiza la tabla para obtener el tipo de cuenta
 					update #CientesPersonas set 
 							Cli_TipCue = Cue_Tipo
@@ -295,9 +286,9 @@ if @Tip_ConTip = @Str_L begin
 			end
 			
 			--se consulta solo el numero del cliente
-			insert into #AuxCientesPersonas(ClientePersonaID,ClientePersonaNum)	
+			insert into #AuxCientesPersonas(ClientePersonaID,ClientePersonaNum,FechaSis)
 			select top 50	
-				ClClientID, Cli_Numero
+				ClClientID, Cli_Numero, FechaSis
 				from  CLCLIENT noholdlock
 				where	Cli_Comple like @Per_Comple
 				and 	Cli_SucAti = isnull(@Suc_Numero,Cli_SucAti) 
@@ -370,10 +361,6 @@ if @Tip_ConTip = @Str_L begin
 							inner join CLLOCALI noholdlock on Cli_Locali = Loc_Numero
 							inner join CLENTIDA noholdlock on Cli_Entida = Ent_Numero
 					
-					update #CientesPersonas set  
-						Per_Calle = @Sin_Direcc
-					where Per_Calle = @Str_Vacio
-					
 					--se actualiza la tabla para obtener el tipo de cuenta
 					update #CientesPersonas set 
 							Cli_TipCue = Cue_Tipo
@@ -396,22 +383,15 @@ if @Tip_ConTip = @Str_L begin
 			
 			-- se limpian las tablas auxiliares para buscar a las personas
 			truncate table #AuxCientesPersonas
-			truncate table #AuxPersonas
 					
 			-----Se obtienen solo los id de las personas
-			insert into #AuxPersonas(ClientePersonaID,ClientePersonaNum,FechaSis)		
+			insert into #AuxCientesPersonas(ClientePersonaID,ClientePersonaNum,FechaSis)		
 			select	top 50		
-					PerPersoID, Per_Numero, FechaSis
+					PerPersoID, Per_Numero, max(FechaSis) FechaSis
 				from 	SOPERSON noholdlock
 				where	Per_Comple like @Per_Comple
 				group by Per_Comple, Per_RFC
-			
-			--se ordenan por los mas recientes
-			insert into #AuxCientesPersonas(ClientePersonaID,ClientePersonaNum)		
-			select	ClientePersonaID, ClientePersonaNum   
-				from 	#AuxPersonas noholdlock
-				order by FechaSis desc
-			
+	
 			--solo si regreso resultados continua con las consultas de cliente
 			select @Conteo = count(*) from #AuxCientesPersonas noholdlock
 			if @Conteo > @Ent_Cero begin  
@@ -470,10 +450,6 @@ if @Tip_ConTip = @Str_L begin
 				from #CientesPersonas noholdlock
 						inner join CLLOCALI noholdlock on Cli_Locali = Loc_Numero
 						inner join CLENTIDA noholdlock on Cli_Entida = Ent_Numero
-				
-				update #CientesPersonas set  
-					Per_Calle = @Sin_Direcc
-				where Per_Calle = @Str_Vacio
 					
 			end
 		end				
@@ -499,9 +475,9 @@ if @Tip_ConTip = @Str_L begin
 			end
 			
 			--se consulta solo el numero del cliente
-			insert into #AuxCientesPersonas(ClientePersonaID,ClientePersonaNum)	
+			insert into #AuxCientesPersonas(ClientePersonaID,ClientePersonaNum,FechaSis)
 			select top 50	
-				ClClientID, Cli_Numero
+				ClClientID, Cli_Numero, FechaSis
 				from  CLCLIENT noholdlock
 				where 	Cli_Numero = @Busqueda 
 				and 	Cli_Fecha >= @Par_FecSuc
@@ -578,10 +554,6 @@ if @Tip_ConTip = @Str_L begin
 							left join CLENTIDA noholdlock on Cli_Entida = Ent_Numero
 					where	Per_Numero = @Busqueda
 					
-					update #CientesPersonas set  
-						Per_Calle = @Sin_Direcc
-					where Per_Calle = @Str_Vacio
-					
 					--se actualiza la tabla para obtener el tipo de cuenta
 					update #CientesPersonas set 
 							Cli_TipCue = Cue_Tipo
@@ -613,9 +585,9 @@ if @Tip_ConTip = @Str_L begin
 			end
 			
 			--se consulta solo el numero del cliente
-			insert into #AuxCientesPersonas(ClientePersonaID,ClientePersonaNum)	
+			insert into #AuxCientesPersonas(ClientePersonaID,ClientePersonaNum,FechaSis)
 			select top 50	
-				ClClientID, Cli_Numero
+				ClClientID, Cli_Numero, FechaSis
 				from  CLCLIENT noholdlock
 				where	Cli_Comple like @Per_Comple
 				and 	Cli_Fecha >= @Par_FecSuc
@@ -688,10 +660,6 @@ if @Tip_ConTip = @Str_L begin
 							inner join CLLOCALI noholdlock on Cli_Locali = Loc_Numero
 							inner join CLENTIDA noholdlock on Cli_Entida = Ent_Numero
 					
-					update #CientesPersonas set  
-						Per_Calle = @Sin_Direcc
-					where Per_Calle = @Str_Vacio
-					
 					--se actualiza la tabla para obtener el tipo de cuenta
 					update #CientesPersonas set 
 							Cli_TipCue = Cue_Tipo
@@ -714,22 +682,15 @@ if @Tip_ConTip = @Str_L begin
 			
 			-- se limpian las tablas auxiliares para buscar a las personas
 			truncate table #AuxCientesPersonas
-			truncate table #AuxPersonas
 					
 			-----Se obtienen solo los id de las personas
-			insert into #AuxPersonas(ClientePersonaID,ClientePersonaNum,FechaSis)		
+			insert into #AuxCientesPersonas(ClientePersonaID,ClientePersonaNum,FechaSis)
 			select	top 50		
-					PerPersoID, Per_Numero, FechaSis
+					PerPersoID, Per_Numero, max(FechaSis) FechaSis
 				from 	SOPERSON noholdlock
 				where	Per_Comple like @Per_Comple
 				and 	Per_Fecha 	>= 	@Par_FecSuc
 				group by Per_Comple, Per_RFC
-			
-			--se ordenan por los mas recientes
-			insert into #AuxCientesPersonas(ClientePersonaID,ClientePersonaNum)		
-			select	ClientePersonaID, ClientePersonaNum   
-				from 	#AuxPersonas noholdlock
-				order by FechaSis desc
 			
 			--solo si regreso resultados continua con las consultas de cliente
 			select @Conteo = count(*) from #AuxCientesPersonas noholdlock
@@ -789,10 +750,6 @@ if @Tip_ConTip = @Str_L begin
 				from #CientesPersonas noholdlock
 						inner join CLLOCALI noholdlock on Cli_Locali = Loc_Numero
 						inner join CLENTIDA noholdlock on Cli_Entida = Ent_Numero
-				
-				update #CientesPersonas set  
-					Per_Calle = @Sin_Direcc
-				where Per_Calle = @Str_Vacio
 					
 			end
 		end				
@@ -813,9 +770,9 @@ if @Tip_ConTip = @Str_L begin
 			end
 			
 			--se consulta solo el numero del cliente
-			insert into #AuxCientesPersonas(ClientePersonaID,ClientePersonaNum)	
+			insert into #AuxCientesPersonas(ClientePersonaID,ClientePersonaNum,FechaSis)
 			select top 50	
-				ClClientID, Cli_Numero
+				ClClientID, Cli_Numero, FechaSis
 				from  CLCLIENT noholdlock
 				where 	Cli_Numero = @Busqueda
 						
@@ -890,10 +847,6 @@ if @Tip_ConTip = @Str_L begin
 							left join CLENTIDA noholdlock on Cli_Entida = Ent_Numero
 					where	Per_Numero = @Busqueda
 					
-					update #CientesPersonas set  
-						Per_Calle = @Sin_Direcc
-					where Per_Calle = @Str_Vacio
-					
 					--se actualiza la tabla para obtener el tipo de cuenta
 					update #CientesPersonas set 
 							Cli_TipCue = Cue_Tipo
@@ -925,9 +878,9 @@ if @Tip_ConTip = @Str_L begin
 			end
 			
 			--se consulta solo el numero del cliente
-			insert into #AuxCientesPersonas(ClientePersonaID,ClientePersonaNum)	
+			insert into #AuxCientesPersonas(ClientePersonaID,ClientePersonaNum,FechaSis)
 			select top 50	
-				ClClientID, Cli_Numero
+				ClClientID, Cli_Numero, FechaSis
 				from  CLCLIENT noholdlock
 				where	Cli_Comple like @Per_Comple
 			
@@ -999,10 +952,6 @@ if @Tip_ConTip = @Str_L begin
 							inner join CLLOCALI noholdlock on Cli_Locali = Loc_Numero
 							inner join CLENTIDA noholdlock on Cli_Entida = Ent_Numero
 					
-					update #CientesPersonas set  
-						Per_Calle = @Sin_Direcc
-					where Per_Calle = @Str_Vacio
-					
 					--se actualiza la tabla para obtener el tipo de cuenta
 					update #CientesPersonas set 
 							Cli_TipCue = Cue_Tipo
@@ -1025,22 +974,15 @@ if @Tip_ConTip = @Str_L begin
 			
 			-- se limpian las tablas auxiliares para buscar a las personas
 			truncate table #AuxCientesPersonas
-			truncate table #AuxPersonas
 					
 			-----Se obtienen solo los id de las personas
-			insert into #AuxPersonas(ClientePersonaID,ClientePersonaNum,FechaSis)		
+			insert into #AuxCientesPersonas(ClientePersonaID,ClientePersonaNum,FechaSis)
 			select	top 50		
-					PerPersoID, Per_Numero, FechaSis
+					PerPersoID, Per_Numero, max(FechaSis) FechaSis
 				from 	SOPERSON noholdlock
 				where	Per_Comple like @Per_Comple
 				group by Per_Comple, Per_RFC
-			
-			--se ordenan por los mas recientes
-			insert into #AuxCientesPersonas(ClientePersonaID,ClientePersonaNum)		
-			select	ClientePersonaID, ClientePersonaNum   
-				from 	#AuxPersonas noholdlock
-				order by FechaSis desc
-			
+
 			--solo si regreso resultados continua con las consultas de cliente
 			select @Conteo = count(*) from #AuxCientesPersonas noholdlock
 			if @Conteo > @Ent_Cero begin  
@@ -1099,14 +1041,14 @@ if @Tip_ConTip = @Str_L begin
 				from #CientesPersonas noholdlock
 						inner join CLLOCALI noholdlock on Cli_Locali = Loc_Numero
 						inner join CLENTIDA noholdlock on Cli_Entida = Ent_Numero
-				
-				update #CientesPersonas set  
-					Per_Calle = @Sin_Direcc
-				where Per_Calle = @Str_Vacio
-					
+	
 			end
 		end
 	end	
+	
+	update #CientesPersonas set  
+		Per_Calle = @Sin_Direcc
+	where Per_Calle = @Str_Vacio
 	
 	select	distinct
 			Per_Numero, 	Per_NumTra, 	Per_Titulo, 	Per_ComOrd, 	Per_RFC, 
@@ -1117,7 +1059,6 @@ if @Tip_ConTip = @Str_L begin
 			
 	drop table #CientesPersonas
 	drop table #AuxCientesPersonas
-	drop table #AuxPersonas
 			
 end 
 	
