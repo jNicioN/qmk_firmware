@@ -477,7 +477,7 @@ if @Tip_ConTip = @Str_L begin
 					
 			end
 		end				
-	end else if @Tip_ConCon = @Str_Dos begin --CONSULTA L2 : BUSQUEDA DE CLIENTES Y PERSONAS SIN RESTRICCION DE SUCURSAL Y SOLO DIA DE HOY (BD PRODUCCION)
+	end else if @Tip_ConCon = @Str_Dos begin --CONSULTA L2 : BUSQUEDA DE CLIENTES Y PERSONAS SIN RESTRICCION DE SUCURSAL Y SOLO CREADOS EL DIA DE HOY (BD PRODUCCION)
 		
 		select	@Suc_Numero = ltrim(rtrim(@Per_Numero))
 		--Se obtiene la fecha actual de la sucursal
