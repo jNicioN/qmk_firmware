@@ -85,7 +85,8 @@ declare	@Str_Vacio	char(1),
 		@Str_CuaCer	char(4),
 		@Cla_Banreg	int,
 		@Cue_HeyBiz	char(2),
-		@Cue_CashBa	char(2)
+		@Cue_CashBa	char(2),
+		@Fec_Vacia	smalldatetime
 
 /* Asignacion de Constantes */
 select	@Str_Vacio	= '',			-- String Vacio
@@ -111,7 +112,8 @@ select	@Str_Vacio	= '',			-- String Vacio
 		@Str_CuaCer	= '0000',		-- String: cuatro ceros 
 		@Cla_Banreg = 2,			-- Clasificacion: Banregio 
 		@Cue_HeyBiz = '47',			-- Tipo de Cuenta: Cashback 
-		@Cue_CashBa = '31'			-- Tipo de Cuenta: Cashback 
+		@Cue_CashBa = '31',			-- Tipo de Cuenta: Cashback 
+		@Fec_Vacia	= '1900-01-01'	-- Feha Vacia
 		
 select	@Busqueda	= @Per_Comple
 select	@Tip_ConTip	= substring(@Tip_Consul, @Ent_Uno, @Ent_Uno),
@@ -201,36 +203,35 @@ if @Tip_ConTip = @Str_L begin
 				select		Cli_Numero,
 							Cli_Numero,
 							cast(@Ent_Uno as varchar),
-							Cli_ComOrd,
+							isnull(Cli_ComOrd, @Str_Vacio),
 							space(@Ent_Tres),
-							Cli_RFC,
+							isnull(Cli_RFC, @Str_Vacio),
 							@Str_Vacio,
 							case when Cli_Tipo = @Tip_Fisica and Cli_ActEmp = @Sta_Si then
 									@Str_Tres
 								else
-									Cli_Tipo
+									isnull(Cli_Tipo, @Str_Vacio)
 							end,
 							case when Cli_Tipo = @Tip_Moral then
 									isnull(Con_NomSoc, @Str_Vacio)
 								else
-									Cli_Nombre
+									isnull(Cli_Nombre, @Str_Vacio)
 							end,
 							isnull(Cli_ApePat, @Str_Vacio),
-							
 							isnull(Cli_ApeMat, @Str_Vacio),
 							isnull(Con_TipSoc, @Str_Vacio),
 							case when Cli_Tipo = @Tip_Moral then
 									isnull(con.Con_FeEsCl, cla.Adi_FecNac)
 								else
-									cla.Adi_FecNac
+									isnull(cla.Adi_FecNac,@Fec_Vacia)
 							end,
-							con.Con_TipIde,
-							con.Con_NumIde,
-							cla.Adi_NumPer,
-							Cli_CURP,
+							isnull(con.Con_TipIde, @Str_Vacio),
+							isnull(con.Con_NumIde, @Str_Vacio),
+							isnull(cla.Adi_NumPer, @Str_Vacio),
+							isnull(Cli_CURP, @Str_Vacio),
 							@Str_Vacio,
-							Cli_Locali,
-							Cli_Entida,
+							isnull(Cli_Locali, @Str_Vacio),
+							isnull(Cli_Entida, @Str_Vacio),
 							@Str_Vacio,
 							isnull(Cli_Calle, @Str_Vacio),
 							isnull(Cli_CalNum, @Str_Vacio),
@@ -311,35 +312,35 @@ if @Tip_ConTip = @Str_L begin
 				select		Cli_Numero,
 							Cli_Numero,
 							cast(@Ent_Uno as varchar),
-							Cli_ComOrd,
+							isnull(Cli_ComOrd, @Str_Vacio),
 							space(@Ent_Tres),
-							Cli_RFC,
+							isnull(Cli_RFC, @Str_Vacio),
 							@Str_Vacio,
 							case when Cli_Tipo = @Tip_Fisica and Cli_ActEmp = @Sta_Si then
-								@Str_Tres
-							else
-								Cli_Tipo
+									@Str_Tres
+								else
+									isnull(Cli_Tipo, @Str_Vacio)
 							end,
 							case when Cli_Tipo = @Tip_Moral then
-								isnull(Con_NomSoc, @Str_Vacio)
-							else
-								Cli_Nombre
+									isnull(Con_NomSoc, @Str_Vacio)
+								else
+									isnull(Cli_Nombre, @Str_Vacio)
 							end,
 							isnull(Cli_ApePat, @Str_Vacio),
 							isnull(Cli_ApeMat, @Str_Vacio),
 							isnull(Con_TipSoc, @Str_Vacio),
 							case when Cli_Tipo = @Tip_Moral then
-								isnull(con.Con_FeEsCl, cla.Adi_FecNac)
-							else
-								cla.Adi_FecNac
+									isnull(con.Con_FeEsCl, cla.Adi_FecNac)
+								else
+									isnull(cla.Adi_FecNac,@Fec_Vacia)
 							end,
-							con.Con_TipIde,
-							con.Con_NumIde,
-							cla.Adi_NumPer,
-							Cli_CURP,
+							isnull(con.Con_TipIde, @Str_Vacio),
+							isnull(con.Con_NumIde, @Str_Vacio),
+							isnull(cla.Adi_NumPer, @Str_Vacio),
+							isnull(Cli_CURP, @Str_Vacio),
 							@Str_Vacio,
-							Cli_Locali,
-							Cli_Entida,
+							isnull(Cli_Locali, @Str_Vacio),
+							isnull(Cli_Entida, @Str_Vacio),
 							@Str_Vacio,
 							isnull(Cli_Calle, @Str_Vacio),
 							isnull(Cli_CalNum, @Str_Vacio),
@@ -410,7 +411,7 @@ if @Tip_ConTip = @Str_L begin
 					@Tip_Fisica as Per_Titulo,
 					Per_ComOrd,					
 					Per_Nacion,
-					Per_RFC,
+					isnull(Per_RFC, @Str_Vacio),
 					@Str_Vacio,
 					case when Per_Tipo = @Tip_Fisica and Per_ActEmp = @Sta_Si then
 							@Str_Tres
@@ -422,17 +423,17 @@ if @Tip_ConTip = @Str_L begin
 						else
 							Per_Nombre
 					end,
-					Per_ApePat,
-					Per_ApeMat,
+					isnull(Per_ApePat, @Str_Vacio),
+					isnull(Per_ApeMat, @Str_Vacio),
 					isnull(Clp_TipSoc, @Str_Vacio),
-					Adi_FecNac,
-					Adi_TipIde,
-					Adi_NumIde,
+					isnull(Adi_FecNac, @Fec_Vacia),
+					isnull(Adi_TipIde, @Str_Vacio),
+					isnull(Adi_NumIde, @Str_Vacio),
 					Per_Numero,
-					Per_CURP,
+					isnull(Per_CURP, @Str_Vacio),
 					@Str_Vacio,
-					Per_Locali,
-					Per_Entida,
+					isnull(Per_Locali, @Str_Vacio),
+					isnull(Per_Entida, @Str_Vacio),
 					@Str_Vacio,
 					isnull(Per_Calle, @Str_Vacio),
 					isnull(Per_CalNum, @Str_Vacio),
@@ -500,36 +501,35 @@ if @Tip_ConTip = @Str_L begin
 				select		Cli_Numero,
 							Cli_Numero,
 							cast(@Ent_Uno as varchar),
-							Cli_ComOrd,
+							isnull(Cli_ComOrd, @Str_Vacio),
 							space(@Ent_Tres),
-							Cli_RFC,
+							isnull(Cli_RFC, @Str_Vacio),
 							@Str_Vacio,
 							case when Cli_Tipo = @Tip_Fisica and Cli_ActEmp = @Sta_Si then
 									@Str_Tres
 								else
-									Cli_Tipo
+									isnull(Cli_Tipo, @Str_Vacio)
 							end,
 							case when Cli_Tipo = @Tip_Moral then
 									isnull(Con_NomSoc, @Str_Vacio)
 								else
-									Cli_Nombre
+									isnull(Cli_Nombre, @Str_Vacio)
 							end,
 							isnull(Cli_ApePat, @Str_Vacio),
-							
 							isnull(Cli_ApeMat, @Str_Vacio),
 							isnull(Con_TipSoc, @Str_Vacio),
 							case when Cli_Tipo = @Tip_Moral then
 									isnull(con.Con_FeEsCl, cla.Adi_FecNac)
 								else
-									cla.Adi_FecNac
+									isnull(cla.Adi_FecNac,@Fec_Vacia)
 							end,
-							con.Con_TipIde,
-							con.Con_NumIde,
-							cla.Adi_NumPer,
-							Cli_CURP,
+							isnull(con.Con_TipIde, @Str_Vacio),
+							isnull(con.Con_NumIde, @Str_Vacio),
+							isnull(cla.Adi_NumPer, @Str_Vacio),
+							isnull(Cli_CURP, @Str_Vacio),
 							@Str_Vacio,
-							Cli_Locali,
-							Cli_Entida,
+							isnull(Cli_Locali, @Str_Vacio),
+							isnull(Cli_Entida, @Str_Vacio),
 							@Str_Vacio,
 							isnull(Cli_Calle, @Str_Vacio),
 							isnull(Cli_CalNum, @Str_Vacio),
@@ -610,35 +610,35 @@ if @Tip_ConTip = @Str_L begin
 				select		Cli_Numero,
 							Cli_Numero,
 							cast(@Ent_Uno as varchar),
-							Cli_ComOrd,
+							isnull(Cli_ComOrd, @Str_Vacio),
 							space(@Ent_Tres),
-							Cli_RFC,
+							isnull(Cli_RFC, @Str_Vacio),
 							@Str_Vacio,
 							case when Cli_Tipo = @Tip_Fisica and Cli_ActEmp = @Sta_Si then
-								@Str_Tres
-							else
-								Cli_Tipo
+									@Str_Tres
+								else
+									isnull(Cli_Tipo, @Str_Vacio)
 							end,
 							case when Cli_Tipo = @Tip_Moral then
-								isnull(Con_NomSoc, @Str_Vacio)
-							else
-								Cli_Nombre
+									isnull(Con_NomSoc, @Str_Vacio)
+								else
+									isnull(Cli_Nombre, @Str_Vacio)
 							end,
 							isnull(Cli_ApePat, @Str_Vacio),
 							isnull(Cli_ApeMat, @Str_Vacio),
 							isnull(Con_TipSoc, @Str_Vacio),
 							case when Cli_Tipo = @Tip_Moral then
-								isnull(con.Con_FeEsCl, cla.Adi_FecNac)
-							else
-								cla.Adi_FecNac
+									isnull(con.Con_FeEsCl, cla.Adi_FecNac)
+								else
+									isnull(cla.Adi_FecNac,@Fec_Vacia)
 							end,
-							con.Con_TipIde,
-							con.Con_NumIde,
-							cla.Adi_NumPer,
-							Cli_CURP,
+							isnull(con.Con_TipIde, @Str_Vacio),
+							isnull(con.Con_NumIde, @Str_Vacio),
+							isnull(cla.Adi_NumPer, @Str_Vacio),
+							isnull(Cli_CURP, @Str_Vacio),
 							@Str_Vacio,
-							Cli_Locali,
-							Cli_Entida,
+							isnull(Cli_Locali, @Str_Vacio),
+							isnull(Cli_Entida, @Str_Vacio),
 							@Str_Vacio,
 							isnull(Cli_Calle, @Str_Vacio),
 							isnull(Cli_CalNum, @Str_Vacio),
@@ -710,7 +710,7 @@ if @Tip_ConTip = @Str_L begin
 					@Tip_Fisica as Per_Titulo,
 					Per_ComOrd,					
 					Per_Nacion,
-					Per_RFC,
+					isnull(Per_RFC, @Str_Vacio),
 					@Str_Vacio,
 					case when Per_Tipo = @Tip_Fisica and Per_ActEmp = @Sta_Si then
 							@Str_Tres
@@ -722,17 +722,17 @@ if @Tip_ConTip = @Str_L begin
 						else
 							Per_Nombre
 					end,
-					Per_ApePat,
-					Per_ApeMat,
+					isnull(Per_ApePat, @Str_Vacio),
+					isnull(Per_ApeMat, @Str_Vacio),
 					isnull(Clp_TipSoc, @Str_Vacio),
-					Adi_FecNac,
-					Adi_TipIde,
-					Adi_NumIde,
+					isnull(Adi_FecNac, @Fec_Vacia),
+					isnull(Adi_TipIde, @Str_Vacio),
+					isnull(Adi_NumIde, @Str_Vacio),
 					Per_Numero,
-					Per_CURP,
+					isnull(Per_CURP, @Str_Vacio),
 					@Str_Vacio,
-					Per_Locali,
-					Per_Entida,
+					isnull(Per_Locali, @Str_Vacio),
+					isnull(Per_Entida, @Str_Vacio),
 					@Str_Vacio,
 					isnull(Per_Calle, @Str_Vacio),
 					isnull(Per_CalNum, @Str_Vacio),
@@ -794,36 +794,35 @@ if @Tip_ConTip = @Str_L begin
 				select		Cli_Numero,
 							Cli_Numero,
 							cast(@Ent_Uno as varchar),
-							Cli_ComOrd,
+							isnull(Cli_ComOrd, @Str_Vacio),
 							space(@Ent_Tres),
-							Cli_RFC,
+							isnull(Cli_RFC, @Str_Vacio),
 							@Str_Vacio,
 							case when Cli_Tipo = @Tip_Fisica and Cli_ActEmp = @Sta_Si then
 									@Str_Tres
 								else
-									Cli_Tipo
+									isnull(Cli_Tipo, @Str_Vacio)
 							end,
 							case when Cli_Tipo = @Tip_Moral then
 									isnull(Con_NomSoc, @Str_Vacio)
 								else
-									Cli_Nombre
+									isnull(Cli_Nombre, @Str_Vacio)
 							end,
 							isnull(Cli_ApePat, @Str_Vacio),
-							
 							isnull(Cli_ApeMat, @Str_Vacio),
 							isnull(Con_TipSoc, @Str_Vacio),
 							case when Cli_Tipo = @Tip_Moral then
 									isnull(con.Con_FeEsCl, cla.Adi_FecNac)
 								else
-									cla.Adi_FecNac
+									isnull(cla.Adi_FecNac,@Fec_Vacia)
 							end,
-							con.Con_TipIde,
-							con.Con_NumIde,
-							cla.Adi_NumPer,
-							Cli_CURP,
+							isnull(con.Con_TipIde, @Str_Vacio),
+							isnull(con.Con_NumIde, @Str_Vacio),
+							isnull(cla.Adi_NumPer, @Str_Vacio),
+							isnull(Cli_CURP, @Str_Vacio),
 							@Str_Vacio,
-							Cli_Locali,
-							Cli_Entida,
+							isnull(Cli_Locali, @Str_Vacio),
+							isnull(Cli_Entida, @Str_Vacio),
 							@Str_Vacio,
 							isnull(Cli_Calle, @Str_Vacio),
 							isnull(Cli_CalNum, @Str_Vacio),
@@ -902,35 +901,35 @@ if @Tip_ConTip = @Str_L begin
 				select		Cli_Numero,
 							Cli_Numero,
 							cast(@Ent_Uno as varchar),
-							Cli_ComOrd,
+							isnull(Cli_ComOrd, @Str_Vacio),
 							space(@Ent_Tres),
-							Cli_RFC,
+							isnull(Cli_RFC, @Str_Vacio),
 							@Str_Vacio,
 							case when Cli_Tipo = @Tip_Fisica and Cli_ActEmp = @Sta_Si then
-								@Str_Tres
-							else
-								Cli_Tipo
+									@Str_Tres
+								else
+									isnull(Cli_Tipo, @Str_Vacio)
 							end,
 							case when Cli_Tipo = @Tip_Moral then
-								isnull(Con_NomSoc, @Str_Vacio)
-							else
-								Cli_Nombre
+									isnull(Con_NomSoc, @Str_Vacio)
+								else
+									isnull(Cli_Nombre, @Str_Vacio)
 							end,
 							isnull(Cli_ApePat, @Str_Vacio),
 							isnull(Cli_ApeMat, @Str_Vacio),
 							isnull(Con_TipSoc, @Str_Vacio),
 							case when Cli_Tipo = @Tip_Moral then
-								isnull(con.Con_FeEsCl, cla.Adi_FecNac)
-							else
-								cla.Adi_FecNac
+									isnull(con.Con_FeEsCl, cla.Adi_FecNac)
+								else
+									isnull(cla.Adi_FecNac,@Fec_Vacia)
 							end,
-							con.Con_TipIde,
-							con.Con_NumIde,
-							cla.Adi_NumPer,
-							Cli_CURP,
+							isnull(con.Con_TipIde, @Str_Vacio),
+							isnull(con.Con_NumIde, @Str_Vacio),
+							isnull(cla.Adi_NumPer, @Str_Vacio),
+							isnull(Cli_CURP, @Str_Vacio),
 							@Str_Vacio,
-							Cli_Locali,
-							Cli_Entida,
+							isnull(Cli_Locali, @Str_Vacio),
+							isnull(Cli_Entida, @Str_Vacio),
 							@Str_Vacio,
 							isnull(Cli_Calle, @Str_Vacio),
 							isnull(Cli_CalNum, @Str_Vacio),
@@ -1001,7 +1000,7 @@ if @Tip_ConTip = @Str_L begin
 					@Tip_Fisica as Per_Titulo,
 					Per_ComOrd,					
 					Per_Nacion,
-					Per_RFC,
+					isnull(Per_RFC, @Str_Vacio),
 					@Str_Vacio,
 					case when Per_Tipo = @Tip_Fisica and Per_ActEmp = @Sta_Si then
 							@Str_Tres
@@ -1013,17 +1012,17 @@ if @Tip_ConTip = @Str_L begin
 						else
 							Per_Nombre
 					end,
-					Per_ApePat,
-					Per_ApeMat,
+					isnull(Per_ApePat, @Str_Vacio),
+					isnull(Per_ApeMat, @Str_Vacio),
 					isnull(Clp_TipSoc, @Str_Vacio),
-					Adi_FecNac,
-					Adi_TipIde,
-					Adi_NumIde,
+					isnull(Adi_FecNac, @Fec_Vacia),
+					isnull(Adi_TipIde, @Str_Vacio),
+					isnull(Adi_NumIde, @Str_Vacio),
 					Per_Numero,
-					Per_CURP,
+					isnull(Per_CURP, @Str_Vacio),
 					@Str_Vacio,
-					Per_Locali,
-					Per_Entida,
+					isnull(Per_Locali, @Str_Vacio),
+					isnull(Per_Entida, @Str_Vacio),
 					@Str_Vacio,
 					isnull(Per_Calle, @Str_Vacio),
 					isnull(Per_CalNum, @Str_Vacio),
