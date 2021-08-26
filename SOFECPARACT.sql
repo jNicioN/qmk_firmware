@@ -58,21 +58,12 @@ end
 
 if @Tip_Actual = @Tip_Progre begin
 	
-	exec @Status =  CHPACIMEACT 
-		@Tip_Progre, 	@NumTransac, 	@Transaccio, 	@Usuario, 	@FechaSis, 
-		@SucOrigen, 	@SucDestino, 	@Modulo
-	if @Status <> @Ent_Cero begin 
-		select	Err_Codigo	= '000002', 	
-				Err_Mensaj	= 'Error al actualizar en parametro en CHPARAMS'
-		rollback
-	end
-	
 	exec @Status =  ESAPESUCPRO 
 		@Fecha, 		@NumTransac, 	@Transaccio, 	@Usuario, 	@FechaSis, 
 		@Suc_300, 		@Suc_300, 		@Modulo
 	if @Status <> @Ent_Cero begin 
 		select	Err_Codigo	= '000004', 	
-				Err_Mensaj	= 'Error al actualizar en parametro en CHPARAMS'
+				Err_Mensaj	= 'Error al actualizar la fecha de la sucursal 300'
 		rollback
 	end
 	
@@ -81,6 +72,15 @@ if @Tip_Actual = @Tip_Progre begin
 		@Suc_001, 		@Suc_001, 		@Modulo
 	if @Status <> @Ent_Cero begin 
 		select	Err_Codigo	= '000005', 	
+				Err_Mensaj	= 'Error al actualizar la fecha de la sucursal 001'
+		rollback
+	end
+
+	exec @Status =  CHPACIMEACT 
+		@Tip_Progre, 	@NumTransac, 	@Transaccio, 	@Usuario, 	@FechaSis, 
+		@SucOrigen, 	@SucDestino, 	@Modulo
+	if @Status <> @Ent_Cero begin 
+		select	Err_Codigo	= '000002', 	
 				Err_Mensaj	= 'Error al actualizar en parametro en CHPARAMS'
 		rollback
 	end
