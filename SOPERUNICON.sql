@@ -22,6 +22,11 @@ as
 ** DESCRIPCION: Consulta de Persona Unica						****
 ********************************************************************
 ** Modifico:	Esthepny Aguilar								****
+** Fecha:		01/09/2021										****
+** Help:		1536793	 										****
+** Descripcion:	Se agrega LC para consultar por RFC			    ****
+********************************************************************
+** Modifico:	Esthepny Aguilar								****
 ** Fecha:		14/04/2020										****
 ** Help:		1396836	 										****
 ** Descripcion:	Se agrega LB para consultar por nombre		    ****
@@ -177,6 +182,7 @@ declare	@Str_Vacio	char(1), /* Vacio */
 		@Str_Nueve	char(1), /* Tipo 9*/
 		@Len_RFCOrd	int,
 		@Len_RFCHom int,
+		@Len_RFCEmp int,		/* RFC de 9 posiciones */
 		@Ent_Cuatro	int,		/*	Entero en cuatro */
 		@Ent_Uno	int,		/*	Entero en uno */
 		@Str_A      char(1)	/* Tipo A*/
@@ -202,6 +208,7 @@ select	@Str_Vacio	= '',
 		@Str_Nueve  = '9',
 		@Len_RFCOrd	= 10,								/* Longitud de rfc ordinario*/
 		@Len_RFCHom = 13,								/* Longitud de rfc con homoclave*/
+		@Len_RFCEmp = 9,
 		@Ent_Cuatro	= 4,
 		@Ent_Uno	= 1,
 		@Str_A 		= 'A'
@@ -910,5 +917,31 @@ end else begin
 			 left join CLADICIO noholdlock on Adi_NumPer = Per_Numero
 
 		drop table #PersonasUni
+	end
+	if @Tip_ConCon	= @Str_C begin /* LC - Consulta de Personas unica por RFC */
+		create table #PersonaUnicaRFC ( Per_Numero	char(8), Per_Grupo	char(8))
+		
+		if isnull(@Str_PerRFC, @Str_Vacio) <> @Str_Vacio and len(@Str_PerRFC) = @Len_RFCHom begin
+			insert into #PersonaUnicaRFC(Per_Numero, Per_Grupo)
+			select Per_Numero, @Str_Vacio
+			from	SOPERSON noholdlock
+			 where Per_RFC = @Str_PerRFC
+		end else if isnull(@Str_PerRFC, @Str_Vacio) <> @Str_Vacio and len(@Str_PerRFC) >= @Len_RFCEmp begin
+			insert into #PersonaUnicaRFC(Per_Numero, Per_Grupo)
+			select Per_Numero, @Str_Vacio
+			from	SOPERSON noholdlock
+			 where Per_RFC like @Str_PerRFC + @Str_Porcen
+		end
+		
+		update #PersonaUnicaRFC set Per_Grupo=SOUNIPER.Peu_Grupo 
+		from SOUNIPER noholdlock
+		where #PersonaUnicaRFC.Per_Numero = SOUNIPER.Peu_Person
+		
+		select distinct  SOPERSON.Per_Numero, Per_ComOrd, Per_Comple,	Per_RFC, Per_CURP,
+			    Per_Nombre, Per_Grupo
+			from SOPERSON noholdlock
+			inner join #PersonaUnicaRFC on #PersonaUnicaRFC.Per_Grupo = SOPERSON.Per_Numero
+			
+		drop table #PersonaUnicaRFC
 	end
 end
