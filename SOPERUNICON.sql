@@ -820,7 +820,7 @@ end else begin
 		select Per_Numero, Per_ComOrd, Per_Comple,	Per_RFC, Per_CURP,
 			   Per_Nombre
 		  from CLADICIO noholdlock 
-		 inner join SOPERSON on Per_Numero = Adi_NumPer
+		 inner join SOPERSON noholdlock on Per_Numero = Adi_NumPer
 		 where Adi_Client = @Cli_Unific
 	end
 	
@@ -889,7 +889,7 @@ end else begin
 			  from #PersonasRFC
 			 inner join SOUNIPER noholdlock on #PersonasRFC.Per_Numero = SOUNIPER.Peu_Person
 		  ) as personasUnicas
-		 inner join SOPERSON on personasUnicas.Peu_Grupo = SOPERSON.Per_Numero
+		 inner join SOPERSON noholdlock on personasUnicas.Peu_Grupo = SOPERSON.Per_Numero
 		  left outer join SOPERADI noholdlock on Adi_PerNum	= Per_Numero
 
 
