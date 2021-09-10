@@ -12,8 +12,8 @@ create procedure SOPARCATCON (
 
 as
 
-/****************************************************************************
-** Descripción:	 Consulta a parametros de cliente preferentes	****
+/***************************************************************************
+** Descripción:	 Consulta a parametros de cliente preferentes			****
 ****************************************************************************
 ** Creó:		Pedro A. Perez											****
 ** Fecha:		02-08-2021												****
