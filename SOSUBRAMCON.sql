@@ -11,7 +11,7 @@ create procedure SOSUBRAMCON (
 as
 
 /****************************************************************/
-/* DESCRIPCION: Consulta de registros de Rama					*/
+/* DESCRIPCION: Consulta de registros de Subrama				*/
 /****************************************************************/
 /** Creo:			Raul Muniz									*/
 /** Fecha:			09/09/2021                               	*/
