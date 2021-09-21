@@ -13,7 +13,7 @@ create procedure SOACTPRECON (
 as
 
 /****************************************************************/
-/* DESCRIPCION: Consulta de registros de Rama					*/
+/* DESCRIPCION: Consulta de registros de Actividad Preponderante*/
 /****************************************************************/
 /** Creo:			Raul Muniz									*/
 /** Fecha:			09/09/2021                               	*/
@@ -44,18 +44,26 @@ select @Tip_ConTip = substring(@Tip_Consul, 1, 1),
 if @Tip_ConTip	= @Str_C begin /* 'C': Consulta */
 	if @Tip_ConCon = @Str_Uno begin		/* C1 */
 		select	Acp_Numero,	Acp_Descri,	Acp_Status,	Sur_Numero,	Sur_Descri,
-				Ram_Numero,	Ram_Descri,	Sus_Numero,	Sus_Descri,	Sec_Numero,
-				Sec_Descri
+				Ram_Numero,	Ram_Descri,	Ram_Subsec
+			into #ActividadSubRama
 			from SOACTPRE noholdlock
 			inner join	SOSUBRAM noholdlock
 				on Sur_Numero = Acp_SubRam
 			inner join	SORAMA noholdlock
 				on Ram_Numero = Sur_Rama
+			where	Acp_Numero	= @Acp_Numero
+	
+		select	Acp_Numero,	Acp_Descri,	Acp_Status,	Sur_Numero,	Sur_Descri,
+				Ram_Numero,	Ram_Descri,	Sus_Numero,	Sus_Descri,	Sec_Numero,
+				Sec_Descri
+			from #ActividadSubRama noholdlock
 			inner join	SOSUBSEC noholdlock
 				on Sus_Numero = Ram_Subsec
 			inner join	SOSECTOR noholdlock
 				on Sec_Numero = Sus_Sector
 			where	Acp_Numero	= @Acp_Numero
+			
+		drop table #ActividadSubRama
 	end
 end else begin
 	if @Tip_ConCon = @Str_Uno begin		/* L1 */
