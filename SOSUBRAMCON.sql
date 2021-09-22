@@ -24,12 +24,10 @@ declare @Tip_ConTip	char(1),		/* Tipo consulta C/L */
 
 /* Declaracion de Constantes */
 declare @Str_Uno	char(1),		/* Caracter 1 */
-		@Str_C		char(1),		/* Caracter C */
-		@Est_Activo	char(1)				/* Bit valor 1 */
+		@Str_C		char(1)			/* Caracter C */
 
-select @Str_C = 'C',
-       @Str_Uno = '1',
-	   @Est_Activo = 'A'
+select @Str_C = 'C',				/* Caracter C */
+       @Str_Uno = '1'				/* Caracter 1 */
 
 select @Tip_ConTip = substring(@Tip_Consul, 1, 1),
        @Tip_ConCon = substring(@Tip_Consul, 2, 1) 
@@ -37,14 +35,14 @@ select @Tip_ConTip = substring(@Tip_Consul, 1, 1),
 
 if @Tip_ConTip	= @Str_C begin /* 'C': Consulta */
 	if @Tip_ConCon = @Str_Uno begin		/* C1 */
-		select	Sur_Numero,	Sur_Descri,		Sur_Status,		Sur_Rama,		NumTransac,
+		select	Sur_Numero,	Sur_Descri,		Sur_Activo,		Sur_Rama,		NumTransac,
 				Transaccio,	Usuario,		FechaSis,		SucOrigen,		SucDestino
 		from SOSUBRAM noholdlock
 		where	Sur_Numero	= @Sur_Numero
 	end
 end else begin
 	if @Tip_ConCon = @Str_Uno begin		/* L1 */
-		select	Sur_Numero,	Sur_Descri,		Sur_Status,		Sur_Rama,		NumTransac,
+		select	Sur_Numero,	Sur_Descri,		Sur_Activo,		Sur_Rama,		NumTransac,
 				Transaccio,	Usuario,		FechaSis,		SucOrigen,		SucDestino
 		from SOSUBRAM noholdlock
 	end

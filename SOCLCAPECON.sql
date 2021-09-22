@@ -44,13 +44,13 @@ declare	@Tip_ConTip	char(1),		/* Tipo Lista o Consulta */
 declare	@Str_Consul	char(1),		/* Cadena consulta */
 		@Str_Uno	char(1),		/* Cadena Uno */
 		@Str_Dos	char(1),		/* Cadena Dos */
-		@Sta_Activo	char(1)			/* Estatus Activo */
+		@Sta_Activo	bit				/* Estatus Activo */
 
 /* Asignacion de Constantes */
 select	@Str_Consul	= 'C',			/* Consulta */
 		@Str_Uno	= '1',			/* Cadena Uno */
 		@Str_Dos	= '2',			/* Cadena Dos */
-		@Sta_Activo	= 'A'			/* Estatus Activo */
+		@Sta_Activo	= 1				/* Estatus Activo */
 		
 select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
 		@Tip_ConCon	= substring(@Tip_Consul, 2, 1)
@@ -70,11 +70,11 @@ if @Tip_ConTip = @Str_Consul begin		/* 'C':  Consulta */
 			into #ActividadSubRama			
 			from SOCLCAPE noholdlock
 			left join SOACTPRE noholdlock
-				on Acp_Numero = Clp_ActPre and Acp_Status = @Sta_Activo
+				on Acp_Numero = Clp_ActPre and Acp_Activo = @Sta_Activo
 			left join SOSUBRAM noholdlock
-				on Sur_Numero = Acp_SubRam and Sur_Status = @Sta_Activo
+				on Sur_Numero = Acp_SubRam and Sur_Activo = @Sta_Activo
 			left join SORAMA noholdlock
-				on Ram_Numero = Sur_Rama and Ram_Status = @Sta_Activo
+				on Ram_Numero = Sur_Rama and Ram_Activo = @Sta_Activo
 			where	Clp_NumPer	= @Clp_NumPer
 			
 	
@@ -85,9 +85,9 @@ if @Tip_ConTip = @Str_Consul begin		/* 'C':  Consulta */
 				Sus_Descri,	Sec_Numero,	Sec_Descri
 			from #ActividadSubRama noholdlock
 			left join SOSUBSEC noholdlock
-				on Sus_Numero = Ram_Subsec and Sus_Status = @Sta_Activo
+				on Sus_Numero = Ram_Subsec and Sus_Activo = @Sta_Activo
 			left join SOSECTOR noholdlock
-				on Sec_Numero = Sus_Sector and Sec_Status = @Sta_Activo
+				on Sec_Numero = Sus_Sector and Sec_Activo = @Sta_Activo
 			
 		drop table #ActividadSubRama
 	end

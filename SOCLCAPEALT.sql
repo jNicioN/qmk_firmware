@@ -23,7 +23,7 @@ create procedure SOCLCAPEALT (
 as
 
 /**************************************************************************/
-/* DESCRIPCION: ** Alta de Clasificacin de Cartera de Personas **		*/
+/* DESCRIPCION: ** Alta de Clasificacion de Cartera de Personas **		*/
 /**************************************************************************/
 /* REFERENCIAS:															***/
 /****************************************************************************
@@ -58,7 +58,7 @@ as
 ** Help:		538910													****
 ****************************************************************************/
 /* Declaracion de Variables */
-declare	@Act_Prepon	int			/* Actividad Preponderante */
+declare	@Act_ActPre	int			/* Actividad Preponderante */
 
 /*	Declaracion de Constantes	*/
 declare	@Ent_Cero	int			/* Entero Cero */
@@ -72,7 +72,7 @@ select	@Clp_EntFin	= Tis_EntFin
 
 select	@Clp_EntFin = isnull(@Clp_EntFin,'')
 
-select	@Act_Prepon	= isnull(Apc_Prepon, @Ent_Cero)
+select	@Act_ActPre	= isnull(Apc_ActPre, @Ent_Cero)
 	from SOPERSON noholdlock
 	inner join SOACPRCL noholdlock
 	on Apc_Activi = Per_Activi
@@ -88,7 +88,7 @@ insert into SOCLCAPE (Clp_NumPer,	Clp_InsReg,	Clp_OtoCre,	Clp_Bancar,	Clp_SubBan
 						Usuario,	FechaSis,	SucOrigen,	SucDestino )
 	values (@Clp_NumPer,	@Clp_InsReg,	@Clp_OtoCre,	@Clp_Bancar,	@Clp_SubBan,
 			@Clp_Fideic,	@Clp_TipSoc,	@Clp_NomSoc,	@Clp_UsBuCr,	@Clp_EntFin,
-			@Clp_LocINE,	@Clp_EntINE,	@Act_Prepon,	@NumTransac,	@Transaccio,	@Usuario,
+			@Clp_LocINE,	@Clp_EntINE,	@Act_ActPre,	@NumTransac,	@Transaccio,	@Usuario,
 			@FechaSis,		@SucOrigen,		@SucDestino)
 	
 end else begin
