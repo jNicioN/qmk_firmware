@@ -503,8 +503,8 @@ end else if @Tip_ConCon = @Str_Ocho begin	 /* C8*/  /*se obtiene el caso a evalu
 		end
 		 
 	
-	select @Ef_RangoAc = (convert(int, Esf_MesFin) - convert(int, Esf_MesIni) + @Ent_Uno) FROM SOESTFIN where  Esf_Numero =@Esf_Numero  -- margen de tiempo del EF Actual
-	select @Ef_RangoAn = (convert(int, Esf_MesFin) - convert(int, Esf_MesIni) + @Ent_Uno) FROM SOESTFIN where  Esf_Numero =@Ef_Anterio -- margen de tiempo del EF Anterior
+	select @Ef_RangoAc = (convert(int, Esf_MesFin) - convert(int, Esf_MesIni) + @Ent_Uno) FROM SOESTFIN noholdlock where  Esf_Numero =@Esf_Numero  -- margen de tiempo del EF Actual
+	select @Ef_RangoAn = (convert(int, Esf_MesFin) - convert(int, Esf_MesIni) + @Ent_Uno) FROM SOESTFIN noholdlock where  Esf_Numero =@Ef_Anterio -- margen de tiempo del EF Anterior
 	
 	if (@Ef_Anterio <> @Ent_Cero) begin
 		if(@Ef_RangoAc<>@Ent_MesFin) begin /*es parcial*/
