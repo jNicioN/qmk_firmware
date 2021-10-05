@@ -22,9 +22,11 @@ as
 ** REFERENCIAS:													****
 ********************************************************************
 **	Modificó:	Carlos Copto									****
-**  Fecha:		17/08/2021										****
+**  Fecha:		02/09/2021										****
 **  Help:		1478014											****
-**	Descripción: Se optimizan todas las consultas				****
+**	Descripción: Se optimizan todas las consultas, se cambia	****
+**	la forma de obtener la clasificacion del cliente			****
+**	desde la tabla CLCLACLI										****
 ********************************************************************
 **	Modificó:	Carlos Copto									****
 **  Fecha:		14/04/2021										****
@@ -142,11 +144,11 @@ create table #CientesPersonas (
 	Cli_TieCla	char(1),
 	Cli_Locali	char(8),
 	Cli_Entida	char(3),
-	Cli_TipCue	char(2),
 	
 	Cli_Calle	char(40),
 	Cli_CalNum	varchar(10),
-	Cli_Coloni	varchar(150)
+	Cli_Coloni	varchar(150),
+	Cli_ID		int
 )
 
 create table #AuxCientesPersonas (
@@ -198,7 +200,7 @@ if @Tip_ConTip = @Str_L begin
 					Per_RFC,		Per_Calle,		Per_Tipo, 		Per_Nombre, 	Per_ApePat,	
 					Per_ApeMat,		Per_RazSoc, 	Adi_FecNac, 	Adi_TipIde,		Adi_NumIde,	
 					Per_NumPer,		Per_CURP,		Cli_TieCla,		Cli_Locali,		Cli_Entida,
-					Cli_TipCue, 	Cli_Calle,		Cli_CalNum,		Cli_Coloni
+					Cli_Calle,		Cli_CalNum,		Cli_Coloni,		Cli_ID
 				)
 				select		Cli_Numero,
 							Cli_Numero,
@@ -232,16 +234,14 @@ if @Tip_ConTip = @Str_L begin
 							@Str_Vacio,
 							isnull(Cli_Locali, @Str_Vacio),
 							isnull(Cli_Entida, @Str_Vacio),
-							@Str_Vacio,
 							isnull(Cli_Calle, @Str_Vacio),
 							isnull(Cli_CalNum, @Str_Vacio),
-							isnull(Cli_Coloni, @Str_Vacio)
+							isnull(Cli_Coloni, @Str_Vacio),
+							clc.ClClientID 
 					from 	#AuxCientesPersonas noholdlock
 							inner join CLCLIENT clc noholdlock on clc.ClClientID = ClientePersonaID
 							left join CLADICIO cla noholdlock on ClientePersonaID = cla.ClClientID 
 							left join CLCONTRA con noholdlock on ClientePersonaNum =  Con_Client
-					where	Cli_Numero = @Busqueda 
-					and 	Cli_SucAti = isnull(@Suc_Numero,Cli_SucAti)
 					
 					--se crea indice para la tabla
 					create nonclustered index CPNumero on #CientesPersonas ( Per_Numero )
@@ -254,22 +254,13 @@ if @Tip_ConTip = @Str_L begin
 					from #CientesPersonas noholdlock
 							left join CLLOCALI noholdlock on Cli_Locali = Loc_Numero
 							left join CLENTIDA noholdlock on Cli_Entida = Ent_Numero
-					where	Per_Numero = @Busqueda
-					
-					--se actualiza la tabla para obtener el tipo de cuenta
-					update #CientesPersonas set 
-							Cli_TipCue = Cue_Tipo
-					from #CientesPersonas noholdlock
-							inner join CHCUENTA noholdlock on Per_Numero = Cue_Client
-					
+			
 					--se actualiza el campo de clasificacion
 					update #CientesPersonas set 
 							Cli_TieCla = @Sta_Si
-					from 	SOPRTICU noholdlock
-							inner join SOCLAPRO noholdlock on Ptc_Produc  =  Clp_Produc 
-					where	Clp_Clasif  = @Per_ClaCom
-					  and 	Ptc_TipCue  = Cli_TipCue
-					  and	Cli_TipCue not in (@Cue_CashBa)
+					from 	#CientesPersonas noholdlock
+							inner join CLCLACLI noholdlock on  Cli_ID = Clc_Client
+					where	Clc_Clasif = @Per_ClaCom
 					
 					--se borran los que no tengan clasificacion
 					delete from #CientesPersonas 
@@ -307,7 +298,7 @@ if @Tip_ConTip = @Str_L begin
 					Per_RFC,		Per_Calle,		Per_Tipo, 		Per_Nombre, 	Per_ApePat,	
 					Per_ApeMat,		Per_RazSoc, 	Adi_FecNac, 	Adi_TipIde,		Adi_NumIde,	
 					Per_NumPer,		Per_CURP,		Cli_TieCla,		Cli_Locali,		Cli_Entida,
-					Cli_TipCue, 	Cli_Calle,		Cli_CalNum,		Cli_Coloni
+					Cli_Calle,		Cli_CalNum,		Cli_Coloni,		Cli_ID
 				)
 				select		Cli_Numero,
 							Cli_Numero,
@@ -341,10 +332,10 @@ if @Tip_ConTip = @Str_L begin
 							@Str_Vacio,
 							isnull(Cli_Locali, @Str_Vacio),
 							isnull(Cli_Entida, @Str_Vacio),
-							@Str_Vacio,
 							isnull(Cli_Calle, @Str_Vacio),
 							isnull(Cli_CalNum, @Str_Vacio),
-							isnull(Cli_Coloni, @Str_Vacio)
+							isnull(Cli_Coloni, @Str_Vacio),
+							clc.ClClientID 
 					from 	#AuxCientesPersonas noholdlock
 							inner join CLCLIENT clc noholdlock on clc.ClClientID = ClientePersonaID
 							left join CLADICIO cla noholdlock on ClientePersonaID = cla.ClClientID 
@@ -362,20 +353,12 @@ if @Tip_ConTip = @Str_L begin
 							inner join CLLOCALI noholdlock on Cli_Locali = Loc_Numero
 							inner join CLENTIDA noholdlock on Cli_Entida = Ent_Numero
 					
-					--se actualiza la tabla para obtener el tipo de cuenta
-					update #CientesPersonas set 
-							Cli_TipCue = Cue_Tipo
-					from #CientesPersonas noholdlock
-							inner join CHCUENTA noholdlock on Per_Numero = Cue_Client
-					
 					--se actualiza el campo de clasificacion
 					update #CientesPersonas set 
 							Cli_TieCla = @Sta_Si
-					from 	SOPRTICU noholdlock
-							inner join SOCLAPRO noholdlock on Ptc_Produc  =  Clp_Produc 
-					where	Clp_Clasif  = @Per_ClaCom
-					  and 	Ptc_TipCue  = Cli_TipCue
-					  and	Cli_TipCue not in (@Cue_CashBa)
+					from 	#CientesPersonas noholdlock
+							inner join CLCLACLI noholdlock on  Cli_ID = Clc_Client
+					where	Clc_Clasif = @Per_ClaCom
 					
 					--se borran los que no tengan clasificacion
 					delete from #CientesPersonas
@@ -403,7 +386,7 @@ if @Tip_ConTip = @Str_L begin
 					Per_RFC,		Per_Calle,		Per_Tipo, 		Per_Nombre, 	Per_ApePat,	
 					Per_ApeMat,		Per_RazSoc, 	Adi_FecNac, 	Adi_TipIde,		Adi_NumIde,	
 					Per_NumPer,		Per_CURP,		Cli_TieCla,		Cli_Locali,		Cli_Entida,
-					Cli_TipCue, 	Cli_Calle,		Cli_CalNum,		Cli_Coloni
+					Cli_Calle,		Cli_CalNum,		Cli_Coloni,		Cli_ID
 				)
 				select	
 					Per_Numero,
@@ -434,10 +417,10 @@ if @Tip_ConTip = @Str_L begin
 					@Str_Vacio,
 					isnull(Per_Locali, @Str_Vacio),
 					isnull(Per_Entida, @Str_Vacio),
-					@Str_Vacio,
 					isnull(Per_Calle, @Str_Vacio),
 					isnull(Per_CalNum, @Str_Vacio),
-					isnull(Per_Coloni, @Str_Vacio)
+					isnull(Per_Coloni, @Str_Vacio),
+					PerPersoID
 				from #AuxCientesPersonas noholdlock
 					inner join SOPERSON noholdlock on PerPersoID  = ClientePersonaID
 					inner join SOPERADI noholdlock on ClientePersonaNum = Adi_PerNum
@@ -496,7 +479,7 @@ if @Tip_ConTip = @Str_L begin
 					Per_RFC,		Per_Calle,		Per_Tipo, 		Per_Nombre, 	Per_ApePat,	
 					Per_ApeMat,		Per_RazSoc, 	Adi_FecNac, 	Adi_TipIde,		Adi_NumIde,	
 					Per_NumPer,		Per_CURP,		Cli_TieCla,		Cli_Locali,		Cli_Entida,
-					Cli_TipCue, 	Cli_Calle,		Cli_CalNum,		Cli_Coloni
+					Cli_Calle,		Cli_CalNum,		Cli_Coloni,		Cli_ID
 				)
 				select		Cli_Numero,
 							Cli_Numero,
@@ -530,16 +513,14 @@ if @Tip_ConTip = @Str_L begin
 							@Str_Vacio,
 							isnull(Cli_Locali, @Str_Vacio),
 							isnull(Cli_Entida, @Str_Vacio),
-							@Str_Vacio,
 							isnull(Cli_Calle, @Str_Vacio),
 							isnull(Cli_CalNum, @Str_Vacio),
-							isnull(Cli_Coloni, @Str_Vacio)
+							isnull(Cli_Coloni, @Str_Vacio),
+							clc.ClClientID 
 					from 	#AuxCientesPersonas noholdlock
 							inner join CLCLIENT clc noholdlock on clc.ClClientID = ClientePersonaID
 							left join CLADICIO cla noholdlock on ClientePersonaID = cla.ClClientID 
 							left join CLCONTRA con noholdlock on ClientePersonaNum =  Con_Client
-					where	Cli_Numero = @Busqueda 
-					and 	Cli_Fecha >= @Par_FecSuc
 					
 					--se crea indice para la tabla
 					create nonclustered index CPNumero on #CientesPersonas ( Per_Numero )
@@ -552,22 +533,13 @@ if @Tip_ConTip = @Str_L begin
 					from #CientesPersonas noholdlock
 							left join CLLOCALI noholdlock on Cli_Locali = Loc_Numero
 							left join CLENTIDA noholdlock on Cli_Entida = Ent_Numero
-					where	Per_Numero = @Busqueda
-					
-					--se actualiza la tabla para obtener el tipo de cuenta
-					update #CientesPersonas set 
-							Cli_TipCue = Cue_Tipo
-					from #CientesPersonas noholdlock
-							inner join CHCUENTA noholdlock on Per_Numero = Cue_Client
 					
 					--se actualiza el campo de clasificacion
 					update #CientesPersonas set 
 							Cli_TieCla = @Sta_Si
-					from 	SOPRTICU noholdlock
-							inner join SOCLAPRO noholdlock on Ptc_Produc  =  Clp_Produc 
-					where	Clp_Clasif  = @Per_ClaCom
-					  and 	Ptc_TipCue  = Cli_TipCue
-					  and	Cli_TipCue not in (@Cue_CashBa)
+					from 	#CientesPersonas noholdlock
+							inner join CLCLACLI noholdlock on  Cli_ID = Clc_Client
+					where	Clc_Clasif = @Per_ClaCom
 					
 					--se borran los que no tengan clasificacion
 					delete from #CientesPersonas 
@@ -605,7 +577,7 @@ if @Tip_ConTip = @Str_L begin
 					Per_RFC,		Per_Calle,		Per_Tipo, 		Per_Nombre, 	Per_ApePat,	
 					Per_ApeMat,		Per_RazSoc, 	Adi_FecNac, 	Adi_TipIde,		Adi_NumIde,	
 					Per_NumPer,		Per_CURP,		Cli_TieCla,		Cli_Locali,		Cli_Entida,
-					Cli_TipCue, 	Cli_Calle,		Cli_CalNum,		Cli_Coloni
+					Cli_Calle,		Cli_CalNum,		Cli_Coloni,		Cli_ID
 				)
 				select		Cli_Numero,
 							Cli_Numero,
@@ -639,10 +611,10 @@ if @Tip_ConTip = @Str_L begin
 							@Str_Vacio,
 							isnull(Cli_Locali, @Str_Vacio),
 							isnull(Cli_Entida, @Str_Vacio),
-							@Str_Vacio,
 							isnull(Cli_Calle, @Str_Vacio),
 							isnull(Cli_CalNum, @Str_Vacio),
-							isnull(Cli_Coloni, @Str_Vacio)
+							isnull(Cli_Coloni, @Str_Vacio),
+							clc.ClClientID 
 					from 	#AuxCientesPersonas noholdlock
 							inner join CLCLIENT clc noholdlock on clc.ClClientID = ClientePersonaID
 							left join CLADICIO cla noholdlock on ClientePersonaID = cla.ClClientID 
@@ -660,20 +632,12 @@ if @Tip_ConTip = @Str_L begin
 							inner join CLLOCALI noholdlock on Cli_Locali = Loc_Numero
 							inner join CLENTIDA noholdlock on Cli_Entida = Ent_Numero
 					
-					--se actualiza la tabla para obtener el tipo de cuenta
-					update #CientesPersonas set 
-							Cli_TipCue = Cue_Tipo
-					from #CientesPersonas noholdlock
-							inner join CHCUENTA noholdlock on Per_Numero = Cue_Client
-					
 					--se actualiza el campo de clasificacion
 					update #CientesPersonas set 
 							Cli_TieCla = @Sta_Si
-					from 	SOPRTICU noholdlock
-							inner join SOCLAPRO noholdlock on Ptc_Produc  =  Clp_Produc 
-					where	Clp_Clasif  = @Per_ClaCom
-					  and 	Ptc_TipCue  = Cli_TipCue
-					  and	Cli_TipCue not in (@Cue_CashBa)
+					from 	#CientesPersonas noholdlock
+							inner join CLCLACLI noholdlock on  Cli_ID = Clc_Client
+					where	Clc_Clasif = @Per_ClaCom
 					
 					--se borran los que no tengan clasificacion
 					delete from #CientesPersonas
@@ -702,7 +666,7 @@ if @Tip_ConTip = @Str_L begin
 					Per_RFC,		Per_Calle,		Per_Tipo, 		Per_Nombre, 	Per_ApePat,	
 					Per_ApeMat,		Per_RazSoc, 	Adi_FecNac, 	Adi_TipIde,		Adi_NumIde,	
 					Per_NumPer,		Per_CURP,		Cli_TieCla,		Cli_Locali,		Cli_Entida,
-					Cli_TipCue, 	Cli_Calle,		Cli_CalNum,		Cli_Coloni
+					Cli_Calle,		Cli_CalNum,		Cli_Coloni,		Cli_ID
 				)
 				select	
 					Per_Numero,
@@ -733,10 +697,10 @@ if @Tip_ConTip = @Str_L begin
 					@Str_Vacio,
 					isnull(Per_Locali, @Str_Vacio),
 					isnull(Per_Entida, @Str_Vacio),
-					@Str_Vacio,
 					isnull(Per_Calle, @Str_Vacio),
 					isnull(Per_CalNum, @Str_Vacio),
-					isnull(Per_Coloni, @Str_Vacio)
+					isnull(Per_Coloni, @Str_Vacio),
+					PerPersoID
 				from #AuxCientesPersonas noholdlock
 					inner join SOPERSON noholdlock on PerPersoID  = ClientePersonaID
 					inner join SOPERADI noholdlock on ClientePersonaNum = Adi_PerNum
@@ -789,7 +753,7 @@ if @Tip_ConTip = @Str_L begin
 					Per_RFC,		Per_Calle,		Per_Tipo, 		Per_Nombre, 	Per_ApePat,	
 					Per_ApeMat,		Per_RazSoc, 	Adi_FecNac, 	Adi_TipIde,		Adi_NumIde,	
 					Per_NumPer,		Per_CURP,		Cli_TieCla,		Cli_Locali,		Cli_Entida,
-					Cli_TipCue, 	Cli_Calle,		Cli_CalNum,		Cli_Coloni
+					Cli_Calle,		Cli_CalNum,		Cli_Coloni,		Cli_ID
 				)
 				select		Cli_Numero,
 							Cli_Numero,
@@ -823,15 +787,14 @@ if @Tip_ConTip = @Str_L begin
 							@Str_Vacio,
 							isnull(Cli_Locali, @Str_Vacio),
 							isnull(Cli_Entida, @Str_Vacio),
-							@Str_Vacio,
 							isnull(Cli_Calle, @Str_Vacio),
 							isnull(Cli_CalNum, @Str_Vacio),
-							isnull(Cli_Coloni, @Str_Vacio)
+							isnull(Cli_Coloni, @Str_Vacio),
+							clc.ClClientID 
 					from 	#AuxCientesPersonas noholdlock
 							inner join CLCLIENT clc noholdlock on clc.ClClientID = ClientePersonaID
 							left join CLADICIO cla noholdlock on ClientePersonaID = cla.ClClientID 
 							left join CLCONTRA con noholdlock on ClientePersonaNum =  Con_Client
-					where	Cli_Numero = @Busqueda
 					
 					--se crea indice para la tabla
 					create nonclustered index CPNumero on #CientesPersonas ( Per_Numero )
@@ -844,22 +807,13 @@ if @Tip_ConTip = @Str_L begin
 					from #CientesPersonas noholdlock
 							left join CLLOCALI noholdlock on Cli_Locali = Loc_Numero
 							left join CLENTIDA noholdlock on Cli_Entida = Ent_Numero
-					where	Per_Numero = @Busqueda
-					
-					--se actualiza la tabla para obtener el tipo de cuenta
-					update #CientesPersonas set 
-							Cli_TipCue = Cue_Tipo
-					from #CientesPersonas noholdlock
-							inner join CHCUENTA noholdlock on Per_Numero = Cue_Client
 					
 					--se actualiza el campo de clasificacion
 					update #CientesPersonas set 
 							Cli_TieCla = @Sta_Si
-					from 	SOPRTICU noholdlock
-							inner join SOCLAPRO noholdlock on Ptc_Produc  =  Clp_Produc 
-					where	Clp_Clasif  = @Per_ClaCom
-					  and 	Ptc_TipCue  = Cli_TipCue
-					  and	Cli_TipCue not in (@Cue_CashBa)
+					from 	#CientesPersonas noholdlock
+							inner join CLCLACLI noholdlock on  Cli_ID = Clc_Client
+					where	Clc_Clasif = @Per_ClaCom
 					
 					--se borran los que no tengan clasificacion
 					delete from #CientesPersonas 
@@ -896,7 +850,7 @@ if @Tip_ConTip = @Str_L begin
 					Per_RFC,		Per_Calle,		Per_Tipo, 		Per_Nombre, 	Per_ApePat,	
 					Per_ApeMat,		Per_RazSoc, 	Adi_FecNac, 	Adi_TipIde,		Adi_NumIde,	
 					Per_NumPer,		Per_CURP,		Cli_TieCla,		Cli_Locali,		Cli_Entida,
-					Cli_TipCue, 	Cli_Calle,		Cli_CalNum,		Cli_Coloni
+					Cli_Calle,		Cli_CalNum,		Cli_Coloni,		Cli_ID
 				)
 				select		Cli_Numero,
 							Cli_Numero,
@@ -930,10 +884,10 @@ if @Tip_ConTip = @Str_L begin
 							@Str_Vacio,
 							isnull(Cli_Locali, @Str_Vacio),
 							isnull(Cli_Entida, @Str_Vacio),
-							@Str_Vacio,
 							isnull(Cli_Calle, @Str_Vacio),
 							isnull(Cli_CalNum, @Str_Vacio),
-							isnull(Cli_Coloni, @Str_Vacio)
+							isnull(Cli_Coloni, @Str_Vacio),
+							clc.ClClientID 
 					from 	#AuxCientesPersonas noholdlock
 							inner join CLCLIENT clc noholdlock on clc.ClClientID = ClientePersonaID
 							left join CLADICIO cla noholdlock on ClientePersonaID = cla.ClClientID 
@@ -950,21 +904,13 @@ if @Tip_ConTip = @Str_L begin
 					from #CientesPersonas noholdlock
 							inner join CLLOCALI noholdlock on Cli_Locali = Loc_Numero
 							inner join CLENTIDA noholdlock on Cli_Entida = Ent_Numero
-					
-					--se actualiza la tabla para obtener el tipo de cuenta
-					update #CientesPersonas set 
-							Cli_TipCue = Cue_Tipo
-					from #CientesPersonas noholdlock
-							inner join CHCUENTA noholdlock on Per_Numero = Cue_Client
-					
+				
 					--se actualiza el campo de clasificacion
 					update #CientesPersonas set 
 							Cli_TieCla = @Sta_Si
-					from 	SOPRTICU noholdlock
-							inner join SOCLAPRO noholdlock on Ptc_Produc  =  Clp_Produc 
-					where	Clp_Clasif  = @Per_ClaCom
-					  and 	Ptc_TipCue  = Cli_TipCue
-					  and	Cli_TipCue not in (@Cue_CashBa)
+					from 	#CientesPersonas noholdlock
+							inner join CLCLACLI noholdlock on  Cli_ID = Clc_Client
+					where	Clc_Clasif = @Per_ClaCom
 					
 					--se borran los que no tengan clasificacion
 					delete from #CientesPersonas
@@ -992,7 +938,7 @@ if @Tip_ConTip = @Str_L begin
 					Per_RFC,		Per_Calle,		Per_Tipo, 		Per_Nombre, 	Per_ApePat,	
 					Per_ApeMat,		Per_RazSoc, 	Adi_FecNac, 	Adi_TipIde,		Adi_NumIde,	
 					Per_NumPer,		Per_CURP,		Cli_TieCla,		Cli_Locali,		Cli_Entida,
-					Cli_TipCue, 	Cli_Calle,		Cli_CalNum,		Cli_Coloni
+					Cli_Calle,		Cli_CalNum,		Cli_Coloni,		Cli_ID
 				)
 				select	
 					Per_Numero,
@@ -1023,10 +969,10 @@ if @Tip_ConTip = @Str_L begin
 					@Str_Vacio,
 					isnull(Per_Locali, @Str_Vacio),
 					isnull(Per_Entida, @Str_Vacio),
-					@Str_Vacio,
 					isnull(Per_Calle, @Str_Vacio),
 					isnull(Per_CalNum, @Str_Vacio),
-					isnull(Per_Coloni, @Str_Vacio)
+					isnull(Per_Coloni, @Str_Vacio),
+					PerPersoID
 				from #AuxCientesPersonas noholdlock
 					inner join SOPERSON noholdlock on PerPersoID  = ClientePersonaID
 					inner join SOPERADI noholdlock on ClientePersonaNum = Adi_PerNum
