@@ -21,6 +21,12 @@ create procedure SOESTFINCON (
 /*******************************************************************
 ** DESCRIPCION: Consulta de registros de estados financieros      **
 ********************************************************************
+** Modifica:		Jose R. Rodriguez Zenteno	                  **
+** Fecha:			20/09/2021                               	  **
+** Descripcion:		Se modifica consulta C8 para regresar         **
+** 					ID de EEFF anterior y anterior parcial		  **
+** Help: 			1536793		 					 			  **
+********************************************************************
 ** Modifica:		Jose Romeo Rodriguez		                  **
 ** Fecha:			27/11/2018                               	  **
 ** Descripcion:		se agregan campos Esf_NomCon, Esf_NuCePr      **
@@ -497,8 +503,8 @@ end else if @Tip_ConCon = @Str_Ocho begin	 /* C8*/  /*se obtiene el caso a evalu
 		end
 		 
 	
-	select @Ef_RangoAc = (convert(int, Esf_MesFin) - convert(int, Esf_MesIni) + @Ent_Uno) FROM SOESTFIN where  Esf_Numero =@Esf_Numero  -- margen de tiempo del EF Actual
-	select @Ef_RangoAn = (convert(int, Esf_MesFin) - convert(int, Esf_MesIni) + @Ent_Uno) FROM SOESTFIN where  Esf_Numero =@Ef_Anterio -- margen de tiempo del EF Anterior
+	select @Ef_RangoAc = (convert(int, Esf_MesFin) - convert(int, Esf_MesIni) + @Ent_Uno) FROM SOESTFIN noholdlock where  Esf_Numero =@Esf_Numero  -- margen de tiempo del EF Actual
+	select @Ef_RangoAn = (convert(int, Esf_MesFin) - convert(int, Esf_MesIni) + @Ent_Uno) FROM SOESTFIN noholdlock where  Esf_Numero =@Ef_Anterio -- margen de tiempo del EF Anterior
 	
 	if (@Ef_Anterio <> @Ent_Cero) begin
 		if(@Ef_RangoAc<>@Ent_MesFin) begin /*es parcial*/
@@ -515,7 +521,7 @@ end else if @Tip_ConCon = @Str_Ocho begin	 /* C8*/  /*se obtiene el caso a evalu
 			end
 			
 			if(@Ef_AntParc > @Ent_Cero and @Ef_RangoAn=@Ent_MesFin) begin /* 1 CIERRE  Y 2 PARCIALES CON MISMO PERIODO DE TIEMPO*/
-				select @Ent_Cuatro as Esf_Caso
+				select @Ent_Cuatro as Esf_Caso,@Esf_Numero as Esf_Numero,@Ef_Anterio as Ef_Anterio ,@Ef_AntParc as Ef_AntParc 
 			end
 			else begin
 				select @Ent_Uno as Esf_Caso
