@@ -85,20 +85,26 @@ as
 /******************************************************************/
 /** REFERENCIAS: 
 *********************************************************************
+** Modifico:	Raul Muniz										****
+** Fecha:		06/Octubre/2020									****
+** Help:		1504301											****
+** Descripcion: Se agrega exec a SOPEINCOALT para guardar		****
+**				actividad preponderante							****												  
+********************************************************************
 ** Modifico:	CODE4U-Eliezer Catalino Xul Canche				****
 ** Fecha:		06/Febrero/2020									****
 ** Help:		1343720											****
 ** Descripcion: Se agrega indentity para el campo PerPersoID	****												  
 ********************************************************************
-** Modifico:	Erika BÃ¡ez										****
+** Modifico:	Erika Báez										****
 ** Fecha:		04/Marzo/2019									****
 ** Help:		1191883											****
 ** Descripcion: Se modifica mensaje cuando el RFC ya existe		****
 ********************************************************************
-** Modifico:		Armando Alexis SepÃºlveda Cruz				****
+** Modifico:		Armando Alexis Sepúlveda Cruz				****
 ** Fecha:		26/Junio/2017									****
 ** Help:		991811											****
-** Descripcion: Se elimina la concatenaciÃ³n de Per_Titulo en 	****
+** Descripcion: Se elimina la concatenación de Per_Titulo en 	****
 **				Per_ComOrd										****
 /*******************************************************************
 ** Modifico:	Claudia V Sandoval P							****
@@ -140,7 +146,8 @@ declare	@Per_NumTra	char(10),		/*Numero de transaccion*/
 		@Status		int,			/*Status*/
 		@PerPersoID	int,			/*Id de persona*/
 		@Per_ActINE	char(6),		/*Numero de actividad INE*/
-		@Existe		char(1)			/*Bandera de si existe persona*/
+		@Existe		char(1),		/*Bandera de si existe persona*/
+		@Act_ActPre	int				/* Actividad Preponderante */
 
 declare	@Str_Vacio	char(1),		/*	Declaracion de Constantes	*/
 		@Str_Espaci	char(1),
@@ -170,7 +177,7 @@ select	@Str_Vacio	= '',			/* String Vacio	*/
 		@Per_Fisica	= '2',			/* Persona Fisica */
 		@Sta_ActIna	= 'I',			/* Status de actividad inactiva */
 		@Tab_Nombre	= 'SOPERSON',	/* Tabla que se consulta en SOFOLIOS */
-		@Fec_Vacia	= '1900-01-01',	/*	Fecha VacÃ­a*/
+		@Fec_Vacia	= '1900-01-01',	/*	Fecha Vacía*/
 		@Ent_Cero	= 0,			/* Entero en Cero */
 		@Ent_Uno	= 1,			/* Entero en Uno */
 		@Tip_Titula	= '1',			/* Titular */
@@ -317,6 +324,19 @@ insert into SOPERADI values (
 exec @Status	= SOUNIPERPRO
 	@Per_Numero,	@NumTransac,	@Transaccio,	@Usuario,	@FechaSis,
 	@SucOrigen,		@SucDestino,	@Modulo
+	
+if @Status <> 0 begin
+	rollback
+	return 1
+end
+
+select	@Act_ActPre	= isnull(Apc_ActPre, @Ent_Cero)
+	from SOACPRCL noholdlock
+	where Apc_Activi = @Per_Activi
+	
+exec @Status	= SOPEINCOALT
+	@Per_Numero,	@Act_ActPre,	@NumTransac,	@Transaccio,	@Usuario,
+	@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
 	
 if @Status <> 0 begin
 	rollback

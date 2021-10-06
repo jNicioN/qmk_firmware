@@ -48,150 +48,159 @@ as
 /***************************************************************************/
 /** REFERENCIAS:														   */
 /***************************************************************************
+** Modifico:	Raul Muniz												****
+** Fecha:		06/Octubre/2020											****
+** Help:		1504301													****
+** Descripcion: Se agrega exec a SOPEINCOALT para guardar actividad		****
+**				preponderante											****
+****************************************************************************
 ** Modifico:	CODE4U-Eliezer Catalino Xul Canche						****
 ** Fecha:		06/Febrero/2020											****
 ** Help:		1343720													****
 ** Descripcion: Se agrega indentity para el campo PerPersoID			****
 ****************************************************************************
-** Modifico:		Armando Alexis SepÃºlveda Cruz						****
+** Modifico:		Armando Alexis Sepúlveda Cruz						****
 ** Fecha:		26/Junio/2017											****
 ** Help:		991811													****
-** Descripcion: Se elimina la concatenaciÃ³n de Per_Titulo en Per_ComOrd	****
+** Descripcion: Se elimina la concatenación de Per_Titulo en Per_ComOrd	****
 ****************************************************************************
-** Modifico:	Andrea RamÃ­rez MondragÃ³n								****
+** Modifico:	Andrea Ramírez Mondragón								****
 ** Fecha:		22/Abril/2015											****
 ** Help:		733855													****
 ** Descripcion:	Se obtiene datos para cuentas Nivel 2 de OLPARAMS		****
 ****************************************************************************
-** ModificaciÃ³n:	David Alejandro Cantu TreviÃ±o						****
+** Modificación:	David Alejandro Cantu Treviño						****
 ** Fecha:			18/Mayo/2015										****
 ** Help:			766265												****
-** DescripciÃ³n:		ValidaciÃ³n para CLLOCALI y CLENTIDA por Pais		****
+** Descripción:		Validación para CLLOCALI y CLENTIDA por Pais		****
 ****************************************************************************
-** Modifico:		Edwin E. PÃ©rez Requena								****
+** Modifico:		Edwin E. Pérez Requena								****
 ** Fecha:		11/Agosto/2014											****
 ** Help:			673139												****
-** Descripcion:	Se agrega NB en condiciÃ³n para Banca 					****
-**				ElectrÃ³nica												****
+** Descripcion:	Se agrega NB en condición para Banca 					****
+**				Electrónica												****
 ****************************************************************************
 ** Modifico:		Claudia V Sandoval P								****
 ** Fecha:		03/03/2014												****
 ** Help:			00599444											****
 ** Descripcion:	Se agrega proceso unificacion							****
 ****************************************************************************
-** ModificÃ³:		Ignacio Ordaz Valtierra								****
+** Modificó:		Ignacio Ordaz Valtierra								****
 ** Fecha:		12/Sep/2012												****
 ** Help:			386371												****
-** DescripciÃ³n:	validar localidad y entidad sean activos				****
+** Descripción:	validar localidad y entidad sean activos				****
 ****************************************************************************
-** ModificÃ³:		Eugenio Chairez Flore     							****
+** Modificó:		Eugenio Chairez Flore     							****
 ** Fecha:		27/Oct/2011												****
 ** Help:			00411176											****
-** DescripciÃ³n:	No atraopaba el Error al validar el Telefono			****
+** Descripción:	No atraopaba el Error al validar el Telefono			****
 ****************************************************************************
-** ModificÃ³:		Ma. Dolores Hdz.									****
+** Modificó:		Ma. Dolores Hdz.									****
 ** Fecha:		05/Ene/10												****
 ** Help:			00224608											****
-** DescripciÃ³n:	Omitir ValidaciÃ³n telefonp en modulo FB					****
+** Descripción:	Omitir Validación telefonp en modulo FB					****
 ****************************************************************************
-** ModificÃ³:		Jorge Guerrero										****
+** Modificó:		Jorge Guerrero										****
 ** Fecha:		08/Dic/2009												****
 ** Help Desk:	00232160												****
-** Descripcion:	validar el la longitud del telÃ©fono, sÃ³lo a las 		****				  
+** Descripcion:	validar el la longitud del teléfono, sólo a las 		****				  
 **				personas que son titulares (Clientes).		 			**** 		
 ****************************************************************************
-** ModificÃ³:		Jorge Guerrero Perez								****
+** Modificó:		Jorge Guerrero Perez								****
 ** Fecha:		19/Oct/2009												****
 ** Help Desk:	00208986												****
-** Descripcion:	Se agregÃ³ validaciÃ³n para lada y telÃ©fono 				**** 		
+** Descripcion:	Se agregó validación para lada y teléfono 				**** 		
 **** **																	****
 ****************************************************************************
 ****************************************************************************
-** ModificÃ³:		Grisdely MartÃ­nez RamÃ­rez							****
+** Modificó:		Grisdely Martínez Ramírez							****
 ** Fecha:		01/Julio/2009											****
 ** Help Desk:	173833													****
-** Descripcion:	Se ampliÃ³ Per_RazSoc, Per_Comple 	 					****
+** Descripcion:	Se amplió Per_RazSoc, Per_Comple 	 					****
  **				y Per_ComOrd											****
 ****************************************************************************
-**Â Â  Â Â Â Â 			STORE CONVERTIDOÂ Â Â Â Â  Â Â Â Â Â Â Â Â Â Â Â 					****
+**       			STORE CONVERTIDO                 					****
 ****************************************************************************
-** ModificÃ³:		Karina ChavarrÃ­a Tovar								****
+** Modificó:		Karina Chavarría Tovar								****
 ** Fecha:		27/Febrero/2008											****
 ** Help:			76754												****
-** DescripciÃ³n:	Eliminar los espacios en blanco a Cli_RazSoc 			****
+** Descripción:	Eliminar los espacios en blanco a Cli_RazSoc 			****
 **				cuando se asigna a Cli_ComOrd y Cli_Comple				**** 
 ****************************************************************************
-** ModificÃ³:		Lucina Gonzalez Trejo								****
+** Modificó:		Lucina Gonzalez Trejo								****
 ** Fecha:		09/Nov/07												****
-** DescripciÃ³n:	Optimizar												****
+** Descripción:	Optimizar												****
 ** Help:			59235												****
 ****************************************************************************
-** ModificÃ³:		Gerardo Valladares									****
+** Modificó:		Gerardo Valladares									****
 ** Fecha:		25/Sep/07												****
-** DescripciÃ³n:	Agregar var Err_Descri									****
+** Descripción:	Agregar var Err_Descri									****
 ** Help:			3666												****
 ****************************************************************************
 ** 				STORE CONVERTIDO 										****	
-** ConvirtiÃ³ : Karina ChavarrÃ­a Tovar									****	
+** Convirtió : Karina Chavarría Tovar									****	
 ** Fecha :     23/Julio/07												****	
 ****************************************************************************
-** ModificÃ³:		Lucina Gonzalez Trejo								****
+** Modificó:		Lucina Gonzalez Trejo								****
 ** Fecha:		12/Marzo/07												****
-** DescripciÃ³n:	Agregar campos											****
+** Descripción:	Agregar campos											****
 ** Help:			3666 - 7100											****
 ****************************************************************************
-** ModificÃ³:		Ricardo Salinas										****
+** Modificó:		Ricardo Salinas										****
 ** Fecha:		27/Oct/06												****
-** DescripciÃ³n:	Si el modulo es BE no hace las validaciones				****
+** Descripción:	Si el modulo es BE no hace las validaciones				****
 ** Help:			3781												****
 ****************************************************************************
 ****************************************************************************
-** ModificÃ³:		Ricardo Salinas										****
+** Modificó:		Ricardo Salinas										****
 ** Fecha:		03/Jul/06												****
-** DescripciÃ³n:	Elimine validacion de CP con ciudad	 					****
+** Descripción:	Elimine validacion de CP con ciudad	 					****
 ****************************************************************************
 ****************************************************************************
-** ModificÃ³:		FCHIA	       										****
+** Modificó:		FCHIA	       										****
 ** Fecha:		24/Mar/06												****
-** DescripciÃ³n:	Que valide Actividad solo si  <> Vacio					****
+** Descripción:	Que valide Actividad solo si  <> Vacio					****
 ****************************************************************************
-** ModificÃ³:		Jorge Ortega RodrÃ­guez								****
+** Modificó:		Jorge Ortega Rodríguez								****
 ** Fecha:		28/Octubre/2005											****
-** Help:			CorrecciÃ³n											****
-** DescripciÃ³n:	Se cambiÃ³ la variable Err_Numero por					****
+** Help:			Corrección											****
+** Descripción:	Se cambió la variable Err_Numero por					****
 **				Per_Numero en la salida del Store						****
 ****************************************************************************
-** ModificÃ³:		Jorge M. Maldonado GonzÃ¡lez							****
+** Modificó:		Jorge M. Maldonado González							****
 ** Fecha:		28/Octubre/2004											****
-** DescripciÃ³n:	Cambio en estructura de SOPERSON						****
+** Descripción:	Cambio en estructura de SOPERSON						****
 ****************************************************************************
-** ModificÃ³:		Mayra Estrada	  									****
+** Modificó:		Mayra Estrada	  									****
 ** Fecha:		17/Jun/00												****
-** DescripciÃ³n:	ValidaciÃ³n 000002										****
+** Descripción:	Validación 000002										****
 ****************************************************************************
-** CreÃ³:			FROCHA         										****
+** Creó:			FROCHA         										****
 ** Fecha:		18/Jun/1998												****
 ****************************************************************************
-** ModificÃ³ : 	Ing. Laura Elena Cervantes 								****
+** Modificó : 	Ing. Laura Elena Cervantes 								****
 ** Fecha:	 	16/Jul/1998												****
 ****************************************************************************/
 
-declare	@Per_Comple	varchar(180),	/*	Declaracion de Variables	*/
-		@Per_ComOrd	varchar(180),
-		@Act_Numero	char(10),
-		@Act_Status	char(1),
-		@Status		int,
-		@PerPersoID	int,
-		@PerExist	char(8),
-		@Per_Benefi	char(1),
-		@Err_Descri	char(12),
-		@Lon_Telefo smallint,
-		@Tel_Comple	varchar(11),
-		@Sta_Locali char(1),
-		@Sta_Entida	char(1),
-		@Per_Pais	char(3)
+/*	Declaracion de Variables	*/
+declare	@Per_Comple	varchar(180),	/* Nombre Completo */
+		@Per_ComOrd	varchar(180),	/* Nombre Completo Ordenado */
+		@Act_Numero	char(10),		/* Numero Actividad */
+		@Act_Status	char(1),		/* Estatus Actividad */
+		@Status		int,			/* Estatus */
+		@PerPersoID	int,			/* ID Persona */
+		@PerExist	char(8),		/* Variable Existe Persona */
+		@Per_Benefi	char(1),		/* Beneficiario */
+		@Err_Descri	char(12),		/* Error Descripcion */
+		@Lon_Telefo smallint,		/* Telefono */
+		@Tel_Comple	varchar(11),	/* Telefono Completo */
+		@Sta_Locali char(1),		/* Localidad */
+		@Sta_Entida	char(1),		/* Estatus Entidad */
+		@Per_Pais	char(3),		/* Pais */
+		@Act_ActPre	int				/* Actividad Preponderante */
 
-declare	@Fec_Vacia	smalldatetime,   /*	Declaracion de Constantes	*/
+/*	Declaracion de Constantes	*/
+declare	@Fec_Vacia	smalldatetime,
         @Str_Vacio	char(1),		
 		@Str_Espaci	char(1),
 		@Per_Moral	char(1),
@@ -226,7 +235,7 @@ declare	@Fec_Vacia	smalldatetime,   /*	Declaracion de Constantes	*/
 		@Tip_PerNum char(1)
 
 
-select	@Fec_Vacia	= '1900-01-01',	/*	Fecha VacÃ­a*/
+select	@Fec_Vacia	= '1900-01-01',	/*	Fecha Vacía*/
 		@Str_Vacio	= '',			/*	String Vacio	*/
 		@Str_Espaci	= ' ',			/*	String Espacio	*/
 		@Per_Moral	= '1',			/* Persona Moral */
@@ -236,7 +245,7 @@ select	@Fec_Vacia	= '1900-01-01',	/*	Fecha VacÃ­a*/
 		@Ent_Cero	= 0,			/* Entero en Cero */
 		@Ent_Uno	= 1,			/* Entero en Uno */
 		@Ban_Electr	= 'BE',			/* Banca Elctronica */
-		@Ban_NueBan	= 'NB',			/* Nueva Banca ElectrÃ³nica */
+		@Ban_NueBan	= 'NB',			/* Nueva Banca Electrónica */
 		@Pro_Intern	= 'IT',			/* Proceso de Internacional			*/
 		@Tip_CueChe	= 'CH',			/* Proceso: Personas relacionadas a Cuenta de cheques*/
 		@Tip_CliNom	= 'CN',			/* Proceso: Clientes de Nomina		*/
@@ -254,7 +263,7 @@ select	@Fec_Vacia	= '1900-01-01',	/*	Fecha VacÃ­a*/
 		@Tip_Titula	= '1',
 		@Str_No123	= '[^123]',
 	 	@Str_23		= '[23]',
-	 	@Mod_FabCon = 'FB',			/* Modulo de Fabrica de CrÃ©dito al Consumo */
+	 	@Mod_FabCon = 'FB',			/* Modulo de Fabrica de Crédito al Consumo */
 	 	@Sta_Inacti	= 'I',			/* Status Inactivo para validar localidad y entidad */
 		@Mod_AplOnl	= 'OL',			/* Modulo de Aplicaciones Online*/		
 		@Tip_PerNum = 'F'			/*  Tipo proceso para actualizar el numero de folio*/
@@ -286,7 +295,7 @@ if @Cob_Tipo	= @Tip_Titula begin
 	if @Modulo not in (@Mod_FabCon,@Pro_Intern) begin	
 		if @Lon_Telefo <> 10 begin
 			select 	Err_Codigo = '000024',
-					Err_Mensaj = 'LADA Ã³ TelÃ©fono Incorrecto, favor de verificarlos'				
+					Err_Mensaj = 'LADA ó Teléfono Incorrecto, favor de verificarlos'				
 			rollback
 			return 1
 		end
@@ -545,7 +554,7 @@ if (@Modulo not in (@Ban_Electr, @Ban_NueBan)) and (@Tip_Proces = @Tip_CueChe an
 									  and	Cpc_CodPos	= @Per_CodPos)) and @Per_Nacion = @Per_PaiMex begin
 
 			select	Err_Codigo	= '000021',
-					Err_Mensaj	= 'CÃƒÂ³digo Postal' + @Err_Descri + ' Incorrecto',
+					Err_Mensaj	= 'Código Postal' + @Err_Descri + ' Incorrecto',
 					Err_Variab	= 'Per_CodPos'
 			rollback
 			return 1
@@ -628,10 +637,23 @@ exec @Status = SOPERSONPRO
 		rollback
 		return 1
 	end
-
+	
 exec SOUNIPERPRO
 	@Per_Numero,	@NumTransac,	@Transaccio,	@Usuario,	@FechaSis,
 	@SucOrigen,		@SucDestino,	@Modulo
+	
+select	@Act_ActPre	= isnull(Apc_ActPre, @Ent_Cero)
+	from SOACPRCL noholdlock
+	where Apc_Activi = @Per_Activi
+	
+exec @Status	= SOPEINCOALT
+	@Per_Numero,	@Act_ActPre,	@NumTransac,	@Transaccio,	@Usuario,
+	@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
+	
+if @Status <> 0 begin
+	rollback
+	return 1
+end
 
 if @@nestlevel = @Ent_Uno
 	select	Err_Codigo	= '000000',
