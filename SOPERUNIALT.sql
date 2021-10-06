@@ -86,10 +86,10 @@ as
 /** REFERENCIAS: 
 *********************************************************************
 ** Modifico:	Raul Muniz										****
-** Fecha:		06/Octubre/2020									****
+** Fecha:		06/Octubre/2021									****
 ** Help:		1504301											****
 ** Descripcion: Se agrega exec a SOPEINCOALT para guardar		****
-**				actividad preponderante							****												  
+**				actividad preponderante							****
 ********************************************************************
 ** Modifico:	CODE4U-Eliezer Catalino Xul Canche				****
 ** Fecha:		06/Febrero/2020									****
@@ -330,6 +330,7 @@ if @Status <> 0 begin
 	return 1
 end
 
+select	@Act_ActPre	= @Ent_Cero
 select	@Act_ActPre	= isnull(Apc_ActPre, @Ent_Cero)
 	from SOACPRCL noholdlock
 	where Apc_Activi = @Per_Activi

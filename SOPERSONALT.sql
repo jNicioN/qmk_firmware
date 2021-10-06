@@ -49,7 +49,7 @@ as
 /** REFERENCIAS:														   */
 /***************************************************************************
 ** Modifico:	Raul Muniz												****
-** Fecha:		06/Octubre/2020											****
+** Fecha:		06/Octubre/2021											****
 ** Help:		1504301													****
 ** Descripcion: Se agrega exec a SOPEINCOALT para guardar actividad		****
 **				preponderante											****
@@ -641,7 +641,8 @@ exec @Status = SOPERSONPRO
 exec SOUNIPERPRO
 	@Per_Numero,	@NumTransac,	@Transaccio,	@Usuario,	@FechaSis,
 	@SucOrigen,		@SucDestino,	@Modulo
-	
+
+select	@Act_ActPre	= @Ent_Cero	
 select	@Act_ActPre	= isnull(Apc_ActPre, @Ent_Cero)
 	from SOACPRCL noholdlock
 	where Apc_Activi = @Per_Activi
