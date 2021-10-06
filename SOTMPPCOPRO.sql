@@ -44,7 +44,6 @@ select @FinMes	= dateadd(dd, -1, dateadd(mm,  1, @IniMes))
 
 begin transaction
 	update SOPRTICR set
-		Ptc_Numero  =  tmp.Pco_Numero,
 		Ptc_TipCre  =  tmp.Pco_TipCre,
 		Ptc_Produc  =  tmp.Pco_Produc,
 		NumTransac  =  @NumTransac,
@@ -60,13 +59,11 @@ begin transaction
 
 
 	insert into SOPRTICR(
-		Ptc_Numero,   Ptc_TipCre, Ptc_Produc, NumTransac,   
-        Transaccio,   Usuario,    FechaSis,    SucOrigen,
-        SucDestino)
+		 Ptc_TipCre, Ptc_Produc, NumTransac,    Transaccio,   
+		 Usuario,    FechaSis,    SucOrigen,    SucDestino)
 		select  
-		tmp.Pco_Numero,   tmp.Pco_TipCre, tmp.Pco_Produc,  @NumTransac,      
-        @Transaccio,      @Usuario,       @FechaSis,        @SucOrigen,
-        @SucDestino
+	    tmp.Pco_TipCre, tmp.Pco_Produc,  @NumTransac,      @Transaccio,      
+		@Usuario,       @FechaSis,        @SucOrigen,      @SucDestino
 		from SOTMPPCO tmp noholdlock 
 		left join SOPRTICR des on   tmp.Pco_TipCre = des.Ptc_TipCre and  
                                    tmp.Pco_Produc = des.Ptc_Produc

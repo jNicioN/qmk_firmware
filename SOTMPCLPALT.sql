@@ -31,4 +31,4 @@ as
 
 /* Alta de Catalogo */
 insert into SOTMPCLP values(
-	@Clp_Numero,		@Clp_Clasif,		@Clp_Produc,		@Clp_FecCon)
+	@Clp_Numero,		@Clp_Clasif,		@Clp_Produc,		@Clp_FecCon, 	@NumTransac)

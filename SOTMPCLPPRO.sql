@@ -44,7 +44,6 @@ select @FinMes	= dateadd(dd, -1, dateadd(mm,  1, @IniMes))
 
 begin transaction
 	update SOCLAPRO set
-		Clp_Numero  =  tmp.Clp_Numero,
 		Clp_Clasif  =  tmp.Clp_Clasif,
 		Clp_Produc  =  tmp.Clp_Produc,
 		NumTransac  =  @NumTransac,
@@ -60,13 +59,11 @@ begin transaction
 
 
 	insert into SOCLAPRO(
-		Clp_Numero,   Clp_Clasif, Clp_Produc, NumTransac,   
-        Transaccio,   Usuario,    FechaSis,    SucOrigen,
-        SucDestino)
+		Clp_Clasif, Clp_Produc, NumTransac,    Transaccio,   
+		Usuario,    FechaSis,    SucOrigen,     SucDestino)
 		select  
-		tmp.Clp_Numero,   tmp.Clp_Clasif, tmp.Clp_Produc,  @NumTransac,      
-        @Transaccio,      @Usuario,       @FechaSis,        @SucOrigen,
-        @SucDestino
+	    tmp.Clp_Clasif, tmp.Clp_Produc,  @NumTransac,  @Transaccio,     
+		@Usuario,       @FechaSis,        @SucOrigen,  @SucDestino
 		from SOTMPCLP tmp noholdlock 
 		left join SOCLAPRO des on   tmp.Clp_Clasif = des.Clp_Clasif and  
                                    tmp.Clp_Produc = des.Clp_Produc

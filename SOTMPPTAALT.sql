@@ -31,4 +31,4 @@ as
 
 /* Alta de Catalogo */
 insert into SOTMPPTA values(
-	@Pta_Numero,		@Pta_TipTar,		@Pta_Produc,		@Pta_FecCon)
+	@Pta_Numero,		@Pta_TipTar,		@Pta_Produc,		@Pta_FecCon,	@NumTransac)

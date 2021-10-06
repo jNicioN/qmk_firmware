@@ -39,4 +39,4 @@ as
 /* Alta de Catalogo */
 insert into SOTMPPRO values(
 	@Pro_Numero,		@Pro_Nombre,		@Pro_Abrevi,		@Pro_Activo,
-	@Pro_FecCon,			@Pro_NivAut)
+	@Pro_FecCon,		@Pro_NivAut,		@NumTransac)

@@ -44,7 +44,6 @@ select @FinMes	= dateadd(dd, -1, dateadd(mm,  1, @IniMes))
 
 begin transaction
 	update SOPRTITA set
-		Ptt_Numero  =  tmp.Pta_Numero,
 		Ptt_TipTar  =  tmp.Pta_TipTar,
 		Ptt_Produc  =  tmp.Pta_Produc,
 		NumTransac  =  @NumTransac,
@@ -60,13 +59,11 @@ begin transaction
 
 
 	insert into SOPRTITA(
-		Ptt_Numero,   Ptt_TipTar, Ptt_Produc, NumTransac,   
-        Transaccio,   Usuario,    FechaSis,    SucOrigen,
-        SucDestino)
+	    Ptt_TipTar, Ptt_Produc, NumTransac,   Transaccio,   
+		Usuario,    FechaSis,    SucOrigen,    SucDestino)
 		select  
-		tmp.Pta_Numero,   tmp.Pta_TipTar, tmp.Pta_Produc,  @NumTransac,      
-        @Transaccio,      @Usuario,       @FechaSis,        @SucOrigen,
-        @SucDestino
+		tmp.Pta_TipTar, tmp.Pta_Produc,  @NumTransac, @Transaccio,      
+		@Usuario,       @FechaSis,        @SucOrigen, @SucDestino
 		from SOTMPPTA tmp noholdlock 
 		left join SOPRTITA des on tmp.Pta_TipTar = des.Ptt_TipTar and  
                                    tmp.Pta_Produc = des.Ptt_Produc

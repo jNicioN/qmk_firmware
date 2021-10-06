@@ -31,4 +31,4 @@ as
 
 /* Alta de Catalogo */
 insert into SOTMPPCC values(
-	@Pcc_Numero,		@Pcc_TipCre,		@Pcc_Produc,		@Pcc_FecCon)
+	@Pcc_Numero,		@Pcc_TipCre,		@Pcc_Produc,		@Pcc_FecCon,	@NumTransac)

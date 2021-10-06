@@ -31,4 +31,4 @@ as
 
 /* Alta de Catalogo */
 insert into SOTMPPCO values(
-	@Pco_Numero,		@Pco_TipCre,		@Pco_Produc,		@Pco_FecCon)
+	@Pco_Numero,		@Pco_TipCre,		@Pco_Produc,		@Pco_FecCon,	@NumTransac)
