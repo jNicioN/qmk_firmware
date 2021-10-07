@@ -21,6 +21,11 @@ as
 ** REFERENCIAS:													****
 ********************************************************************
 **	Modifico:	Marcelo Bautista Hernandez						****
+**  Fecha:		06/10/2021										****
+**  Help:		1179955											****
+**	Descripcion: Se modifican las consultas relacionadas a SMS	****
+********************************************************************
+**	Modifico:	Marcelo Bautista Hernandez						****
 **  Fecha:		03/06/2021										****
 **  Help:		1482775											****
 **	Descripcion: optimizar CB, L9, quitar L8, LB	 			****
@@ -744,9 +749,6 @@ if @Tip_ConTip = 'C' begin
 		 order by Peu_Grupo
 
 	end else if @Tip_ConCon = 'C' begin /*Consulta por persona registrada en internacional para tercero autorizado*/
-		select @Int_Client = ClClientID 
-		from CLCLIENT noholdlock
-		where Cli_Numero = @Per_Numero
 		 select	sp.Per_Numero,	sp.Per_Tipo,	sp.Per_Benefi,	sp.Per_NuSeFi,	sp.Per_Titulo,
 				sp.Per_Nombre,	sp.Per_ApePat,	sp.Per_ApeMat,	sp.Per_RazSoc,	sp.Per_Comple,
 				sp.Per_ComOrd,	sp.Per_RFC,		sp.Per_CURP
@@ -754,7 +756,6 @@ if @Tip_ConTip = 'C' begin
 			inner join ITPERSON pe noholdlock on sp.PerPersoID = pe.Per_PerId 
 			where Per_Tipo in (@Tip_Fisica,@Tip_FisAE)
 			  and Per_RFC = @Per_RFC
-			  and pe.Per_Client = @Int_Client
 	end else if @Tip_ConCon = 'D' begin /*Consulta para personas que no existen en lIsta negra de Tercero autorizado*/
 			 select top 1	sp.Per_Numero,	sp.Per_Tipo,	sp.Per_Benefi,	sp.Per_NuSeFi,	sp.Per_Titulo,
 				sp.Per_Nombre,	sp.Per_ApePat,	sp.Per_ApeMat,	sp.Per_RazSoc,	sp.Per_Comple,
@@ -783,11 +784,12 @@ if @Tip_ConTip = 'C' begin
 			and Per_RFC = @Per_RFC	
 		end 
 	end else if @Tip_ConCon = 'G' begin /*Consulta para personas que no existen en lIsta negra de Tercero autorizado*/
-		
-		select @Int_Client = ClClientID 
-		from CLCLIENT noholdlock
-		where Cli_Numero = @Per_Numero
 	
+		if @Per_RFC = @Str_Vacio begin
+			select ''
+			return 0
+		end
+		
 		create table #PersonasBloqueadas(
 			Per_Id 	   int identity,
 			Per_Numero char(8)
@@ -822,7 +824,6 @@ if @Tip_ConTip = 'C' begin
 				Adi_CaNuIn,	Adi_EntPri,	Adi_EntSeg, PerPersoID 
 			from SOPERSON per noholdlock 
 			inner join ITPERSON pe noholdlock on per.PerPersoID = pe.Per_PerId 
-											and pe.Per_Client = @Int_Client
 			left join #PersonasBloqueadas bloc noholdlock on bloc.Per_Numero = per.Per_Numero
 			left join  SOPERADI noholdlock on per.Per_Numero	= Adi_PerNum
 			where bloc.Per_Id is null	
@@ -1225,6 +1226,7 @@ end else begin
 		
 		select Per_RFC, Per_Comple
 		from SOPERSON noholdlock
-		where Per_RFC like @Rfc_Like
+		where  Per_Tipo <> '1'
+		and	Per_RFC like @Rfc_Like
 	end
 end
