@@ -27,10 +27,15 @@ as
 /* Declaracion de Variables */
 
 
-	declare	@Fec_Ciclo smalldatetime,
-			@Fec_FinSem smalldatetime,
-			@Tas_Valor float,
-			@Tas_Nombre varchar(50),
+	declare	@Fec_FinSem smalldatetime,
+			@Tas_Nombre varchar(50)
+			
+			
+			
+/* Declaracion de Constantes */			
+	declare @Fec_Ciclo	smalldatetime,
+			@Bus_Consul	char(1),
+			@Tas_Valor	float,
 			@Sum_Tasas	float,
 			@Val_Promed	float,
 			@Val_Dias	int,
@@ -44,10 +49,8 @@ as
 			@Ent_Uno	int,
 			@Tip_ConTip char(1),
 			@Tip_ConCon char(1),
-			@Bus_Consul	char(1),
 			@Str_Uno	char(1)
-			
-		
+				
 		
 	select	@Fec_Ciclo = @Par_FecIni,
 			@Bus_Consul = 'C',
@@ -61,7 +64,7 @@ as
 			@Int_MenUno = -1,
 			@Ent_Uno	= 1,
 			@Int_Cero   = 0,
-			@Str_Uno		= 1
+			@Str_Uno	= '1'
 			
 		
 		
@@ -161,7 +164,7 @@ as
 			select Tmp_NomTas, Tmp_Fecha, Tmp_ValTas, Tmp_Suma 
 				from #TasasFecha 
 		
-			select  Promedio = @Val_Promed
+			select Promedio = @Val_Promed 
 		
 		end else begin 
 		
