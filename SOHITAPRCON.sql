@@ -44,7 +44,8 @@ as
 			@Ent_Uno	int,
 			@Tip_ConTip char(1),
 			@Tip_ConCon char(1),
-			@Bus_Consul	char(1)
+			@Bus_Consul	char(1),
+			@Str_Uno	char(1)
 			
 		
 		
@@ -59,7 +60,8 @@ as
 			@Str_NE		= 'NE',
 			@Int_MenUno = -1,
 			@Ent_Uno	= 1,
-			@Int_Cero   = 0
+			@Int_Cero   = 0,
+			@Str_Uno		= 1
 			
 		
 		
@@ -75,7 +77,7 @@ as
 		end
 		
 		select top 1 @Val_Tasa =  Hit_Tasa 
-			from SOHISTAS 
+			from SOHISTAS noholdlock
 		where  Hit_Tasa = @Par_Tasa
 		
 		select @Val_Tasa = isnull(@Val_Tasa,@Str_NE)
@@ -113,7 +115,7 @@ as
 							if @Tas_Valor = @Int_Cero begin
 									
 								select top 1 @Tas_Valor = (Hit_Valor) 
-									from SOHISTAS 
+									from SOHISTAS noholdlock
 									where Hit_Tasa = @Par_Tasa 
 									and Hit_Fecha <= @Fec_FinSem
 									order by Hit_Fecha desc
@@ -154,7 +156,7 @@ as
 		select @Val_Promed = @Sum_Tasas / @Val_Dias
 				
 	if @Tip_ConTip = @Bus_Consul begin  	/* 'C' = Consulta */
-		if @Tip_ConCon = '1' begin	/* Consulta General */
+		if @Tip_ConCon = @Str_Uno begin	/* Consulta General */
 			
 			select Tmp_NomTas, Tmp_Fecha, Tmp_ValTas, Tmp_Suma from #TasasFecha 
 		
