@@ -158,18 +158,21 @@ as
 	if @Tip_ConTip = @Bus_Consul begin  	/* 'C' = Consulta */
 		if @Tip_ConCon = @Str_Uno begin	/* Consulta General */
 			
-			select Tmp_NomTas, Tmp_Fecha, Tmp_ValTas, Tmp_Suma from #TasasFecha 
+			select Tmp_NomTas, Tmp_Fecha, Tmp_ValTas, Tmp_Suma 
+				from #TasasFecha 
 		
-			select  @Val_Promed Promedio
+			select  Promedio = @Val_Promed
 		
 		end else begin 
 		
-			select Tmp_NomTas, Tmp_Fecha, Tmp_ValTas, Tmp_Suma from #TasasFecha
+			select Tmp_NomTas, Tmp_Fecha, Tmp_ValTas, Tmp_Suma 
+				from #TasasFecha
 			 
 		end
 	end else begin	 /* 'L' = Lista */
 		
-			select Tmp_NomTas, Tmp_Fecha, Tmp_ValTas, Tmp_Suma from #TasasFecha
+			select Tmp_NomTas, Tmp_Fecha, Tmp_ValTas, Tmp_Suma 
+				from #TasasFecha
 	end
 	
 		
