@@ -42,7 +42,7 @@ as
 			@Sum_Dias	int,
 			@Val_UltTas	float,
 			@Ent_Cero int,
-			@Val_Tasa char(2),
+			@Val_Tasa int,
 			@Str_NE	char(2),
 			@Int_Cero int,
 			@Int_MenUno int,
@@ -79,13 +79,13 @@ as
 		return 1
 		end
 		
-		select top 1 @Val_Tasa =  Hit_Tasa 
-			from SOHISTAS noholdlock
-		where  Hit_Tasa = @Par_Tasa
+
 		
-		select @Val_Tasa = isnull(@Val_Tasa,@Str_NE)
+		select @Val_Tasa = count( Tas_Numero )   
+			from SOTASAS noholdlock
+		where   Tas_Numero = @Par_Tasa
 			
-		if @Val_Tasa = @Str_NE begin
+		if( isnull(@Val_Tasa,@Int_Cero) = @Int_Cero ) begin
 			select 	Err_Codigo 	= '000002',
 					Err_Mensaj 	= 'La tasa esta incorrecta'
 				rollback
@@ -164,7 +164,7 @@ as
 			select Tmp_NomTas, Tmp_Fecha, Tmp_ValTas, Tmp_Suma 
 				from #TasasFecha 
 		
-			select Promedio = @Val_Promed 
+			select  Promedio = @Val_Promed 
 		
 		end else begin 
 		
