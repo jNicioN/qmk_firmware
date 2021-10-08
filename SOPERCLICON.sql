@@ -1,4 +1,4 @@
-﻿create procedure SOPERCLICON(
+create procedure SOPERCLICON(
 	@PerPersoID		int output,
 	@ClClientID		int output,
 	@Per_Numero 	char(8),
@@ -12,13 +12,16 @@
 	@SucOrigen		char(3),
 	@SucDestino		char(3),
 	@Modulo			char(2))
-
-
 as
-
 
 /***************************************************************************
 ** Descripción:	 Consulta Persona y Cliente								****
+****************************************************************************
+** Modificó:	Armando Alexis Sepúlveda Cruz							****
+** Fecha:		03/Agosto/2020											****
+** Help Desk:	1379522													****
+** Descripción:	Se modifica la consulta C7 para buscar contemplar los   ****
+**				grupos de clientes										****
 ****************************************************************************
 ** Modificó:	Armando Alexis Sepúlveda Cruz							****
 ** Fecha:		03/Agosto/2020											****
@@ -56,17 +59,15 @@ as
 declare	@Tip_ConTip	char(1),
 		@Tip_ConCon	char(1),
 		@Str_Vacio  char(1),
-		@Peu_Grupo  char(8)
+		@Peu_Grupo  char(8),
+		@Emp_Client	char(8)
 		
 										/* Asignación de constantes */
 select	@Str_Vacio	= ''				/* String vacío */		
 
-
 select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
 		@Tip_ConCon	= substring(@Tip_Consul, 2, 1)
 		
-
-
 if @Tip_ConTip = 'C' begin							/* 'C':  Consulta */
 	if @Tip_ConCon = '1' begin						/* Consulta by Cli_Numero  */	
 	
@@ -78,6 +79,7 @@ if @Tip_ConTip = 'C' begin							/* 'C':  Consulta */
 	end else	if @Tip_ConCon = '2' begin			/* Consulta by Per_Numero  */	
 	
 		select 	ClClientID,  PerPersoID ,  Adi_Client as Cli_Numero , Per_Numero
+
 		from 	SOPERSON	noholdlock
 		left 	join CLADICIO noholdlock on Adi_NumPer = Per_Numero 
 		where  	Per_Numero  = @Per_Numero
@@ -125,16 +127,36 @@ if @Tip_ConTip = 'C' begin							/* 'C':  Consulta */
 				 left join CLADICIO on  Per_Numero  =  Adi_NumPer 
 			where @Per_Numero != @Str_Vacio and Per_Numero = @Per_Numero	
 	end else	if @Tip_ConCon = '7' begin						/* Consulta unificada por Cli_Numero o Per_Numero*/	
+		create table #ClientesUnicas (
+			Clu_Grupo char(8)
+		)
+
+		create index clientesUnicas on #ClientesUnicas(Clu_Grupo)
+				
 		select @Peu_Grupo = Peu_Grupo
 		  from SOUNIPER noholdlock
 		 where Peu_Person = @Per_Numero
+
+		insert into #ClientesUnicas
+		select Clu_Grupo
+		  from SOUNIPER noholdlock
+		 inner join CLADICIO noholdlock on Peu_Person =	Adi_NumPer
+		 inner join CLCLIUNI noholdlock on Clu_Client = Adi_Client
+		 where Peu_Grupo = @Peu_Grupo
+		 group by Clu_Grupo
+		 order by Clu_Grupo
+		 
+		select @Emp_Client = Emp_Client
+		  from #ClientesUnicas 
+		 inner join CLCLIUNI noholdlock on #ClientesUnicas.Clu_Grupo = CLCLIUNI.Clu_Grupo
+		 inner join RHEMPLEA on Emp_Client = CLCLIUNI.Clu_Client
 		 
 		select ClClientID,  PerPersoID ,  Adi_Client as Cli_Numero, Per_Numero
-		  from SOUNIPER noholdlock
-		 inner join SOPERSON noholdlock on Per_Numero = Peu_Person
-		 inner join CLADICIO noholdlock on Per_Numero =	Adi_NumPer
-		 inner join RHEMPLEA noholdlock on Emp_Client =	Adi_Client
-		 where Peu_Grupo = @Peu_Grupo
+		  from CLADICIO noholdlock
+		 inner join SOPERSON noholdlock on Per_Numero = Adi_NumPer
+		 inner join SOUNIPER noholdlock on Per_Numero =	Peu_Person
+		 where Adi_Client = @Emp_Client
+		 
+		drop table #ClientesUnicas
 	end
 end
-
