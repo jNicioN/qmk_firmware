@@ -81,7 +81,7 @@ as
 		
 
 		
-		select @Val_Tasa = count( Tas_Numero )   
+		select @Val_Tasa = count(1)   
 			from SOTASAS noholdlock
 		where   Tas_Numero = @Par_Tasa
 			
