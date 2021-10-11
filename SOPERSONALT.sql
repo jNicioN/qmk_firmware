@@ -88,7 +88,7 @@ as
 ** Modificó:		Ignacio Ordaz Valtierra								****
 ** Fecha:		12/Sep/2012												****
 ** Help:			386371												****
-** Descripci�n:	validar localidad y entidad sean activos				****
+** Descripción:	validar localidad y entidad sean activos				****
 ****************************************************************************
 ** Modificó:		Eugenio Chairez Flore     							****
 ** Fecha:		27/Oct/2011												****
@@ -295,7 +295,7 @@ if @Cob_Tipo	= @Tip_Titula begin
 	if @Modulo not in (@Mod_FabCon,@Pro_Intern) begin	
 		if @Lon_Telefo <> 10 begin
 			select 	Err_Codigo = '000024',
-					Err_Mensaj = 'LADA � Tel�fono Incorrecto, favor de verificarlos'				
+					Err_Mensaj = 'LADA ó Teléfono Incorrecto, favor de verificarlos'				
 			rollback
 			return 1
 		end
