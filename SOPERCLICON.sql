@@ -143,11 +143,11 @@ if @Tip_ConTip = @Con_Consul begin							/* 'C':  Consulta */
 				 left join CLADICIO on  Per_Numero  =  Adi_NumPer 
 			where @Per_Numero != @Str_Vacio and Per_Numero = @Per_Numero	
 	end else	if @Tip_ConCon = @Con_CliEmp begin						/* Consulta unificada por Cli_Numero o Per_Numero*/	
-		create table #ClientesUnicas (
+		create table #CLCLIUNI (
 			Clu_Grupo char(8)
 		)
 
-		create index ClientesUnicas on #ClientesUnicas(Clu_Grupo)
+		create index CLCLIUNI on #CLCLIUNI(Clu_Grupo)
 				
 		select @Peu_Grupo = Peu_Grupo
 		  from SOUNIPER noholdlock
