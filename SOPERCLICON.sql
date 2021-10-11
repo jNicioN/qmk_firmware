@@ -58,25 +58,41 @@ as
 													/* Declaración de variables */
 declare	@Tip_ConTip	char(1),
 		@Tip_ConCon	char(1),
-		@Str_Vacio  char(1),
 		@Peu_Grupo  char(8),
 		@Emp_Client	char(8)
 		
+declare @Str_Vacio  char(1),						/* Declaración de constantes */
+        @Con_Consul char(1),
+        @Con_Client char(1),
+        @Con_Person char(1),
+        @Con_CliPar char(1),
+        @Con_CliIde char(1),
+        @Con_PerIde char(1),
+        @Con_CliPer char(1),
+        @Con_CliEmp char(1)
 										/* Asignación de constantes */
-select	@Str_Vacio	= ''				/* String vacío */		
+select	@Str_Vacio	= '',				/* String vacío */
+        @Con_Consul  = 'C',				/* Tipo Consulta */
+        @Con_Client	= '1',				/* Consutla por numero de cliente */
+        @Con_Person	= '2',				/* Consulta por numero de persona */
+        @Con_CliPar	= '3',				/* Consulta por numero de cliente en parametros*/
+        @Con_CliIde	= '4',				/* Consulta por numero de cliente id */
+        @Con_PerIde	= '5',				/* Consulta por numero de persona id */
+        @Con_CliPer	= '6',				/* Consulta por numero de cliente o persona */
+        @Con_CliEmp	= '7'				/* Consulta por numero de persona para saber si es cliente */
 
 select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
 		@Tip_ConCon	= substring(@Tip_Consul, 2, 1)
 		
-if @Tip_ConTip = 'C' begin							/* 'C':  Consulta */
-	if @Tip_ConCon = '1' begin						/* Consulta by Cli_Numero  */	
+if @Tip_ConTip = @Con_Consul begin							/* 'C':  Consulta */
+	if @Tip_ConCon = @Con_Client begin						/* Consulta by Cli_Numero  */	
 	
 		select  ClClientID,  PerPersoID  ,  Adi_Client as Cli_Numero, Adi_NumPer as Per_Numero
 		from 	CLADICIO 	noholdlock
 		inner	join SOPERSON noholdlock on	Per_Numero	=	Adi_NumPer
 		where  	Adi_Client  = @Cli_Numero
 	
-	end else	if @Tip_ConCon = '2' begin			/* Consulta by Per_Numero  */	
+	end else	if @Tip_ConCon = @Con_Person begin			/* Consulta by Per_Numero  */	
 	
 		select 	ClClientID,  PerPersoID ,  Adi_Client as Cli_Numero , Per_Numero
 
@@ -84,28 +100,28 @@ if @Tip_ConTip = 'C' begin							/* 'C':  Consulta */
 		left 	join CLADICIO noholdlock on Adi_NumPer = Per_Numero 
 		where  	Per_Numero  = @Per_Numero
 	
-	end else	if @Tip_ConCon = '3' begin						/* Consulta by Cli_Numero , return params  */	
+	end else	if @Tip_ConCon = @Con_CliPar begin						/* Consulta by Cli_Numero , return params  */	
 	
 		select  @ClClientID = ClClientID,  @PerPersoID = PerPersoID  
 		from 	CLADICIO 	noholdlock
 		inner	join SOPERSON noholdlock on	Per_Numero	=	Adi_NumPer
 		where  	Adi_Client  = @Cli_Numero
 		
-	end else	if @Tip_ConCon = '4' begin			/* Consulta by ClClientID  */	
+	end else	if @Tip_ConCon = @Con_CliIde begin			/* Consulta by ClClientID  */	
 	
 		select  ClClientID,  PerPersoID  ,  Adi_Client as Cli_Numero, Adi_NumPer as Per_Numero
 		from 	CLADICIO 	noholdlock
 		inner	join SOPERSON noholdlock on	Per_Numero	=	Adi_NumPer
 		where  	ClClientID  = @ClClientID
 	
-	end else	if @Tip_ConCon = '5' begin						/* Consulta by PerPersoID*/	
+	end else	if @Tip_ConCon = @Con_PerIde begin						/* Consulta by PerPersoID*/	
 	
 		select 	ClClientID,  PerPersoID ,  Adi_Client as Cli_Numero , Per_Numero
 		from 	SOPERSON	noholdlock
 		left 	join CLADICIO noholdlock on Adi_NumPer = Per_Numero 
 		where  	PerPersoID  = @PerPersoID
 	
-	end else	if @Tip_ConCon = '6' begin						/* Consulta unificada por Cli_Numero o Per_Numero*/	
+	end else	if @Tip_ConCon = @Con_CliPer begin						/* Consulta unificada por Cli_Numero o Per_Numero*/	
 	
 		select	ClClientID,  PerPersoID ,  Adi_Client as Cli_Numero , Per_Numero
 			from CLCLIUNI Cli noholdlock
@@ -126,12 +142,12 @@ if @Tip_ConTip = 'C' begin							/* 'C':  Consulta */
 			from SOPERSON  
 				 left join CLADICIO on  Per_Numero  =  Adi_NumPer 
 			where @Per_Numero != @Str_Vacio and Per_Numero = @Per_Numero	
-	end else	if @Tip_ConCon = '7' begin						/* Consulta unificada por Cli_Numero o Per_Numero*/	
+	end else	if @Tip_ConCon = @Con_CliEmp begin						/* Consulta unificada por Cli_Numero o Per_Numero*/	
 		create table #ClientesUnicas (
 			Clu_Grupo char(8)
 		)
 
-		create index clientesUnicas on #ClientesUnicas(Clu_Grupo)
+		create index ClientesUnicas on #ClientesUnicas(Clu_Grupo)
 				
 		select @Peu_Grupo = Peu_Grupo
 		  from SOUNIPER noholdlock
