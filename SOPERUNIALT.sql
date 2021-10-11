@@ -96,15 +96,15 @@ as
 ** Help:		1343720											****
 ** Descripcion: Se agrega indentity para el campo PerPersoID	****												  
 ********************************************************************
-** Modifico:	Erika Báez										****
+** Modifico:	Erika BÃ¡ez										****
 ** Fecha:		04/Marzo/2019									****
 ** Help:		1191883											****
 ** Descripcion: Se modifica mensaje cuando el RFC ya existe		****
 ********************************************************************
-** Modifico:		Armando Alexis Sepúlveda Cruz				****
+** Modifico:		Armando Alexis SepÃºlveda Cruz				****
 ** Fecha:		26/Junio/2017									****
 ** Help:		991811											****
-** Descripcion: Se elimina la concatenación de Per_Titulo en 	****
+** Descripcion: Se elimina la concatenaciÃ³n de Per_Titulo en 	****
 **				Per_ComOrd										****
 /*******************************************************************
 ** Modifico:	Claudia V Sandoval P							****
@@ -177,7 +177,7 @@ select	@Str_Vacio	= '',			/* String Vacio	*/
 		@Per_Fisica	= '2',			/* Persona Fisica */
 		@Sta_ActIna	= 'I',			/* Status de actividad inactiva */
 		@Tab_Nombre	= 'SOPERSON',	/* Tabla que se consulta en SOFOLIOS */
-		@Fec_Vacia	= '1900-01-01',	/*	Fecha Vacía*/
+		@Fec_Vacia	= '1900-01-01',	/*	Fecha VacÃ­a*/
 		@Ent_Cero	= 0,			/* Entero en Cero */
 		@Ent_Uno	= 1,			/* Entero en Uno */
 		@Tip_Titula	= '1',			/* Titular */

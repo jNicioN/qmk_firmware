@@ -59,126 +59,126 @@ as
 ** Help:		1343720													****
 ** Descripcion: Se agrega indentity para el campo PerPersoID			****
 ****************************************************************************
-** Modifico:		Armando Alexis Sepúlveda Cruz						****
+** Modifico:		Armando Alexis SepÃºlveda Cruz						****
 ** Fecha:		26/Junio/2017											****
 ** Help:		991811													****
-** Descripcion: Se elimina la concatenación de Per_Titulo en Per_ComOrd	****
+** Descripcion: Se elimina la concatenaciÃ³n de Per_Titulo en Per_ComOrd	****
 ****************************************************************************
-** Modifico:	Andrea Ramírez Mondragón								****
+** Modifico:	Andrea RamÃ­rez MondragÃ³n								****
 ** Fecha:		22/Abril/2015											****
 ** Help:		733855													****
 ** Descripcion:	Se obtiene datos para cuentas Nivel 2 de OLPARAMS		****
 ****************************************************************************
-** Modificación:	David Alejandro Cantu Treviño						****
+** ModificaciÃ³n:	David Alejandro Cantu TreviÃ±o						****
 ** Fecha:			18/Mayo/2015										****
 ** Help:			766265												****
-** Descripción:		Validación para CLLOCALI y CLENTIDA por Pais		****
+** DescripciÃ³n:		ValidaciÃ³n para CLLOCALI y CLENTIDA por Pais		****
 ****************************************************************************
-** Modifico:		Edwin E. Pérez Requena								****
+** Modifico:		Edwin E. PÃ©rez Requena								****
 ** Fecha:		11/Agosto/2014											****
 ** Help:			673139												****
-** Descripcion:	Se agrega NB en condición para Banca 					****
-**				Electrónica												****
+** Descripcion:	Se agrega NB en condiciÃ³n para Banca 					****
+**				ElectrÃ³nica												****
 ****************************************************************************
 ** Modifico:		Claudia V Sandoval P								****
 ** Fecha:		03/03/2014												****
 ** Help:			00599444											****
 ** Descripcion:	Se agrega proceso unificacion							****
 ****************************************************************************
-** Modificó:		Ignacio Ordaz Valtierra								****
+** ModificÃ³:		Ignacio Ordaz Valtierra								****
 ** Fecha:		12/Sep/2012												****
 ** Help:			386371												****
-** Descripción:	validar localidad y entidad sean activos				****
+** Descripciï¿½n:	validar localidad y entidad sean activos				****
 ****************************************************************************
-** Modificó:		Eugenio Chairez Flore     							****
+** ModificÃ³:		Eugenio Chairez Flore     							****
 ** Fecha:		27/Oct/2011												****
 ** Help:			00411176											****
-** Descripción:	No atraopaba el Error al validar el Telefono			****
+** DescripciÃ³n:	No atraopaba el Error al validar el Telefono			****
 ****************************************************************************
-** Modificó:		Ma. Dolores Hdz.									****
+** ModificÃ³:		Ma. Dolores Hdz.									****
 ** Fecha:		05/Ene/10												****
 ** Help:			00224608											****
-** Descripción:	Omitir Validación telefonp en modulo FB					****
+** DescripciÃ³n:	Omitir ValidaciÃ³n telefonp en modulo FB					****
 ****************************************************************************
-** Modificó:		Jorge Guerrero										****
+** ModificÃ³:		Jorge Guerrero										****
 ** Fecha:		08/Dic/2009												****
 ** Help Desk:	00232160												****
-** Descripcion:	validar el la longitud del teléfono, sólo a las 		****				  
+** Descripcion:	validar el la longitud del telÃ©fono, sÃ³lo a las 		****				  
 **				personas que son titulares (Clientes).		 			**** 		
 ****************************************************************************
-** Modificó:		Jorge Guerrero Perez								****
+** ModificÃ³:		Jorge Guerrero Perez								****
 ** Fecha:		19/Oct/2009												****
 ** Help Desk:	00208986												****
-** Descripcion:	Se agregó validación para lada y teléfono 				**** 		
+** Descripcion:	Se agregÃ³ validaciÃ³n para lada y telÃ©fono 				**** 		
 **** **																	****
 ****************************************************************************
 ****************************************************************************
-** Modificó:		Grisdely Martínez Ramírez							****
+** ModificÃ³:		Grisdely MartÃ­nez RamÃ­rez							****
 ** Fecha:		01/Julio/2009											****
 ** Help Desk:	173833													****
-** Descripcion:	Se amplió Per_RazSoc, Per_Comple 	 					****
+** Descripcion:	Se ampliÃ³ Per_RazSoc, Per_Comple 	 					****
  **				y Per_ComOrd											****
 ****************************************************************************
-**       			STORE CONVERTIDO                 					****
+**Â Â  Â Â Â Â 			STORE CONVERTIDOÂ Â Â Â Â  Â Â Â Â Â Â Â Â Â Â Â 					****
 ****************************************************************************
-** Modificó:		Karina Chavarría Tovar								****
+** ModificÃ³:		Karina ChavarrÃ­a Tovar								****
 ** Fecha:		27/Febrero/2008											****
 ** Help:			76754												****
-** Descripción:	Eliminar los espacios en blanco a Cli_RazSoc 			****
+** DescripciÃ³n:	Eliminar los espacios en blanco a Cli_RazSoc 			****
 **				cuando se asigna a Cli_ComOrd y Cli_Comple				**** 
 ****************************************************************************
-** Modificó:		Lucina Gonzalez Trejo								****
+** ModificÃ³:		Lucina Gonzalez Trejo								****
 ** Fecha:		09/Nov/07												****
-** Descripción:	Optimizar												****
+** DescripciÃ³n:	Optimizar												****
 ** Help:			59235												****
 ****************************************************************************
-** Modificó:		Gerardo Valladares									****
+** ModificÃ³:		Gerardo Valladares									****
 ** Fecha:		25/Sep/07												****
-** Descripción:	Agregar var Err_Descri									****
+** DescripciÃ³n:	Agregar var Err_Descri									****
 ** Help:			3666												****
 ****************************************************************************
 ** 				STORE CONVERTIDO 										****	
-** Convirtió : Karina Chavarría Tovar									****	
+** ConvirtiÃ³ : Karina ChavarrÃ­a Tovar									****	
 ** Fecha :     23/Julio/07												****	
 ****************************************************************************
-** Modificó:		Lucina Gonzalez Trejo								****
+** ModificÃ³:		Lucina Gonzalez Trejo								****
 ** Fecha:		12/Marzo/07												****
-** Descripción:	Agregar campos											****
+** DescripciÃ³n:	Agregar campos											****
 ** Help:			3666 - 7100											****
 ****************************************************************************
-** Modificó:		Ricardo Salinas										****
+** ModificÃ³:		Ricardo Salinas										****
 ** Fecha:		27/Oct/06												****
-** Descripción:	Si el modulo es BE no hace las validaciones				****
+** DescripciÃ³n:	Si el modulo es BE no hace las validaciones				****
 ** Help:			3781												****
 ****************************************************************************
 ****************************************************************************
-** Modificó:		Ricardo Salinas										****
+** ModificÃ³:		Ricardo Salinas										****
 ** Fecha:		03/Jul/06												****
-** Descripción:	Elimine validacion de CP con ciudad	 					****
+** DescripciÃ³n:	Elimine validacion de CP con ciudad	 					****
 ****************************************************************************
 ****************************************************************************
-** Modificó:		FCHIA	       										****
+** ModificÃ³:		FCHIA	       										****
 ** Fecha:		24/Mar/06												****
-** Descripción:	Que valide Actividad solo si  <> Vacio					****
+** DescripciÃ³n:	Que valide Actividad solo si  <> Vacio					****
 ****************************************************************************
-** Modificó:		Jorge Ortega Rodríguez								****
+** ModificÃ³:		Jorge Ortega RodrÃ­guez								****
 ** Fecha:		28/Octubre/2005											****
-** Help:			Corrección											****
-** Descripción:	Se cambió la variable Err_Numero por					****
+** Help:			CorrecciÃ³n											****
+** DescripciÃ³n:	Se cambiÃ³ la variable Err_Numero por					****
 **				Per_Numero en la salida del Store						****
 ****************************************************************************
-** Modificó:		Jorge M. Maldonado González							****
+** ModificÃ³:		Jorge M. Maldonado GonzÃ¡lez							****
 ** Fecha:		28/Octubre/2004											****
-** Descripción:	Cambio en estructura de SOPERSON						****
+** DescripciÃ³n:	Cambio en estructura de SOPERSON						****
 ****************************************************************************
-** Modificó:		Mayra Estrada	  									****
+** ModificÃ³:		Mayra Estrada	  									****
 ** Fecha:		17/Jun/00												****
-** Descripción:	Validación 000002										****
+** DescripciÃ³n:	ValidaciÃ³n 000002										****
 ****************************************************************************
-** Creó:			FROCHA         										****
+** CreÃ³:			FROCHA         										****
 ** Fecha:		18/Jun/1998												****
 ****************************************************************************
-** Modificó : 	Ing. Laura Elena Cervantes 								****
+** ModificÃ³ : 	Ing. Laura Elena Cervantes 								****
 ** Fecha:	 	16/Jul/1998												****
 ****************************************************************************/
 
@@ -235,7 +235,7 @@ declare	@Fec_Vacia	smalldatetime,
 		@Tip_PerNum char(1)
 
 
-select	@Fec_Vacia	= '1900-01-01',	/*	Fecha Vacía*/
+select	@Fec_Vacia	= '1900-01-01',	/*	Fecha VacÃ­a*/
 		@Str_Vacio	= '',			/*	String Vacio	*/
 		@Str_Espaci	= ' ',			/*	String Espacio	*/
 		@Per_Moral	= '1',			/* Persona Moral */
@@ -245,7 +245,7 @@ select	@Fec_Vacia	= '1900-01-01',	/*	Fecha Vacía*/
 		@Ent_Cero	= 0,			/* Entero en Cero */
 		@Ent_Uno	= 1,			/* Entero en Uno */
 		@Ban_Electr	= 'BE',			/* Banca Elctronica */
-		@Ban_NueBan	= 'NB',			/* Nueva Banca Electrónica */
+		@Ban_NueBan	= 'NB',			/* Nueva Banca ElectrÃ³nica */
 		@Pro_Intern	= 'IT',			/* Proceso de Internacional			*/
 		@Tip_CueChe	= 'CH',			/* Proceso: Personas relacionadas a Cuenta de cheques*/
 		@Tip_CliNom	= 'CN',			/* Proceso: Clientes de Nomina		*/
@@ -263,7 +263,7 @@ select	@Fec_Vacia	= '1900-01-01',	/*	Fecha Vacía*/
 		@Tip_Titula	= '1',
 		@Str_No123	= '[^123]',
 	 	@Str_23		= '[23]',
-	 	@Mod_FabCon = 'FB',			/* Modulo de Fabrica de Crédito al Consumo */
+	 	@Mod_FabCon = 'FB',			/* Modulo de Fabrica de CrÃ©dito al Consumo */
 	 	@Sta_Inacti	= 'I',			/* Status Inactivo para validar localidad y entidad */
 		@Mod_AplOnl	= 'OL',			/* Modulo de Aplicaciones Online*/		
 		@Tip_PerNum = 'F'			/*  Tipo proceso para actualizar el numero de folio*/
@@ -295,7 +295,7 @@ if @Cob_Tipo	= @Tip_Titula begin
 	if @Modulo not in (@Mod_FabCon,@Pro_Intern) begin	
 		if @Lon_Telefo <> 10 begin
 			select 	Err_Codigo = '000024',
-					Err_Mensaj = 'LADA ó Teléfono Incorrecto, favor de verificarlos'				
+					Err_Mensaj = 'LADA ï¿½ Telï¿½fono Incorrecto, favor de verificarlos'				
 			rollback
 			return 1
 		end
@@ -554,7 +554,7 @@ if (@Modulo not in (@Ban_Electr, @Ban_NueBan)) and (@Tip_Proces = @Tip_CueChe an
 									  and	Cpc_CodPos	= @Per_CodPos)) and @Per_Nacion = @Per_PaiMex begin
 
 			select	Err_Codigo	= '000021',
-					Err_Mensaj	= 'Código Postal' + @Err_Descri + ' Incorrecto',
+					Err_Mensaj	= 'CÃ³digo Postal' + @Err_Descri + ' Incorrecto',
 					Err_Variab	= 'Per_CodPos'
 			rollback
 			return 1
