@@ -153,7 +153,7 @@ if @Tip_ConTip = @Con_Consul begin							/* 'C':  Consulta */
 		  from SOUNIPER noholdlock
 		 where Peu_Person = @Per_Numero
 
-		insert into #ClientesUnicas
+		insert into #CLCLIUNI
 		select Clu_Grupo
 		  from SOUNIPER noholdlock
 		 inner join CLADICIO noholdlock on Peu_Person =	Adi_NumPer
@@ -163,8 +163,8 @@ if @Tip_ConTip = @Con_Consul begin							/* 'C':  Consulta */
 		 order by Clu_Grupo
 		 
 		select @Emp_Client = Emp_Client
-		  from #ClientesUnicas 
-		 inner join CLCLIUNI noholdlock on #ClientesUnicas.Clu_Grupo = CLCLIUNI.Clu_Grupo
+		  from #CLCLIUNI 
+		 inner join CLCLIUNI noholdlock on #CLCLIUNI.Clu_Grupo = CLCLIUNI.Clu_Grupo
 		 inner join RHEMPLEA on Emp_Client = CLCLIUNI.Clu_Client
 		 
 		select ClClientID,  PerPersoID ,  Adi_Client as Cli_Numero, Per_Numero
@@ -173,6 +173,6 @@ if @Tip_ConTip = @Con_Consul begin							/* 'C':  Consulta */
 		 inner join SOUNIPER noholdlock on Per_Numero =	Peu_Person
 		 where Adi_Client = @Emp_Client
 		 
-		drop table #ClientesUnicas
+		drop table #CLCLIUNI
 	end
 end
