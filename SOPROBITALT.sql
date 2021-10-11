@@ -14,14 +14,14 @@ create procedure SOPROBITALT (
 as
 
 /***************************************************************************
-** Descripción:    Migracion de la Información de Configuracion Producto****
+** Descripción:    Alta de Información de Configuracion Producto****
 ****************************************************************************
 ** Referencias:															****
 ****************************************************************************
 ** Elaboró: 		Alan Santamaria                           			****
 ** Fecha:		    06/10/2021  								        ****
 ** Help:			          									        ****
-** Descripción:	    Procedimiento padre de Sincronizacion.              ****
+** Descripción:	    Alta de informacion              ****
 ****************************************************************************/
 
 insert into SOPROBIT(
