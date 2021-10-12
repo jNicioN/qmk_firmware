@@ -19,7 +19,7 @@ as
 ** Fecha:		07-10-2021          									****
 ** Descripción: Se elimina la seccion de configuracion producto         ****
 **              debido a que se separa el sp de sincronizacion          ****
-** Help:		    										            ****
+** Help:		    1574028										            ****
 ****************************************************************************
 ** Elaboró: 		CODE4U Jonathan Perez                      			****
 ** Fecha:		    12/01/2020									        ****

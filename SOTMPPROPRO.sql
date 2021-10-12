@@ -16,7 +16,7 @@ as
 ****************************************************************************
 ** Elaboró: 		Frank Canul						                    ****
 ** Fecha:		    22/09/2021									        ****
-** Help:			1286068  									        ****
+** Help:			1574028  									        ****
 ** Descripción:	    Se agrega campo Pro_NivAut para la tabla SOPRODUC	****
 **					y SOTMPPRO, se elimna el campo de subproducto       ****
 ****************************************************************************
