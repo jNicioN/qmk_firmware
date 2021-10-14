@@ -18,6 +18,11 @@ as
 ******************************************************************
 ** Modifico:	Alma Perez										**
 ** HelpDesk:	1390218											**
+** Fecha:		12/10/2021										**
+** Desc: Permitir baja por numero								**
+******************************************************************
+** Modifico:	Alma Perez										**
+** HelpDesk:	1390218											**
 ** Fecha:		12/10/2020										**
 ** Desc: Validar valores nulos									**
 ******************************************************************
@@ -521,30 +526,15 @@ end
 
 if @Tip_Proces = @Str_Duplic begin
 	
-	select	@Str_Cuenta	= Fir_Cuenta,
-			@Str_Consec = Fir_Consec,
-			@Str_NumTer = Fir_NumTer
-	from CHTMPFIR a noholdlock
-	where	Fir_Identi	= @Mif_Numero
-	
-	select @Ent_Valido	= count(1)
+	select	@Ent_Identi	= Apf_Identi
 		from CHADPEFO noholdlock
-		where	Apf_Cuenta	= @Str_Cuenta
-		  and	Apf_Consec	= @Str_Consec
-		  and	Apf_NumTer	= @Str_NumTer
+		where	 Apf_Identi	= @Mif_Numero
 	
-	if @Ent_Valido = @Ent_Uno begin
+	if isnull(@Ent_Identi,@Ent_Cero) = @Ent_Cero begin
 		select	Err_Codigo = '000005', 
-				Err_Mensaj = 'El registro no esta duplicado'
+				Err_Mensaj = 'El registro no existe'
 		return 1
 	end
-	
-	select @Ent_Identi	= Apf_Identi
-		from CHADPEFO noholdlock
-		where	Apf_Cuenta	= @Str_Cuenta
-		  and	Apf_Consec	= @Str_Consec
-		  and	Apf_NumTer	= @Str_NumTer
-		  and	Usuario		= 'MIGRAC'
 	
 	insert into CHHISAPF
 			(Apf_Identi,	Apf_Cuenta,		Apf_Consec,		Apf_NumTer,		Apf_Person,
@@ -556,10 +546,10 @@ if @Tip_Proces = @Str_Duplic begin
 			from CHADPEFO noholdlock
 			where	Apf_Identi	= @Ent_Identi
 		
-	delete CHADPEFO
+	delete from CHADPEFO
 		where	Apf_Identi 	= @Ent_Identi
 		
 	select	Err_Codigo	= '000000',
-			Err_Mensaj	= 'Registro duplicado eliminado'
+			Err_Mensaj	= 'Registro eliminado'
 
 end
