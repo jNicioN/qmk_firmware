@@ -1226,7 +1226,7 @@ end else begin
 		
 		select Per_RFC, Per_Comple
 		from SOPERSON noholdlock
-		where  Per_Tipo <> '1'
+		where  Per_Tipo <> @Tip_Moral
 		and	Per_RFC like @Rfc_Like
 	end
 end
