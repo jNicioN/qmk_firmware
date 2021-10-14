@@ -20,7 +20,7 @@ as
 ********************************************************************
 ** REFERENCIAS:													****
 ********************************************************************
-**	Modifico:	Marcelo Bautista Hernandez						****
+**	Modifico:	Luis Enrique Ramirez Ortiz						****
 **  Fecha:		06/10/2021										****
 **  Help:		1179955											****
 **	Descripcion: Se modifican las consultas relacionadas a SMS	****
