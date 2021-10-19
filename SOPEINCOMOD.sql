@@ -1,5 +1,5 @@
 create procedure SOPEINCOMOD (
-	@Pic_PerNum	char(8),
+	@Pic_PerNum	int,
 	@Pic_ActPre	int,
 
 	@NumTransac	char(10),
@@ -22,20 +22,20 @@ as
 
 /*	Declaracion de Variables */
 declare	@Status		int,
-		@Num_Person	char(8)
+		@Num_Person	int
 
 /*	Declaracion de Constantes	*/
-declare	@Str_Vacio	char(1),				-- String Vacio
+declare	@Ent_Cero	int,					-- Entero Cero
 		@Ent_Uno	int						-- Entero Uno
 
-select	@Str_Vacio	= '',					-- String Vacio
+select	@Ent_Cero	= 0,					-- Entero Cero
 		@Ent_Uno	= 1						-- Entero Uno
 
-select	@Num_Person = isnull(Pic_PerNum, @Str_Vacio)
+select	@Num_Person = isnull(Pic_PerNum, @Ent_Cero)
 	from	SOPEINCO noholdlock
 	where	Pic_PerNum	= @Pic_PerNum
 
-if @Num_Person	= @Str_Vacio begin
+if @Num_Person	= @Ent_Cero begin
 
 	exec @Status = SOPEINCOALT
 		@Pic_PerNum,	@Pic_ActPre,	@NumTransac,	@Transaccio,	@Usuario,

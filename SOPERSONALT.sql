@@ -648,7 +648,7 @@ select	@Act_ActPre	= isnull(Apc_ActPre, @Ent_Cero)
 	where Apc_Activi = @Per_Activi
 	
 exec @Status	= SOPEINCOALT
-	@Per_Numero,	@Act_ActPre,	@NumTransac,	@Transaccio,	@Usuario,
+	@PerPersoID,	@Act_ActPre,	@NumTransac,	@Transaccio,	@Usuario,
 	@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
 	
 if @Status <> 0 begin

@@ -1,5 +1,5 @@
 create procedure SOPEINCOCON (
-	@Pic_PerNum char(8),
+	@Pic_PerNum int,
 	
 	@Tip_Consul char(2),
 	@NumTransac	char(10),

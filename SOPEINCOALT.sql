@@ -1,5 +1,5 @@
 create procedure SOPEINCOALT (
-   @Pic_PerNum char(8),
+   @Pic_PerNum int,
    @Pic_ActPre int,
    
    @NumTransac char(10),
