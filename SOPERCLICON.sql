@@ -131,7 +131,7 @@ if @Tip_ConTip = @Con_Consul begin							/* 'C':  Consulta */
 			where @Cli_Numero != @Str_Vacio and Cli.Clu_Client = @Cli_Numero  
 		union  
 		select	 AdiGpo.ClClientID,  PerGpo.PerPersoID ,  AdiGpo.Adi_Client as Cli_Numero , PerGpo.Per_Numero
-			from SOPERSON Per
+			from SOPERSON Per noholdlock
 				inner join CLADICIO Adi noholdlock on  Per.Per_Numero = Adi.Adi_NumPer
 				inner join CLCLIUNI Cli noholdlock on  Adi.Adi_Client = Cli.Clu_Grupo
 				inner join CLADICIO AdiGpo noholdlock on Cli.Clu_Client = AdiGpo.Adi_Client
@@ -139,8 +139,8 @@ if @Tip_ConTip = @Con_Consul begin							/* 'C':  Consulta */
 			where @Per_Numero != @Str_Vacio and Per.Per_Numero = @Per_Numero
 		union
 		select	ClClientID,  PerPersoID ,  Adi_Client as Cli_Numero , Per_Numero
-			from SOPERSON  
-				 left join CLADICIO on  Per_Numero  =  Adi_NumPer 
+			from SOPERSON noholdlock
+				 left join CLADICIO noholdlock on  Per_Numero  =  Adi_NumPer 
 			where @Per_Numero != @Str_Vacio and Per_Numero = @Per_Numero	
 	end else	if @Tip_ConCon = @Con_CliEmp begin						/* Consulta unificada por Cli_Numero o Per_Numero*/	
 		create table #CLCLIUNI (
@@ -165,7 +165,7 @@ if @Tip_ConTip = @Con_Consul begin							/* 'C':  Consulta */
 		select @Emp_Client = Emp_Client
 		  from #CLCLIUNI 
 		 inner join CLCLIUNI noholdlock on #CLCLIUNI.Clu_Grupo = CLCLIUNI.Clu_Grupo
-		 inner join RHEMPLEA on Emp_Client = CLCLIUNI.Clu_Client
+		 inner join RHEMPLEA noholdlock on Emp_Client = CLCLIUNI.Clu_Client
 		 
 		select ClClientID,  PerPersoID ,  Adi_Client as Cli_Numero, Per_Numero
 		  from CLADICIO noholdlock
