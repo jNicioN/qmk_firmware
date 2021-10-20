@@ -18,7 +18,7 @@ as
 ** Descripción:	 Consulta Persona y Cliente								****
 ****************************************************************************
 ** Modificó:	Armando Alexis Sepúlveda Cruz							****
-** Fecha:		03/Agosto/2020											****
+** Fecha:		05/Octubre/2021											****
 ** Help Desk:	1379522													****
 ** Descripción:	Se modifica la consulta C7 para buscar contemplar los   ****
 **				grupos de clientes										****
