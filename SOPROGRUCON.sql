@@ -1,7 +1,7 @@
 create procedure SOPROGRUCON  (
 	@Pro_Identi	int,				/* Campo SOPROGRU.Prg_GruPro o SOGRUPRO.Grp_Identi */
-	@Pro_Numero int,				/* Campo SOPROGRU.Prg_NumPro o SOPRODUC.Pro_Numero */
-	@Tip_Consul char(2),
+	@Pro_Numero	int,				/* Campo SOPROGRU.Prg_NumPro o SOPRODUC.Pro_Numero */
+	@Tip_Consul	char(2),
 
 	@NumTransac	char(10),
 	@Transaccio	char(3),
