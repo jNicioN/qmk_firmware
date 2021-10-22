@@ -753,7 +753,7 @@ if @Tip_ConTip = 'C' begin
 				sp.Per_Nombre,	sp.Per_ApePat,	sp.Per_ApeMat,	sp.Per_RazSoc,	sp.Per_Comple,
 				sp.Per_ComOrd,	sp.Per_RFC,		sp.Per_CURP
 			from SOPERSON sp noholdlock
-			inner join ITPERSON pe noholdlock on sp.PerPersoID = pe.Per_PerId 
+			inner join ITPETEAU pe noholdlock on sp.PerPersoID = pe.Pta_PerId 
 			where Per_Tipo in (@Tip_Fisica,@Tip_FisAE)
 			  and Per_RFC = @Per_RFC
 	end else if @Tip_ConCon = 'D' begin /*Consulta para personas que no existen en lIsta negra de Tercero autorizado*/
@@ -823,7 +823,7 @@ if @Tip_ConTip = 'C' begin
 				Adi_NuIdFi,	Adi_TieRes,	Adi_NumDep,	Adi_AntLab,	Adi_FecCon,
 				Adi_CaNuIn,	Adi_EntPri,	Adi_EntSeg, PerPersoID 
 			from SOPERSON per noholdlock 
-			inner join ITPERSON pe noholdlock on per.PerPersoID = pe.Per_PerId 
+			inner join ITPETEAU pe noholdlock on per.PerPersoID = pe.Pta_PerId 
 			left join #PersonasBloqueadas bloc noholdlock on bloc.Per_Numero = per.Per_Numero
 			left join  SOPERADI noholdlock on per.Per_Numero	= Adi_PerNum
 			where bloc.Per_Id is null	
