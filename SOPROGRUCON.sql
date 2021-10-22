@@ -43,7 +43,7 @@ select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
 		@Tip_ConCon	= substring(@Tip_Consul, 2, 1)
 
 if (@Tip_ConTip = @Con_Consul) begin
-	(if @Tip_ConCon = @Str_Uno) begin																	/* Consulta por llave principal (por número de producto) */
+	if (@Tip_ConCon = @Str_Uno) begin																	/* Consulta por llave principal (por número de producto) */
 		select	Cla_Numero,	Cla_Descri,	Tip_Numero,	Tip_Moneda,	Tip_Descri
 			from CHTIPOS noholdlock
 			inner join SOPRTICU noholdlock on Ptc_TipCue = Tip_Numero and Ptc_Moneda = Tip_Moneda
