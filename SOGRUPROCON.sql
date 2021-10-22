@@ -10,6 +10,7 @@ create procedure SOGRUPROCON (
 	@SucDestino	char(3),
 	@Modulo		char(2))
 as
+
 /***********************************************************************
 ** DESCRIPCIÓN:	Consultas a tabla SOGRUPRO							****
 ************************************************************************
@@ -47,7 +48,8 @@ if @Tip_ConTip = @Con_TipCon begin												/* C O N S U L T A S */
 	end 
 end else if @Tip_ConTip = @Con_TipLis  begin									/* L I S T A S */
 			if @Tip_ConCon = @Lis_Catalo begin									/* Lista de todos los registros de la tabla */
-				select *
+				select	Grp_Identi,	Grp_Descri,	NumTransac,	Transaccio,	Usuario
+						FechaSis,	SucOrigen,	SucDestino
 					from SOGRUPRO noholdlock
 			end
 	end
