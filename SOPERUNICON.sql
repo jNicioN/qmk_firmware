@@ -185,7 +185,9 @@ declare	@Str_Vacio	char(1), /* Vacio */
 		@Len_RFCEmp int,		/* RFC de 9 posiciones */
 		@Ent_Cuatro	int,		/*	Entero en cuatro */
 		@Ent_Uno	int,		/*	Entero en uno */
-		@Str_A      char(1)	/* Tipo A*/
+		@Str_A      char(1),	/* Tipo A*/
+		@Ent_Cinco	int,		/*	Entero Cinco */
+		@Ent_Quinc	int			/*	Entero Quince */
 
 
 /* Asignacion de Constantes */
@@ -211,7 +213,9 @@ select	@Str_Vacio	= '',
 		@Len_RFCEmp = 9,
 		@Ent_Cuatro	= 4,
 		@Ent_Uno	= 1,
-		@Str_A 		= 'A'
+		@Str_A 		= 'A',
+		@Ent_Cinco	= 5,
+		@Ent_Quinc	= 15
 
 
 select	@Str_PerRFC = ltrim(rtrim(@Per_RFC)),
@@ -363,11 +367,18 @@ end else begin
 
 
 	if @Tip_ConCon	= @Str_Dos begin /* L2 - Consulta de Personas Bases por nombre */
+		--Obligar a que se capturen más de 4 caracteres
+		if len(isnull(rtrim(ltrim(@Per_Comple)), @Str_Vacio)) < @Ent_Cinco begin
+			select	Err_Codigo	= '000004',
+					Err_Mensaj	= 'Especifique al menos 4 caracteres para realizar la búsqueda de personas'
+			return @Ent_Uno
+		end
+		select @Per_Comple = @Per_Comple + @Str_Porcen
 		select Per_Person = Per_Numero, Per_Grupo = Per_Numero
 			into #tmpPerso02
 			from SOPERSON noholdlock
-			where	Per_Comple like @Str_PeuNom
-
+			where	Per_Comple like @Per_Comple
+--Genera mucho io cost cuando en el like lleva una variable diferente al parametro de entrada y la asignacion del % tiene que ser antes
 
 		update #tmpPerso02 set
 			Per_Grupo = Peu_Grupo
@@ -609,11 +620,18 @@ end else begin
 
 
 	if @Tip_ConCon	= @Str_Cinco begin /* L5 - Busqueda de Grupo de Persona por nombre*/
+		--Obligar a que se capturen más de 4 caracteres
+		if len(isnull(rtrim(ltrim(@Per_Comple)), @Str_Vacio)) < @Ent_Cinco begin
+			select	Err_Codigo	= '000004',
+					Err_Mensaj	= 'Especifique al menos 4 caracteres para realizar la búsqueda de personas'
+			return @Ent_Uno
+		end
+		select @Per_Comple = @Per_Comple + @Str_Porcen
+		--Genera mucho io cost cuando en el like lleva una variable diferente al parametro de entrada y la asignacion del % tiene que ser antes
 		select Per_Person = Per_Numero, Per_Grupo = Per_Numero
 			into #tmpPerso04
 			from SOPERSON noholdlock
-			where	Per_Comple like @Str_PeuNom
-
+			where	Per_Comple like @Per_Comple
 
 		update #tmpPerso04 set
 			Per_Grupo = Peu_Grupo
@@ -770,7 +788,7 @@ end else begin
 
 	if @Tip_ConCon	= @Str_Siete begin /* L7 - Busqueda por nombre de personas que representan la persona única*/
 		--Obligar a que se capturen más de 4 caracteres
-		if len(isnull(rtrim(ltrim(@Per_Comple)), @Str_Vacio)) < @Ent_Cuatro begin
+		if len(isnull(rtrim(ltrim(@Per_Comple)), @Str_Vacio)) < @Ent_Cinco begin
 			select	Err_Codigo	= '000004',
 					Err_Mensaj	= 'Especifique al menos 4 caracteres para realizar la búsqueda de personas'
 			return @Ent_Uno
@@ -781,14 +799,14 @@ end else begin
 
 			Per_Grupo	char(8) not null)
 
-
+		select @Per_Comple = @Per_Comple + @Str_Porcen
 		create index personasUnicas on #PersonasUnicas(Per_Grupo)
-
+--Genera mucho io cost cuando en el like lleva una variable diferente al parametro de entrada y la asignacion del % tiene que ser antes
 
 		insert into #PersonasUnicas
 			select Per_Numero, Per_Numero
 				from SOPERSON noholdlock
-				where	Per_Comple like @Str_PeuNom
+				where	Per_Comple like @Per_Comple
 
 
 		update #PersonasUnicas set
@@ -825,7 +843,7 @@ end else begin
 	end
 	
 	if @Tip_ConCon = @Str_Nueve begin /* L9 - Busqueda por RFC*/
-	
+		select @Per_RFC = left(ltrim(rtrim(@Per_RFC)) + replicate(@Str_Porcen,@Ent_Quinc) , @Ent_Quinc)
 		create table #Personas (
 			Per_Numero	char(8),
 			Per_ComOrd  char(120),
@@ -846,7 +864,7 @@ end else begin
 			select Per_Numero, Per_ComOrd, Per_Comple,	Per_RFC, Per_CURP,
 				   Per_Nombre, @Str_Vacio
 			from	SOPERSON noholdlock
-			 where Per_RFC like @Str_PerRFC + @Str_Porcen
+			 where Per_RFC like @Per_RFC
 		end
 				
 		update #Personas set
@@ -864,6 +882,7 @@ end else begin
 
 
 	if @Tip_ConCon = @Str_A begin /* LA - Busqueda persona unica por RFC*/
+		select @Per_RFC = left(ltrim(rtrim(@Per_RFC)) + replicate(@Str_Porcen,@Ent_Quinc) , @Ent_Quinc)
 		create table #PersonasRFC (
 			Per_Numero	char(8)
 		)
@@ -876,7 +895,7 @@ end else begin
 			insert into #PersonasRFC
 			select Per_Numero
 			from	SOPERSON noholdlock
-			 where Per_RFC like @Str_PerRFC + @Str_Porcen
+			 where Per_RFC like @Per_RFC
 		end
 
 
@@ -896,12 +915,20 @@ end else begin
 		drop table #PersonasRFC
 	end
 	if @Tip_ConCon	= @Str_B begin /* LB - Consulta de Personas Bases por nombre */
+		--Obligar a que se capturen más de 4 caracteres
+		if len(isnull(rtrim(ltrim(@Per_Comple)), @Str_Vacio)) < @Ent_Cinco begin
+			select	Err_Codigo	= '000004',
+					Err_Mensaj	= 'Especifique al menos 4 caracteres para realizar la búsqueda de personas'
+			return @Ent_Uno
+		end
+		select @Per_Comple = @Per_Comple + @Str_Porcen
+		--Genera mucho io cost cuando en el like lleva una variable diferente al parametro de entrada y la asignacion del % tiene que ser antes
 		create table #PersonasUni(Per_Person char(8), Per_Grupo char(8))
 		
 		insert into #PersonasUni(Per_Person, Per_Grupo)
 		select Per_Numero, Per_Numero
 			from SOPERSON (index SOPERSONCOM ) noholdlock
-			where	Per_Comple like @Str_PeuNom
+			where	Per_Comple like @Per_Comple
 
 		update #PersonasUni set
 			Per_Grupo = Peu_Grupo
@@ -919,6 +946,7 @@ end else begin
 		drop table #PersonasUni
 	end
 	if @Tip_ConCon	= @Str_C begin /* LC - Consulta de Personas unica por RFC */
+		select @Per_RFC = left(ltrim(rtrim(@Per_RFC)) + replicate(@Str_Porcen,@Ent_Quinc) , @Ent_Quinc)
 		create table #PersonaUnicaRFC ( Per_Numero	char(8), Per_Grupo	char(8))
 		
 		if isnull(@Str_PerRFC, @Str_Vacio) <> @Str_Vacio and len(@Str_PerRFC) = @Len_RFCHom begin
@@ -930,7 +958,7 @@ end else begin
 			insert into #PersonaUnicaRFC(Per_Numero, Per_Grupo)
 			select Per_Numero, @Str_Vacio
 			from	SOPERSON noholdlock
-			 where Per_RFC like @Str_PerRFC + @Str_Porcen
+			 where Per_RFC like @Per_RFC
 		end
 		
 		update #PersonaUnicaRFC set Per_Grupo=SOUNIPER.Peu_Grupo 
