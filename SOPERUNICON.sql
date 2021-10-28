@@ -21,6 +21,14 @@ as
 /*******************************************************************
 ** DESCRIPCION: Consulta de Persona Unica						****
 ********************************************************************
+** Modifico:	Marcelo Bautista								****
+** Fecha:		28/10/2021										****
+** Help:		1379522	 										****
+** Descripcion:	Optimizar L2,L5,L7,LB,L9,LA,LC, el like se hace ****
+**				con parametro entrada ya que con otra variable	****
+**				genera alto io cost, pendiente L3,L6 por 		****
+**				desconocimiento DXBANDEJ						****
+********************************************************************
 ** Modifico:	Esthepny Aguilar								****
 ** Fecha:		01/09/2021										****
 ** Help:		1536793	 										****
@@ -187,7 +195,8 @@ declare	@Str_Vacio	char(1), /* Vacio */
 		@Ent_Uno	int,		/*	Entero en uno */
 		@Str_A      char(1),	/* Tipo A*/
 		@Ent_Cinco	int,		/*	Entero Cinco */
-		@Ent_Quinc	int			/*	Entero Quince */
+		@Ent_Quinc	int,		/*	Entero Quince */
+		@Ent_Dos	int			/*	Entero Dos */
 
 
 /* Asignacion de Constantes */
@@ -215,15 +224,16 @@ select	@Str_Vacio	= '',
 		@Ent_Uno	= 1,
 		@Str_A 		= 'A',
 		@Ent_Cinco	= 5,
-		@Ent_Quinc	= 15
+		@Ent_Quinc	= 15,
+		@Ent_Dos	= 2
 
 
 select	@Str_PerRFC = ltrim(rtrim(@Per_RFC)),
 		@Str_PeuNom	= ltrim(rtrim(@Per_Comple)) + @Str_Porcen
 
 
-select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
-		@Tip_ConCon	= substring(@Tip_Consul, 2, 1)
+select	@Tip_ConTip	= substring(@Tip_Consul, @Ent_Uno, @Ent_Uno),
+		@Tip_ConCon	= substring(@Tip_Consul, @Ent_Dos, @Ent_Uno)
 
 
 if @Tip_ConTip = @Str_C begin
@@ -370,7 +380,7 @@ end else begin
 		--Obligar a que se capturen más de 4 caracteres
 		if len(isnull(rtrim(ltrim(@Per_Comple)), @Str_Vacio)) < @Ent_Cinco begin
 			select	Err_Codigo	= '000004',
-					Err_Mensaj	= 'Especifique al menos 4 caracteres para realizar la búsqueda de personas'
+					Err_Mensaj	= 'Especifique al menos 5 caracteres para realizar la búsqueda de personas'
 			return @Ent_Uno
 		end
 		select @Per_Comple = @Per_Comple + @Str_Porcen
@@ -623,7 +633,7 @@ end else begin
 		--Obligar a que se capturen más de 4 caracteres
 		if len(isnull(rtrim(ltrim(@Per_Comple)), @Str_Vacio)) < @Ent_Cinco begin
 			select	Err_Codigo	= '000004',
-					Err_Mensaj	= 'Especifique al menos 4 caracteres para realizar la búsqueda de personas'
+					Err_Mensaj	= 'Especifique al menos 5 caracteres para realizar la búsqueda de personas'
 			return @Ent_Uno
 		end
 		select @Per_Comple = @Per_Comple + @Str_Porcen
@@ -790,7 +800,7 @@ end else begin
 		--Obligar a que se capturen más de 4 caracteres
 		if len(isnull(rtrim(ltrim(@Per_Comple)), @Str_Vacio)) < @Ent_Cinco begin
 			select	Err_Codigo	= '000004',
-					Err_Mensaj	= 'Especifique al menos 4 caracteres para realizar la búsqueda de personas'
+					Err_Mensaj	= 'Especifique al menos 5 caracteres para realizar la búsqueda de personas'
 			return @Ent_Uno
 		end	
 	
@@ -918,7 +928,7 @@ end else begin
 		--Obligar a que se capturen más de 4 caracteres
 		if len(isnull(rtrim(ltrim(@Per_Comple)), @Str_Vacio)) < @Ent_Cinco begin
 			select	Err_Codigo	= '000004',
-					Err_Mensaj	= 'Especifique al menos 4 caracteres para realizar la búsqueda de personas'
+					Err_Mensaj	= 'Especifique al menos 5 caracteres para realizar la búsqueda de personas'
 			return @Ent_Uno
 		end
 		select @Per_Comple = @Per_Comple + @Str_Porcen
