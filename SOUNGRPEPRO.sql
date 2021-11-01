@@ -30,6 +30,12 @@ as
 ** REFERENCIAS: 														****
 ****************************************************************************
 ** Modifico:	Armando Alexis Sepulveda Cruz							****
+** Fecha:		01/Noviembre/2021										****
+** Help:		1379522													****
+** Descripcion:	Se agrega alta SOPERADIALT para persona	antiguas que 	****
+**				que no cuentan registro en SOPERADI.					****
+****************************************************************************
+** Modifico:	Armando Alexis Sepulveda Cruz							****
 ** Fecha:		06/Julio/2020											****
 ** Help:		1379522													****
 ** Descripcion:	Se agrega modificacion para admitir apellido paterno	****
@@ -55,6 +61,7 @@ as
 **				los apellidos maternos vacios como espacios.			****
 ****************************************************************************
 ** Modifico:	Armando Alexis Sepulveda Cruz							****
+
 ** Fecha:		28/Mayo/2019											****
 ** Help:		1258812													****
 ** Descripcion:	Se modifica la unificación de la persona tomando en 	****
@@ -80,15 +87,12 @@ declare	@Reg_Existe	int,					/*Existe Registro*/
 		@Pro_GruMin	char(1),				/*Proceso de agrupación de persona por minimo*/
 		@Pro_GrClUn char(1),				/*Proceso de agrupacion de persona por persona del cliente único*/
 		@Ent_Status	int,					/* Status */
+		@Bit_PerNum char(8),				/* Persona numero */
 		@Bit_Fecha	smalldatetime,			/* Bitacora Fecha */
 		@Bit_NumTra	char(10),				/* Bitacora Numero de transaccion */
 		@Bit_Tipo	char(1),				/* Bitacora tipo */
 		@Bit_NuSeFi	varchar(30),			/* Bitacora Numero de serie de la Firma Electronica Avanzada */
 		@Bit_Titulo	varchar(10),			/* Bitacora titulo */
-
-
-
-
 		@Bit_Nombre	varchar(40),			/* Bitacora Nombre */
 		@Bit_ApePat	varchar(40),			/* Bitacora apellido paterno */
 		@Bit_ApeMat	varchar(40),			/* Bitacora Apellido Materno */
@@ -156,7 +160,7 @@ declare	@Reg_Existe	int,					/*Existe Registro*/
 		@Bit_EntPri char(40), 				/* Bitacora Entre Calle Primera */
 		@Bit_EntSeg char(40),				/* Bitacora Entre Calle Segunda */
 		@Exi_Regist int,					/* Variable de control de existencia de registro*/
-		@Str_Punto	char(1)				/* String para punto para apellidos vacios */
+		@Str_Punto	char(1)					/* String para punto para apellidos vacios */
 
 
 /* Declaracion de Constantes */
@@ -193,7 +197,8 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 	select @Gpc_CURP	= isnull(ltrim(rtrim(@Gpc_CURP)), @Str_Vacio)
 
 
-	select	@Bit_Fecha	= Per_Fecha,
+	select	@Bit_PerNum = Per_Numero,
+			@Bit_Fecha	= Per_Fecha,
 			@Bit_NumTra	= Per_NumTra,
 			@Bit_Tipo	= Per_Tipo,
 			@Bit_NuSeFi	= Per_NuSeFi,
@@ -227,23 +232,26 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 		from SOPERSON noholdlock
 		where	Per_Numero = @Gpc_Person
 
-
-	exec @Ent_Status = SOBITPERALT
-		@Gpc_Person,	@Bit_Fecha,		@Bit_NumTra,	@Bit_Tipo,		@Bit_NuSeFi,
-		@Bit_Titulo,	@Bit_Nombre,	@Bit_ApePat,	@Bit_ApeMat,	@Bit_RazSoc,
-		@Bit_Comple,	@Bit_ComOrd,	@Bit_RFC,		@Bit_CURP,		@Bit_Calle,
-		@Bit_CalNum,	@Bit_Coloni,	@Bit_Entida,	@Bit_Locali,	@Bit_CodPos,
-		@Bit_ApaPos,	@Bit_LadTel,	@Bit_Telefo,	@Bit_Email,		@Bit_ComDom,
-		@Bit_EstCiv,	@Bit_Nacion,	@Bit_ActEmp,	@Bit_Giro,		@Bit_Sector,
-		@Bit_Activi,	@Bit_ActINE,	@NumTransac,	@Transaccio,	@Usuario,
-		@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
-	if @Ent_Status <> @Ent_Cero begin
-		rollback
-		return 1
+	if isnull(@Bit_PerNum, @Str_Vacio) <> @Str_Vacio begin
+		exec @Ent_Status = SOBITPERALT
+			@Gpc_Person,	@Bit_Fecha,		@Bit_NumTra,	@Bit_Tipo,		@Bit_NuSeFi,
+			@Bit_Titulo,	@Bit_Nombre,	@Bit_ApePat,	@Bit_ApeMat,	@Bit_RazSoc,
+			@Bit_Comple,	@Bit_ComOrd,	@Bit_RFC,		@Bit_CURP,		@Bit_Calle,
+			@Bit_CalNum,	@Bit_Coloni,	@Bit_Entida,	@Bit_Locali,	@Bit_CodPos,
+			@Bit_ApaPos,	@Bit_LadTel,	@Bit_Telefo,	@Bit_Email,		@Bit_ComDom,
+			@Bit_EstCiv,	@Bit_Nacion,	@Bit_ActEmp,	@Bit_Giro,		@Bit_Sector,
+			@Bit_Activi,	@Bit_ActINE,	@NumTransac,	@Transaccio,	@Usuario,
+			@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
+		if @Ent_Status <> @Ent_Cero begin
+			rollback
+			return 1
+		end
 	end
+	
+	select @Bit_PerNum = @Str_Vacio
 
-
-	select	@Bit_Fecha	= Adi_Fecha,
+	select	@Bit_PerNum = Adi_PerNum,
+			@Bit_Fecha	= Adi_Fecha,
 			@Bit_NumTra	= Adi_NumTra,
 			@Bit_LugNac	= Adi_LugNac,
 			@Bit_Sexo	= Adi_Sexo,
@@ -289,7 +297,7 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 		from SOPERADI noholdlock
 		where	Adi_PerNum	= @Gpc_Person
 
-
+	if isnull(@Bit_PerNum, @Str_Vacio) <> @Str_Vacio begin
 		exec @Ent_Status =	SOBIPEADALT
 			@Gpc_Person,	@Bit_Fecha,		@Bit_NumTra,	@Bit_LugNac,	@Bit_Sexo,
 			@Bit_FecNac,	@Bit_RegMat,	@Bit_VivCas,	@Bit_TieRes,	@Bit_Fax,
@@ -308,8 +316,20 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 			rollback
 			return 1
 		end
-
-
+	end else begin
+		exec SOPERADIALT @Gpc_Person, @Str_Vacio,  @Str_Vacio, @Str_Vacio, @Gpc_Sexo, 
+						 @Gpc_FecNac, @Str_Vacio, @Str_Vacio, @Ent_Cero, @Str_Vacio, 
+						 @Ent_Cero, @Str_Vacio, @Str_Vacio, @Ent_Cero, @Str_Vacio, 
+						 @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio, 
+						 @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio,  
+						 @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio, 
+						 @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio,  
+						 @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio,  
+						 @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio,  
+						 @Str_Vacio, @Str_Vacio,   @NumTransac, @Transaccio, @Usuario, 
+						 @FechaSis,   @SucOrigen,  @SucDestino, @Modulo
+	end
+	
 	select	@Gpc_Comple = @Gpc_ApePat + ' ' + @Gpc_ApeMat + ' ' + @Gpc_Nombre,
 			@Gpc_ComOrd = @Gpc_Nombre + ' ' + @Gpc_ApePat + ' ' + @Gpc_ApeMat
 	
