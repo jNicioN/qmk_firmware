@@ -85,6 +85,12 @@ as
 /******************************************************************/
 /** REFERENCIAS: 
 *********************************************************************
+** Modifico:	Raul Muniz										****
+** Fecha:		06/Octubre/2021									****
+** Help:		1504301											****
+** Descripcion: Se agrega exec a SOPEINCOALT para guardar		****
+**				actividad preponderante							****
+********************************************************************
 ** Modifico:	CODE4U-Eliezer Catalino Xul Canche				****
 ** Fecha:		06/Febrero/2020									****
 ** Help:		1343720											****
@@ -140,7 +146,8 @@ declare	@Per_NumTra	char(10),		/*Numero de transaccion*/
 		@Status		int,			/*Status*/
 		@PerPersoID	int,			/*Id de persona*/
 		@Per_ActINE	char(6),		/*Numero de actividad INE*/
-		@Existe		char(1)			/*Bandera de si existe persona*/
+		@Existe		char(1),		/*Bandera de si existe persona*/
+		@Act_ActPre	int				/* Actividad Preponderante */
 
 declare	@Str_Vacio	char(1),		/*	Declaracion de Constantes	*/
 		@Str_Espaci	char(1),
@@ -317,6 +324,20 @@ insert into SOPERADI values (
 exec @Status	= SOUNIPERPRO
 	@Per_Numero,	@NumTransac,	@Transaccio,	@Usuario,	@FechaSis,
 	@SucOrigen,		@SucDestino,	@Modulo
+	
+if @Status <> 0 begin
+	rollback
+	return 1
+end
+
+select	@Act_ActPre	= @Ent_Cero
+select	@Act_ActPre	= isnull(Apc_ActPre, @Ent_Cero)
+	from SOACPRCL noholdlock
+	where Apc_Activi = @Per_Activi
+	
+exec @Status	= SOPEINCOALT
+	@PerPersoID,	@Act_ActPre,	@NumTransac,	@Transaccio,	@Usuario,
+	@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
 	
 if @Status <> 0 begin
 	rollback
