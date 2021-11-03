@@ -317,7 +317,7 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 			return 1
 		end
 	end else begin
-		exec SOPERADIALT @Gpc_Person, @Str_Vacio,  @Str_Vacio, @Str_Vacio, @Gpc_Sexo, 
+		exec @Ent_Status =	SOPERADIALT @Gpc_Person, @Str_Vacio,  @Str_Vacio, @Str_Vacio, @Gpc_Sexo, 
 						 @Gpc_FecNac, @Str_Vacio, @Str_Vacio, @Ent_Cero, @Str_Vacio, 
 						 @Ent_Cero, @Str_Vacio, @Str_Vacio, @Ent_Cero, @Str_Vacio, 
 						 @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio, 
@@ -328,6 +328,11 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 						 @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio,  
 						 @Str_Vacio, @Str_Vacio,   @NumTransac, @Transaccio, @Usuario, 
 						 @FechaSis,   @SucOrigen,  @SucDestino, @Modulo
+						 
+		if @Ent_Status <> 0 begin
+			rollback
+			return 1
+		end
 	end
 	
 	select	@Gpc_Comple = @Gpc_ApePat + ' ' + @Gpc_ApeMat + ' ' + @Gpc_Nombre,
