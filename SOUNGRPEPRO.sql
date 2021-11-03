@@ -1,4 +1,4 @@
-create procedure SOUNGRPEPRO (
+﻿create procedure SOUNGRPEPRO (
 	@Gpc_Person char(8),
 	@Gpc_Grupo  char(8),
 	@Gpc_Nombre varchar(40),

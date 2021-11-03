@@ -1,4 +1,4 @@
-create procedure SOPERCURPRO (
+﻿﻿create procedure SOPERCURPRO (
 	@Per_Numero	char(8),
 	@Tip_Proces	char(1),
 
