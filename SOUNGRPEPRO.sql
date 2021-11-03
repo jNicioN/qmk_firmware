@@ -310,7 +310,7 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 			@Modulo
 
 
-		if @Status <> 0 begin
+		if @Status <> @Ent_Cero begin
 			rollback
 			return 1
 		end
@@ -327,7 +327,7 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 						 @Str_Vacio, @Str_Vacio,   @NumTransac, @Transaccio, @Usuario, 
 						 @FechaSis,   @SucOrigen,  @SucDestino, @Modulo
 						 
-		if @Status <> 0 begin
+		if @Status <> @Ent_Cero begin
 			rollback
 			return 1
 		end
