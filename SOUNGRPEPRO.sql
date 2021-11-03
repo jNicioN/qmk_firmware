@@ -74,8 +74,7 @@ as
 
 
 /* Declaracion de variables */
-declare	@Reg_Existe	int,					/*Existe Registro*/
-		@Status		int,					/*Estatus de Procedimiento*/
+declare	@Status		int,					/*Estatus de Procedimiento*/
 		@Peu_Person char(8),				/*Persona*/
 		@Gpc_GrpAnt	char(8),				/*Grupo Anterior*/
 		@Gpc_Comple varchar(120),			/*Nombre Completo*/
@@ -86,7 +85,6 @@ declare	@Reg_Existe	int,					/*Existe Registro*/
 		@Pro_DesAgr	char(1),				/*Proceso de desagrupación de persona*/
 		@Pro_GruMin	char(1),				/*Proceso de agrupación de persona por minimo*/
 		@Pro_GrClUn char(1),				/*Proceso de agrupacion de persona por persona del cliente único*/
-		@Ent_Status	int,					/* Status */
 		@Bit_PerNum char(8),				/* Persona numero */
 		@Bit_Fecha	smalldatetime,			/* Bitacora Fecha */
 		@Bit_NumTra	char(10),				/* Bitacora Numero de transaccion */
@@ -233,7 +231,7 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 		where	Per_Numero = @Gpc_Person
 
 	if isnull(@Bit_PerNum, @Str_Vacio) <> @Str_Vacio begin
-		exec @Ent_Status = SOBITPERALT
+		exec @Status = SOBITPERALT
 			@Gpc_Person,	@Bit_Fecha,		@Bit_NumTra,	@Bit_Tipo,		@Bit_NuSeFi,
 			@Bit_Titulo,	@Bit_Nombre,	@Bit_ApePat,	@Bit_ApeMat,	@Bit_RazSoc,
 			@Bit_Comple,	@Bit_ComOrd,	@Bit_RFC,		@Bit_CURP,		@Bit_Calle,
@@ -242,7 +240,7 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 			@Bit_EstCiv,	@Bit_Nacion,	@Bit_ActEmp,	@Bit_Giro,		@Bit_Sector,
 			@Bit_Activi,	@Bit_ActINE,	@NumTransac,	@Transaccio,	@Usuario,
 			@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
-		if @Ent_Status <> @Ent_Cero begin
+		if @Status <> @Ent_Cero begin
 			rollback
 			return 1
 		end
@@ -298,7 +296,7 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 		where	Adi_PerNum	= @Gpc_Person
 
 	if isnull(@Bit_PerNum, @Str_Vacio) <> @Str_Vacio begin
-		exec @Ent_Status =	SOBIPEADALT
+		exec @Status =	SOBIPEADALT
 			@Gpc_Person,	@Bit_Fecha,		@Bit_NumTra,	@Bit_LugNac,	@Bit_Sexo,
 			@Bit_FecNac,	@Bit_RegMat,	@Bit_VivCas,	@Bit_TieRes,	@Bit_Fax,
 			@Bit_NumDep,    @Bit_Puesto,	@Bit_Ocupac,	@Bit_AntLab,	@Bit_LugTra,
@@ -312,12 +310,12 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 			@Modulo
 
 
-		if @Ent_Status <> 0 begin
+		if @Status <> 0 begin
 			rollback
 			return 1
 		end
 	end else begin
-		exec @Ent_Status =	SOPERADIALT @Gpc_Person, @Str_Vacio,  @Str_Vacio, @Str_Vacio, @Gpc_Sexo, 
+		exec @Status =	SOPERADIALT @Gpc_Person, @Str_Vacio,  @Str_Vacio, @Str_Vacio, @Gpc_Sexo, 
 						 @Gpc_FecNac, @Str_Vacio, @Str_Vacio, @Ent_Cero, @Str_Vacio, 
 						 @Ent_Cero, @Str_Vacio, @Str_Vacio, @Ent_Cero, @Str_Vacio, 
 						 @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio, 
@@ -329,7 +327,7 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 						 @Str_Vacio, @Str_Vacio,   @NumTransac, @Transaccio, @Usuario, 
 						 @FechaSis,   @SucOrigen,  @SucDestino, @Modulo
 						 
-		if @Ent_Status <> 0 begin
+		if @Status <> 0 begin
 			rollback
 			return 1
 		end
