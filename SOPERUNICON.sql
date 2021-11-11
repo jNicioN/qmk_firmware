@@ -1,4 +1,4 @@
-﻿create procedure SOPERUNICON (
+create procedure SOPERUNICON (
 	@Per_Numero	char(8),
 	@Per_Fecha	smalldatetime,
 	@Per_NumTra	char(10),
@@ -20,6 +20,12 @@
 as
 /*******************************************************************
 ** DESCRIPCION: Consulta de Persona Unica						****
+********************************************************************
+** Modifico:	Armando Alexis Sepulveda Cruz					****
+** Fecha:		11/11/2021										****
+** Help:		1379522	 										****
+** Descripcion:	Se modifican las consultas L7 y LA para agregar	****
+**				a la salida de datos el campo Per_Tipo			****
 ********************************************************************
 ** Modifico:	Marcelo Bautista								****
 ** Fecha:		28/10/2021										****
@@ -114,6 +120,7 @@ as
 ** Fecha:		29/10/2018										****
 ** Help:		1147468											****
 ** Descripcion:	Se agrega salida de campos Adi_FeExId, Adi_Sexo	****
+
 **				y Adi_FecNac a C5 y L5, agregar L7				****
 ********************************************************************
 ** Modifico:	Erick Gloria							        ****
@@ -535,6 +542,7 @@ end else begin
 			into #documentosBitCliDoc
 			from #documentosBitCli
 
+
 			inner join DXBANDOC noholdlock on Bad_Bandej = Ban_Numero
 
 
@@ -673,6 +681,7 @@ end else begin
 			Per_Person char(8)
 		)
 		create index #tmpPersoL5 on #tmpPersoL5 (Per_Person)
+
 
 
 		create table #tmpClienL5 (
@@ -828,7 +837,7 @@ end else begin
 		select	Per_Numero, Per_ComOrd, Per_Comple,	Per_RFC, Per_CURP,
 				Per_Nombre,	Per_ApePat,	Per_ApeMat,	Adi_TipIde,	Adi_NumIde,
 				Adi_FeVeId,	Per_Nacion,	Adi_NacExt,	Adi_FeExId,	Adi_Sexo,
-				Adi_FecNac
+				Adi_FecNac, Per_Tipo
 			from #PersonasUnicas
 			inner join SOPERSON noholdlock on Per_Numero = Per_Grupo
 			left outer join SOPERADI noholdlock on Adi_PerNum	= Per_Numero
@@ -909,10 +918,10 @@ end else begin
 		end
 
 
-		select Per_Numero, Per_ComOrd, Per_Comple,	Per_RFC, Per_CURP,
+		select Per_Numero, 	Per_ComOrd, Per_Comple,	Per_RFC, Per_CURP,
   			   Per_Nombre,	Per_ApePat,	Per_ApeMat,	Adi_TipIde,	Adi_NumIde,
 			   Adi_FeVeId,	Per_Nacion,	Adi_NacExt,	Adi_FeExId,	Adi_Sexo,
-			   Adi_FecNac
+			   Adi_FecNac,	Per_Tipo
 		  from (
 		  	select SOUNIPER.Peu_Grupo 
 			  from #PersonasRFC
