@@ -1,4 +1,4 @@
-create procedure SOPERUNICON (
+﻿create procedure SOPERUNICON (
 	@Per_Numero	char(8),
 	@Per_Fecha	smalldatetime,
 	@Per_NumTra	char(10),
