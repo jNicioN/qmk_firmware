@@ -48,6 +48,12 @@ as
 /***************************************************************************/
 /** REFERENCIAS:														   */
 /***************************************************************************
+** Modifico:	Raul Muniz												****
+** Fecha:		06/Octubre/2021											****
+** Help:		1504301													****
+** Descripcion: Se agrega exec a SOPEINCOALT para guardar actividad		****
+**				preponderante											****
+****************************************************************************
 ** Modifico:	CODE4U-Eliezer Catalino Xul Canche						****
 ** Fecha:		06/Febrero/2020											****
 ** Help:		1343720													****
@@ -176,22 +182,25 @@ as
 ** Fecha:	 	16/Jul/1998												****
 ****************************************************************************/
 
-declare	@Per_Comple	varchar(180),	/*	Declaracion de Variables	*/
-		@Per_ComOrd	varchar(180),
-		@Act_Numero	char(10),
-		@Act_Status	char(1),
-		@Status		int,
-		@PerPersoID	int,
-		@PerExist	char(8),
-		@Per_Benefi	char(1),
-		@Err_Descri	char(12),
-		@Lon_Telefo smallint,
-		@Tel_Comple	varchar(11),
-		@Sta_Locali char(1),
-		@Sta_Entida	char(1),
-		@Per_Pais	char(3)
+/*	Declaracion de Variables	*/
+declare	@Per_Comple	varchar(180),	/* Nombre Completo */
+		@Per_ComOrd	varchar(180),	/* Nombre Completo Ordenado */
+		@Act_Numero	char(10),		/* Numero Actividad */
+		@Act_Status	char(1),		/* Estatus Actividad */
+		@Status		int,			/* Estatus */
+		@PerPersoID	int,			/* ID Persona */
+		@PerExist	char(8),		/* Variable Existe Persona */
+		@Per_Benefi	char(1),		/* Beneficiario */
+		@Err_Descri	char(12),		/* Error Descripcion */
+		@Lon_Telefo smallint,		/* Telefono */
+		@Tel_Comple	varchar(11),	/* Telefono Completo */
+		@Sta_Locali char(1),		/* Localidad */
+		@Sta_Entida	char(1),		/* Estatus Entidad */
+		@Per_Pais	char(3),		/* Pais */
+		@Act_ActPre	int				/* Actividad Preponderante */
 
-declare	@Fec_Vacia	smalldatetime,   /*	Declaracion de Constantes	*/
+/*	Declaracion de Constantes	*/
+declare	@Fec_Vacia	smalldatetime,
         @Str_Vacio	char(1),		
 		@Str_Espaci	char(1),
 		@Per_Moral	char(1),
@@ -545,7 +554,7 @@ if (@Modulo not in (@Ban_Electr, @Ban_NueBan)) and (@Tip_Proces = @Tip_CueChe an
 									  and	Cpc_CodPos	= @Per_CodPos)) and @Per_Nacion = @Per_PaiMex begin
 
 			select	Err_Codigo	= '000021',
-					Err_Mensaj	= 'CÃ³digo Postal' + @Err_Descri + ' Incorrecto',
+					Err_Mensaj	= 'Código Postal' + @Err_Descri + ' Incorrecto',
 					Err_Variab	= 'Per_CodPos'
 			rollback
 			return 1
@@ -628,10 +637,24 @@ exec @Status = SOPERSONPRO
 		rollback
 		return 1
 	end
-
+	
 exec SOUNIPERPRO
 	@Per_Numero,	@NumTransac,	@Transaccio,	@Usuario,	@FechaSis,
 	@SucOrigen,		@SucDestino,	@Modulo
+
+select	@Act_ActPre	= @Ent_Cero	
+select	@Act_ActPre	= isnull(Apc_ActPre, @Ent_Cero)
+	from SOACPRCL noholdlock
+	where Apc_Activi = @Per_Activi
+	
+exec @Status	= SOPEINCOALT
+	@PerPersoID,	@Act_ActPre,	@NumTransac,	@Transaccio,	@Usuario,
+	@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
+	
+if @Status <> 0 begin
+	rollback
+	return 1
+end
 
 if @@nestlevel = @Ent_Uno
 	select	Err_Codigo	= '000000',
