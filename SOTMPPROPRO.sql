@@ -14,6 +14,12 @@ as
 ****************************************************************************
 ** Referencias:															****
 ****************************************************************************
+** Elaboró: 		Frank Canul						                    ****
+** Fecha:		    22/09/2021									        ****
+** Help:			1574028  									        ****
+** Descripción:	    Se agrega campo Pro_NivAut para la tabla SOPRODUC	****
+**					y SOTMPPRO, se elimna el campo de subproducto       ****
+****************************************************************************
 ** Elaboró: 		CODE4U Jonathan Perez Tiburcio                      ****
 ** Fecha:		    11/01/2020									        ****
 ** Help:			1286068  									        ****
@@ -47,8 +53,8 @@ begin transaction
 		Pro_Numero  =  tmp.Pro_Numero,
 		Pro_Nombre  =  tmp.Pro_Nombre,
 		Pro_Abrevi  =  tmp.Pro_Abrevi,
-		Pro_SubPro  =  tmp.Pro_SubPro,
         Pro_Activo  =  tmp.Pro_Activo,
+		Pro_NivAut	=  tmp.Pro_NivAut,
 		NumTransac  =  @NumTransac,
 		Transaccio  =  @Transaccio,
 		Usuario     =  @Usuario,   
@@ -61,13 +67,13 @@ begin transaction
 
 
 	insert into SOPRODUC(
-		Pro_Numero,   Pro_Nombre, Pro_Abrevi, Pro_SubPro, Pro_Activo,
-        NumTransac,   Transaccio, Usuario,    FechaSis,   SucOrigen,
-        SucDestino)
+		Pro_Numero,   Pro_Nombre,   Pro_Abrevi, Pro_Activo,
+        Pro_NivAut,	  NumTransac,   Transaccio, Usuario,    FechaSis,   
+		SucOrigen,    SucDestino)
 		select  
-		tmp.Pro_Numero,   tmp.Pro_Nombre, tmp.Pro_Abrevi, tmp.Pro_SubPro, tmp.Pro_Activo,
-        @NumTransac,      @Transaccio,    @Usuario,       @FechaSis,      @SucOrigen,
-        @SucDestino
+		tmp.Pro_Numero,   tmp.Pro_Nombre,   tmp.Pro_Abrevi, tmp.Pro_Activo,
+		tmp.Pro_NivAut,   @NumTransac,      @Transaccio,    @Usuario,       @FechaSis,      
+		@SucOrigen,       @SucDestino
 		from SOTMPPRO tmp noholdlock 
 		left join SOPRODUC des on tmp.Pro_Numero = des.Pro_Numero
 		where des.Pro_Numero is null
