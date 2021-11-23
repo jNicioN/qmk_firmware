@@ -61,7 +61,7 @@ begin transaction
 		FechaSis    =  @FechaSis,  
 		SucOrigen   =  @SucOrigen, 
 		SucDestino  =  @SucDestino 
-		from SOTMPPRO tmp
+		from SOTMPPRO tmp noholdlock
 		inner join SOPRODUC des on tmp.Pro_Numero = des.Pro_Numero 
 		where convert(date, tmp.Pro_FecCon) between @IniMes and @FinMes
 

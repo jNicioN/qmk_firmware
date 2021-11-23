@@ -52,7 +52,7 @@ begin transaction
 		FechaSis    =  @FechaSis,  
 		SucOrigen   =  @SucOrigen, 
 		SucDestino  =  @SucDestino 
-		from SOTMPCLP tmp
+		from SOTMPCLP tmp noholdlock
 		inner join SOCLAPRO des on tmp.Clp_Clasif = des.Clp_Clasif and  
                                    tmp.Clp_Produc = des.Clp_Produc
 		where convert(date, tmp.Clp_FecCon) between @IniMes and @FinMes

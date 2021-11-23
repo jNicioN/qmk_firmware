@@ -52,7 +52,7 @@ begin transaction
 		FechaSis    =  @FechaSis,  
 		SucOrigen   =  @SucOrigen, 
 		SucDestino  =  @SucDestino 
-		from SOTMPPTA tmp
+		from SOTMPPTA tmp noholdlock
 		inner join SOPRTITA des on tmp.Pta_TipTar = des.Ptt_TipTar and  
                                    tmp.Pta_Produc = des.Ptt_Produc
 		where convert(date, tmp.Pta_FecCon) between @IniMes and @FinMes
