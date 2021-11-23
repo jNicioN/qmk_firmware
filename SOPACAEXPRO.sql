@@ -36,11 +36,11 @@ select	@Str_Vacio	= '',			/* Cadena vacia 								*/
 		@Str_Prefi	= 'exp-'
 
 CREATE TABLE #PersonasUnicas(
-	Grupo char(8) not null
+	Per_Grupo char(8) not null
 )
-create nonclustered index #PersonasUnicas on #PersonasUnicas ( Grupo)
+create nonclustered index #PersonasUnicas on #PersonasUnicas ( Per_Grupo)
 
-insert into #PersonasUnicas(Grupo)
+insert into #PersonasUnicas(Per_Grupo)
 select distinct UNI.Peu_Grupo
 	from CLCLACLI CLA noholdlock
 inner join CLADICIO ADI noholdlock on CLA.Clc_Client = ADI.ClClientID
@@ -57,7 +57,7 @@ select 	PER.PerPersoID, PER.Per_Tipo, PER.Per_RFC, PER.Per_Tipo,lower(@Str_Prefi
 		@NumTransac, 	@Transaccio, 	@Usuario,		@FechaSis, 		@SucOrigen, 
 		@SucDestino
 from #PersonasUnicas PEU
-inner join SOPERSON PER noholdlock on PEU.Grupo = PER.Per_Numero
+inner join SOPERSON PER noholdlock on PEU.Per_Grupo = PER.Per_Numero
 left join SOPACAEX CRE noholdlock on PER.PerPersoID = CRE.Pce_UniPer
 where	CRE.Pce_UniPer is null
 

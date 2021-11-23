@@ -39,8 +39,7 @@ declare @Str_Vacio char(1),
 				@Ent_NoIni int,
 				@Ent_Pendie int,
 				@Ent_Termin int,
-				@Ent_Error int,
-				@Flu_Numero int
+				@Ent_Error int
 
 /* Asignacion de Constantes */
 select @Str_Vacio = '',			/* Tipo consulta*/
