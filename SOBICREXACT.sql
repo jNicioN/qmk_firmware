@@ -1,7 +1,7 @@
 create procedure SOBICREXACT (
 	 @Bce_Numero int,
-	 @Bce_PerNum int,
-	 @Bce_Status smallint,
+	 @Bce_Person char(8),
+	 @Bce_Status smallint,/*0-pendiente,1-pendiente,2-exitoso, 3 error*/
 	 @Bce_Mensaj varchar(100),
 	 @Tip_Actual char(1),
 
@@ -39,7 +39,8 @@ declare @Str_Vacio char(1),
 				@Ent_NoIni int,
 				@Ent_Pendie int,
 				@Ent_Termin int,
-				@Ent_Error int
+				@Ent_Error int,
+				@Flu_Numero int
 
 /* Asignacion de Constantes */
 select @Str_Vacio = '',			/* Tipo consulta*/
@@ -71,11 +72,11 @@ if @Tip_Actual = @Str_Uno begin /*Tipo 1 Se actualiza el estatus por Cliente*/
 
 	select @Bce_Numero = Bce_Numero
 	from SOBICREX Bic noholdlock
-	where Bic.Bce_PerNum = @Bce_PerNum
+	where Bic.Bce_Person = @Bce_Person
 
 	if(isnull(@Bce_Numero,@Ent_Cero) = @Ent_Cero ) begin
 
-		exec @Status = SOBICREXALT @Bce_Numero out, @Bce_PerNum	, @Bce_Status ,@Bce_Mensaj ,
+		exec @Status = SOBICREXALT @Bce_Numero out, @Bce_Person	, @Bce_Status ,@Bce_Mensaj ,
 		 @NumTransac, @Transaccio, @Usuario, @FechaSis, @SucOrigen, @SucDestino, @Modulo
 
 		if @Status <> @Ent_Cero begin

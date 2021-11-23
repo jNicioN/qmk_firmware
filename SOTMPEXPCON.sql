@@ -58,44 +58,44 @@ select	@Tip_ConTip	= substring(@Tip_Consul,@Ent_Uno,@Ent_Uno),
 
 if @Tip_ConTip = @Str_Lista begin
 	if @Tip_ConCon = @Str_Uno begin
-		select CRE.Exp_Numero,	CRE.Exp_UniPer,	CRE.Exp_Tipo,	CRE.Exp_RFC,	CRE.Exp_PerFis,
+		select CRE.Exp_Numero,	CRE.Exp_Person,	CRE.Exp_Tipo,	CRE.Exp_RFC,	CRE.Exp_PerFis,
 			   CRE.Exp_Reposi,  CRE.Exp_Nombre,	CRE.Exp_ApePat,	CRE.Exp_ApeMat,	CRE.Exp_RazSoc,
 			   CRE.Exp_Curp,	CRE.Exp_FecNac,	CRE.NumTransac,	CRE.Transaccio,	CRE.Usuario,
 			   CRE.FechaSis,	CRE.SucOrigen,	CRE.SucDestino
 		from SOTMPEXP CRE noholdlock
-		inner join SOBICREX BCE noholdlock on CRE.Exp_UniPer = BCE.Bce_PerNum
+		inner join SOBICREX BCE noholdlock on CRE.Exp_Person = BCE.Bce_Person
 		where	BCE.Bce_Status = @Sta_NoProc
 	end else
 	if @Tip_ConCon = @Str_Dos begin
-		select CRE.Exp_Numero,CRE.Exp_UniPer,CRE.Exp_Tipo,CRE.Exp_RFC,CRE.Exp_PerFis,CRE.Exp_Reposi,
+		select CRE.Exp_Numero,CRE.Exp_Person,CRE.Exp_Tipo,CRE.Exp_RFC,CRE.Exp_PerFis,CRE.Exp_Reposi,
 		CRE.Exp_Nombre,CRE.Exp_ApePat,CRE.Exp_ApeMat,CRE.Exp_RazSoc,CRE.Exp_Curp,CRE.Exp_FecNac,
 		CRE.NumTransac,CRE.Transaccio,CRE.Usuario,CRE.FechaSis,CRE.SucOrigen,CRE.SucDestino
 		from SOTMPEXP CRE noholdlock
-		inner join SOBICREX BCE noholdlock on CRE.Exp_UniPer = BCE.Bce_PerNum
+		inner join SOBICREX BCE noholdlock on CRE.Exp_Person = BCE.Bce_Person
 		where	BCE.Bce_Status = @Sta_Pendie
 	end else
 	if @Tip_ConCon = @Str_Tres begin
-		select CRE.Exp_Numero,CRE.Exp_UniPer,CRE.Exp_Tipo,CRE.Exp_RFC,CRE.Exp_PerFis,CRE.Exp_Reposi,
+		select CRE.Exp_Numero,CRE.Exp_Person,CRE.Exp_Tipo,CRE.Exp_RFC,CRE.Exp_PerFis,CRE.Exp_Reposi,
 		CRE.Exp_Nombre,CRE.Exp_ApePat,CRE.Exp_ApeMat,CRE.Exp_RazSoc,CRE.Exp_Curp,CRE.Exp_FecNac,
 		CRE.NumTransac,CRE.Transaccio,CRE.Usuario,CRE.FechaSis,CRE.SucOrigen,CRE.SucDestino
 		from SOTMPEXP CRE noholdlock
-		inner join SOBICREX BCE noholdlock on CRE.Exp_UniPer = BCE.Bce_PerNum
+		inner join SOBICREX BCE noholdlock on CRE.Exp_Person = BCE.Bce_Person
 		where	BCE.Bce_Status = @Sta_Proces
 	end else
 	if @Tip_ConCon = @Str_Cuatro begin
-		select CRE.Exp_Numero,CRE.Exp_UniPer,CRE.Exp_Tipo,CRE.Exp_RFC,CRE.Exp_PerFis,CRE.Exp_Reposi,
+		select CRE.Exp_Numero,CRE.Exp_Person,CRE.Exp_Tipo,CRE.Exp_RFC,CRE.Exp_PerFis,CRE.Exp_Reposi,
 		CRE.Exp_Nombre,CRE.Exp_ApePat,CRE.Exp_ApeMat,CRE.Exp_RazSoc,CRE.Exp_Curp,CRE.Exp_FecNac,
 		CRE.NumTransac,CRE.Transaccio,CRE.Usuario,CRE.FechaSis,CRE.SucOrigen,CRE.SucDestino
 		from SOTMPEXP CRE noholdlock
-		inner join SOBICREX BCE noholdlock on CRE.Exp_UniPer = BCE.Bce_PerNum
+		inner join SOBICREX BCE noholdlock on CRE.Exp_Person = BCE.Bce_Person
 		where	BCE.Bce_Status = @Sta_Rechaz
 	end else
 	if @Tip_ConCon = @Str_Cinco begin
-		select CRE.Exp_Numero,CRE.Exp_UniPer,CRE.Exp_Tipo,CRE.Exp_RFC,CRE.Exp_PerFis,CRE.Exp_Reposi,
+		select CRE.Exp_Numero,CRE.Exp_Person,CRE.Exp_Tipo,CRE.Exp_RFC,CRE.Exp_PerFis,CRE.Exp_Reposi,
 		CRE.Exp_Nombre,CRE.Exp_ApePat,CRE.Exp_ApeMat,CRE.Exp_RazSoc,CRE.Exp_Curp,CRE.Exp_FecNac,
 		CRE.NumTransac,CRE.Transaccio,CRE.Usuario,CRE.FechaSis,CRE.SucOrigen,CRE.SucDestino
 		from SOTMPEXP CRE noholdlock
-		inner join SOBICREX BCE noholdlock on CRE.Exp_UniPer = BCE.Bce_PerNum
+		inner join SOBICREX BCE noholdlock on CRE.Exp_Person = BCE.Bce_Person
 		where	BCE.Bce_Status = @Sta_NoCump
 	end
 end

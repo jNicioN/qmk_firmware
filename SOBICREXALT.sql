@@ -1,6 +1,6 @@
 create procedure SOBICREXALT (
 	@Bce_Numero int output,
-	@Bce_PerNum int,
+	@Bce_Person char(8),
 	@Bce_Status smallint,
 	@Bce_Mensaj varchar(100),
 
@@ -54,10 +54,10 @@ if(@Bce_Status<> @Ent_NoIni
 end
 
 insert into SOBICREX (
-		Bce_PerNum, Bce_Status , Bce_Mensaj, 	NumTransac,
+		Bce_Person, Bce_Status , Bce_Mensaj, 	NumTransac,
 		Transaccio, 	Usuario, 	FechaSis, 	SucOrigen, 	SucDestino)
 	values (
-		@Bce_PerNum , @Bce_Status , @Bce_Mensaj, 	@NumTransac,
+		@Bce_Person , @Bce_Status , @Bce_Mensaj, 	@NumTransac,
 		@Transaccio, 	@Usuario, 	@FechaSis, 	@SucOrigen, 	@SucDestino)
 
 select @Bce_Numero = @@identity
