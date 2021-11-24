@@ -15,7 +15,7 @@ as
 /***********************************************************************************/
 /*REFERENCIAS:
 *************************************************************************************
-** CreÃ³:		Josue Palomar     												 ****
+** CreÃƒÂ³:		Josue Palomar     												 ****
 ** Fecha:		29/Octubre/2021													 ****
 ** Help:		1574028															****
 ************************************************************************************/
@@ -60,8 +60,7 @@ if @Tip_ConTip = @Str_Lista begin
 	if @Tip_ConCon = @Str_Uno begin
 		select CRE.Exp_Numero,	CRE.Exp_Person,	CRE.Exp_Tipo,	CRE.Exp_RFC,	CRE.Exp_PerFis,
 			   CRE.Exp_Reposi,  CRE.Exp_Nombre,	CRE.Exp_ApePat,	CRE.Exp_ApeMat,	CRE.Exp_RazSoc,
-			   CRE.Exp_Curp,	CRE.Exp_FecNac,	CRE.NumTransac,	CRE.Transaccio,	CRE.Usuario,
-			   CRE.FechaSis,	CRE.SucOrigen,	CRE.SucDestino
+			   CRE.Exp_Curp,	CRE.Exp_FecNac,	CRE.Exp_NumTra NumTransac
 		from SOTMPEXP CRE noholdlock
 		inner join SOBICREX BCE noholdlock on CRE.Exp_Person = BCE.Bce_Person
 		where	BCE.Bce_Status = @Sta_NoProc
@@ -69,7 +68,7 @@ if @Tip_ConTip = @Str_Lista begin
 	if @Tip_ConCon = @Str_Dos begin
 		select CRE.Exp_Numero,CRE.Exp_Person,CRE.Exp_Tipo,CRE.Exp_RFC,CRE.Exp_PerFis,CRE.Exp_Reposi,
 		CRE.Exp_Nombre,CRE.Exp_ApePat,CRE.Exp_ApeMat,CRE.Exp_RazSoc,CRE.Exp_Curp,CRE.Exp_FecNac,
-		CRE.NumTransac,CRE.Transaccio,CRE.Usuario,CRE.FechaSis,CRE.SucOrigen,CRE.SucDestino
+		CRE.Exp_NumTra NumTransac
 		from SOTMPEXP CRE noholdlock
 		inner join SOBICREX BCE noholdlock on CRE.Exp_Person = BCE.Bce_Person
 		where	BCE.Bce_Status = @Sta_Pendie
@@ -77,7 +76,7 @@ if @Tip_ConTip = @Str_Lista begin
 	if @Tip_ConCon = @Str_Tres begin
 		select CRE.Exp_Numero,CRE.Exp_Person,CRE.Exp_Tipo,CRE.Exp_RFC,CRE.Exp_PerFis,CRE.Exp_Reposi,
 		CRE.Exp_Nombre,CRE.Exp_ApePat,CRE.Exp_ApeMat,CRE.Exp_RazSoc,CRE.Exp_Curp,CRE.Exp_FecNac,
-		CRE.NumTransac,CRE.Transaccio,CRE.Usuario,CRE.FechaSis,CRE.SucOrigen,CRE.SucDestino
+		CRE.Exp_NumTra NumTransac
 		from SOTMPEXP CRE noholdlock
 		inner join SOBICREX BCE noholdlock on CRE.Exp_Person = BCE.Bce_Person
 		where	BCE.Bce_Status = @Sta_Proces
@@ -85,7 +84,7 @@ if @Tip_ConTip = @Str_Lista begin
 	if @Tip_ConCon = @Str_Cuatro begin
 		select CRE.Exp_Numero,CRE.Exp_Person,CRE.Exp_Tipo,CRE.Exp_RFC,CRE.Exp_PerFis,CRE.Exp_Reposi,
 		CRE.Exp_Nombre,CRE.Exp_ApePat,CRE.Exp_ApeMat,CRE.Exp_RazSoc,CRE.Exp_Curp,CRE.Exp_FecNac,
-		CRE.NumTransac,CRE.Transaccio,CRE.Usuario,CRE.FechaSis,CRE.SucOrigen,CRE.SucDestino
+		CRE.Exp_NumTra NumTransac
 		from SOTMPEXP CRE noholdlock
 		inner join SOBICREX BCE noholdlock on CRE.Exp_Person = BCE.Bce_Person
 		where	BCE.Bce_Status = @Sta_Rechaz
@@ -93,9 +92,10 @@ if @Tip_ConTip = @Str_Lista begin
 	if @Tip_ConCon = @Str_Cinco begin
 		select CRE.Exp_Numero,CRE.Exp_Person,CRE.Exp_Tipo,CRE.Exp_RFC,CRE.Exp_PerFis,CRE.Exp_Reposi,
 		CRE.Exp_Nombre,CRE.Exp_ApePat,CRE.Exp_ApeMat,CRE.Exp_RazSoc,CRE.Exp_Curp,CRE.Exp_FecNac,
-		CRE.NumTransac,CRE.Transaccio,CRE.Usuario,CRE.FechaSis,CRE.SucOrigen,CRE.SucDestino
+		CRE.Exp_NumTra NumTransac
 		from SOTMPEXP CRE noholdlock
 		inner join SOBICREX BCE noholdlock on CRE.Exp_Person = BCE.Bce_Person
 		where	BCE.Bce_Status = @Sta_NoCump
 	end
 end
+
