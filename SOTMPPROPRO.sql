@@ -62,7 +62,7 @@ begin transaction
 		SucOrigen   =  @SucOrigen, 
 		SucDestino  =  @SucDestino 
 		from SOTMPPRO tmp noholdlock
-		inner join SOPRODUC des on tmp.Pro_Numero = des.Pro_Numero 
+		inner join SOPRODUC des noholdlock on tmp.Pro_Numero = des.Pro_Numero 
 		where convert(date, tmp.Pro_FecCon) between @IniMes and @FinMes
 
 
@@ -75,7 +75,7 @@ begin transaction
 		tmp.Pro_NivAut,   @NumTransac,      @Transaccio,    @Usuario,       @FechaSis,      
 		@SucOrigen,       @SucDestino
 		from SOTMPPRO tmp noholdlock 
-		left join SOPRODUC des on tmp.Pro_Numero = des.Pro_Numero
+		left join SOPRODUC des noholdlock on tmp.Pro_Numero = des.Pro_Numero
 		where des.Pro_Numero is null
 		  and convert(date, tmp.Pro_FecCon) between @IniMes and @FinMes
 commit

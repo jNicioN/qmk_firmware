@@ -53,7 +53,7 @@ begin transaction
 		SucOrigen   =  @SucOrigen, 
 		SucDestino  =  @SucDestino 
 		from SOTMPPCC tmp noholdlock
-		inner join SOPRTICC des on tmp.Pcc_TipCre = des.Ptc_TipCre and  
+		inner join SOPRTICC des noholdlock on tmp.Pcc_TipCre = des.Ptc_TipCre and  
                                    tmp.Pcc_Produc = des.Ptc_Produc
 		where convert(date, tmp.Pcc_FecCon) between @IniMes and @FinMes
 
@@ -65,7 +65,7 @@ begin transaction
 		tmp.Pcc_TipCre, tmp.Pcc_Produc,  @NumTransac,  @Transaccio,      
 		@Usuario,       @FechaSis,        @SucOrigen,  @SucDestino
 		from SOTMPPCC tmp noholdlock 
-		left join SOPRTICC des on   tmp.Pcc_TipCre = des.Ptc_TipCre and  
+		left join SOPRTICC des noholdlock on   tmp.Pcc_TipCre = des.Ptc_TipCre and  
                                    tmp.Pcc_Produc = des.Ptc_Produc
 		where des.Ptc_Numero is null
 		  and convert(date, tmp.Pcc_FecCon) between @IniMes and @FinMes

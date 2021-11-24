@@ -53,7 +53,7 @@ begin transaction
 		SucOrigen   =  @SucOrigen, 
 		SucDestino  =  @SucDestino 
 		from SOTMPPTA tmp noholdlock
-		inner join SOPRTITA des on tmp.Pta_TipTar = des.Ptt_TipTar and  
+		inner join SOPRTITA des noholdlock on tmp.Pta_TipTar = des.Ptt_TipTar and  
                                    tmp.Pta_Produc = des.Ptt_Produc
 		where convert(date, tmp.Pta_FecCon) between @IniMes and @FinMes
 
@@ -65,7 +65,7 @@ begin transaction
 		tmp.Pta_TipTar, tmp.Pta_Produc,  @NumTransac, @Transaccio,      
 		@Usuario,       @FechaSis,        @SucOrigen, @SucDestino
 		from SOTMPPTA tmp noholdlock 
-		left join SOPRTITA des on tmp.Pta_TipTar = des.Ptt_TipTar and  
+		left join SOPRTITA des noholdlock on tmp.Pta_TipTar = des.Ptt_TipTar and  
                                    tmp.Pta_Produc = des.Ptt_Produc
 		where des.Ptt_Numero is null
 		  and convert(date, tmp.Pta_FecCon) between @IniMes and @FinMes

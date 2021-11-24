@@ -53,7 +53,7 @@ begin transaction
 		SucOrigen   =  @SucOrigen, 
 		SucDestino  =  @SucDestino 
 		from SOTMPCLP tmp noholdlock
-		inner join SOCLAPRO des on tmp.Clp_Clasif = des.Clp_Clasif and  
+		inner join  SOCLAPRO des noholdlock on tmp.Clp_Clasif = des.Clp_Clasif and  
                                    tmp.Clp_Produc = des.Clp_Produc
 		where convert(date, tmp.Clp_FecCon) between @IniMes and @FinMes
 
@@ -65,7 +65,7 @@ begin transaction
 	    tmp.Clp_Clasif, tmp.Clp_Produc,  @NumTransac,  @Transaccio,     
 		@Usuario,       @FechaSis,        @SucOrigen,  @SucDestino
 		from SOTMPCLP tmp noholdlock 
-		left join SOCLAPRO des on   tmp.Clp_Clasif = des.Clp_Clasif and  
+		left join SOCLAPRO des noholdlock on   tmp.Clp_Clasif = des.Clp_Clasif and  
                                    tmp.Clp_Produc = des.Clp_Produc
 		where des.Clp_Numero is null
 		  and convert(date, tmp.Clp_FecCon) between @IniMes and @FinMes
