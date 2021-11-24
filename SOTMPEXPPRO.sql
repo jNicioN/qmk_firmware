@@ -14,7 +14,7 @@ as
 /***********************************************************************************/
 /*REFERENCIAS:
 *************************************************************************************
-** Creo¸:		Francisco Euan     												 ****
+** CreoÂ¸:		Francisco Euan     												 ****
 ** Fecha:		29/Octubre/2021													 ****
 ** Help:	1574028														****
 ************************************************************************************/
@@ -40,6 +40,8 @@ CREATE TABLE #PersonasUnicas(
 )
 create nonclustered index #PersonasUnicas on #PersonasUnicas ( Grupo)
 
+delete from SOTMPEXP where Exp_NumTra <> @NumTransac
+
 insert into #PersonasUnicas(Grupo)
 select distinct UNI.Peu_Grupo
 	from CLCLACLI CLA noholdlock
@@ -50,12 +52,10 @@ where 	CLA.Clc_Clasif = @Cla_Hey
 insert into SOTMPEXP
 	(Exp_Person,	Exp_Tipo,	Exp_RFC,	Exp_PerFis,	Exp_Reposi,
 	Exp_Nombre,		Exp_ApePat,	Exp_ApeMat,	Exp_RazSoc,	Exp_Curp,
-	Exp_FecNac,		NumTransac,	Transaccio,	Usuario,	FechaSis,
-	SucOrigen,		SucDestino)
+	Exp_FecNac,		Exp_NumTra)
 select 	PER.Per_Numero, PER.Per_Tipo, PER.Per_RFC, PER.Per_Tipo,lower(@Str_Prefi||PER.Per_RFC) as Repo,
 		PER.Per_Nombre, PER.Per_ApePat, PER.Per_ApeMat, PER.Per_RazSoc, PER.Per_CURP,PEA.Adi_FecNac,
-		@NumTransac, 	@Transaccio, 	@Usuario,		@FechaSis, 		@SucOrigen, 
-		@SucDestino
+		@NumTransac
 from #PersonasUnicas PEU
 inner join SOPERSON PER noholdlock on PEU.Grupo = PER.Per_Numero
 inner join SOPERADI PEA noholdlock on PER.Per_Numero = PEA.Adi_PerNum
@@ -63,3 +63,4 @@ left join SOTMPEXP CRE noholdlock on PER.Per_Numero = CRE.Exp_Person
 where	CRE.Exp_Person is null
 
 drop table #PersonasUnicas
+
