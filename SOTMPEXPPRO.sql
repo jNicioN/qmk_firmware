@@ -14,7 +14,7 @@ as
 /***********************************************************************************/
 /*REFERENCIAS:
 *************************************************************************************
-** CreoÂ¸:		Francisco Euan     												 ****
+** Creo:		Josue Palomar   												 ****
 ** Fecha:		29/Octubre/2021													 ****
 ** Help:	1574028														****
 ************************************************************************************/
@@ -26,14 +26,16 @@ declare	@Str_Vacio	char(1),
 		@Ent_Trece	smallint,
 		@Cla_Hey	smallint,
 		@Cla_Banreg	smallint,
-		@Str_Prefi char(4)
+		@Str_Prefi char(4),
+		@Sta_Exito smallint
 
 select	@Str_Vacio	= '',			/* Cadena vacia 								*/
 		@Ent_Doce	= 12,			/* Entero doce									*/
 		@Ent_Trece	= 13,			/* Entero trece									*/
 		@Cla_Hey	= 1,			/* Clasificacion para Hey						*/
 		@Cla_Banreg	= 2,			/* Clasificacion para Banregio					*/
-		@Str_Prefi	= 'exp-'
+		@Str_Prefi	= 'exp-',
+		@Sta_Exito  = 2
 
 CREATE TABLE #PersonasUnicas(
 	Grupo char(8) not null
@@ -48,6 +50,11 @@ select distinct UNI.Peu_Grupo
 inner join CLADICIO ADI noholdlock on CLA.Clc_Client = ADI.ClClientID
 inner join SOUNIPER UNI noholdlock on ADI.Adi_NumPer = UNI.Peu_Grupo
 where 	CLA.Clc_Clasif = @Cla_Hey
+
+delete #PersonasUnicas
+from #PersonasUnicas 
+inner join SOBICREX noholdlock on Grupo = Bce_Person
+where Bce_Status = @Sta_Exito
 
 insert into SOTMPEXP
 	(Exp_Person,	Exp_Tipo,	Exp_RFC,	Exp_PerFis,	Exp_Reposi,
