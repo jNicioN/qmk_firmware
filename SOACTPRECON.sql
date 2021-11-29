@@ -1,6 +1,7 @@
 create procedure SOACTPRECON (
 	@Acp_Numero int,
 	@Acp_Descri	varchar(254),
+	@Act_Numero char(10),
 	@Tip_Consul char(2),
 	
 	@NumTransac	char(10),
@@ -12,9 +13,15 @@ create procedure SOACTPRECON (
 	@Modulo char(2)) 
 as
 
-/****************************************************************/
-/* DESCRIPCION: Consulta de registros de Actividad Preponderante*/
-/****************************************************************/
+/***********************************************************************************/
+/* DESCRIPCION: Consulta de registros de Actividad Preponderante				****/
+/***********************************************************************************/
+/** Modifica:		Eduardo Perez Santiago										****/
+/** Fecha:			19 de noviembre del 2021                            		****/
+/** Help:			1504301					 									****/
+/** Descripcion:	Se crea la consulta L3 donde se le da salida a la actividad	****/
+/**					proponderante dependindo de una actividad de CLACTIVI		****/
+/***********************************************************************************/
 /** Creo:			Raul Muniz									*/
 /** Fecha:			09/09/2021                               	*/
 /** Help:			1504301					 					*/
@@ -29,13 +36,15 @@ declare @Str_C		char(1),		/* Caracter C */
 		@Str_Uno	char(1),		/* Caracter 1 */
 		@Str_Dos	char(1),		/* Caracter 2 */
 		@Est_Activo	bit,			/* Estatus Activo */
-		@Str_Porcen	char(1)			/* String Porcentaje */
+		@Str_Porcen	char(1),		/* String Porcentaje */
+		@Str_Tres   char(1)
 
 select @Str_C = 'C',				/* Caracter C */
        @Str_Uno = '1',				/* Caracter 1 */
        @Str_Dos = '2',				/* Caracter 2 */
 	   @Est_Activo = 1,				/* Estatus Activo */
-	   @Str_Porcen	= '%'			/* String Porcentaje */
+	   @Str_Porcen	= '%',			/* String Porcentaje */
+	   @Str_Tres = '3'
 
 select @Tip_ConTip = substring(@Tip_Consul, 1, 1),
        @Tip_ConCon = substring(@Tip_Consul, 2, 1) 
@@ -80,5 +89,11 @@ end else begin
 			where	Acp_Activo	= @Est_Activo
 			  and	Acp_Descri like @Str_Porcen + @Acp_Descri + @Str_Porcen
 			order by Acp_Descri
+	end else if  @Tip_ConCon = @Str_Tres begin  /* L3 */
+		select	Acp_Numero,	Acp_Descri
+			from CLACTIVI noholdlock
+				inner join SOACPRCL noholdlock on Apc_Activi = Act_Numero
+				inner join SOACTPRE noholdlock on Acp_Numero = convert(integer,Apc_ActPre)
+				where	Act_Numero	= @Act_Numero and Acp_Activo = @Est_Activo
 	end
 end
