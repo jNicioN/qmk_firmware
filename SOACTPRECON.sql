@@ -1,4 +1,4 @@
-create procedure SOACTPRECON (
+create procedure SOACTPRECON ( 
 	@Acp_Numero int,
 	@Acp_Descri	varchar(254),
 	@Act_Numero char(10),
@@ -18,10 +18,11 @@ as
 /***********************************************************************************/
 /** Modifica:		Eduardo Perez Santiago										****/
 /** Fecha:			19 de noviembre del 2021                            		****/
-/** Help:			1504301					 									****/
+/** Help:			1438184					 									****/
 /** Descripcion:	Se crea la consulta L3 donde se le da salida a la actividad	****/
 /**					proponderante dependindo de una actividad de CLACTIVI		****/
 /***********************************************************************************/
+/****************************************************************/
 /** Creo:			Raul Muniz									*/
 /** Fecha:			09/09/2021                               	*/
 /** Help:			1504301					 					*/
@@ -90,10 +91,10 @@ end else begin
 			  and	Acp_Descri like @Str_Porcen + @Acp_Descri + @Str_Porcen
 			order by Acp_Descri
 	end else if  @Tip_ConCon = @Str_Tres begin  /* L3 */
-		select	Acp_Numero,	Acp_Descri
-			from CLACTIVI noholdlock
-				inner join SOACPRCL noholdlock on Apc_Activi = Act_Numero
-				inner join SOACTPRE noholdlock on Acp_Numero = convert(integer,Apc_ActPre)
-				where	Act_Numero	= @Act_Numero and Acp_Activo = @Est_Activo
+		 	select	Acp_Numero,	Acp_Descri
+				from CLACTIVI noholdlock
+					inner join SOACPRCL noholdlock on Apc_Activi = Act_Numero
+					inner join SOACTPRE noholdlock on Acp_Numero = convert(integer,Apc_ActPre)
+					where	Act_Numero	= @Act_Numero and Acp_Activo = @Est_Activo
 	end
 end
