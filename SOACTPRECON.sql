@@ -1,4 +1,4 @@
-create procedure SOACTPRECON ( 
+create procedure SOACTPRECON (
 	@Acp_Numero int,
 	@Acp_Descri	varchar(254),
 	@Act_Numero char(10),
