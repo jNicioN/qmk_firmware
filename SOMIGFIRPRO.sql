@@ -153,7 +153,7 @@ if @Tip_Proces = @Str_RegTem begin
 					Err_Mensaj = 'La sucursal '+@Mif_Sucurs+' ha concluido totalmente la fase de migración.'
 			return 1
 		end if @Str_Estatu = @Str_EstTer begin
-			
+		
 			update SOMIGFIR set Mif_Estatu = @Str_EstPen
 				where	Mif_Sucurs = @Mif_Sucurs
 				
@@ -174,16 +174,33 @@ if @Tip_Proces = @Str_RegTem begin
 				from #totales
 				left join #totalesMigradas on Fir_Cuenta = Apf_Cuenta
 				where	isnull(Apf_Total,@Ent_Cero) < Total
-							
+										  
 			update CHTMPFIR set
 				Fir_Estatu	= @Str_EstPen
-				from CHTMPFIR noholdlock
+				from CHTMPFIR t noholdlock
 				inner join #cuentasPendientes on Fir_Cuenta = Cuenta
-				where	NumTransac = @Str_NumTra
+				left join CHADPEFO noholdlock on Apf_Cuenta = Fir_Cuenta and Fir_NumTer	= Apf_NumTer
+				where	t.NumTransac = @Str_NumTra
 				  and	Fir_Estatu <> @Str_EstPro
+				  and	Apf_Cuenta is null
 			
-			drop table #totales, #totalesMigradas, #cuentasPendientes
-				
+			/* Todo lo que no se haya identificado la persona, buscar en CHCOTBEN */
+			select Cob_Cuenta, Cob_Person, Cob_Numero
+			into #baseCotitular
+				from CHCOTBEN noholdlock
+				inner join #totales ON Cob_Cuenta = Fir_Cuenta
+				where	Cob_Tipo = @Str_TerAut
+			
+			update CHTMPFIR set 
+				Fir_Person	= Cob_Person
+				from CHTMPFIR noholdlock
+				inner join #baseCotitular on Fir_Cuenta = Cob_Cuenta and Fir_NumTer = Cob_Numero
+				where	NumTransac	= @Str_NumTra
+				  and	Fir_Person	= @Str_Vacio
+				  and	Fir_Estatu	= @Str_EstPen
+				  
+			drop table #totales, #totalesMigradas, #cuentasPendientes, #baseCotitular
+					
 			select	Top 1000 
 				Fir_Identi,	Fir_Cuenta,	Fir_Consec,	Fir_NumTer,	Fir_Person,
 				Fir_Observ
