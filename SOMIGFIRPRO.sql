@@ -431,7 +431,7 @@ if @Tip_Proces = @Str_RegTem begin
 			inner join #baseCotitulares on Fir_Cuenta = Cob_Cuenta and Fir_NumTer = Cob_Numero
 			where	NumTransac	= @Str_NumTra
 			  and	Fir_Person	= @Str_Vacio
-			  and	Fir_Estatu	!= @Str_EstPro
+			  and	Fir_Estatu	!= @Str_EstPen
 			  
 		drop table #cuentasBase, #baseCotitulares
 			  
