@@ -94,7 +94,7 @@ end else begin
 		 	select	Acp_Numero,	Acp_Descri
 				from CLACTIVI noholdlock
 					inner join SOACPRCL noholdlock on Apc_Activi = Act_Numero
-					inner join SOACTPRE noholdlock on Acp_Numero = convert(integer,Apc_ActPre)
+					inner join SOACTPRE noholdlock on Acp_Numero = Apc_ActPre
 					where	Act_Numero	= @Act_Numero and Acp_Activo = @Est_Activo
 	end
 end
