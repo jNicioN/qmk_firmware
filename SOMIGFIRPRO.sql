@@ -153,11 +153,6 @@ if @Tip_Proces = @Str_RegTem begin
 					Err_Mensaj = 'La sucursal '+@Mif_Sucurs+' ha concluido totalmente la fase de migración.'
 			return 1
 		end if @Str_Estatu = @Str_EstTer begin
-			/* REPROCESAMIENTO FASE 2 */
-			/* Podria hacer una historica una copia de CHTMPFIR en la instalacion de este cambio - CONSIDERAR */
-			-- update a SOMIGFIR a P
-			-- update CHTMPFIR S a P solo lo pendiente de migrar - chfirmas vs chadpefo
-			-- Select top 1000
 			
 			update SOMIGFIR set Mif_Estatu = @Str_EstPen
 				where	Mif_Sucurs = @Mif_Sucurs
