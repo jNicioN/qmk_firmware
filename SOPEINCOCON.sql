@@ -18,7 +18,7 @@ as
 /***************************************************************************/
 /** Creo:			Eduardo Perez Santiago								****/
 /** Fecha:			06/12/2021                              			****/
-/** Help:			1504301					 							****/
+/** Help:			1438184					 							****/
 /**	Descripcion:	Se crea la consulta C3 para consultar la actividad 	****/
 /**					preponderante dependiendo de un cliente				****/
 /***************************************************************************/
