@@ -15,6 +15,12 @@ as
 ********************************************************************************
 ** REFERENCIAS:															    ****
 ********************************************************************************
+** Modifico:	Joel Gonzalez											    ****
+** Fecha:		16/12/2021											        ****
+** Help:		1286068											    	    ****
+** Descripcion:	Ajuste por eliminacion del campo Pro_SubPro en SOPRODUC     ****
+**              para obtener los productos de Cheques se utiliza SOPRTICU.  ****
+********************************************************************************
 **	Modificó:	Fatima Sanchez												****
 **  Fecha:		30/04/2021													****
 **  Help:		1286068														****
@@ -124,7 +130,7 @@ declare	@Str_Ceros	varchar(10),	-- String de Ceros para conversiones de numeros 
 		@Bit_No		bit,			-- Bit: No
 		@Str_Si		char(1),		-- String: Si
 		@Str_No		char(1),		-- String: No
-		@Mod_Cheque	char(2),		-- Modulo: Cheques
+		--@Mod_Cheque	char(2),		-- Modulo: Cheques
 		@Per_PerMor	char(1),			-- Personalidad Fiscal: Persona Moral
 		@Sta_CueAct	char(1),		-- Status Cuenta: Activa
 		@Tip_CoCuNu	tinyint,		-- Tipo de Configuracion: Cuenta Nueva
@@ -156,7 +162,7 @@ select	@Str_Ceros	= '0000000000',	-- String de Ceros para conversiones de numero
 		@Bit_No		= 0,			-- Bit: No
 		@Str_Si		= 'S',			-- String: Si
 		@Str_No		= 'N',			-- String: No
-		@Mod_Cheque	= 'CH',			-- Modulo: Cheques
+		--@Mod_Cheque	= 'CH',			-- Modulo: Cheques
 		@Per_PerMor	= '1',			-- Personalidad Fiscal: Persona Moral
 		@Sta_CueAct	= 'A',			-- Status Cuenta: Activa
 		@Tip_CoCuNu	= 1,			-- Tipo de Configuracion: Cuenta Nueva
@@ -284,15 +290,10 @@ select	Pro_Numero, Ptc_TipCue,	Ptc_Moneda,
 		Prp_PrTiMo	= Ptm_Numero,	Prp_TiMoEn	= Ptm_TipMov,
 		Prp_TipMov	= substring(@Str_Ceros, 1, 6 - len(rtrim(convert(char(6), Ptm_TipMov)))) + rtrim(convert(char(6), Ptm_TipMov)),
 		Dat_TiCaMo,	Prp_CheGra	= @Ent_Cero 
-from SOTIPPRO noholdlock
-inner join SOSUBPRO noholdlock
-		on Sup_TipPro	= Tip_Numero
-		and Sup_Activo	= @Bit_Si
+from SOPRTICU noholdlock
 inner join SOPRODUC noholdlock
-		on Pro_SubPro	= Sup_Numero
+		on Pro_Numero	= Ptc_Produc
 		and Pro_Activo	= @Bit_Si
-inner join SOPRTICU noholdlock
-		on Ptc_Produc	= Pro_Numero
 inner join SOPRPEFI noholdlock
 		on Ppf_Produc	= Pro_Numero
 		and Ppf_Activo	= @Bit_Si
@@ -302,9 +303,7 @@ inner join SOPRTIMO noholdlock
 inner join SODAADTI noholdlock
 		on Dat_TipMov	= Ptm_TipMov
 		and Dat_Activo	= @Bit_Si
-where Tip_Modulo	= @Mod_Cheque
-  and Tip_Activo	= @Bit_Si
-
+		
 -- Obtener los Cheques Gratis por Producto y Personalidad Fiscal
 update #ProductosPro
 	set Prp_CheGra	= case when Prp_PeFiEn = @Per_PerMor then Tip_NoChPM - @Ent_Uno else Tip_NoChPF - @Ent_Uno end
