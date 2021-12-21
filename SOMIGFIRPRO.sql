@@ -417,7 +417,7 @@ if @Tip_Proces = @Str_RegTem begin
 			Fir_Observ	= 'NO SE IDENTIFICO LA PERSONA'
 			where	Fir_Estatu	= @Str_ErrTre
 			  and	NumTransac	= @Str_NumTra
-			  
+				  	  
 		/* Todo lo que no se haya identificado la persona, buscar en CHCOTBEN */
 		select Cob_Cuenta, Cob_Person, Cob_Numero
 		into #baseCotitulares
@@ -434,6 +434,12 @@ if @Tip_Proces = @Str_RegTem begin
 			  and	Fir_Estatu	!= @Str_EstPen
 			  
 		drop table #cuentasBase, #baseCotitulares
+		
+		/* Asignar estatus P para procesar todo*/
+		update CHTMPFIR set
+			Fir_Estatu	= @Str_EstPen
+			where	NumTransac = @Str_NumTra
+			  and	Fir_Estatu <> @Str_EstPen
 			  
 		select	Top 1000 
 				Fir_Identi,	Fir_Cuenta,	Fir_Consec,	Fir_NumTer,	Fir_Person,
