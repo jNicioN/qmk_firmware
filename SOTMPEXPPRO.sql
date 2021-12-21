@@ -14,7 +14,13 @@ as
 /***********************************************************************************/
 /*REFERENCIAS:
 *************************************************************************************
-** Creo:		Josue Palomar   												 ****
+** Modifico:		Oscar Trevino    												 ****
+** Fecha:		13/Diciembre/2021													 ****
+** Desc:		Se corrige condicion en consulta de grupos unicos para ****
+**					utilizar Peu_Person en lugar de Peu_Grupo						****
+** Help:	1574028																		****
+*************************************************************************************
+** Creo:		Francisco Euan     												 ****
 ** Fecha:		29/Octubre/2021													 ****
 ** Help:	1574028														****
 ************************************************************************************/
@@ -48,7 +54,7 @@ insert into #PersonasUnicas(Grupo)
 select distinct UNI.Peu_Grupo
 	from CLCLACLI CLA noholdlock
 inner join CLADICIO ADI noholdlock on CLA.Clc_Client = ADI.ClClientID
-inner join SOUNIPER UNI noholdlock on ADI.Adi_NumPer = UNI.Peu_Grupo
+inner join SOUNIPER UNI noholdlock on ADI.Adi_NumPer = UNI.Peu_Person
 where 	CLA.Clc_Clasif = @Cla_Hey
 
 delete #PersonasUnicas
@@ -70,4 +76,3 @@ left join SOTMPEXP CRE noholdlock on PER.Per_Numero = CRE.Exp_Person
 where	CRE.Exp_Person is null
 
 drop table #PersonasUnicas
-
