@@ -18,6 +18,11 @@ as
 ******************************************************************
 ** Modifico:	Alma Perez										**
 ** HelpDesk:	1390218											**
+** Fecha:		13/12/2021										**
+** Desc: Migrar firmas sin numero de persona					**
+******************************************************************
+** Modifico:	Alma Perez										**
+** HelpDesk:	1390218											**
 ** Fecha:		12/10/2021										**
 ** Desc: Permitir baja por numero								**
 ******************************************************************
@@ -64,6 +69,7 @@ declare @Ent_Cero	int,
 		@Str_EstPro	char(1),
 		@Str_EsNoPr	char(1),
 		@Str_EstTer	char(1),
+		@Str_TeFaDo	char(1),
 		@Str_EstSca	char(1),
 		@Str_Vacio	char(1),
 		@Str_StaAct	char(1),
@@ -84,7 +90,9 @@ declare @Ent_Cero	int,
 		@Str_ErrTre	char(1),
 		@Str_ErrCua	char(1),
 		@Str_Porcen	char(1),
-		@Str_Reproc	char(1)
+		@Str_Reproc	char(1),
+		@Str_BucDef	char(8),
+		@Str_TerAut	char(1)
 
 select	@Ent_Cero	= 0,		/* Entero cero */
 		@Ent_Uno	= 1,		/* Entero uno */
@@ -93,6 +101,7 @@ select	@Ent_Cero	= 0,		/* Entero cero */
 		@Str_EstPro	= 'S',		/* Estatus procesado */
 		@Str_EsNoPr	= 'N',		/* Estatus no procesado */
 		@Str_EstTer	= 'T',		/* Estatus terminado */
+		@Str_TeFaDo	= 'F',		/* Estatus terminado fase dos */
 		@Str_EstSca	= 'S',		/* Estatus scaneado */
 		@Str_Vacio	= '',		/* String Vacio */
 		@Str_StaAct	= 'A',		/* Estatus activo */
@@ -113,7 +122,9 @@ select	@Ent_Cero	= 0,		/* Entero cero */
 		@Str_ErrTre	= '3',		/* Error tres = NO SE IDENTIFICO LA PERSONA */
 		@Str_ErrCua	= '4',		/* Error cuatro = REGISTROS NumTer 000 NO IDENTIFICADO */
 		@Str_Porcen	= '%',		/* String porcentaje */
-		@Str_Reproc	= 'R'		/* String reproceso */
+		@Str_Reproc	= 'R',		/* String reproceso */
+		@Str_BucDef	= 'firmamig',		/* String Bucket default para firmas en Minio */
+		@Str_TerAut	= '7'		/* Tercero autorizado */
 		
 if @Tip_Proces = @Str_RegTem begin
 	
@@ -134,15 +145,71 @@ if @Tip_Proces = @Str_RegTem begin
 		from SOMIGFIR noholdlock
 		where	Mif_Sucurs	= @Mif_Sucurs
 		
+	select	@Str_SucFil	= @Mif_Sucurs + @Str_Porcen
+		
 	if @Ent_Numero > @Ent_Cero begin
-		
-		if @Str_Estatu = @Str_EstTer begin
-			select	Err_Codigo = '000002', 
-					Err_Mensaj = 'La sucursal '+@Mif_Sucurs+' ya ha sido procesada. Revisar detalle de registros migrados en CHTMPFIR'
+		if @Str_Estatu = @Str_TeFaDo begin
+			select	Err_Codigo = '000020', 
+					Err_Mensaj = 'La sucursal '+@Mif_Sucurs+' ha concluido totalmente la fase de migración.'
 			return 1
-		end
+		end if @Str_Estatu = @Str_EstTer begin
 		
-		if @Str_Estatu = @Str_EstPen begin
+			update SOMIGFIR set Mif_Estatu = @Str_EstPen
+				where	Mif_Sucurs = @Mif_Sucurs
+				
+			select Fir_Cuenta, Total = count(1)
+				into #totales
+				from CHFIRMAS noholdlock
+				where	Fir_Cuenta	like @Str_SucFil
+				group by	Fir_Cuenta
+				
+			select Apf_Cuenta, Apf_Total = count(1)
+				into #totalesMigradas
+				from CHADPEFO noholdlock
+				where	Apf_Cuenta like @Str_SucFil
+				group by	Apf_Cuenta
+				
+			select Cuenta = Fir_Cuenta
+			into #cuentasPendientes
+				from #totales
+				left join #totalesMigradas on Fir_Cuenta = Apf_Cuenta
+				where	isnull(Apf_Total,@Ent_Cero) < Total
+										  
+			update CHTMPFIR set
+				Fir_Estatu	= @Str_EstPen
+				from CHTMPFIR t noholdlock
+				inner join #cuentasPendientes on Fir_Cuenta = Cuenta
+				left join CHADPEFO noholdlock on Apf_Cuenta = Fir_Cuenta and Fir_NumTer	= Apf_NumTer
+				where	t.NumTransac = @Str_NumTra
+				  and	Fir_Estatu <> @Str_EstPro
+				  and	Apf_Cuenta is null
+			
+			/* Todo lo que no se haya identificado la persona, buscar en CHCOTBEN */
+			select Cob_Cuenta, Cob_Person, Cob_Numero
+			into #baseCotitular
+				from CHCOTBEN noholdlock
+				inner join #totales ON Cob_Cuenta = Fir_Cuenta
+				where	Cob_Tipo = @Str_TerAut
+			
+			update CHTMPFIR set 
+				Fir_Person	= Cob_Person
+				from CHTMPFIR noholdlock
+				inner join #baseCotitular on Fir_Cuenta = Cob_Cuenta and Fir_NumTer = Cob_Numero
+				where	NumTransac	= @Str_NumTra
+				  and	Fir_Person	= @Str_Vacio
+				  and	Fir_Estatu	= @Str_EstPen
+				  
+			drop table #totales, #totalesMigradas, #cuentasPendientes, #baseCotitular
+					
+			select	Top 1000 
+				Fir_Identi,	Fir_Cuenta,	Fir_Consec,	Fir_NumTer,	Fir_Person,
+				Fir_Observ
+			from CHTMPFIR noholdlock
+			where	NumTransac	= @Str_NumTra
+			  and	Fir_Estatu	= @Str_EstPen
+			order by	Fir_Identi
+			
+		end if @Str_Estatu = @Str_EstPen begin
 			select	top 1000
 					Fir_Identi,	Fir_Cuenta,	Fir_Consec,	Fir_NumTer, Fir_Person,
 					Fir_Observ
@@ -157,7 +224,6 @@ if @Tip_Proces = @Str_RegTem begin
 		select	@FechaSis	= getdate()
 		select	@Str_FecCor = convert(varchar,@FechaSis,111)
 		select	@Par_FecAct	= convert(smalldatetime,@Str_FecCor)
-		select	@Str_SucFil	= @Mif_Sucurs + @Str_Porcen
 	
 		select	@Ent_Contad	= count(1) + 1
 			from SOMIGFIR noholdlock
@@ -332,9 +398,9 @@ if @Tip_Proces = @Str_RegTem begin
 				from #baseFirmas
 				order by Identificador
 				
-		drop table #cuentasBase, #baseFirmas, #baseFormatoFirmas, 
-			#formatosCuenta, #ultimoFormatoFirmas, #NuevoFormatoFirmas
-			
+		drop table #baseFirmas, #baseFormatoFirmas, #formatosCuenta, 
+			#ultimoFormatoFirmas, #NuevoFormatoFirmas
+				
 		update CHTMPFIR set 
 			Fir_Observ	= 'CUENTA NO EXISTE EN CHPEFOFI'
 			where	Fir_Estatu	= @Str_ErrUno
@@ -351,7 +417,30 @@ if @Tip_Proces = @Str_RegTem begin
 			Fir_Observ	= 'NO SE IDENTIFICO LA PERSONA'
 			where	Fir_Estatu	= @Str_ErrTre
 			  and	NumTransac	= @Str_NumTra
+				  	  
+		/* Todo lo que no se haya identificado la persona, buscar en CHCOTBEN */
+		select Cob_Cuenta, Cob_Person, Cob_Numero
+		into #baseCotitulares
+			from CHCOTBEN noholdlock
+			inner join #cuentasBase ON Cob_Cuenta = Cue_Numero
+			where	Cob_Tipo = @Str_TerAut
 		
+		update CHTMPFIR set 
+			Fir_Person	= Cob_Person
+			from CHTMPFIR noholdlock
+			inner join #baseCotitulares on Fir_Cuenta = Cob_Cuenta and Fir_NumTer = Cob_Numero
+			where	NumTransac	= @Str_NumTra
+			  and	Fir_Person	= @Str_Vacio
+			  and	Fir_Estatu	!= @Str_EstPen
+			  
+		drop table #cuentasBase, #baseCotitulares
+		
+		/* Asignar estatus P para procesar todo*/
+		update CHTMPFIR set
+			Fir_Estatu	= @Str_EstPen
+			where	NumTransac = @Str_NumTra
+			  and	Fir_Estatu <> @Str_EstPen
+			  
 		select	Top 1000 
 				Fir_Identi,	Fir_Cuenta,	Fir_Consec,	Fir_NumTer,	Fir_Person,
 				Fir_Observ
@@ -378,7 +467,7 @@ if @Tip_Proces = @Str_AcTeNo begin
 end
 
 if @Tip_Proces = @Str_EstTer begin
-	update SOMIGFIR set Mif_Estatu = @Str_EstTer
+	update SOMIGFIR set Mif_Estatu = @Str_TeFaDo
 		where	Mif_Sucurs = @Mif_Sucurs
 	
 end
@@ -417,8 +506,11 @@ if @Tip_Proces = @Str_ConFir begin
 		
 	end
 	
-	select	t.Fir_Identi,	t.Fir_Cuenta,	t.Fir_Consec,	t.Fir_NumTer,	t.Fir_Person,
-			t.Fir_Observ,	PerPersoID,	f.Fir_Firma,	f.Usuario,	f.FechaSis
+	select	t.Fir_Identi,	t.Fir_Cuenta,	t.Fir_Consec,	t.Fir_NumTer,
+			Fir_Observ	= @Str_Reproc,	PerPersoID,	f.Fir_Firma,	f.Usuario,	f.FechaSis,
+			Fir_Person = case when 
+								isnull(ltrim(rtrim(t.Fir_Person)),@Str_Vacio) = @Str_Vacio 
+									then @Str_BucDef else t.Fir_Person end
 	from CHTMPFIR t noholdlock
 	left join SOPERSON noholdlock on Fir_Person = Per_Numero
 	left join CHFIRMAS f noholdlock on t.Fir_Cuenta = f.Fir_Cuenta
