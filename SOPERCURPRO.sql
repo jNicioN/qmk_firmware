@@ -1,4 +1,4 @@
-﻿﻿create procedure SOPERCURPRO (
+create procedure SOPERCURPRO (
 	@Per_Numero	char(8),
 	@Tip_Proces	char(1),
 
@@ -17,6 +17,13 @@ as
 ********************************************************************
 ** REFERENCIAS: 												  **
 ********************************************************************
+** Modifico:	Armando Alexis Sepulveda Cruz					****
+** Fecha:		05/Enero/2022									****
+** Help:		1379522											****
+** Descripcion:	Se añade la actualización de los campos 		****
+**				DaP_PaiNac, DaP_EntNac, Per_Entida, Per_Nacion 	****
+**				y Adi_NacExt para para asignar la nacionalidad 	****
+**				correspondiente									**** 
 ********************************************************************
 ** Modifico:	Armando Alexis Sepulveda Cruz					****
 ** Fecha:		01/Noviembre/2021								****
@@ -49,6 +56,7 @@ declare	@Peu_Grupo	char(8),
 		@Per_ApeMat char(40),
 		@Per_Comple char(180),
 		@Per_ComOrd char(180),
+		@Per_Nacion char(3),					/* Pais de Nacimiento */
 		@Per_Entida char(3),
 		@Per_RFC    char(15),
 		@Per_CURP   char(18),
@@ -60,7 +68,8 @@ declare	@Peu_Grupo	char(8),
 		@DaP_PaiNac char(3),
 		@DaP_EntNac char(3),
 		@DaP_ClvEle char(18),
-		@DaP_NumEmi char(2)
+		@DaP_NumEmi char(2),
+		@Adi_NacExt char(1)
 
 /* Asignación de constantes */
 select	@Str_Vacios	= '',			-- String Vacio
@@ -79,6 +88,7 @@ select	@Per_Nombre     = Per_Nombre,
 		@Per_ApeMat     = Per_ApeMat,
 		@Per_Comple     = Per_Comple,
 		@Per_ComOrd     = Per_ComOrd,
+		@Per_Nacion		= Per_Nacion,
 		@Per_Entida     = Per_Entida,
 		@Per_RFC        = Per_RFC,
 		@Per_CURP       = Per_CURP
@@ -117,7 +127,8 @@ if ltrim(@Per_Grupo) <> ltrim(@Str_Vacios) begin							/* Actualizar grupo*/
 					@Adi_Sexo	= Adi_Sexo,
 					@Adi_NuIdFi = Adi_NuIdFi,
 					@Adi_FeExId = Adi_FeExId,
-					@Adi_FeVeId = Adi_FeVeId
+					@Adi_FeVeId = Adi_FeVeId,
+					@Adi_NacExt = Adi_NacExt
 			  from SOPERADI noholdlock
 			 where Adi_PerNum = @Per_Numero
 			 
@@ -134,6 +145,7 @@ if ltrim(@Per_Grupo) <> ltrim(@Str_Vacios) begin							/* Actualizar grupo*/
 				Per_ApeMat     = @Per_ApeMat,
 				Per_Comple     = @Per_Comple,
 				Per_ComOrd     = @Per_ComOrd,
+				Per_Nacion	   = @Per_Nacion,
 				Per_Entida     = @Per_Entida,
 				Per_RFC        = @Per_RFC,
 				Per_CURP       = @Per_CURP,
@@ -152,6 +164,7 @@ if ltrim(@Per_Grupo) <> ltrim(@Str_Vacios) begin							/* Actualizar grupo*/
 				Adi_NuIdFi 	= @Adi_NuIdFi,
 				Adi_FeExId 	= @Adi_FeExId,
 				Adi_FeVeId 	= @Adi_FeVeId,
+				Adi_NacExt	= @Adi_NacExt,
 				
 				NumTransac	= @NumTransac,
 				Transaccio	= @Transaccio,
@@ -186,6 +199,7 @@ end else begin																/* Alta de grupo*/
 	if @Status <> @Ent_Cero begin
 		rollback
 		return 1
+
 	end
 end
 
