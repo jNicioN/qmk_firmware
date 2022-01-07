@@ -11,7 +11,6 @@
 	@Gpc_CURP	char(18),
 	@Tip_Proces	char(1),
 
-
 	@NumTransac	char(10),
 	@Transaccio	char(3),
 	@Usuario	char(6),
@@ -28,6 +27,13 @@ as
 ** DESCRIPCION: ** Proceso de unificación de grupos de Persona			****
 ****************************************************************************
 ** REFERENCIAS: 														****
+****************************************************************************
+** Modifico:	Armando Alexis Sepulveda Cruz							****
+** Fecha:		05/Enero/2022											****
+** Help:		1379522													****
+** Descripcion:	Se añade la actualización de los campos DaP_PaiNac, 	****
+**              DaP_EntNac, Per_Entida, Per_Nacion y Adi_NacExt para	****
+**				para asignar la nacionalidad correspondiente			****  
 ****************************************************************************
 ** Modifico:	Armando Alexis Sepulveda Cruz							****
 ** Fecha:		01/Noviembre/2021										****
@@ -158,7 +164,10 @@ declare	@Status		int,					/*Estatus de Procedimiento*/
 		@Bit_EntPri char(40), 				/* Bitacora Entre Calle Primera */
 		@Bit_EntSeg char(40),				/* Bitacora Entre Calle Segunda */
 		@Exi_Regist int,					/* Variable de control de existencia de registro*/
-		@Str_Punto	char(1)					/* String para punto para apellidos vacios */
+		@Str_Punto	char(1),				/* String para punto para apellidos vacios */
+		@Adi_NacExt	char(1),				/* Nacional */
+		@Per_Nacion char(3),				/* Pais de Nacimiento */
+		@Ent_Status	int					/* Status */
 
 
 /* Declaracion de Constantes */
@@ -168,7 +177,8 @@ declare	@Ent_Uno	int,					/*Entero: Uno*/
 		@Str_Vacio	char(1),				/*String: vacio*/
 		@Str_NacMex	char(1),				/*String nacionalidad mexicana*/
 		@Str_NacExt char(1),				/*String nacionalidad extranjera*/
-		@Str_EntExt char(2)					/*String Entidad en el extranjero*/
+		@Str_EntExt char(2),				/*String Entidad en el extranjero*/
+		@Str_PaiMex char(3)					/*String pais mexico*/
 
 
 select	@Ent_Uno	= 1,
@@ -180,9 +190,10 @@ select	@Ent_Uno	= 1,
 		@Pro_GrClUn = '4',
 		@Str_Vacio	= '',
 		@Str_Punto	= '.',
-		@Str_NacMex = 'M',
+		@Str_NacMex = 'N',
 		@Str_NacExt = 'E',
-		@Str_EntExt = 'NE'
+		@Str_EntExt = 'NE',
+		@Str_PaiMex = '001'
 		
 if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 	select @Gpc_Nombre	= isnull(ltrim(rtrim(@Gpc_Nombre)), @Str_Vacio)
@@ -242,6 +253,7 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 			@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
 		if @Status <> @Ent_Cero begin
 			rollback
+
 			return 1
 		end
 	end
@@ -297,6 +309,7 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 
 	if isnull(@Bit_PerNum, @Str_Vacio) <> @Str_Vacio begin
 		exec @Status =	SOBIPEADALT
+
 			@Gpc_Person,	@Bit_Fecha,		@Bit_NumTra,	@Bit_LugNac,	@Bit_Sexo,
 			@Bit_FecNac,	@Bit_RegMat,	@Bit_VivCas,	@Bit_TieRes,	@Bit_Fax,
 			@Bit_NumDep,    @Bit_Puesto,	@Bit_Ocupac,	@Bit_AntLab,	@Bit_LugTra,
@@ -315,7 +328,7 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 			return 1
 		end
 	end else begin
-		exec @Status =	SOPERADIALT @Gpc_Person, @Str_Vacio,  @Str_Vacio, @Str_Vacio, @Gpc_Sexo, 
+		exec @Status = SOPERADIALT @Gpc_Person, @Str_Vacio,  @Str_Vacio, @Str_Vacio, @Gpc_Sexo, 
 						 @Gpc_FecNac, @Str_Vacio, @Str_Vacio, @Ent_Cero, @Str_Vacio, 
 						 @Ent_Cero, @Str_Vacio, @Str_Vacio, @Ent_Cero, @Str_Vacio, 
 						 @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio, 
@@ -326,7 +339,7 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 						 @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio,  
 						 @Str_Vacio, @Str_Vacio,   @NumTransac, @Transaccio, @Usuario, 
 						 @FechaSis,   @SucOrigen,  @SucDestino, @Modulo
-						 
+		
 		if @Status <> @Ent_Cero begin
 			rollback
 			return 1
@@ -337,12 +350,35 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 			@Gpc_ComOrd = @Gpc_Nombre + ' ' + @Gpc_ApePat + ' ' + @Gpc_ApeMat
 	
 	if @Gpc_EntNac = @Str_EntExt begin
-		select @Per_Entida = @Str_Vacio
+		-- Se otorga la misma entidad en caso de ser capturado anteriormente
+		select @Per_Nacion = isnull(Per_Nacion, @Str_Vacio),
+			   @Per_Entida = isnull(Per_Entida , @Str_Vacio)
+		  from SOPERSON noholdlock
+		 where Per_Numero = @Gpc_Person
+		
+		select @Adi_NacExt = @Str_NacExt
+		
+		
+		if @Per_Nacion = @Str_Vacio begin
+			select @Per_Nacion = isnull(DaP_PaiNac , @Str_Vacio)
+			  from SOPEDACO noholdlock
+			 where DaP_Person = @Gpc_Person
+		end
+		
+		if @Per_Entida = @Str_Vacio begin
+			select @Per_Entida = isnull(DaP_EntNac , @Str_Vacio)
+			  from SOPEDACO noholdlock
+			 where DaP_Person = @Gpc_Person
+		end
 	end else begin
 		select @Per_Entida = Ent_Numero 
 		  from CLENTIDA noholdlock
 		 where Ent_Abrevi = @Gpc_EntNac
 		   and Ent_Status = @Sta_Activo
+		   
+		select @Adi_NacExt = @Str_NacMex,
+			   @Per_Nacion = @Str_PaiMex
+			   
 	end
 			
 	update SOPERSON set
@@ -351,6 +387,7 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 		Per_ApeMat	= @Gpc_ApeMat,
 		Per_Comple	= @Gpc_Comple,
 		Per_ComOrd	= @Gpc_ComOrd,
+		Per_Nacion	= @Per_Nacion,
 		Per_Entida	= @Per_Entida,
 		Per_RFC		= @Gpc_RFC,
 		Per_CURP	= @Gpc_CURP,
@@ -362,11 +399,11 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 		SucOrigen	= @SucOrigen,
 		SucDestino	= @SucDestino
 	where Per_Numero = @Gpc_Person
-
-
+	
 	update SOPERADI set
 		Adi_FecNac	= @Gpc_FecNac,
 		Adi_Sexo	= @Gpc_Sexo,
+		Adi_NacExt	= @Adi_NacExt,
 		
 		NumTransac	= @NumTransac,
 		Transaccio	= @Transaccio,
@@ -375,6 +412,18 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 		SucOrigen	= @SucOrigen,
 		SucDestino	= @SucDestino
 	where Adi_PerNum = @Gpc_Person
+	
+	update SOPEDACO 
+	   set DaP_PaiNac 	= @Per_Nacion,
+	       DaP_EntNac 	= @Per_Entida,
+	   
+	   	   NumTransac	= @NumTransac,
+		   Transaccio	= @Transaccio,
+		   Usuario		= @Usuario,
+		   FechaSis		= @FechaSis,
+		   SucOrigen	= @SucOrigen,
+		   SucDestino	= @SucDestino
+	 where DaP_Person = @Gpc_Person
 	
 end	else if @Tip_Proces = @Pro_DesAgr begin		/*Desagrupacion de Registros*/
 	/*Consulta de la persona del Cliente Unico ligada a la persona consultada*/
