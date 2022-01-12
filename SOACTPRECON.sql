@@ -16,17 +16,21 @@ as
 /***********************************************************************************/
 /* DESCRIPCION: Consulta de registros de Actividad Preponderante				****/
 /***********************************************************************************/
+/** Modifica:		Jose R. Rodriguez Zenteno								    ****/
+/** Fecha:			21/Diciembre/2021                           		        ****/
+/** Help:			1504301 				 									****/
+/** Descripcion:	Se modifica C1 para regresar MacroSector(SOMACSEC)			****/
+/***********************************************************************************/
 /** Modifica:		Eduardo Perez Santiago										****/
 /** Fecha:			19 de noviembre del 2021                            		****/
 /** Help:			1438184					 									****/
 /** Descripcion:	Se crea la consulta L3 donde se le da salida a la actividad	****/
 /**					proponderante dependindo de una actividad de CLACTIVI		****/
 /***********************************************************************************/
-/****************************************************************/
-/** Creo:			Raul Muniz									*/
-/** Fecha:			09/09/2021                               	*/
-/** Help:			1504301					 					*/
-/****************************************************************/
+/** Creo:			Raul Muniz													****/
+/** Fecha:			09/09/2021                               					****/
+/** Help:			1504301					 									****/
+/***********************************************************************************/
 
 /* Declaracion de Variables */
 declare @Tip_ConTip	char(1),		/* Tipo consulta C/L */
@@ -38,14 +42,14 @@ declare @Str_C		char(1),		/* Caracter C */
 		@Str_Dos	char(1),		/* Caracter 2 */
 		@Est_Activo	bit,			/* Estatus Activo */
 		@Str_Porcen	char(1),		/* String Porcentaje */
-		@Str_Tres   char(1)
+		@Str_Tres   char(1)			/* String numero 3 */
 
 select @Str_C = 'C',				/* Caracter C */
        @Str_Uno = '1',				/* Caracter 1 */
        @Str_Dos = '2',				/* Caracter 2 */
 	   @Est_Activo = 1,				/* Estatus Activo */
 	   @Str_Porcen	= '%',			/* String Porcentaje */
-	   @Str_Tres = '3'
+	   @Str_Tres = '3'				/* String numero 3 */
 
 select @Tip_ConTip = substring(@Tip_Consul, 1, 1),
        @Tip_ConCon = substring(@Tip_Consul, 2, 1) 
@@ -65,12 +69,14 @@ if @Tip_ConTip	= @Str_C begin /* 'C': Consulta */
 	
 		select	Acp_Numero,	Acp_Descri,	Acp_Activo,	Sur_Numero,	Sur_Descri,
 				Ram_Numero,	Ram_Descri,	Sus_Numero,	Sus_Descri,	Sec_Numero,
-				Sec_Descri
+				Sec_Descri, Mac_Numero, Mac_Descri
 			from #ActividadSubRama noholdlock
 			inner join	SOSUBSEC noholdlock
 				on Sus_Numero = Ram_Subsec
 			inner join	SOSECTOR noholdlock
 				on Sec_Numero = Sus_Sector
+			inner join SOMACSEC noholdlock
+				on Mac_Numero = Sec_MacSec
 			where	Acp_Numero	= @Acp_Numero
 			
 		drop table #ActividadSubRama
