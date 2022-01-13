@@ -17,8 +17,8 @@ as
 ********************************************************************************************
 ** Elaboro: 	Fatima Sanchez Luis                    									****
 ** Fecha:		10/01/2022									        					****
-** Help:								        									****
-** Descripcion:	Se agrega la ejecucion del proceso 	CTMAARAPPRO							****
+** Help:		1612865						        									****
+** Descripcion:	Se agrega la ejecucion del proceso INMALIINPRO							****
 ********************************************************************************************
 ** Elaboro: 	Frank Canul		                     									****
 ** Fecha:		13/08/2021									        					****
