@@ -1,4 +1,3 @@
-
 create procedure SOEJEPROPRO (
 	@Num_EjeFlu int,					-- Numero de Ejecucion de Flujo
 	@Num_ProFlu int,					-- Numero de Proceso de Flujo
@@ -15,6 +14,11 @@ as
 ** Descripcion: Ejecucion de Procesos definidos en Flujos								****
 ********************************************************************************************
 ** Referencias:																	  		****
+********************************************************************************************
+** Elaboro: 	Fatima Sanchez Luis                    									****
+** Fecha:		10/01/2022									        					****
+** Help:		1612865						        									****
+** Descripcion:	Se agrega la ejecucion del proceso INMALIINPRO							****
 ********************************************************************************************
 ** Elaboro: 	Frank Canul		                     									****
 ** Fecha:		13/08/2021									        					****
@@ -69,7 +73,8 @@ declare	@Ent_Uno	tinyint,		-- Cantidad: Uno
         @Pro_VerCli varchar(11),     -- Procedimiento de Verificacion de Clientes. CLMAVECLPRO
 		@Pro_CliCat varchar(11),    -- Procedimiento de Clientes Categorias. CLMACLCAPRO
         @Pro_MotCat varchar(11),     -- Procedimiento de Motivos Categorias. CLMAMOCAPRO
-        @Pro_ActRap varchar(11)
+        @Pro_ActRap varchar(11),
+		@Pro_ActLin varchar(11)	 
 
 select  @Ent_Uno	= 1,				-- Cantidad: Uno
 		@Ent_Cero	= 0,				-- Cantidad: Cero
@@ -84,7 +89,8 @@ select  @Ent_Uno	= 1,				-- Cantidad: Uno
         @Pro_VerCli = 'CLMAVECLPRO',    -- Procedimiento de Verificacion de Clientes. CLMAVECLPRO
 		@Pro_CliCat = 'CLMACLCAPRO',    -- Procedimiento de Clientes Categorias. CLMACLCAPRO
         @Pro_MotCat = 'CLMAMOCAPRO',    -- Procedimiento de Motivos Categorias. CLMAMOCAPRO
-        @Pro_ActRap = 'CTMAARAPPRO'     -- Procedimiento de Actualizacion de registros Apple Pay 
+        @Pro_ActRap = 'CTMAARAPPRO',    -- Procedimiento de Actualizacion de registros Apple Pay 
+		@Pro_ActLin = 'INMALIINPRO'		-- Procedimiento maestro de actualizacion de instruccion de liquidacion de inversion
 --
 select	@Pro_ExiEje	= @Bit_No
 
@@ -515,7 +521,55 @@ end else if @Stp_Proced	= @Pro_ActRap begin
 	end
 
 	select	@Pro_ExiEje	= @Bit_Si
+end else if @Stp_Proced	= @Pro_ActLin begin  -- Procedimiento maestro de actualizacion de instruccion de liquidacion de inversiones
+
+	select @Par_EntUno	= convert(int, isnull(Ppe_Valor, Ppf_Valor))
+	from SOPAPRFL noholdlock
+	left join SOPAPREJ noholdlock
+			on Ppe_EjeFlu	= @Num_EjeFlu
+			and Ppe_PaPrFl	= Ppf_Numero
+	where Ppf_ProFlu = @Num_ProFlu
+	  and Ppf_NomPar = @Par_TipEje
+	  and Ppf_Activo = @Bit_Si
+		
+	select	@Res_EjeIns	= @@error
+	if @Res_EjeIns	<> @Ent_Cero begin
+		select @Men_Error = 'Error al obtener valor del Parametro [' + @Par_TipEje + '] Codigo: ' + convert(varchar(10), @Res_EjeIns)
+		return @Ent_Uno
+	end
+	
+	if @Par_EntUno	is null begin
+		select @Men_Error = 'Error al obtener valor del Parametro [' + @Par_TipEje + '] Valor: null'
+		return @Ent_Uno
+	end
+
+	execute	@Status	= INMALIINPRO
+		@Num_EjeFlu	= @Num_EjeFlu,
+		@Num_ProFlu	= @Num_ProFlu,
+		@Tip_Ejecuc	= @Par_EntUno,	-- Tipo de Ejecucion: 1.- Validacion 2.- Ejecucion
+		@NumTransac	= @NumTransac, 
+		@Transaccio	= @Transaccio,  
+		@Usuario	= @Usuario, 
+		@FechaSis	= @FechaSis, 
+		@SucOrigen	= @SucOrigen,
+		@SucDestino	= @SucDestino,
+		@Modulo		= @Modulo
+
+	--Si se detecta un error de ejecucion del procedimiento, reporta el Codigo de error.
+	select @Res_EjeIns = @@error
+	if @Res_EjeIns <> @Ent_Cero begin
+		select	@Men_Error = 'ERROR de ejecucion (Sybase) Codigo: ' + convert(varchar(10), @Res_EjeIns)
+		return	@Res_EjeIns
+	end
+	--Si el procedimiento respondio con error, registrar que el error fue dentro del proceso ejecutado
+	if @Status <> @Ent_Cero begin
+		select	@Men_Error = 'ERROR dentro del proceso de [' + @Stp_Proced + ']. Codigo: ' + convert(varchar(10), @Status)
+		return	@Status
+	end
+
+	select	@Pro_ExiEje	= @Bit_Si
 end
+
 if 	@Pro_ExiEje	= @Bit_No begin
 	select @Men_Error = 'El procedimiento [' + @Stp_Proced + '] no esta configuracion para ejecucion en SOEJEPROPRO'
 	return @Ent_Uno
