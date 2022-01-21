@@ -16,16 +16,21 @@ as
 /***************************************************************************/
 /* DESCRIPCION: Consulta de Persona Informacion	Complemento				****/
 /***************************************************************************/
+/** Creo:			Jose R. Rodriguez Zenteno							****/
+/** Fecha:			21/Diciembre/2021                          			****/
+/** Help:			1504301					 							****/
+/**	Descripcion:	Se modifica consulta C1 para regresar MacroSector 	****/
+/***************************************************************************/
 /** Creo:			Eduardo Perez Santiago								****/
 /** Fecha:			06/12/2021                              			****/
 /** Help:			1438184					 							****/
 /**	Descripcion:	Se crea la consulta C3 para consultar la actividad 	****/
 /**					preponderante dependiendo de un cliente				****/
 /***************************************************************************/
-/** Creo:			Raul Muniz									*/
-/** Fecha:			05/10/2021                               	*/
-/** Help:			1504301					 					*/
-/****************************************************************/
+/** Creo:			Raul Muniz											****/
+/** Fecha:			05/10/2021                               			****/
+/** Help:			1504301					 							****/
+/***************************************************************************/
 
 /* Declaracion de Variables */
 declare @Tip_ConTip	char(1),		/* Tipo consulta C/L */
@@ -77,12 +82,13 @@ if @Tip_ConTip	= @Str_C begin /* 'C': Consulta */
 			
 		select	Pic_PerNum,	Pic_ActPre,	Acp_Descri,	Sur_Numero,	Sur_Descri,
 				Ram_Numero,	Ram_Subsec,	Ram_Descri,	Sus_Numero,	Sus_Descri,
-				Sec_Numero,	Sec_Descri
+				Sec_Numero,	Sec_Descri, Mac_Numero, Mac_Descri
 			from #ActividadSubRama noholdlock
 			left join SOSUBSEC noholdlock
 				on Sus_Numero = Ram_Subsec and Sus_Activo = @Sta_Activo
 			left join SOSECTOR noholdlock
 				on Sec_Numero = Sus_Sector and Sec_Activo = @Sta_Activo
+			left join SOMACSEC noholdlock on Mac_Numero = Sec_MacSec
 			
 		drop table #ActividadSubRama
 	end else if @Tip_ConCon = @Str_Tres begin

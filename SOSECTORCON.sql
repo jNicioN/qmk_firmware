@@ -13,6 +13,12 @@ as
 /****************************************************************/
 /* DESCRIPCION: Consulta de registros de Sector					*/
 /****************************************************************/
+/** Modifico:		Jose R. Rodriguez Zenteno					*/
+/** Fecha:			28/Diciembre/2021                           */
+/** Help:			1504301					 					*/
+/** Descripcion: 	Se agrega campo Sec_MacSec a consultas: 	*/
+/**  				C1 y L1 									*/
+/****************************************************************/
 /** Creo:			Raul Muniz									*/
 /** Fecha:			09/09/2021                               	*/
 /** Help:			1504301					 					*/
@@ -35,15 +41,15 @@ select @Tip_ConTip = substring(@Tip_Consul, 1, 1),
 
 if @Tip_ConTip	= @Str_C begin /* 'C': Consulta */
 	if @Tip_ConCon = @Str_Uno begin		/* C1 */
-		select	Sec_Numero,	Sec_Descri,		Sec_Activo,		NumTransac,		Transaccio,
-				Usuario,	FechaSis,		SucOrigen,		SucDestino
+		select	Sec_Numero,	Sec_Descri,		Sec_MacSec,		Sec_Activo,		NumTransac,		
+				Transaccio,	Usuario,		FechaSis,		SucOrigen,		SucDestino
 		from SOSECTOR noholdlock
 		where	Sec_Numero	= @Sec_Numero
 	end
 end else begin
 	if @Tip_ConCon = @Str_Uno begin		/* L1 */
-		select	Sec_Numero,	Sec_Descri,		Sec_Activo,		NumTransac,		Transaccio,
-				Usuario,	FechaSis,		SucOrigen,		SucDestino
+		select	Sec_Numero,	Sec_Descri,		Sec_MacSec,		Sec_Activo,		NumTransac,		
+				Transaccio,	Usuario,		FechaSis,		SucOrigen,		SucDestino
 		from SOSECTOR noholdlock
 	end
 end
