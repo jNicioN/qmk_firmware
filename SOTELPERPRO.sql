@@ -166,7 +166,6 @@ if @Tep_TipTel = @Tip_TelPri begin
 		  and	Cvt_TipTel	= @Tep_TipTel
 		  and	Cvt_StaVer	= @Sta_CodCon
 	
-	select @Cvt_IdCoVe
 	if isnull(@Cvt_IdCoVe, @Ent_Cero) != @Ent_Cero begin
 		/* Actualizar a verificado el celular */
 		exec @Status =	SOTELPERACT
