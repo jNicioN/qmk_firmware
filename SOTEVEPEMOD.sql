@@ -31,7 +31,7 @@ declare	@Status		int,
 		@Btp_Lada		int, 
 		@Btp_Telefo		bigint,
 		@Str_A			char(1),
-		@Tep_Verifis	int,
+		@Tip_Verifi	int,
 		@Tip_ConTip char(1),			
 		@Tip_ConCon char(1)
 										/* Declaración de constantes */
@@ -102,7 +102,7 @@ select
 	@Btp_TipTel	= Tep_TipTel, 
 	@Btp_Lada	= Tep_Lada, 
 	@Btp_Telefo	= Tep_Telefo,
-	@Tep_Verifis = Tep_Verifi
+	@Tip_Verifi = Tep_Verifi
 	from SOTELPER noholdlock 
 	where PerPersoID	= @PerPersoID
 		and Tep_TipTel	= @Tep_TipTel
@@ -122,22 +122,22 @@ end
 if @Tep_Lada <> @Btp_Lada or @Tep_Telefo <> @Btp_Telefo begin
 	if @Tip_ConTip = @Str_A begin  				/* 'A' = Actualizacion */
 		if @Tip_ConCon = @Tip_ConUno begin		/* 1 */
-			select @Tep_Verifis = @Ent_Uno
+			select @Tip_Verifi = @Ent_Uno
 		end else begin
-			select @Tep_Verifis = @Sta_SinVer
+			select @Tip_Verifi = @Sta_SinVer
 		end
 	end else begin
-		select @Tep_Verifis = @Sta_SinVer
+		select @Tip_Verifi = @Sta_SinVer
 	end
 end else begin
-	select @Tep_Verifis = isnull(@Tep_Verifis, @Ent_Cero)
+	select @Tip_Verifi = isnull(@Tip_Verifi, @Ent_Cero)
 end
 
 /*Modifica Telefono de Persona */
 update SOTELPER set 
 	Tep_Lada	= @Tep_Lada, 
 	Tep_Telefo	= @Tep_Telefo,
-	Tep_Verifi	= @Tep_Verifis,
+	Tep_Verifi	= @Tip_Verifi,
 	
 	NumTransac	= @NumTransac,
 	Transaccio	= @Transaccio,
