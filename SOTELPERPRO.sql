@@ -20,7 +20,7 @@ as
 ** Descripción:	 Procesar Telefonos de Personas							****
 ****************************************************************************
 ** Modificó:	Francisco Javier Minajas Carbajal						****
-** Fecha:		24/Enero/2022											****
+** Fecha:		17/Dic/2021												****
 ** Help:		1582843													****
 ** Descripción:	Se agrega validacion con parametro A1 para dar de alta  ****
 				un telefono verificado en SOTELPER						****
@@ -142,7 +142,7 @@ end else begin
 		if @Tip_ConCon = @Tip_ConUno begin		/* 1 */
 			exec @Status =	SOTELPERACT
 				@PerPersoID,	@Tep_TipTel,	@ClClientID,	@Tep_Lada,		@Tep_Telefo,
-				@Ent_Cero,		@Act_TelVer,	@NumTransac,	@Transaccio,	@Usuario,
+				@Ent_Uno,		@Act_TelVer,	@NumTransac,	@Transaccio,	@Usuario,
 				@FechaSis,		@SucOrigen, 	@SucDestino,	@Modulo
 			if @Status <> @Ent_Cero begin
 				rollback

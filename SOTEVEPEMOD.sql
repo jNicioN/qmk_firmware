@@ -4,7 +4,7 @@ create procedure SOTEVEPEMOD (
 	@ClClientID	 	int,		
 	@Tep_Lada		int, 
 	@Tep_Telefo		bigint,
-	@Tip_Proces     char(2),
+	@Tep_Verifi     char(2),
 
 	@NumTransac	char(10),
 	@Transaccio	char(3),
@@ -31,7 +31,7 @@ declare	@Status		int,
 		@Btp_Lada		int, 
 		@Btp_Telefo		bigint,
 		@Str_A			char(1),
-		@Tep_Verifi		int,
+		@Tep_Verifis	int,
 		@Tip_ConTip char(1),			
 		@Tip_ConCon char(1)
 										/* Declaración de constantes */
@@ -53,8 +53,8 @@ select	@Str_Vacio	= '',				/* String vacío */
 		@Tip_ConUno	= '1'				/* UNO*/
 
 /* Asignacion de Constante */
-select 	@Tip_ConTip = substring(@Tip_Proces,1,1),	
-		@Tip_ConCon = substring(@Tip_Proces,2,1)
+select 	@Tip_ConTip = substring(@Tep_Verifi,1,1),	
+		@Tip_ConCon = substring(@Tep_Verifi,2,1)
 		
 /* Validaciones */
 if @PerPersoID = @Ent_Cero begin
@@ -102,7 +102,7 @@ select
 	@Btp_TipTel	= Tep_TipTel, 
 	@Btp_Lada	= Tep_Lada, 
 	@Btp_Telefo	= Tep_Telefo,
-	@Tep_Verifi	= Tep_Verifi
+	@Tep_Verifis = Tep_Verifi
 	from SOTELPER noholdlock 
 	where PerPersoID	= @PerPersoID
 		and Tep_TipTel	= @Tep_TipTel
@@ -122,22 +122,22 @@ end
 if @Tep_Lada <> @Btp_Lada or @Tep_Telefo <> @Btp_Telefo begin
 	if @Tip_ConTip = @Str_A begin  				/* 'A' = Actualizacion */
 		if @Tip_ConCon = @Tip_ConUno begin		/* 1 */
-			select @Tep_Verifi = @Ent_Uno
+			select @Tep_Verifis = @Ent_Uno
 		end else begin
-			select @Tep_Verifi = @Sta_SinVer
+			select @Tep_Verifis = @Sta_SinVer
 		end
 	end else begin
-		select @Tep_Verifi = @Sta_SinVer
+		select @Tep_Verifis = @Sta_SinVer
 	end
 end else begin
-	select @Tep_Verifi = isnull(@Tep_Verifi, @Ent_Cero)
+	select @Tep_Verifis = isnull(@Tep_Verifis, @Ent_Cero)
 end
 
 /*Modifica Telefono de Persona */
 update SOTELPER set 
 	Tep_Lada	= @Tep_Lada, 
 	Tep_Telefo	= @Tep_Telefo,
-	Tep_Verifi	= @Tep_Verifi,
+	Tep_Verifi	= @Tep_Verifis,
 	
 	NumTransac	= @NumTransac,
 	Transaccio	= @Transaccio,
