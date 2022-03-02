@@ -28,23 +28,25 @@ declare @Est_SepAct int
 declare @Par_SepAct varchar(50),
         @Par_BanAct varchar(50),
         @Ent_Cero   int,
-        @Str_Cero   char(1)
+        @Ent_Dos    int
 
 /*  ASIGNACION DE CONSTANTES */
 select  @Ent_Cero   =   0,
         @Par_SepAct =   'SeparacionActiva',         /*1: SI, 0: NO*/
         @Par_BanAct =   'BancoActual',               /*Banco Actual 1-HEY, 2-Banregio*/
-        @Str_Cero   =   '0'
+        @Ent_Dos    =   2
 
-select  @Est_SepAct = cast(isnull(Par_Valor, @Str_Cero) as int)
+select  @Est_SepAct = cast(Par_Valor as int)
 from    SOPARGEN noholdlock
 where   Par_Nombre = @Par_SepAct
 
-if @Est_SepAct = @Ent_Cero begin 
+if isnull(@Est_SepAct, @Ent_Cero) = @Ent_Cero begin 
     select @Est_BanAct = @Ent_Cero
 end else begin
-    select  @Est_BanAct = cast(isnull(Par_Valor, @Str_Cero) as int)
+    select  @Est_BanAct = cast(Par_Valor as int)
     from    SOPARGEN noholdlock
     where   Par_Nombre = @Par_BanAct
+
+    select @Est_BanAct = isnull(@Est_BanAct, @Ent_Dos)
 end 
 
