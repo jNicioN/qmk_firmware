@@ -1,4 +1,4 @@
-create  procedure    SOBANACTCON    (
+create or replace procedure SOBANACTCON (
     @Est_BanAct	int output,
 
     @NumTransac	char(10),
@@ -9,32 +9,34 @@ create  procedure    SOBANACTCON    (
     @SucDestino	char(3),
     @Modulo		char(2))
 
+
 as
 
 /***********************************************************************
 *   DESCRIPCION:  Consulta el banco actual                             *
 ************************************************************************
 **  REFERENCIAS:
-*************************************************************************
-**  Creó:    Maria Maritza                                           ****
-**  Fecha:   01/MARZO/2022                                           ****
-**  Help:                                                            ****
-*************************************************************************/
+************************************************************************
+**  Creó:    Maria De La Cruz                                        ***
+**  Fecha:   01/03/2022                                              ***
+**  Help:    1632142                                                 ***
+***********************************************************************/
 
-/*  VARIABLES */
+/* Declaracion de Variables */
 declare @Est_SepAct int
 
-/*  CONSTANTES */
+/* Declaracion de Constantes */
 declare @Par_SepAct varchar(50),
         @Par_BanAct varchar(50),
         @Ent_Cero   int,
         @Ent_Dos    int
 
-/*  ASIGNACION DE CONSTANTES */
-select  @Ent_Cero   =   0,
-        @Par_SepAct =   'SeparacionActiva',         /*1: SI, 0: NO*/
+/* Asignacion de Constantes */
+select  @Par_SepAct =   'SeparacionActiva',         /*1: SI, 0: NO*/
         @Par_BanAct =   'BancoActual',               /*Banco Actual 1-HEY, 2-Banregio*/
+        @Ent_Cero   =   0,
         @Ent_Dos    =   2
+        
 
 select  @Est_SepAct = cast(Par_Valor as int)
 from    SOPARGEN noholdlock
