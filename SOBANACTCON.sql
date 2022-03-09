@@ -1,4 +1,4 @@
-create or replace procedure SOBANACTCON (
+create procedure SOBANACTCON (
     @Est_BanAct	int output,
 
     @NumTransac	char(10),
