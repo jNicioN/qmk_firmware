@@ -19,6 +19,12 @@ as
 /****************************************************************************
 ** Descripción:	 Procesar Telefonos de Personas							****
 ****************************************************************************
+** Modificó:	Francisco Javier Minajas Carbajal						****
+** Fecha:		17/Dic/2021												****
+** Help:		1582843													****
+** Descripción:	Se agrega validacion con parametro A1 para dar de alta  ****
+				un telefono verificado en SOTELPER						****
+****************************************************************************
 ** Modificó:	Francisco Javier Carrillo Rojas							****
 ** Fecha:		05/Dic/2018												****
 ** Help:		01171269												****
@@ -37,7 +43,9 @@ as
 ****************************************************************************/
 										/* Declaración de variables */
 declare	@Status		int,
-		@Cvt_IdCoVe	int
+		@Cvt_IdCoVe	int,
+		@Tip_ConTip char(1),			
+		@Tip_ConCon char(1)
 
 										/* Declaración de constantes */
 declare	@Str_Vacio	char(1),
@@ -48,6 +56,7 @@ declare	@Str_Vacio	char(1),
 		@Sta_SinVer	int,
 		@Sta_CodCon	int,
 		@Tip_TelPri	int,
+		@Tip_ConUno char(1),
 		@Act_TelVer	char(1),
 		@Tip_BajId	char(1)
 
@@ -62,7 +71,12 @@ select	@Str_Vacio	= '',				/* String vacío */
 		@Sta_CodCon	= 1,				/* Estatus de código confirmado */
 		@Tip_TelPri	= 1,				/* Tipo de teléfono principal */	
 		@Act_TelVer	= 'V',				/* Tipo de actualización : teléfono verificado */ 
-		@Tip_BajId	= 'I'				/* Tipo de baja por id */
+		@Tip_BajId	= 'I',				/* Tipo de baja por id */
+		@Tip_ConUno	= '1'				/* UNO*/
+
+/* Asignacion de Constante */
+select 	@Tip_ConTip = substring(@Tip_Proces,1,1),	
+		@Tip_ConCon = substring(@Tip_Proces,2,1)
 
 /* Validaciones */
 if @PerPersoID = @Ent_Cero begin
@@ -124,12 +138,23 @@ end else begin
 		@PerPersoID,	@Tep_TipTel,	@ClClientID,	@Tep_Lada,	@Tep_Telefo,
 		@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,	@SucOrigen, 
 		@SucDestino,	@Modulo
+	if @Tip_ConTip = @Tep_Status begin  		/* 'A' = Actualizacion */
+		if @Tip_ConCon = @Tip_ConUno begin		/* 1 */
+			exec @Status =	SOTELPERACT
+				@PerPersoID,	@Tep_TipTel,	@ClClientID,	@Tep_Lada,		@Tep_Telefo,
+				@Ent_Uno,		@Act_TelVer,	@NumTransac,	@Transaccio,	@Usuario,
+				@FechaSis,		@SucOrigen, 	@SucDestino,	@Modulo
+			if @Status <> @Ent_Cero begin
+				rollback
+				return @Ent_Uno		
+			end
+		end
+	end
 	if @Status <> @Ent_Cero begin
 		rollback
 		return @Ent_Uno		
 	end
 end
-
 
 /* Buscar si existe el código de verificación del teléfono asociado al cliente para proceder a su actualización de status */
 if @Tep_TipTel = @Tip_TelPri begin
@@ -140,7 +165,7 @@ if @Tep_TipTel = @Tip_TelPri begin
 		  and	Cvt_Telefo	= @Tep_Telefo
 		  and	Cvt_TipTel	= @Tep_TipTel
 		  and	Cvt_StaVer	= @Sta_CodCon
-			
+	
 	if isnull(@Cvt_IdCoVe, @Ent_Cero) != @Ent_Cero begin
 		/* Actualizar a verificado el celular */
 		exec @Status =	SOTELPERACT
