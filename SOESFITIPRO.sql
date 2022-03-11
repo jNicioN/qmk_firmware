@@ -20,6 +20,12 @@ as
 /****************************************************************/
 /* DESCRIPCION: Proceso de Estados Financieros Tipo Cuenta		*/
 /****************************************************************
+** Modifica:		Jose R. Rodriguez Zenteno                   **
+** Fecha:			09/02/2022                               	**
+** Descripcion:		Se modifica proceso G para regresar 		**
+**					cuentas adicionales de CXC y Proveedores    **
+** Help:			1504301 					 				*/
+/****************************************************************
 ** Modifica:		Claudia Sandoval                   	        **
 ** Fecha:			30/07/2020                               	**
 ** Descripcion:		Validación cuando no hay segundo Eeff		**
@@ -105,7 +111,12 @@ declare	@Tip_ProA char(1),		/* Caracter A */
 		@Tip_CueDep int ,		/* Cuenta Depreciacion*/
 		@Tip_Uafir  int ,		/* Tipo Cuenta UAFIR */
 		@Tip_Uafirda int ,		/* Tipo Cuenta UAFIRDA */
-		@Cue_Depres int			/* Tipo Cuenta Depreciacion*/
+		@Cue_Depres int,		/* Tipo Cuenta Depreciacion*/
+		@Tip_CXC int,			/* Tipo Cuenta C X COBRAR*/
+		@Tip_Provee int,		/* Tipo Cuenta PROVEEDORES*/
+		@Tip_CXCRep int,		/* Tipo Cuenta C X COBRAR solo Resumen Financiero */
+		@Tip_ProRep int,		/* Tipo Cuenta PROVEEDORES solo Resumen Financiero */
+		@Tip_CarMon int			/* Tipo Cuenta Cartgos no Monetarios*/
 		
 /* Asignacion de Constantes */
 select	@Ent_Cero	= 0,
@@ -145,8 +156,12 @@ select	@Ent_Cero	= 0,
 		@Tip_CueDep = 345,
 		@Tip_Uafir  = 702,
 		@Tip_Uafirda = 703,
-		@Cue_Depres = 79
-			
+		@Cue_Depres = 79,
+		@Tip_CXC = 14,
+		@Tip_Provee = 44,
+		@Tip_CXCRep = 926,
+		@Tip_ProRep = 927,
+		@Tip_CarMon = 346
 		
 select	@Ent_Cuenta = @Ent_Uno,
 		@Ent_i		= @Ent_Uno
@@ -653,6 +668,7 @@ end else if @Tip_Proces = @Tip_ProE begin		/* EEFF Gobierno */
 				 on Tcc_TipCue = Tic_Numero
 				and Tcc_ClEsFi = @Eft_ClEsFi
 			where Tfc_Stock		<> @Bit_Si
+			and Tic_Numero not in (@Tip_CXCRep,@Tip_ProRep)
 
 	update #CuentasEstadosTotal set
 		Cet_Descri = Tic_DesTot
@@ -861,7 +877,16 @@ end	else if @Tip_Proces = @Tip_ProG begin
 				and Tcc_ClEsFi = @Eft_ClEsFi
 			where Tfc_Stock		<> @Bit_Si
 			  and Tfc_Report	= @Ent_Uno
-
+			  
+	delete from  #CuentaReporte where Tot_NumCue IN (@Tip_CXC,@Tip_Provee)
+	
+	insert into #CuentaReporte
+	select	Tic_Numero, Tic_DesRep, Tfc_IndRep, Tfc_Estilo
+	from SOTICUEF tc noholdlock
+	inner join SOTFOTCU tf noholdlock on Tfc_Cuenta = Tic_Numero and Tfc_Format = @Eft_TipFor and Tfc_Stock <> @Bit_Si
+	inner join SOTICUCL cl noholdlock on Tcc_TipCue = Tic_Numero and Tcc_ClEsFi = @Eft_ClEsFi
+	where Tic_Numero in (@Tip_CXCRep,@Tip_ProRep)
+	
 	insert into #CuentaValorEeff
 		select	Tot_NumCue,		Tot_DesRep,		isnull(Eft_Numero, @Ent_Cero),
 				@Eft_EsFin1,	isnull(Eft_Valor, @Mon_Cero),	isnull(Eft_Porcen, @Mon_Cero),
@@ -1010,10 +1035,10 @@ end else if @Tip_Proces = @Tip_ProI begin
 	from SOTICUEF tc noholdlock
 	inner join SOTFOTCU ft noholdlock on Tfc_Cuenta = Tic_Numero
 	inner join SOTICUCL cl noholdlock on Tcc_TipCue = Tic_Numero
-	where Tic_Numero = @Cue_Depres
+	where Tic_Numero IN (@Cue_Depres,@Tip_CarMon)
 	
 	insert into #CuentaValorEF
-	select	Tot_NumCue,		Tot_DesRep,		isnull(Eft_Numero, @Ent_Cero),
+	select	distinct Tot_NumCue,		Tot_DesRep,		isnull(Eft_Numero, @Ent_Cero),
 				@Eft_EsFin1,	isnull(Eft_Valor, @Mon_Cero),	isnull(Eft_Porcen, @Mon_Cero),
 				@Eft_EsFin2,	@Mon_Cero,		@Mon_Cero,
 				Tot_Indice, Tot_Estilo
