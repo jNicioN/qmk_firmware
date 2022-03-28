@@ -22,6 +22,12 @@ as
 ** Modificó:	Francisco Minajas										****
 ** Fecha:		22/Enero/2022											****
 ** Help:		1582843													****
+** Descripción:	Se agrega validacion en caso de que el Numero telefonico****
+				sea el mismo											****
+****************************************************************************
+** Modificó:	Francisco Minajas										****
+** Fecha:		22/Enero/2022											****
+** Help:		1582843													****
 ** Descripción:	SP Atomico de SOTELPERMOD								****
 ****************************************************************************/
 
@@ -130,7 +136,13 @@ if @Tep_Lada <> @Btp_Lada or @Tep_Telefo <> @Btp_Telefo begin
 		select @Tip_Verifi = @Sta_SinVer
 	end
 end else begin
-	select @Tip_Verifi = isnull(@Tip_Verifi, @Ent_Cero)
+	if @Tip_ConTip = @Str_A begin  				/* 'A' = Actualizacion */
+		if @Tip_ConCon = @Tip_ConUno begin		/* 1 */
+			select @Tip_Verifi = @Ent_Uno
+		end
+	end else begin
+		select @Tip_Verifi = isnull(@Tip_Verifi, @Ent_Cero)
+	end
 end
 
 /*Modifica Telefono de Persona */
