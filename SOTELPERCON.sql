@@ -17,12 +17,6 @@ as
 /***************************************************************************
 ** Descripción:	 Consulta a Telefonos de Persona						****
 ****************************************************************************
-** Modificó:	Francisco Minajas										****
-** Fecha:		16-02-2021												****
-** Help:		1582843												****
-** Descipcion:	Se agrega el tipo de consulta C2 para consultar         ****
-				TepVerify de SOTELPER									****
-****************************************************************************
 ** Modificó:	Gio Asencio												****
 ** Fecha:		03-09-2018												****
 ** Help:		01134946												****
@@ -88,13 +82,6 @@ if @Tip_ConTip = @Con_Consul begin		/* Consultas */
 				and		ClClientID	= @ClClientID
 				and	 	Tep_TipTel	= @Tep_TipTel
 	end
-	if @Tip_ConCon = @Str_Dos begin	/* Consulta por llave principal */
-		select	PerPersoID, Tep_TipTel, ClClientID, Tep_Lada, Tep_Telefo, Tep_Verifi  /*Consulta de telefonos por Tipo de Telefono y persona*/
-			from SOTELPER noholdlock
-			where	PerPersoID	= @PerPersoID
-				and		ClClientID	= @ClClientID
-				and	 	Tep_TipTel	= @Tep_TipTel
-	end
 
 end else if @Tip_ConTip = @Con_Listas begin	/* Listas */
 	if @Tip_ConCon = @Por_LlaPri begin	/* Lista que trae todos los registros */
@@ -121,12 +108,5 @@ end else if @Tip_ConTip = @Con_Listas begin	/* Listas */
 			from	SOTELPER noholdlock
 			where	ClClientID	= @ClClientID
 			and (@Tep_TipTel=0 OR Tep_TipTel=@Tep_TipTel)
-	end
-	
-	if @Tip_ConCon = '5' begin	/* Lista por Id Persona */
-		select		PerPersoID, Tep_TipTel, ClClientID, Tep_Lada, Tep_Telefo, Tep_Verifi
-			from	SOTELPER noholdlock
-			where	PerPersoID  = @PerPersoID
-			and		ClClientID	= @ClClientID
 	end
 end

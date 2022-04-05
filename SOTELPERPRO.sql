@@ -20,12 +20,6 @@ as
 ** Descripción:	 Procesar Telefonos de Personas							****
 ****************************************************************************
 ** Modificó:	Francisco Javier Minajas Carbajal						****
-** Fecha:		11/Feb/2021												****
-** Help:		1582843													****
-** Descripción:	Se agrega validacion con parametro A1 para dar de alta  ****
-				un telefono verificado en SOTEVEPEMOD					****
-****************************************************************************
-** Modificó:	Francisco Javier Minajas Carbajal						****
 ** Fecha:		17/Dic/2021												****
 ** Help:		1582843													****
 ** Descripción:	Se agrega validacion con parametro A1 para dar de alta  ****
@@ -130,26 +124,14 @@ if @Ent_Cero < (  select 	count(1)  from
 	SOTELPER noholdlock
 	where 	PerPersoID = @PerPersoID 
 		and Tep_TipTel	= @Tep_TipTel 
-		and ClClientID	= @ClClientID ) begin
-			if @Tip_ConTip = @Tep_Status begin  		/* 'A' = Actualizacion */
-				if @Tip_ConCon = @Tip_ConUno begin		/* 1 */	
-					exec @Status =	SOTEVEPEMOD @PerPersoID, @Tep_TipTel, @ClClientID, @Tep_Lada, @Tep_Telefo, @Tip_Proces,
-											@NumTransac, @Transaccio, @Usuario, @FechaSis, @SucOrigen, 
-											@SucDestino, @Modulo
-					if @Status <> @Ent_Cero begin
-						rollback
-						return @Ent_Uno
-					end
-				end else begin	
-					exec @Status =	SOTELPERMOD @PerPersoID, @Tep_TipTel, @ClClientID, @Tep_Lada, @Tep_Telefo,
-											@NumTransac, @Transaccio, @Usuario, @FechaSis, @SucOrigen, 
-											@SucDestino, @Modulo
-					if @Status <> @Ent_Cero begin
-						rollback
-						return @Ent_Uno
-					end
-				end
-			end
+		and ClClientID	= @ClClientID ) begin		
+		exec @Status =	SOTELPERMOD @PerPersoID, @Tep_TipTel, @ClClientID, @Tep_Lada, @Tep_Telefo,
+								@NumTransac, @Transaccio, @Usuario, @FechaSis, @SucOrigen, 
+								@SucDestino, @Modulo
+		if @Status <> @Ent_Cero begin
+			rollback
+			return @Ent_Uno
+		end
 end else begin
 		/* Alta de Telefonos de Personas	 */
 	exec @Status =	SOTELPERALT
