@@ -20,7 +20,7 @@ as
 ** Descripción:	 Modifica Telefonos de Persona							****
 ****************************************************************************
 ** Modificó:	Francisco Minajas										****
-** Fecha:		22/Enero/2022											****
+** Fecha:		12/Abril/2022											****
 ** Help:		1582843													****
 ** Descripción:	Se agrega validacion en caso de que el Numero telefonico****
 				sea el mismo											****

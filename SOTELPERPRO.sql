@@ -20,7 +20,7 @@ as
 ** Descripción:	 Procesar Telefonos de Personas							****
 ****************************************************************************
 ** Modificó:	Francisco Javier Minajas Carbajal						****
-** Fecha:		11/Feb/2021												****
+** Fecha:		12/Abril/2022											****
 ** Help:		1582843													****
 ** Descripción:	Se agrega validacion con parametro A1 para dar de alta  ****
 				un telefono verificado en SOTEVEPEMOD					****

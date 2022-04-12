@@ -18,8 +18,8 @@ as
 ** Descripción:	 Consulta a Telefonos de Persona						****
 ****************************************************************************
 ** Modificó:	Francisco Minajas										****
-** Fecha:		16-02-2021												****
-** Help:		1582843												****
+** Fecha:		12/Abril/2022											****
+** Help:		1582843													****
 ** Descipcion:	Se agrega el tipo de consulta C2 para consultar         ****
 				TepVerify de SOTELPER									****
 ****************************************************************************
