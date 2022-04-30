@@ -48,7 +48,7 @@ select	@Ent_Uno	= 1,			/* Entero Uno*/
 		@Tip_TipCon	= 'C',			/* Tipo consulta*/
 		@Tip_ConUno	= '1',			/* Uno - Consulta de clasificación por clabe */
 		@Tip_ConDos	= '2',			/* Dos - Consulta de clasificación por número de tarjeta */
-		@Tip_ConTre	= '3',			/* Tres - Consulta de clasificación por número de cuenta */
+		@Tip_ConTre	= '3'			/* Tres - Consulta de clasificación por número de cuenta */
 
 select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
 		@Tip_ConCon	= substring(@Tip_Consul, 2, 1)
@@ -66,7 +66,7 @@ if (@Tip_ConTip = @Tip_TipCon) begin			/* Consulta */
 			where	Ptc_TipCue	= @Cue_Tipo
 			  and	Ptc_Moneda	= @Cue_Moneda
 			  and	Clp_Produc	= Ptc_Produc
-	end if (@Tip_ConCon = @Tip_ConDos) begin				/* Consulta por número de tarjeta*/
+	end else if (@Tip_ConCon = @Tip_ConDos) begin				/* Consulta por número de tarjeta*/
 		select	@TaP_TipTar	= TaP_TipTar
 			from CTTARPRO noholdlock
 			where	TaP_Tarjet	= @Cct_Tarjet
@@ -76,7 +76,7 @@ if (@Tip_ConTip = @Tip_TipCon) begin			/* Consulta */
 				 SOPRTITA noholdlock
 			where	Ptt_TipTar	= @TaP_TipTar
 			  and	Clp_Produc	= Ptt_Produc  
-	end if (@Tip_ConCon = @Tip_ConTre) begin				/* Consulta por número de cuenta*/
+	end else if (@Tip_ConCon = @Tip_ConTre) begin				/* Consulta por número de cuenta*/
 		select	clp.Clp_Numero,	clp.Clp_Clasif,	clp.Clp_Produc,	ptc.Ptc_TipCue
 			from CHCUENTA cue
 			inner join SOPRTICU ptc on ptc.Ptc_TipCue = cue.Cue_Tipo and ptc.Ptc_Moneda = cue.Cue_Moneda
