@@ -1,8 +1,8 @@
 create procedure SOCLCLTACON (
 	@Cct_Clabe	char(18),
 	@Cct_Tarjet	char(16),
+	@Cue_Numero	char(12),
 	@Tip_Consul	char(2),
-	@Cue_Numero	char(12)
 
 	@NumTransac	char(10),
 	@Transaccio	char(3),
