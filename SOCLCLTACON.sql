@@ -21,7 +21,7 @@ as
 ****************************************************************************
 ** Modificó:	Seth Karim Luis Martínez								****
 ** Fecha:		29/04/2022												****
-** Help:		1566195													****
+** Help:		1640569													****
 ** Descripción: Consulta de clasificación por número de cuenta			****
 ****************************************************************************
 ** Creó:		Armida González											****
