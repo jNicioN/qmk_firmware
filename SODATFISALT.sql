@@ -73,7 +73,7 @@ end
 /*  Revisar si ya existe la relacion  */
 select	@Ent_Existe	= @Ent_Cero
 select	@Ent_Existe	= @Ent_Uno
-from    SODATFIS
+from    SODATFIS noholdlock
 where 	 PerPersoID = @PerPersoID
 
 if @Ent_Existe = @Ent_Uno begin
