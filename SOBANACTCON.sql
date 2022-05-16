@@ -15,7 +15,12 @@ as
 /***********************************************************************
 *   DESCRIPCION:  Consulta el banco actual                             *
 ************************************************************************
-**  REFERENCIAS:
+/** REFERENCIAS: 
+************************************************************************
+** Modificó:	Librado Santiago									****
+** Fecha:		06/04/2022											****
+** Help Desk:	1640569												****
+** Descripción:	Se agrega @@nestlevel				 				****/
 ************************************************************************
 **  Creó:    Maria De La Cruz                                        ***
 **  Fecha:   01/03/2022                                              ***
@@ -50,5 +55,11 @@ end else begin
     where   Par_Nombre = @Par_BanAct
 
     select @Est_BanAct = isnull(@Est_BanAct, @Ent_Dos)
-end 
+         
+end
 
+if @@nestlevel = 1 begin
+	select	Err_Numero	= '00000',
+			Err_Mensaj	= '',
+			Est_BanAct = @Est_BanAct
+end
