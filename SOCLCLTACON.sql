@@ -79,8 +79,8 @@ if (@Tip_ConTip = @Tip_TipCon) begin			/* Consulta */
 	end else if (@Tip_ConCon = @Tip_ConTre) begin				/* Consulta por número de cuenta*/
 		select	clp.Clp_Numero,	clp.Clp_Clasif,	clp.Clp_Produc,	ptc.Ptc_TipCue
 			from CHCUENTA cue
-			inner join SOPRTICU ptc on ptc.Ptc_TipCue = cue.Cue_Tipo and ptc.Ptc_Moneda = cue.Cue_Moneda
-			inner join SOCLAPRO clp on clp.Clp_Produc = ptc.Ptc_Produc
+			inner join SOPRTICU ptc noholdlock on ptc.Ptc_TipCue = cue.Cue_Tipo and ptc.Ptc_Moneda = cue.Cue_Moneda
+			inner join SOCLAPRO clp noholdlock on clp.Clp_Produc = ptc.Ptc_Produc
 			where	cue.Cue_Numero	= @Cue_Numero
 	end
 end
