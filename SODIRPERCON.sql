@@ -17,11 +17,16 @@ as
 /***************************************************************************
 ** Descripción:	 Consulta de Direccion Persona							****
 ****************************************************************************
+** Modifico:	Adriana Gomez											****
+** Fecha:		06-05-2022												****
+** Help:		1621179													****
+** Descripcion: se agrega consulta c5									****
+****************************************************************************
 ** Modifico:	Marcell Moreno											****
 ** Fecha:		14-02-2019												****
 ** Help:		001187875												****
 ****************************************************************************
-** Modifico:		Norma Tijerina											****
+** Modifico:	Norma Tijerina											****
 ** Fecha:		05-05-2017												****
 ** Help:		00946339												****
 ****************************************************************************
@@ -46,6 +51,7 @@ declare	@Str_Vacio	char(1),
 		@Str_Dos    char(1),
 		@Str_Tres   char(1),
 		@Str_Cuatro char(1),
+		@Str_Cinco  char(1),
 		@Ent_Uno    int,
 		@Ent_Dos    int
 
@@ -60,6 +66,7 @@ select	@Str_Vacio	= '',				/* String vacío */
 		@Str_Dos    = '2',              /*String del numero 2*/
 		@Str_Tres   = '3',              /*String del numero 3*/
 		@Str_Cuatro = '4',              /*String del numero 4*/
+		@Str_Cinco  = '5',              /*String del numero 4*/
 		@Ent_Uno    =  1,               /*Entero del numero 1*/
 		@Ent_Dos    =  2                /*Entero del numero 2*/
 		
@@ -110,6 +117,18 @@ if @Tip_ConTip = @Con_Consul begin		/* Consultas */
 			from SODIRPER noholdlock
 			inner join SOCATIDI noholdlock on  Ctd_Numero  = Dip_TipDir
 			and		ClClientID  	= @ClClientID 
+			and		Dip_TipDir 		= @Dip_TipDir 
+					 
+	end
+	
+	if @Tip_ConCon = @Str_Cinco begin	/* Consulta de Direccion Por Indices */
+
+		select	PerPersoID,	ClClientID,	Dip_TipDir,	Dip_Calle,	Dip_NumExt,
+				Dip_NumInt,	Dip_NumCP,	Dip_EntCa1,	Dip_EntCa2,	Dip_Refere,
+				Dip_Status
+			from SODIRPER noholdlock
+			inner join SOCATIDI noholdlock on  Ctd_Numero  = Dip_TipDir
+			where 	PerPersoID		= @PerPersoID 
 			and		Dip_TipDir 		= @Dip_TipDir 
 					 
 	end
