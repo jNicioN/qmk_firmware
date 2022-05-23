@@ -23,6 +23,11 @@ as
 /***********************************************************
 ** Descripción:	 Alta de Dirección Persona				****
 ************************************************************
+** Modifico:	Adriana Gomez							****
+** Fecha:		06-05-2022								****
+** Help:		1621179									****
+** Descripcion: validacion de cliente y persona			****
+************************************************************
 ** Modifico:	Jonathan Nicio							****
 ** Fecha:		14-09-2020								****
 ** Help:		1399388									****
@@ -55,26 +60,20 @@ select	@Str_Vacio	= '',				/* String vacío */
 		@Dip_Status = 'A'
 
 /* Validaciones */
-if @PerPersoID = @Ent_Cero begin
+if @PerPersoID = @Ent_Cero and  @ClClientID = @Ent_Cero begin
+	
 	select	Err_Codigo	= '000001',
-			Err_Mensaj	= 'Error con el parámetro: @PerPersonID .',
+			Err_Mensaj	= 'Error con el parámetro: @PerPersonID o @ClClientID .',
 			Err_Variab	= '@PerPersonID'
 	rollback
 	return @Ent_Uno
 end
 
+
 if @Dip_TipDir = @Ent_Cero begin
 	select	Err_Codigo	= '000003',
 			Err_Mensaj	= 'Error con el parámetro: @Dip_TipDir.',
 			Err_Variab	= '@Dip_TipDir'
-	rollback
-	return @Ent_Uno
-end
-
-if isnull(@Dip_Calle, @Str_Vacio) = @Str_Vacio begin
-	select	Err_Codigo	= '000004',
-			Err_Mensaj	= 'Error con el parámetro: @Dip_Calle.',
-			Err_Variab	= '@Dip_Calle'
 	rollback
 	return @Ent_Uno
 end
@@ -110,3 +109,8 @@ insert into SODIRPER (
 		@Dip_NumInt,	@Dip_NumCP,		@Dip_EntCa1,	@Dip_EntCa2,	@Dip_Refere,
 		@Dip_Status,	@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,
 		@SucOrigen,		@SucDestino)
+		
+if @@nestlevel = @Ent_Uno
+select	Err_Codigo	= '000000',
+		Err_Mensaj	= 'Registro realizado'
+

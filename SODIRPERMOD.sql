@@ -23,6 +23,16 @@ as
 /***************************************************************************
 ** Descripción:	 Modificación de Descripcion							****
 ****************************************************************************
+** Modifico:		Adriana Gomez										****
+** Fecha:		    06-06-2022											****
+** Help:		    1621179												****
+** Descripcion:		Se modifica validacion cliente y persona			****
+****************************************************************************
+** Modifico:		Carlos Ramirez										****
+** Fecha:		    17-12-2020											****
+** Help:		    1437949												****
+** Descripcion:		Se agrega validacion para @Dim_NumCP				****
+****************************************************************************
 ** Modifico:		Carlos Ramirez										****
 ** Fecha:		    17-12-2020											****
 ** Help:		    1437949												****
@@ -76,20 +86,10 @@ select	@Str_Vacio	= '',				/* String vacío */
 		
 		
 /* Validaciones */
-if @PerPersoID = @Ent_Cero begin
-
-	select	Err_Codigo	= '000001',
-			Err_Mensaj	= 'Error con el parámetro: @PerPersonID.',
-			Err_Variab	= '@PerPersonID'
-	rollback
-	return @Ent_Uno
-
-end
-
-if @ClClientID = @Ent_Cero begin
+if @PerPersoID = @Ent_Cero and @ClClientID = @Ent_Cero begin
 
 	select	Err_Codigo	= '000002',
-			Err_Mensaj	= 'Error con el parámetro: @ClClientID.',
+			Err_Mensaj	= 'Error con el parámetro:@PerPersoID o  @ClClientID.',
 			Err_Variab	= '@ClClientID'
 	rollback
 	return @Ent_Uno
@@ -177,3 +177,7 @@ update SODIRPER set
 	where	ClClientID	= @ClClientID
 	and		Dip_TipDir = @Dip_TipDir
 	and 	PerPersoID	= @PerPersoID
+
+if @@nestlevel = @Ent_Uno
+select	Err_Codigo	= '000000',
+		Err_Mensaj	= 'Registro modificado'
