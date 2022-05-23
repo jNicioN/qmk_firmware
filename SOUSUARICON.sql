@@ -1,4 +1,4 @@
-﻿create procedure SOUSUARICON (
+create procedure SOUSUARICON (
 	@Usu_Numero	char(6),
 	@Usu_Nombre	varchar(50),
 	@Usu_Clave	char(15),
@@ -22,8 +22,13 @@ as
 ** Si se Compila este store en ProducciÃ³n, hay que volverle a 			****
 ** dar acceso al usuario BLOQUEAR										****
 ****************************************************************************
+** Modifico:		Francisco Minajas									****
+** Fecha:			31/05/2020											****
+** Help:			1396836												****
+** Descripcion:		Se agrega consulta C7 y L7 para obtener Usu_Numero	****
+****************************************************************************
 ** Modifico:		Esthepny Aguilar									****
-** Fecha:			10/03/2020											****
+** Fecha:			10/0/2020											****
 ** Help:			1396836												****
 ** Descripcion:		Se agrega consulta L6 para obtener campo activo		****
 ****************************************************************************
@@ -246,7 +251,8 @@ declare	@Str_Vacio	char(1),		/* DeclaraciÃ³n de Constantes */
 		@Str_B		char(1),
         @Str_C		char(1),
         @Str_D		char(1),
-		@Str_E		char(1)
+		@Str_E		char(1),
+		@Str_F		char(1)
 
 /* AsignaciÃ³n de Constantes */
 select	@Str_Vacio	= '',			/* String VacÃ­o												*/
@@ -274,7 +280,9 @@ select	@Str_Vacio	= '',			/* String VacÃ­o												*/
 		@Str_B		= 'B',			/* String para consulta B									*/
         @Str_C		= 'C',			/* String para consulta C									*/
         @Str_D		= 'D',			/* String para consulta D									*/
-		@Str_E		= 'E'			/* String para consulta E									*/
+		@Str_E		= 'E',			/* String para consulta E									*/
+		@Str_F		= 'F'			/* String para consulta F									*/
+
 
 select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
 		@Tip_ConCon	= substring(@Tip_Consul, 2, 1)
@@ -427,9 +435,18 @@ if @Tip_ConTip = @Tra_TipCon begin					/* 'C':  Consulta */
 		  and	(	Usu.Usu_Numero	= @Usu_Numero
 		   or		Usu.Usu_Clave	= @Usu_Clave	)
 		  and	Per_Modulo		= @Mod_EmpCon
+	
+	end else if @Tip_ConCon = @Str_F begin		/* Consulta de Clave de Entrada */
 
-	end
-
+		select	Usu_Numero,	Usu_Nombre,	Usu_Clave,	Usu_Autori,		Usu_Nivel,
+				Usu_Status,	Usu_FeAcPa,	Per_Acceso,	Usu.SaPerfilID,	Usu_StaSes,
+				Usu_IPSesi,	Usu_Activo
+			from SOUSUARI Usu noholdlock,
+				 SAPERFIL Per noholdlock
+			where	Usu.SaPerfilID	= Per.SaPerfilID
+			  and	Usu_Clave		like '%'+@Usu_Clave
+	end 
+	
 
 end else begin					/* 'L':  Lista */
 	select	@Usu_Nombre = ltrim(rtrim(@Usu_Nombre)) + @Str_Porcen
@@ -476,6 +493,12 @@ end else begin					/* 'L':  Lista */
 			from SOUSUARI noholdlock
 			where	Usu_Nombre	like @Usu_Nombre
 			order by Usu_Nombre
+	end
+	
+	if @Tip_ConCon = @Str_Siete begin				/* Lista General mas campo de activo */
+		select	Usu_Numero,	Usu_Nombre,	Usu_Clave,	Usu_EMail, Usu_Activo 
+			from SOUSUARI noholdlock
+			where	Usu_Clave	like @Usu_Clave
 	end
 
 end
