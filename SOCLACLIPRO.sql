@@ -968,6 +968,7 @@ update SOCICORE set Ccr_ClDeAc = @Num_Detalle  ,
 	  and Ccr_FecCla = @FechaSis 
 
 delete from  #ClientesGrupos
+where Cli_Grupo is not null
 -- ================================================================================== --
 -- 				Sacamos los totales detalle y grupo, tipo caso 3 caso 99 	 --
 -- ================================================================================== -- 
@@ -1233,6 +1234,7 @@ update SOCICORE set Ccr_ClDeAc = Ccr_ClDeAc + @Num_Detalle  ,
 	  and Ccr_FecCla = @FechaSis 
 
 delete from  #ClientesGrupos
+where Cli_Grupo is not null
 
 drop table #ConLinCredit
 
@@ -1325,6 +1327,7 @@ update SOCICORE set Ccr_ClDeAc =  @Num_Detalle  ,
 	  and Ccr_FecCla = @FechaSis  
 
 delete from  #ClientesGrupos
+where Cli_Grupo is not null
 
 -- ================================================================================== --
 -- 				Sacamos los totales detalle y grupo, tipo caso 4 caso 99			 --

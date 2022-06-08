@@ -38,7 +38,12 @@ declare	@Str_SI		char(1),
 		@Tip_CuentH	char(2),
 		@Tip_CuHSma	char(2),
 		@Tip_CuSmMe	char(2),
-		@Cla_ClaHey int 
+		@Cla_ClaHey int,
+		@Str_Vacio char(1),
+		@Ent_Uno	int,
+		@Pro_HeyRec char(4),
+		@Cue_Tipo   char(2),
+		@Str_LetraV char(1) 
 
 -- Asignación de Constantes 
 select	@Str_SI		= 'S',		-- String Si 
@@ -56,7 +61,12 @@ select	@Str_SI		= 'S',		-- String Si
 		@Tip_CuentH	= '56',     -- Valor tipo de cuenta CUENTA HEY
 		@Tip_CuHSma	= '57',     -- Valor tipo de cuenta CUENTA HEY SMART
 		@Tip_CuSmMe	= '88',     -- Valor tipo de cuenta CUENTA HEY SMART MENORES
-		@Cla_ClaHey	= 1			-- Clasificacion clientes hey
+		@Cla_ClaHey	= 1,			-- Clasificacion clientes hey
+		@Str_Vacio  = '',
+		@Ent_Uno	= 1,
+		@Pro_HeyRec = '0228',
+		@Cue_Tipo	= '50',
+		@Str_LetraV = 'V'
 		
 		
 -- Cantidad de lineas de credito por cliente
@@ -195,7 +205,7 @@ update SOCLIREC set
 	inner join TALINVIR Vir	noholdlock	on Vir.Lin_Client = Clr_CliNum 
 										and Vir.Lin_Status= @Str_Cancel
 	
-	where Clr_LinVir = ''
+	where Clr_LinVir = @Str_Vacio
 
 
 
@@ -247,7 +257,7 @@ select Clr_CliNum, count(*)
 									and Lin_Status in(@Str_Vigent,@Str_Bloque)
 									
 	group by 	Clr_CliNum	
-	having count(*)  >= 1
+	having count(*)  >= @Ent_Uno
 	
 
 update SOCLIREC set 
@@ -262,7 +272,7 @@ select Clr_CliNum,	count(*), sum(Cue_Dispon)
 	from SOCLIREC 
 	inner join CHCUENTA noholdlock	on Cue_Client =  Clr_CliNum 
 									and Cue_Status IN( @Str_Activo,@Str_Bloque)
-									and Cue_Tipo <> '50'
+									and Cue_Tipo <> @Cue_Tipo
 	group by 	Clr_CliNum		
 	
 	
@@ -312,7 +322,7 @@ select Clr_Grupo, Tcc_Usuari, count(*)
 	inner join NBTABRCO noholdlock	on Tcc_Usuari = Clr_UsuBan
 									and  Tcc_Status = @Str_Activo
 	inner join CTTARPRO noholdlock	on TaP_Tarjet = Tcc_Tarjet
-									and TaP_TipTar = '0228'   --agregar productos PFAE
+									and TaP_TipTar =  @Pro_HeyRec   --agregar productos PFAE
 	where Clr_CliNum <> Tcc_Client
 	group by Clr_Grupo, Tcc_Usuari
 
@@ -336,7 +346,7 @@ update SOCLIREC set
 	from SOCLIREC  
 	inner join TALINVIR	noholdlock	on Lin_Client =  Clr_CliNum 
 									and Lin_Numero = Clr_LinVir
-	where Clr_UsuBan <> ''
+	where Clr_UsuBan <> @Str_Vacio
 	
 	
 -- tipos cuenta HEY
@@ -349,16 +359,16 @@ select	Tip_Numero
 									and Clp_Clasif	= @Cla_ClaHey 
 						
 insert into #TiposHey
-values('50')
+values(@Cue_Tipo)
 
 -- Cantidad de Cuentas que no son HEY
 insert into #CuentasNOHey
 select Clr_CliNum, count(*)
 	from SOCLIREC noholdlock
-	inner join CHCUENTA noholdlock	on Cue_Client =  Clr_CliNum 
-									and Cue_Status IN( @Str_Activo,@Str_Bloque)
-									and Cue_Tipo not in ( select Tip_Numero
-															from #TiposHey) 								
+	inner join CHCUENTA noholdlock	on Cue_Client =  Clr_CliNum
+									and Cue_Status in ( @Str_Activo,@Str_Bloque)
+	left join #TiposHey  on Tip_Numero = Cue_Tipo
+	where Tip_Numero is null								
 	group by Clr_CliNum
 	
 update SOCLIREC set 
@@ -389,7 +399,7 @@ update SOCLIREC set
 	Clr_SaLiVi = Lic_SalAct
 	from SOCLIREC	
 	inner join TALICABA noholdlock	on Lic_LinVir = Clr_LinVir 
-									and Lic_LinVir <> ''
+									and Lic_LinVir <> @Str_Vacio
 
 
 -- Creditos CR activos de clientes hey 
@@ -456,7 +466,7 @@ select Clr_CliNum, count(*)
 	
 	from SOCLIREC noholdlock
 	inner join CCCREDIT noholdlock on Cre_Client = Clr_CliNum
-								   and Cre_Status in( @Str_Vigent,'V',@Str_Castig,@Str_ResCas )	
+								   and Cre_Status in( @Str_Vigent,@Str_LetraV,@Str_Castig,@Str_ResCas )	
 	group by Clr_CliNum
 
 update  SOCLIREC set  

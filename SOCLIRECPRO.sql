@@ -51,7 +51,7 @@ select	@Ent_Dos	= 2,		-- Tipo 2 clientes PF mas de un id
 		
 Create table #GrupPFAES(
 Gpf_Grupo varchar(15),
-Gpf_conteo int
+Gpf_Conteo int
 )
 
 create nonclustered index GrupPFAESGru on #GrupPFAES (Gpf_Grupo)
@@ -124,7 +124,7 @@ select Clu_Grupo, Cli_Numero, ClClientID
 into   #PFAE
 	from  ( select Gpf_Grupo
 				from #GrupPFAES
-				where Gpf_conteo>1 ) Cdf	-- Clientes Unicos con mas de un Cliente Detalle Persona Fisica con actividad empresarial
+				where Gpf_Conteo>1 ) Cdf	-- Clientes Unicos con mas de un Cliente Detalle Persona Fisica con actividad empresarial
 	inner join CLCLIUNI noholdlock on Clu_Grupo = Gpf_Grupo
 	inner join CLCLIENT noholdlock on Cli_Numero = Clu_Client
 						
