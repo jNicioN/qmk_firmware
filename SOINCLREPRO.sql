@@ -1,4 +1,3 @@
--- drop procedure SOINCLREPRO 
 create procedure SOINCLREPRO (
 	@NumTransac char(10),
 	@Transaccio char(3),
@@ -19,7 +18,7 @@ as
 ****************************************************************************
 ** Creo:		Fatima Sanchez Luis										****
 ** Fecha:		31/Mayo/2022											****
-** Help:																****
+** Help:		1637684														****
 ****************************************************************************/
 
 -- Declaración de constantes 

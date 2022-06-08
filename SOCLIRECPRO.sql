@@ -1,4 +1,3 @@
--- drop procedure SOCLIRECPRO
 create procedure SOCLIRECPRO (
 	@NumTransac char(10),
 	@Transaccio char(3),
@@ -17,7 +16,7 @@ as
 ****************************************************************************
 ** Creo:		Fatima Sanchez Luis										****
 ** Fecha:		31/Mayo/2022											****
-** Help:																****
+** Help:		1637684														****
 ****************************************************************************/
 -- Declaración de constantes 
 declare @Ent_Dos	int,	
