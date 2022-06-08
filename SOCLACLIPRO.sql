@@ -1533,7 +1533,7 @@ select  Clr_Grupo
 	and Clr_TipCas <> @Ent_Cuatro
 
 -- ================================================================================== --
--- 				Sacamos los totales detalle y grupo, tipo caso 2 caso 200			 --
+-- 				Sacamos los totales detalle y grupo,  caso 200			 --
 -- ================================================================================== --
 
 
@@ -1565,11 +1565,15 @@ select @Ent_Doscie,	@Ent_Cero,	@Num_Detalle,	@Num_Grupos,	@Ent_Cero,
 	   @FechaSis,	@SucOrigen,		@SucDestino
 
 
+delete from #ClientesGrupos
+where Cli_Grupo is not null
+
 
 update SOCLIREC set
 Clr_Caso = @Ent_Doscie
 from SOCLIREC noholdlock
 inner join #Grupos200 on Cli_Grupo = Clr_Grupo
+
 
 
 -- ======================================================================= --
@@ -1585,10 +1589,10 @@ select @Num_Detalle = @@rowcount
 -- vamos por los registros del grupo afectados por el update
 
 insert into #ClientesGrupos
-select Clr_Grupo
-			   from SOCLIREC  noholdlock
-			   WHERE Clr_Caso  = @Ent_Doscie
-				group by Clr_Grupo
+	select Clr_Grupo
+		from SOCLIREC  noholdlock
+		WHERE Clr_Caso  = @Ent_Doscie
+		group by Clr_Grupo
 
 
 select @Num_Grupos = count(*)
