@@ -1591,6 +1591,7 @@ update SOCICORE set Ccr_ClDeAc = @Num_Detalle  ,
 
 	
 delete from #ClientesGrupos
+where Cli_Grupo is not null
 	
 -- ================================================================================== --
 -- 				Sacamos los totales detalle y grupo, tipo caso 4 caso 101			 --
