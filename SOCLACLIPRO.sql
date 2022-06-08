@@ -1530,7 +1530,7 @@ select  Clr_Grupo
 	from SOCLIREC noholdlock
 	where Clr_Caso in(  @Ent_Cien,@Ent_CieTre )
 	and (Clr_CreAct =  @Ent_Uno or Clr_CrABAc = @Ent_Uno or Clr_CrCCAc = @Ent_Uno )
-
+	and Clr_TipCas <> @Ent_Cuatro
 
 -- ================================================================================== --
 -- 				Sacamos los totales detalle y grupo, tipo caso 2 caso 200			 --
