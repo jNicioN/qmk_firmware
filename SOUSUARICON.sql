@@ -1,4 +1,4 @@
-create procedure SOUSUARICON (
+﻿create procedure SOUSUARICON (
 	@Usu_Numero	char(6),
 	@Usu_Nombre	varchar(50),
 	@Usu_Clave	char(15),
