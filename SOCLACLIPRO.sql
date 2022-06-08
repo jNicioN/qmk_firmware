@@ -152,6 +152,8 @@ select @Ent_Cero,		@Ent_Cero,	@Num_Detalle,	@Num_Grupos,
 		@SucDestino
 
 delete from #ClientesGrupos
+where Cli_Grupo is not null
+
 
 
 -- ================================================================================== --
@@ -183,7 +185,8 @@ select @Ent_Cero,	@Ent_Dos,	@Num_Detalle,	@Num_Grupos,	@Ent_Cero,
 		@Ent_Cero,	@FechaSis, 	@NumTransac,	@Transaccio,	@Usuario,
 		@FechaSis,	@SucOrigen,	@SucDestino
 
-delete from #ClientesGrupos 
+delete from #ClientesGrupos
+where Cli_Grupo is not null 
 
 ------------------------------------------------------------------------------
 --- Casos cien, con inconsistencias-------------------------------------------
@@ -223,6 +226,7 @@ select @Ent_Cien,	@Ent_Dos,	@Num_Detalle,	@Num_Grupos,	@Ent_Cero,
 
 
 delete from #ClientesGrupos 
+where Cli_Grupo is not null
 
 -- Se actualiza la informacion
 update SOCLIREC set
@@ -258,6 +262,7 @@ update SOCICORE set Ccr_ClDeAc =  @Num_Detalle,
 
 
 delete from #ClientesGrupos
+where Cli_Grupo is not null
 
 -- ========================================================================================= --
 --  								CLASIFICACION 99 				 						 --
@@ -304,6 +309,7 @@ select @Ent_Noven,	@Ent_Dos,	@Num_Detalle,	@Num_Grupos,	@Ent_Cero,
 
 
 delete from #ClientesGrupos
+where Cli_Grupo is not null
 
 update SOCLIREC set
 Clr_Caso = @Ent_Noven
@@ -340,6 +346,7 @@ update SOCICORE set Ccr_ClDeAc =  @Num_Detalle,
 
 
 delete from #ClientesGrupos
+where Cli_Grupo is not null
 -- ========================================================================================= --
 --  								CLASIFICACION 99 				 						 --
 -- ========================================================================================= --
@@ -386,6 +393,7 @@ where   Ccr_IdCaso = @Ent_Noven
 
 
 delete from #ClientesGrupos
+where Cli_Grupo is not null
 
 update SOCLIREC set
 Clr_Caso = @Ent_Noven
@@ -420,6 +428,7 @@ update SOCICORE set Ccr_ClDeAc =  Ccr_ClDeAc + @Num_Detalle,
 
 
 delete from #ClientesGrupos
+where Cli_Grupo is not null
 
 -- ========================================================================================= --
 --  								CLASIFICACION 101 				 						 --
@@ -480,6 +489,7 @@ select @Ent_CieUno,	@Ent_Dos,	@Num_Detalle,	@Num_Grupos,	@Ent_Cero,
 	   @FechaSis,	@SucOrigen,	@SucDestino	
 
 delete from #ClientesGrupos
+where Cli_Grupo is not null
 
 update SOCLIREC set
 Clr_Caso = @Ent_CieUno
@@ -516,6 +526,7 @@ update SOCICORE set Ccr_ClDeAc =  @Num_Detalle,
 	  and Ccr_FecCla = @FechaSis
 
 delete from #ClientesGrupos
+where Cli_Grupo is not null
 
 -- ========================================================================================= --
 --  								CLASIFICACION 102 										 --
@@ -579,6 +590,7 @@ update SOCICORE set Ccr_ClDeTo =  Ccr_ClDeTo + @Num_Detalle,
 
 
 delete from #ClientesGrupos
+where Cli_Grupo is not null
 
 
 update SOCLIREC set
@@ -615,6 +627,7 @@ update SOCICORE set Ccr_ClDeAc =  Ccr_ClDeAc + @Num_Detalle,
 	  and Ccr_FecCla = @FechaSis 
 
 delete from #ClientesGrupos
+where Cli_Grupo is not null
 -- ================================================================================== --
 -- 						Sacamos los totales detalle y grupo, caso 102   			 	 --
 -- ================================================================================== --
@@ -645,6 +658,7 @@ select @Ent_CieDos,	@Ent_Dos,	@Num_Detalle,	@Num_Grupos,	@Ent_Cero,
 	   @FechaSis,	@SucOrigen,	@SucDestino
 
 delete from #ClientesGrupos
+where Cli_Grupo is not null
 
 
 update SOCLIREC set
@@ -680,6 +694,7 @@ update SOCICORE set Ccr_ClDeAc = @Num_Detalle,
 	  and Ccr_FecCla = @FechaSis 
 
 delete from #ClientesGrupos
+where Cli_Grupo is not null
 -- ========================================================================================= --
 --  								CLASIFICACION 103				 --
 -- ========================================================================================= --
@@ -722,6 +737,7 @@ select @Ent_CieTre,	@Ent_Dos,	@Num_Detalle,	@Num_Grupos,	@Ent_Cero,
 	   @FechaSis,	@SucOrigen,	@SucDestino
 
 delete from #ClientesGrupos
+where Cli_Grupo is not null
 
 update SOCLIREC set
 Clr_Caso = @Ent_CieTre
@@ -756,6 +772,7 @@ update SOCICORE set Ccr_ClDeAc = @Num_Detalle  ,
 	  and Ccr_FecCla = @FechaSis 
 
 delete from #ClientesGrupos
+where Cli_Grupo is not null
 -- ================================================================================== --
 -- 				Sacamos los totales detalle y grupo, tipo caso 2 caso 100 Final		 --
 -- ================================================================================== --
@@ -784,6 +801,7 @@ select @Ent_Cien,	@Ent_Dos,	@Num_Detalle,	@Num_Grupos,	@Ent_Cero,
 	   @FechaSis,	@SucOrigen,	@SucDestino
 
 delete from #ClientesGrupos
+where Cli_Grupo is not null
 
 drop table  #ClientesConUsrSinL, #Clientes101,
 		 	#ClientesDosUsu102, #Clientes103,#ClientesDosUsuProRec,
@@ -836,6 +854,7 @@ select @Ent_Cero,	@Ent_Tres,	@Num_Detalle,	@Num_Grupos,	@Ent_Cero,
 	   @FechaSis,	@SucOrigen,	@SucDestino
 
 delete from #ClientesGrupos
+where Cli_Grupo is not null
 -- ================================================================================== --
 -- 				Sacamos los totales detalle y grupo, tipo caso 3 caso 99 	 --
 -- ================================================================================== -- 
@@ -869,6 +888,7 @@ select @Ent_Noven,	@Ent_Tres,	@Num_Detalle,	@Num_Grupos,	@Ent_Cero,
 
 
 delete from #ClientesGrupos
+where Cli_Grupo is not null
 
 -- se actualiza la informacion para los casos 99 del tipo 3
 update SOCLIREC set Clr_Caso=@Ent_Noven
@@ -940,6 +960,7 @@ update SOCICORE set Ccr_ClDeAc = Ccr_ClDeAc + @Num_Detalle  ,
 	  and Ccr_FecCla = @FechaSis 
 
 delete from #ClientesGrupos
+where Cli_Grupo is not null
 
 -- se actualiza la informacion para los casos 99 del tipo 3
 update SOCLIREC set Clr_Caso=@Ent_Noven
@@ -974,6 +995,7 @@ update SOCICORE set Ccr_ClDeAc = Ccr_ClDeAc + @Num_Detalle  ,
 	  and Ccr_FecCla = @FechaSis 
 
 delete from #ClientesGrupos
+where Cli_Grupo is not null
 
 -- ========================================================================================= --
 --  								CLASIFICACION  TIPO CASO 4			 				 --
@@ -1013,6 +1035,7 @@ select @Ent_Cero,	@Ent_Cuatro,	@Num_Detalle,	@Num_Grupos,	@Ent_Cero,
 	   @FechaSis,	@SucOrigen,		@SucDestino
 
 delete from #ClientesGrupos
+where Cli_Grupo is not null
 
 
 -- ================================================================================== --
@@ -1050,6 +1073,7 @@ select @Ent_Noven,	@Ent_Cuatro,	@Num_Detalle,	@Num_Grupos,	@Ent_Cero,
 
 
 delete from #ClientesGrupos
+where Cli_Grupo is not null
 
 
 -- se actualiza la informacion para los casos 99 del tipo 4
@@ -1087,6 +1111,7 @@ update SOCICORE set Ccr_ClDeAc = @Num_Detalle  ,
 	  and Ccr_FecCla = @FechaSis 
 
 delete from #ClientesGrupos
+where Cli_Grupo is not null
 
 -- ================================================================================== --
 -- 				Sacamos los totales detalle y grupo, tipo caso 4 caso 99	 --
@@ -1122,6 +1147,7 @@ update SOCICORE set Ccr_ClDeTo = Ccr_ClDeTo + @Num_Detalle  ,
 
 
 delete from #ClientesGrupos
+where Cli_Grupo is not null
 
 -- se actualiza la informacion para los casos 99 del tipo 4
 update SOCLIREC set Clr_Caso=@Ent_Noven
@@ -1208,6 +1234,7 @@ select @Ent_Cien,	@Ent_Cuatro,	@Num_Detalle,	@Num_Grupos,	@Ent_Cero,
 	   @FechaSis,	@SucOrigen,		@SucDestino
 
 delete from #ClientesGrupos
+where Cli_Grupo is not null
 
 update SOCLIREC set
 Clr_Caso = @Ent_Cien
@@ -1277,6 +1304,7 @@ select @Ent_Noven,	@Ent_Cuatro,	@Num_Detalle,	@Num_Grupos,	@Ent_Cero,
 	   @FechaSis,	@SucOrigen,		@SucDestino
 
 delete from #ClientesGrupos
+where Cli_Grupo is not null
 
 -- mandamos a 99 los que no tiene problemas	
 update SOCLIREC set
@@ -1320,6 +1348,7 @@ update SOCICORE set Ccr_ClDeAc =  @Num_Detalle  ,
 	where Ccr_Numero = @Ccr_numero
 
 delete from #ClientesGrupos
+where Cli_Grupo is not null
 
 
 -- Clientes que no tienen lineas de credito ni cuentas que generan recompensas NADA QUE HACER
@@ -1363,6 +1392,7 @@ update SOCICORE set Ccr_ClDeTo = Ccr_ClDeTo + @Num_Detalle  ,
 
 
 delete from #ClientesGrupos
+where Cli_Grupo is not null
 
 update SOCLIREC set
 Clr_Caso = @Ent_Noven
@@ -1402,6 +1432,7 @@ update SOCICORE set Ccr_ClDeAc = Ccr_ClDeAc + @Num_Detalle  ,
  where Ccr_Numero = @Ccr_numero
 
 delete from #ClientesGrupos
+where Cli_Grupo is not null
 
 --drop table #Clientes101 = 101 UNA LINEA CANCELADA QUE SE PUEDE REACTIVAR
 insert into #Clientes1014
@@ -1477,6 +1508,7 @@ select @Ent_CieUno,	@Ent_Cuatro,	@Num_Detalle,	@Num_Grupos,	@Ent_Cero,
 	   @FechaSis,	@SucOrigen,		@SucDestino
 
 delete from #ClientesGrupos
+where Cli_Grupo is not null
 
 update SOCLIREC set
 Clr_Caso = @Ent_CieUno
@@ -1517,6 +1549,7 @@ where Ccr_IdCaso = @Ent_CieUno
   and Ccr_FecCla = @FechaSis
 
 delete from #ClientesGrupos
+where Cli_Grupo is not null
 -- ================================================================================== --
 -- 				Sacamos los totales detalle y grupo, tipo caso 4 caso 100 Final		 --
 -- ================================================================================== --
@@ -1546,6 +1579,7 @@ select @Ent_Cien,	@Ent_Cuatro,	@Num_Detalle,	@Num_Grupos,	@Ent_Cero,
 	   @FechaSis,	@SucOrigen,		@SucDestino
 
 delete from #ClientesGrupos
+where Cli_Grupo is not null
 -- ================================================================================== --
 -- 						Sacamos los totales Final detalle y grupo General			  --
 -- ================================================================================== --
