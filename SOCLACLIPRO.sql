@@ -616,7 +616,7 @@ where Cli_Grupo is not null
 	
 update SOCLIREC set
 Clr_Caso = @Ent_Noven
-	from SOCLIREC 
+	from SOCLIREC noholdlock
 	inner join #ClientesDosUsu102 Cli on Cli.Cli_Grupo = Clr_Grupo
 	left join  #ClientesDosUsuProRec Rec on Rec.Cli_Grupo = Cli.Cli_Grupo
 	where Rec.Cli_Grupo is null 

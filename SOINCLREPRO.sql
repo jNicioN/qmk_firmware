@@ -172,7 +172,7 @@ update SOCLIREC set
 	Clr_Nbusua	= @Str_SI,
 	Clr_UsuBan	= Usu_Numero,
 	Clr_UsrSta  = Usu_Status
-	from SOCLIREC 
+	from SOCLIREC noholdlock
 	inner join NBUSUARI	noholdlock	on Usu_Client = Clr_CliNum
 									and Usu_Status = @Str_Activo
 	
@@ -181,7 +181,7 @@ update SOCLIREC set
 	Clr_Nbusua	= @Str_SI,
 	Clr_UsuBan	= Usu_Numero,
 	Clr_UsrSta  = Usu_Status
-	from SOCLIREC  
+	from SOCLIREC  noholdlock
 	inner join NBUSUARI  noholdlock	on Usu_Client = Clr_CliNum
 									and Usu_Status = @Str_Bloque
 	
@@ -191,7 +191,7 @@ update SOCLIREC set
 	Clr_LinVir  = Vir.Lin_Numero,
 	Clr_StLiVi  = Vir.Lin_Status,
 	Clr_ProRec	= Vir.Lin_Produc
-	from SOCLIREC 
+	from SOCLIREC noholdlock
 	inner join TALINVIR Vir	noholdlock	on Vir.Lin_Client = Clr_CliNum 
 										and Vir.Lin_Status <> @Str_Cancel
 	
@@ -200,7 +200,7 @@ update SOCLIREC set
 	Clr_LinVir  = Vir.Lin_Numero,
 	Clr_StLiVi  = Vir.Lin_Status,
 	Clr_ProRec	= Vir.Lin_Produc
-	from SOCLIREC	
+	from SOCLIREC noholdlock	
 	inner join TALINVIR Vir	noholdlock	on Vir.Lin_Client = Clr_CliNum 
 										and Vir.Lin_Status= @Str_Cancel
 	
@@ -212,7 +212,7 @@ update SOCLIREC set
 	Clr_LinCre	= Lin.Lin_Numero,
 	Clr_LinSta	= Lin.Lin_Status, 
 	Clr_SalCre  = Lin.Lin_Saldo + Lin.Lin_SalBlo
-	from SOCLIREC	
+	from SOCLIREC noholdlock	
 	inner join TALINEAS Lin 	noholdlock	on Lin.Lin_Client = Clr_CliNum
 											and Lin.Lin_Status in( @Str_Vigent,@Str_Bloque,@Str_Castig,@Str_ResCas)
 	
@@ -229,7 +229,7 @@ select Clr_CliNum, count(*)
 	
 update SOCLIREC set 
 	Clr_CaLiCr = Cli_Cantid
-	from SOCLIREC		
+	from SOCLIREC noholdlock		
 	inner join #CantidadLineasCre noholdlock	on  Cli_Client = Clr_CliNum
 	
 	
@@ -243,7 +243,7 @@ select Clr_CliNum, count(*)
 
 update SOCLIREC set 
 	Clr_CanCas	= Clr_CanCas + Cli_Cantid
-	from SOCLIREC 
+	from SOCLIREC noholdlock
 	inner join #ClientesLinCreCas	noholdlock	on Cli_Client = Clr_CliNum	
 
 
@@ -261,14 +261,14 @@ select Clr_CliNum, count(*)
 
 update SOCLIREC set 
 	Clr_CanLiv = Cli_Cantid
-	from SOCLIREC		
+	from SOCLIREC noholdlock		
 	inner join #CantidadLineasV noholdlock	on  Cli_Client = Clr_CliNum
 
 
 
 insert into #Saldos	
 select Clr_CliNum,	count(*), sum(Cue_Dispon)
-	from SOCLIREC 
+	from SOCLIREC noholdlock
 	inner join CHCUENTA noholdlock	on Cue_Client =  Clr_CliNum 
 									and Cue_Status IN( @Str_Activo,@Str_Bloque)
 									and Cue_Tipo <> @Cue_Tipo
@@ -278,7 +278,7 @@ select Clr_CliNum,	count(*), sum(Cue_Dispon)
 update SOCLIREC set 
 	Clr_CueAct	= Sal_Cantid,
 	Clr_SalCue	= Sal_Saldo
-	from SOCLIREC Rec 
+	from SOCLIREC Rec noholdlock
 	inner join #Saldos noholdlock	on Sal_Client = Clr_CliNum
 
 	
@@ -295,7 +295,7 @@ select Clr_CliNum,	count(*)
 	
 update SOCLIREC set 
 	Clr_CaCuRe	= Cue_Cantid
-	from SOCLIREC Rec 
+	from SOCLIREC Rec noholdlock
 	inner join #CuentasRec noholdlock	on Cue_Client = Clr_CliNum
 
 
@@ -310,7 +310,7 @@ select Clr_Grupo, Cor_Usuari, count(*)
 		
 update SOCLIREC set 
 	Clr_NbCuOr	= @Str_SI
-	from SOCLIREC 
+	from SOCLIREC noholdlock
 	inner join #NBCUEORI noholdlock	on Cor_Grupo = Clr_Grupo
 
 
@@ -327,7 +327,7 @@ select Clr_Grupo, Tcc_Usuari, count(*)
 
 update SOCLIREC set 
 	Clr_NbTaBr	= @Str_SI
-	from SOCLIREC 
+	from SOCLIREC noholdlock
 	inner join #NBTABRCO noholdlock on Brc_Grupo = Clr_Grupo
 
 
@@ -342,7 +342,7 @@ update SOCLIREC set
 -- Determinacion de si al cliente de usuario de banca le pertenece la linea virtual de recompensas
 update SOCLIREC set 
 	Clr_LiViUs 	= @Str_SI
-	from SOCLIREC  
+	from SOCLIREC noholdlock 
 	inner join TALINVIR	noholdlock	on Lin_Client =  Clr_CliNum 
 									and Lin_Numero = Clr_LinVir
 	where Clr_UsuBan <> @Str_Vacio
@@ -372,7 +372,7 @@ select Clr_CliNum, count(*)
 	
 update SOCLIREC set 
 	Clr_CuNoHe	= Cue_Cantid
-	from SOCLIREC Rec
+	from SOCLIREC Rec noholdlock
 	inner join #CuentasNOHey noholdlock	on Cue_Client = Clr_CliNum
 
 
@@ -388,7 +388,7 @@ select Cue_Client, count(*)
 	
 update SOCLIREC set 
 	Clr_CaInAc = Inv_Cantid
-	from SOCLIREC
+	from SOCLIREC noholdlock
 	inner join #InvClientes noholdlock	on Inv_Client = Clr_CliNum
 	
 
@@ -396,7 +396,7 @@ update SOCLIREC set
 -- Saldo en recompensas 
 update SOCLIREC set 
 	Clr_SaLiVi = Lic_SalAct
-	from SOCLIREC	
+	from SOCLIREC noholdlock	
 	inner join TALICABA noholdlock	on Lic_LinVir = Clr_LinVir 
 									and Lic_LinVir <> @Str_Vacio
 
@@ -411,7 +411,7 @@ select Clr_CliNum, count(*)
 
 update SOCLIREC set 
 	Clr_CreAct	= Cre_Cantid
-	from SOCLIREC 
+	from SOCLIREC noholdlock
 	inner join #ClientesCre	noholdlock	on Cre_Client = Clr_CliNum
 
 
@@ -426,7 +426,7 @@ select Clr_CliNum, count(*)
 
 update SOCLIREC set 
 	Clr_CanCas	= Clr_CanCas + Cre_Cantid
-	from SOCLIREC 
+	from SOCLIREC noholdlock
 	inner join #ClientesCreCas	noholdlock	on Cre_Client = Clr_CliNum	
 
 
@@ -441,7 +441,7 @@ select Clr_CliNum, count(*)
 	
 update SOCLIREC set 
 	Clr_CrABAc	= Cra_Cantid
-	from SOCLIREC 
+	from SOCLIREC noholdlock
 	inner join #ClientesCreAB	noholdlock	on Cra_Client = Clr_CliNum	
 
 
@@ -455,7 +455,7 @@ select Clr_CliNum, count(*)
 
 update SOCLIREC set 
 	Clr_CanCas	= Clr_CanCas + Crc_Cantid
-	from SOCLIREC 
+	from SOCLIREC noholdlock 
 	inner join #ClientesCreCasAB	noholdlock	on Crc_Client = Clr_CliNum	
 
 
@@ -500,7 +500,7 @@ select Clr_CliNum, count(*)
 						
 update 	SOCLIREC set
 	Clr_FonInv = Fon_Cantid
-	from SOCLIREC
+	from SOCLIREC noholdlock
 	inner join #ClientesFondos noholdlock	on Fon_Client = Clr_CliNum
 
 	
@@ -544,7 +544,7 @@ select Clr_CliNum, count(*)
 	
 update  SOCLIREC set  
 	Clr_CuMeAc	= Men_Cantid
-	from SOCLIREC 
+	from SOCLIREC noholdlock
 	inner join #Menores  noholdlock	on Men_Client = Clr_CliNum
 
 
@@ -558,7 +558,7 @@ select Clr_CliNum, count(*)
 	
 update SOCLIREC set 
 	Clr_MDInve = Mdi_Cantid
-	from SOCLIREC
+	from SOCLIREC noholdlock
 	inner join #MDClientes noholdlock	on Mdi_Client = Clr_CliNum
 	
 	
@@ -573,7 +573,7 @@ select Clr_CliNum, count(*)
 	
 update SOCLIREC set 
 	Clr_TitAct = Tit_Cantid
-	from SOCLIREC
+	from SOCLIREC noholdlock
 	inner join #TitulosClientes noholdlock	on Tit_Client = Clr_CliNum
 	
 	
