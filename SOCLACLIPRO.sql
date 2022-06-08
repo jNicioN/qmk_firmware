@@ -146,6 +146,10 @@ from #ClientesGrupos
 
 -- Insertamos el detalle y los grupos (Iniciales) para el caso 100
 insert into SOCICORE
+	   	(Ccr_IdCaso, 	Ccr_TipCas, Ccr_ClDeTo, Ccr_ClGrTo, 
+		Ccr_ClDeAc,		Ccr_ClGrAc, Ccr_FecCla, NumTransac, 
+		Transaccio,		Usuario,	FechaSis,	SucOrigen,
+		SucDestino)
 select @Ent_Cero,		@Ent_Cero,	@Num_Detalle,	@Num_Grupos,
 		@Ent_Cero,		@Ent_Cero,	@FechaSis,		@NumTransac,
 		@Transaccio,	@Usuario,	@FechaSis,		@SucOrigen, 
@@ -181,6 +185,10 @@ from #ClientesGrupos
 
 -- Insertamos el detalle y los grupos (Iniciales) para el caso 100
 insert into SOCICORE
+		(Ccr_IdCaso, 	Ccr_TipCas, Ccr_ClDeTo, Ccr_ClGrTo, 
+		Ccr_ClDeAc,		Ccr_ClGrAc, Ccr_FecCla, NumTransac, 
+		Transaccio,		Usuario,	FechaSis,	SucOrigen,
+		SucDestino)
 select @Ent_Cero,	@Ent_Dos,	@Num_Detalle,	@Num_Grupos,	@Ent_Cero,
 		@Ent_Cero,	@FechaSis, 	@NumTransac,	@Transaccio,	@Usuario,
 		@FechaSis,	@SucOrigen,	@SucDestino
@@ -220,6 +228,10 @@ from #ClientesGrupos
 
 -- Insertamos el detalle y los grupos (Iniciales) para el caso 100
 insert into SOCICORE
+		(Ccr_IdCaso, 	Ccr_TipCas, Ccr_ClDeTo, Ccr_ClGrTo, 
+		Ccr_ClDeAc,		Ccr_ClGrAc, Ccr_FecCla, NumTransac, 
+		Transaccio,		Usuario,	FechaSis,	SucOrigen,
+		SucDestino)
 select @Ent_Cien,	@Ent_Dos,	@Num_Detalle,	@Num_Grupos,	@Ent_Cero,
 	   @Ent_Cero,	@FechaSis,	@NumTransac,	@Transaccio,	@Usuario,
 	   @FechaSis,	@SucOrigen,	@SucDestino
@@ -303,6 +315,10 @@ select @Num_Grupos = count(*)
 
 -- Insertamos el detalle y los grupos (Iniciales) para el caso 99
 insert into SOCICORE
+		(Ccr_IdCaso, 	Ccr_TipCas, Ccr_ClDeTo, Ccr_ClGrTo, 
+		Ccr_ClDeAc,		Ccr_ClGrAc, Ccr_FecCla, NumTransac, 
+		Transaccio,		Usuario,	FechaSis,	SucOrigen,
+		SucDestino)
 select @Ent_Noven,	@Ent_Dos,	@Num_Detalle,	@Num_Grupos,	@Ent_Cero, 
 	   @Ent_Cero,	@FechaSis,	@NumTransac,	@Transaccio,	@Usuario,
 	   @FechaSis,	@SucOrigen,	@SucDestino
@@ -484,6 +500,10 @@ from #ClientesGrupos
 
 -- Insertamos el detalle y los grupos (Iniciales) para el caso 101
 insert into SOCICORE
+		(Ccr_IdCaso, 	Ccr_TipCas, Ccr_ClDeTo, Ccr_ClGrTo, 
+		Ccr_ClDeAc,		Ccr_ClGrAc, Ccr_FecCla, NumTransac, 
+		Transaccio,		Usuario,	FechaSis,	SucOrigen,
+		SucDestino)
 select @Ent_CieUno,	@Ent_Dos,	@Num_Detalle,	@Num_Grupos,	@Ent_Cero,
 	   @Ent_Cero,	@FechaSis,	@NumTransac,	@Transaccio,	@Usuario,
 	   @FechaSis,	@SucOrigen,	@SucDestino	
@@ -653,6 +673,10 @@ select @Num_Grupos = count(*)
 
 -- inseramos los datos del 102
 insert into SOCICORE
+		(Ccr_IdCaso, 	Ccr_TipCas, Ccr_ClDeTo, Ccr_ClGrTo, 
+		Ccr_ClDeAc,		Ccr_ClGrAc, Ccr_FecCla, NumTransac, 
+		Transaccio,		Usuario,	FechaSis,	SucOrigen,
+		SucDestino)
 select @Ent_CieDos,	@Ent_Dos,	@Num_Detalle,	@Num_Grupos,	@Ent_Cero,
 	   @Ent_Cero,	@FechaSis,	@NumTransac,	@Transaccio,	@Usuario,
 	   @FechaSis,	@SucOrigen,	@SucDestino
@@ -732,6 +756,10 @@ select @Num_Grupos = count(*)
 
 -- inseramos los datos del 103
 insert into SOCICORE
+		(Ccr_IdCaso, 	Ccr_TipCas, Ccr_ClDeTo, Ccr_ClGrTo, 
+		Ccr_ClDeAc,		Ccr_ClGrAc, Ccr_FecCla, NumTransac, 
+		Transaccio,		Usuario,	FechaSis,	SucOrigen,
+		SucDestino)
 select @Ent_CieTre,	@Ent_Dos,	@Num_Detalle,	@Num_Grupos,	@Ent_Cero,
 	   @Ent_Cero,	@FechaSis,	@NumTransac,	@Transaccio,	@Usuario,
 	   @FechaSis,	@SucOrigen,	@SucDestino
@@ -796,6 +824,10 @@ select  @Num_Grupos = count(*)
 
 -- Se registra los conteos antes del update
 insert into SOCICORE 
+		(Ccr_IdCaso, 	Ccr_TipCas, Ccr_ClDeTo, Ccr_ClGrTo, 
+		Ccr_ClDeAc,		Ccr_ClGrAc, Ccr_FecCla, NumTransac, 
+		Transaccio,		Usuario,	FechaSis,	SucOrigen,
+		SucDestino)
 select @Ent_Cien,	@Ent_Dos,	@Num_Detalle,	@Num_Grupos,	@Ent_Cero,
 	   @Ent_Cero,	@FechaSis,	@NumTransac,	@Transaccio,	@Usuario,
 	   @FechaSis,	@SucOrigen,	@SucDestino
@@ -849,6 +881,10 @@ select @Num_Grupos = count(*)
 -- Guardamos el conteo inicial de los registros para el tipo caso 3
 
 insert into SOCICORE 
+		(Ccr_IdCaso, 	Ccr_TipCas, Ccr_ClDeTo, Ccr_ClGrTo, 
+		Ccr_ClDeAc,		Ccr_ClGrAc, Ccr_FecCla, NumTransac, 
+		Transaccio,		Usuario,	FechaSis,	SucOrigen,
+		SucDestino)
 select @Ent_Cero,	@Ent_Tres,	@Num_Detalle,	@Num_Grupos,	@Ent_Cero,
 	   @Ent_Cero,	@FechaSis,	@NumTransac,	@Transaccio,	@Usuario,
 	   @FechaSis,	@SucOrigen,	@SucDestino
@@ -882,6 +918,10 @@ select @Num_Grupos = count(*)
 
 -- Se registra los conteos antes del update
 insert into SOCICORE 
+		(Ccr_IdCaso, 	Ccr_TipCas, Ccr_ClDeTo, Ccr_ClGrTo, 
+		Ccr_ClDeAc,		Ccr_ClGrAc, Ccr_FecCla, NumTransac, 
+		Transaccio,		Usuario,	FechaSis,	SucOrigen,
+		SucDestino)
 select @Ent_Noven,	@Ent_Tres,	@Num_Detalle,	@Num_Grupos,	@Ent_Cero,
 	   @Ent_Cero,	@FechaSis,	@NumTransac,	@Transaccio,	@Usuario,
 	   @FechaSis,	@SucOrigen,	@SucDestino
@@ -1030,6 +1070,10 @@ select @Num_Grupos = count(*)
 -- Guardamos el conteo inicial de los registros para el tipo caso 4
 
 insert into SOCICORE 
+		(Ccr_IdCaso, 	Ccr_TipCas, Ccr_ClDeTo, Ccr_ClGrTo, 
+		Ccr_ClDeAc,		Ccr_ClGrAc, Ccr_FecCla, NumTransac, 
+		Transaccio,		Usuario,	FechaSis,	SucOrigen,
+		SucDestino)
 select @Ent_Cero,	@Ent_Cuatro,	@Num_Detalle,	@Num_Grupos,	@Ent_Cero,
 	   @Ent_Cero,	@FechaSis,		@NumTransac,	@Transaccio,	@Usuario,
 	   @FechaSis,	@SucOrigen,		@SucDestino
@@ -1067,6 +1111,10 @@ select @Num_Grupos = count(*)
 
 -- Se registra los conteos antes del update
 insert into SOCICORE 
+		(Ccr_IdCaso, 	Ccr_TipCas, Ccr_ClDeTo, Ccr_ClGrTo, 
+		Ccr_ClDeAc,		Ccr_ClGrAc, Ccr_FecCla, NumTransac, 
+		Transaccio,		Usuario,	FechaSis,	SucOrigen,
+		SucDestino)
 select @Ent_Noven,	@Ent_Cuatro,	@Num_Detalle,	@Num_Grupos,	@Ent_Cero,
 	   @Ent_Cero,	@FechaSis,		@NumTransac,	@Transaccio,	@Usuario,
 	   @FechaSis,	@SucOrigen,		@SucDestino
@@ -1229,6 +1277,10 @@ select @Num_Grupos = count(*)
 
 -- Se registra los conteos antes del update
 insert into SOCICORE 
+		(Ccr_IdCaso, 	Ccr_TipCas, Ccr_ClDeTo, Ccr_ClGrTo, 
+		Ccr_ClDeAc,		Ccr_ClGrAc, Ccr_FecCla, NumTransac, 
+		Transaccio,		Usuario,	FechaSis,	SucOrigen,
+		SucDestino)
 select @Ent_Cien,	@Ent_Cuatro,	@Num_Detalle,	@Num_Grupos,	@Ent_Cero,
 	   @Ent_Cero, 	@FechaSis,		@NumTransac,	@Transaccio,	@Usuario,
 	   @FechaSis,	@SucOrigen,		@SucDestino
@@ -1299,6 +1351,10 @@ select @Num_Grupos = count(*)
 
 -- guardamos los registros esperados
 insert into SOCICORE 
+		(Ccr_IdCaso, 	Ccr_TipCas, Ccr_ClDeTo, Ccr_ClGrTo, 
+		Ccr_ClDeAc,		Ccr_ClGrAc, Ccr_FecCla, NumTransac, 
+		Transaccio,		Usuario,	FechaSis,	SucOrigen,
+		SucDestino)
 select @Ent_Noven,	@Ent_Cuatro,	@Num_Detalle,	@Num_Grupos,	@Ent_Cero,
 	   @Ent_Cero,	@FechaSis,		@NumTransac,	@Transaccio,	@Usuario,
 	   @FechaSis,	@SucOrigen,		@SucDestino
@@ -1489,6 +1545,10 @@ select @Num_Grupos = count(*)
 
 -- guardamos los registros esperados
 insert into SOCICORE 
+		(Ccr_IdCaso, 	Ccr_TipCas, Ccr_ClDeTo, Ccr_ClGrTo, 
+		Ccr_ClDeAc,		Ccr_ClGrAc, Ccr_FecCla, NumTransac, 
+		Transaccio,		Usuario,	FechaSis,	SucOrigen,
+		SucDestino)
 select @Ent_Doscie,	@Ent_Cero,	@Num_Detalle,	@Num_Grupos,	@Ent_Cero,
 	   @Ent_Cero,	@FechaSis,		@NumTransac,	@Transaccio,	@Usuario,
 	   @FechaSis,	@SucOrigen,		@SucDestino
@@ -1563,6 +1623,10 @@ select @Num_Grupos = count(*)
 
 -- Se registra los conteos antes del update
 insert into SOCICORE 
+		(Ccr_IdCaso, 	Ccr_TipCas, Ccr_ClDeTo, Ccr_ClGrTo, 
+		Ccr_ClDeAc,		Ccr_ClGrAc, Ccr_FecCla, NumTransac, 
+		Transaccio,		Usuario,	FechaSis,	SucOrigen,
+		SucDestino)
 select @Ent_CieUno,	@Ent_Cuatro,	@Num_Detalle,	@Num_Grupos,	@Ent_Cero,
 	   @Ent_Cero,	@FechaSis,		@NumTransac,	@Transaccio,	@Usuario,
 	   @FechaSis,	@SucOrigen,		@SucDestino
@@ -1634,6 +1698,10 @@ select  @Num_Grupos = count(*)
 
 -- Se registra los conteos Finales para saber como acabo el caso 100
 insert into SOCICORE 
+		(Ccr_IdCaso, 	Ccr_TipCas, Ccr_ClDeTo, Ccr_ClGrTo, 
+		Ccr_ClDeAc,		Ccr_ClGrAc, Ccr_FecCla, NumTransac, 
+		Transaccio,		Usuario,	FechaSis,	SucOrigen,
+		SucDestino)
 select @Ent_Cien,	@Ent_Cuatro,	@Num_Detalle,	@Num_Grupos,	@Ent_Cero,
 	   @Ent_Cero,	@FechaSis,		@NumTransac,	@Transaccio,	@Usuario,
 	   @FechaSis,	@SucOrigen,		@SucDestino
@@ -1665,6 +1733,10 @@ from #ClientesGrupos
 
 -- Insertamos el detalle y los grupos (Iniciales) para el caso 100
 insert into SOCICORE
+		(Ccr_IdCaso, 	Ccr_TipCas, Ccr_ClDeTo, Ccr_ClGrTo, 
+		Ccr_ClDeAc,		Ccr_ClGrAc, Ccr_FecCla, NumTransac, 
+		Transaccio,		Usuario,	FechaSis,	SucOrigen,
+		SucDestino)
 select @Ent_Cero,	@Ent_Cero,	@Num_Detalle,	@Num_Grupos,	@Ent_Cero,
 	   @Ent_Cero,	@FechaSis,	@NumTransac,	@Transaccio,	@Usuario,
 	   @FechaSis,	@SucOrigen,	@SucDestino
