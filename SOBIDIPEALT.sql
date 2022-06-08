@@ -22,12 +22,17 @@ create procedure SOBIDIPEALT (
 
 as
 
-/****************************************************************************
+/***************************************************************************
 ** Descripción:	 Alta Bitacora de Direcciones de Persona				****
 ****************************************************************************
-** Creó:			Norma Tijerina				****
-** Fecha:		05-05-2017									****
-** Help:		00946339										****
+** Modifico:		Adriana Gomez										****
+** Fecha:			06-05-2022											****
+** Help:			1621179												****
+** Descripcion: 	validacion de cliente y persona						****
+****************************************************************************
+** Creó:			Norma Tijerina										****
+** Fecha:			05-05-2017											****
+** Help:			00946339											****
 ****************************************************************************/
 
 										/* Declaración de variables */
@@ -46,11 +51,11 @@ select	@Str_Vacio	= '',				/* String vacío */
 		@Ent_Uno	= 1					/* Entero en uno */
 
 /* Validaciones */
-if @PerPersoID = @Ent_Cero begin
+if @PerPersoID = @Ent_Cero and @ClClientID = @Ent_Cero begin
 
 	select	Err_Codigo	= '000001',
-			Err_Mensaj	= 'Error con el parámetro: @PerPersoID.',
-			Err_Variab	= '@PerPersoID'
+			Err_Mensaj	= 'Error con el parámetro:@PerPersoID o  @ClClientID.',
+			Err_Variab	= '@ClClientID'
 	rollback
 	return @Ent_Uno
 
@@ -81,3 +86,4 @@ insert into SOBIDIPE values(
 	@PerPersoID,		@Bdp_TipDir,	@ClClientID,	@Bdp_Calle,		@Bdp_NumExt,	@Bdp_NumInt,	@Bdp_NumCP,
 	@Bdp_EntCa1,		@Bdp_EntCa2,	@Bdp_Refere,    @Bdp_Status,	@Bdp_FecCam,	@NumTransac,	@Transaccio,		
 	@Usuario,			@FechaSis,		@SucOrigen,		@SucDestino)
+
