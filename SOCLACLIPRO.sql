@@ -1310,7 +1310,7 @@ select @Num_Grupos = count(*)
 
 -- vamos por el id del registro
  select @Ccr_numero =  max(Ccr_Numero)
-    from SOCICORE
+    from SOCICORE noholdlock
 	where Ccr_IdCaso = @Ent_Noven
 	  and Ccr_TipCas = @Ent_Cuatro
 	  and Ccr_FecCla = @FechaSis 
@@ -1434,12 +1434,72 @@ select  Clr_Grupo
 	and (Clr_CreAct =  @Ent_Uno or Clr_CrABAc = @Ent_Uno or Clr_CrCCAc = @Ent_Uno )
 
 
+-- ================================================================================== --
+-- 				Sacamos los totales detalle y grupo, tipo caso 2 caso 200			 --
+-- ================================================================================== --
+
+
+-- vamos por el detalle antes del update para el caso 200 del tipo caso 2
+select @Num_Detalle = count(*)
+   from SOCLIREC noholdlock
+inner join #Grupos200 on Cli_Grupo = Clr_Grupo
+
+-- Vamos por el grupo antes el update para el caso 99 del tipo caso 4
+
+insert into  #ClientesGrupos
+select Clr_Grupo
+	from SOCLIREC noholdlock
+inner join #Grupos200 on Cli_Grupo = Clr_Grupo
+				group by Clr_Grupo
+
+
+select @Num_Grupos = count(*)
+   from #ClientesGrupos
+
+-- guardamos los registros esperados
+insert into SOCICORE 
+select @Ent_Doscie,	@Ent_Cero,	@Num_Detalle,	@Num_Grupos,	@Ent_Cero,
+	   @Ent_Cero,	@FechaSis,		@NumTransac,	@Transaccio,	@Usuario,
+	   @FechaSis,	@SucOrigen,		@SucDestino
+
+
+
 update SOCLIREC set
 Clr_Caso = @Ent_Doscie
 from SOCLIREC
 inner join #Grupos200 on Cli_Grupo = Clr_Grupo
 
+
+-- ======================================================================= --
+-- Guardamos  detalle y grupo despues de la actualizacion caso 200  --
+-- ======================================================================= --
+
+
+-- vamos por los registros detalle afectados por el update
+select @Num_Detalle = @@rowcount
+
+
+
+-- vamos por los registros del grupo afectados por el update
+
+insert into #ClientesGrupos
+select Clr_Grupo
+			   from SOCLIREC 
+			   WHERE Clr_Caso  = @Ent_Doscie
+				group by Clr_Grupo
+
+
+select @Num_Grupos = count(*)
+  from #ClientesGrupos
+
+
+update SOCICORE set Ccr_ClDeAc = @Num_Detalle  ,
+					Ccr_ClGrAc =  @Num_Grupos 
+ where Ccr_IdCaso = @Ent_Doscie
+	and Ccr_FecCla = @FechaSis	
+
 	
+delete from #ClientesGrupos
 	
 -- ================================================================================== --
 -- 				Sacamos los totales detalle y grupo, tipo caso 4 caso 101			 --
