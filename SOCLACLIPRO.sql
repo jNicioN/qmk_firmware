@@ -243,7 +243,7 @@ where Cli_Grupo is not null
 -- Se actualiza la informacion
 update SOCLIREC set
 Clr_Caso = @Ent_Cien
-	from SOCLIREC  
+	from SOCLIREC noholdlock
 	where Clr_Grupo in (select Cli_Grupo from #ClientesConUsrSinL  )
 
 -- =============================================================== --
@@ -329,7 +329,7 @@ where Cli_Grupo is not null
 
 update SOCLIREC set
 Clr_Caso = @Ent_Noven
-	from SOCLIREC 
+	from SOCLIREC noholdlock
 	inner join #Clientes99 on Cli_Grupo = Clr_Grupo  
 
 
@@ -531,7 +531,7 @@ select @Num_Detalle = @@rowcount
 
 insert into #ClientesGrupos
 select Clr_Grupo
-			from SOCLIREC
+			from SOCLIREC noholdlock
 			where Clr_Caso   = @Ent_CieUno
 			 and  Clr_TipCas = @Ent_Dos
 			 group by Clr_Grupo
@@ -615,7 +615,7 @@ where Cli_Grupo is not null
 
 update SOCLIREC set
 Clr_Caso = @Ent_Noven
-	from SOCLIREC 
+	from SOCLIREC noholdlock
 	inner join #ClientesDosUsu102 on Cli_Grupo = Clr_Grupo
 	where Clr_Grupo not in (select Cli_Grupo from  #ClientesDosUsuProRec )	
 	
@@ -806,13 +806,13 @@ where Cli_Grupo is not null
 -- ================================================================================== --
 
 select @Num_Detalle = count(*)
-	from SOCLIREC
+	from SOCLIREC noholdlock
 	where  Clr_TipCas = @Ent_Dos
 		and  Clr_Caso   = @Ent_Cien
 
 insert into #ClientesGrupos
 select Clr_Grupo
-			  from SOCLIREC
+			  from SOCLIREC noholdlock
 			  where  Clr_TipCas = @Ent_Dos
 			    and  Clr_Caso   = @Ent_Cien
 				group by Clr_Grupo
@@ -861,7 +861,7 @@ and Clr_TipPer = @Tip_PePFAE
 -- ================================================================================== -- 
 -- vamos por el detalle 
 select @Num_Detalle = count(*)
-	from SOCLIREC 
+	from SOCLIREC noholdlock 
 	where Clr_TipCas =@Ent_Tres
     
 
@@ -870,7 +870,7 @@ select @Num_Detalle = count(*)
 
 insert into #ClientesGrupos
 select  Clr_Grupo
-				from SOCLIREC 
+				from SOCLIREC noholdlock 
 				where Clr_TipCas =@Ent_Tres
 				group by Clr_Grupo
 
@@ -899,7 +899,7 @@ where Cli_Grupo is not null
 
 -- vamos por el detalle para el caso 99 del tipo caso 3
 select @Num_Detalle = count(*)
-   from SOCLIREC a left join #ConLinCredit b on a.Clr_Grupo=b.Clr_Grupo
+   from SOCLIREC  a noholdlock left join #ConLinCredit b on a.Clr_Grupo=b.Clr_Grupo
 	where Clr_TipCas =@Ent_Tres
       and b.Clr_Grupo is null
 
@@ -907,7 +907,7 @@ select @Num_Detalle = count(*)
 
 insert into #ClientesGrupos
 select 	a.Clr_Grupo
-			from SOCLIREC a left join #ConLinCredit b on a.Clr_Grupo=b.Clr_Grupo
+			from SOCLIREC  a noholdlock left join #ConLinCredit b on a.Clr_Grupo=b.Clr_Grupo
 			where Clr_TipCas =@Ent_Tres
 			and b.Clr_Grupo is null
 			group by a.Clr_Grupo
@@ -932,7 +932,7 @@ where Cli_Grupo is not null
 
 -- se actualiza la informacion para los casos 99 del tipo 3
 update SOCLIREC set Clr_Caso=@Ent_Noven
-from SOCLIREC a left join #ConLinCredit b on a.Clr_Grupo=b.Clr_Grupo
+from SOCLIREC  a noholdlock left join #ConLinCredit b on a.Clr_Grupo=b.Clr_Grupo
 where Clr_TipCas = @Ent_Tres
 and b.Clr_Grupo is null
 
@@ -950,7 +950,7 @@ select @Num_Detalle = @@rowcount
 
 insert into  #ClientesGrupos
 select Clr_Grupo
-			   from SOCLIREC
+			   from SOCLIREC noholdlock
 			   where Clr_TipCas = @Ent_Tres
 			     and Clr_Caso   = @Ent_Noven
 				 group by Clr_Grupo
@@ -975,7 +975,7 @@ delete from  #ClientesGrupos
 
 -- vamos por el detalle para el caso 99 del tipo caso 3
 select @Num_Detalle = count(*)
-   from SOCLIREC a inner join #ConLinCredit b on a.Clr_Grupo=b.Clr_Grupo
+   from SOCLIREC  a noholdlock inner join #ConLinCredit b on a.Clr_Grupo=b.Clr_Grupo
 	where Clr_TipCas =3
 
 -- vampos por los grupos  para el caso 99 del tipo 3
@@ -983,7 +983,7 @@ select @Num_Detalle = count(*)
 
 insert into #ClientesGrupos
 select 	a.Clr_Grupo
-			from SOCLIREC a inner join #ConLinCredit b on a.Clr_Grupo=b.Clr_Grupo
+			from SOCLIREC  a noholdlock inner join #ConLinCredit b on a.Clr_Grupo=b.Clr_Grupo
 			where Clr_TipCas =@Ent_Tres
 			group by a.Clr_Grupo
 
@@ -1004,7 +1004,7 @@ where Cli_Grupo is not null
 
 -- se actualiza la informacion para los casos 99 del tipo 3
 update SOCLIREC set Clr_Caso=@Ent_Noven
-from SOCLIREC a inner join #ConLinCredit b on a.Clr_Grupo=b.Clr_Grupo
+from SOCLIREC  a noholdlock inner join #ConLinCredit b on a.Clr_Grupo=b.Clr_Grupo
 where Clr_TipCas = @Ent_Tres
 
 -- =============================================================== --
@@ -1020,7 +1020,7 @@ select @Num_Detalle = @@rowcount
 
 insert into #ClientesGrupos
 select Clr_Grupo
-			   from SOCLIREC
+			   from SOCLIREC noholdlock
 			   where Clr_TipCas = @Ent_Tres
 	  			 and Clr_Caso   = @Ent_Noven
 				 group by Clr_Grupo
@@ -1050,7 +1050,7 @@ where Cli_Grupo is not null
 -- Vamos por el detalle de clientes para el caso 99 del tipo caso 4
  
 select @Num_Detalle = count(*)
-	from SOCLIREC 
+	from SOCLIREC noholdlock 
 	where Clr_TipCas =@Ent_Cuatro
 
 
@@ -1059,7 +1059,7 @@ select @Num_Detalle = count(*)
 
 insert into #ClientesGrupos
 select  Clr_Grupo
-				from SOCLIREC 
+				from SOCLIREC noholdlock
 				where Clr_TipCas =@Ent_Cuatro
 				group by Clr_Grupo
 
@@ -1090,7 +1090,7 @@ where Cli_Grupo is not null
 
 -- vamos por el detalle para el caso 99 del tipo caso 4
 select @Num_Detalle = count(*)
-   from SOCLIREC a left join #ConLinCredit b on a.Clr_Grupo=b.Clr_Grupo
+   from SOCLIREC  a noholdlock left join #ConLinCredit b on a.Clr_Grupo=b.Clr_Grupo
 	where Clr_TipCas = @Ent_Cuatro
 	  and Clr_TipPer = @Tip_PePFAE
       and b.Clr_Grupo is null
@@ -1099,7 +1099,7 @@ select @Num_Detalle = count(*)
 
 insert into #ClientesGrupos
 select 	a.Clr_Grupo
-			from SOCLIREC a left join #ConLinCredit b on a.Clr_Grupo=b.Clr_Grupo
+			from SOCLIREC  a noholdlock left join #ConLinCredit b on a.Clr_Grupo=b.Clr_Grupo
 			where Clr_TipCas = @Ent_Cuatro
 			and Clr_TipPer = @Tip_PePFAE
 			and b.Clr_Grupo is null
@@ -1126,7 +1126,7 @@ where Cli_Grupo is not null
 
 -- se actualiza la informacion para los casos 99 del tipo 4
 update SOCLIREC set Clr_Caso=@Ent_Noven
-from SOCLIREC a left join #ConLinCredit b on a.Clr_Grupo=b.Clr_Grupo
+from SOCLIREC  a noholdlock left join #ConLinCredit b on a.Clr_Grupo=b.Clr_Grupo
 where Clr_TipCas = @Ent_Cuatro
 and Clr_TipPer = @Tip_PePFAE
 and b.Clr_Grupo is null
@@ -1143,7 +1143,7 @@ select @Num_Detalle = @@rowcount
 
 insert into #ClientesGrupos
 select Clr_Grupo
-			   from SOCLIREC
+			   from SOCLIREC noholdlock
 			   where Clr_TipCas =@Ent_Cuatro
 			     and Clr_Caso   = @Ent_Noven
 				 group by Clr_Grupo
@@ -1170,7 +1170,7 @@ where Cli_Grupo is not null
 
 -- vamos por el detalle para el caso 99 del tipo caso 4
 select @Num_Detalle = count(*)
-   from SOCLIREC a inner join #ConLinCredit b on a.Clr_Grupo=b.Clr_Grupo
+   from SOCLIREC  a noholdlock inner join #ConLinCredit b on a.Clr_Grupo=b.Clr_Grupo
 	where Clr_TipCas = @Ent_Cuatro
 	  and Clr_TipPer = @Tip_PePFAE
 
@@ -1178,7 +1178,7 @@ select @Num_Detalle = count(*)
 
 insert into #ClientesGrupos
 select 	a.Clr_Grupo
-			from SOCLIREC a inner join #ConLinCredit b on a.Clr_Grupo=b.Clr_Grupo
+			from SOCLIREC  a noholdlock inner join #ConLinCredit b on a.Clr_Grupo=b.Clr_Grupo
 			where Clr_TipCas = @Ent_Cuatro
 			  and Clr_TipPer = @Tip_PePFAE
 			group by a.Clr_Grupo
@@ -1199,7 +1199,7 @@ where Cli_Grupo is not null
 
 -- se actualiza la informacion para los casos 99 del tipo 4
 update SOCLIREC set Clr_Caso=@Ent_Noven
-from SOCLIREC a inner join #ConLinCredit b on a.Clr_Grupo=b.Clr_Grupo
+from SOCLIREC  a noholdlock inner join #ConLinCredit b on a.Clr_Grupo=b.Clr_Grupo
 where Clr_TipCas = @Ent_Cuatro
 and Clr_TipPer = @Tip_PePFAE
 
@@ -1216,7 +1216,7 @@ select @Num_Detalle = @@rowcount
 
 insert into #ClientesGrupos
 select Clr_Grupo
-			   from SOCLIREC
+			   from SOCLIREC noholdlock
 			   where Clr_TipCas = @Ent_Cuatro
 			     and Clr_Caso   = @Ent_Noven
 				 group by Clr_Grupo
@@ -1306,7 +1306,7 @@ select @Num_Detalle = @@rowcount
 
 insert into #ClientesGrupos
 select Clr_Grupo
-			   from SOCLIREC	
+			   from SOCLIREC noholdlock	
 			   Where Clr_Caso   = @Ent_Cien
 			    and  Clr_TipCas = @Ent_Cuatro
 				group by Clr_Grupo
@@ -1382,7 +1382,7 @@ select @Num_Detalle = @@rowcount
 
 insert into #ClientesGrupos
 select Clr_Grupo
-			  from SOCLIREC
+			  from SOCLIREC noholdlock
 			  where  Clr_TipCas = @Ent_Cuatro
 			    and  Clr_Caso   = @Ent_Noven
 				and  Clr_TipPer = @Tip_PersPF
@@ -1452,7 +1452,7 @@ where Cli_Grupo is not null
 
 update SOCLIREC set
 Clr_Caso = @Ent_Noven
-	from SOCLIREC 
+	from SOCLIREC noholdlock
 	inner join #Clientes499 on Cli_Grupo = Clr_Grupo  
 	where  Clr_TipPer = @Tip_PersPF
  
@@ -1472,7 +1472,7 @@ select @Num_Detalle = @@rowcount
 
 insert into #ClientesGrupos
 select Clr_Grupo
-			   from SOCLIREC 
+			   from SOCLIREC noholdlock 
 			   WHERE Clr_TipCas = @Ent_Cuatro
 			      and Clr_Caso  = @Ent_Noven
 				  and Clr_TipPer = @Tip_PersPF
@@ -1557,7 +1557,7 @@ select @Ent_Doscie,	@Ent_Cero,	@Num_Detalle,	@Num_Grupos,	@Ent_Cero,
 
 update SOCLIREC set
 Clr_Caso = @Ent_Doscie
-from SOCLIREC
+from SOCLIREC noholdlock
 inner join #Grupos200 on Cli_Grupo = Clr_Grupo
 
 
@@ -1575,7 +1575,7 @@ select @Num_Detalle = @@rowcount
 
 insert into #ClientesGrupos
 select Clr_Grupo
-			   from SOCLIREC 
+			   from SOCLIREC  noholdlock
 			   WHERE Clr_Caso  = @Ent_Doscie
 				group by Clr_Grupo
 
@@ -1636,7 +1636,7 @@ where Cli_Grupo is not null
 
 update SOCLIREC set
 Clr_Caso = @Ent_CieUno
-	from SOCLIREC 
+	from SOCLIREC noholdlock 
 	inner join #Clientes1014 Uno on Uno.Cli_Grupo = Clr_Grupo
 	left join  #ClientesDosUsu4 Dos on Dos.Cli_Grupo = Uno.Cli_Grupo
 	where Dos.Cli_Grupo is null
@@ -1655,7 +1655,7 @@ select  @Num_Detalle = @@rowcount
 
 insert into #ClientesGrupos
 select Clr_Grupo
-			from SOCLIREC Clr_Grupo
+			from SOCLIREC noholdlock
 			where Clr_Caso   = @Ent_CieUno
 			  and Clr_TipCas = @Ent_Cuatro
 			  and Clr_TipPer = @Tip_PersPF
@@ -1679,14 +1679,14 @@ where Cli_Grupo is not null
 -- ================================================================================== --
 
 select @Num_Detalle = count(*)
-	from SOCLIREC
+	from SOCLIREC noholdlock
 	where  Clr_TipCas = @Ent_Cuatro
 		and  Clr_Caso   = @Ent_Cien
 		and  Clr_TipPer = @Tip_PersPF
 
 insert into #ClientesGrupos
 select Clr_Grupo
-			  from SOCLIREC
+			  from SOCLIREC noholdlock
 			  where  Clr_TipCas = @Ent_Cuatro
 			    and  Clr_Caso   = @Ent_Cien
 				and  Clr_TipPer = @Tip_PersPF
