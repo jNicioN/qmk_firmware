@@ -50,22 +50,21 @@ select	@Ent_Dos	= 2,		-- Tipo 2 clientes PF mas de un id
 		@Str_Vacio	= ''		-- String vacio
 		
 Create table #GrupPFAES(
-Cdf_Grupo varchar(15),
-Cdf_conteo int
+Gpf_Grupo varchar(15),
+Gpf_conteo int
 )
 
-create nonclustered index GrupPFAESGru on #GrupPFAES (Cdf_Grupo)
+create nonclustered index GrupPFAESGru on #GrupPFAES (Gpf_Grupo)
 with index_compression = none , index_hash_caching = default
 
 
 Create table #SoloGrupPFS(
-Cdf_Grupo varchar(15)
+Gpf_Grupo varchar(15)
 )
 
-create nonclustered index SoloGrupPSGru on #SoloGrupPFS (Cdf_Grupo)
+create nonclustered index SoloGrupPSGru on #SoloGrupPFS (Gpf_Grupo)
 with index_compression = none , index_hash_caching = default
 
-truncate table SOCLIREC
 
 -----------------------------------------------------------------------------------------
 -- Insercion de clientes PF mas de un id en tabla temporal para recompensas
@@ -83,7 +82,7 @@ select	@Ent_Dos,		@Ent_Cero,		Clu_Grupo,	Cli_Numero,	ClClientID,
 		@Transaccio,	@Usuario,		@FechaSis,	@SucOrigen,	@SucDestino    
 
 	from (
-			select Clu_Grupo Cdf_Grupo
+			select Clu_Grupo Gpf_Grupo
 				from CLCLIUNI noholdlock
 				inner join CLCLIENT noholdlock on	Cli_Numero	= Clu_Client
 												and Cli_Status	= @Cli_StaSi
@@ -94,7 +93,7 @@ select	@Ent_Dos,		@Ent_Cero,		Clu_Grupo,	Cli_Numero,	ClClientID,
 				group by Clu_Grupo
 				having count(*) > 1
 		) Cdf	-- Clientes Unicos con mas de un Cliente Detalle Persona Fisica
-	inner join CLCLIUNI noholdlock on Clu_Grupo = Cdf_Grupo
+	inner join CLCLIUNI noholdlock on Clu_Grupo = Gpf_Grupo
 	inner join CLCLIENT noholdlock on Cli_Numero = Clu_Client
 						
 									and Cli_Tipo = @Cli_TipPF
@@ -109,7 +108,7 @@ select	@Ent_Dos,		@Ent_Cero,		Clu_Grupo,	Cli_Numero,	ClClientID,
 
 -- Sacamos todos los PFAES 
 insert into #GrupPFAES
-select Clu_Grupo Cdf_Grupo, count(*) registros
+select Clu_Grupo Gpf_Grupo, count(*) registros
 	from CLCLIUNI noholdlock
 				inner join CLCLIENT noholdlock on Cli_Numero = Clu_Client
 												and Cli_Status = @Cli_StaSi
@@ -123,10 +122,10 @@ select Clu_Grupo Cdf_Grupo, count(*) registros
 -- Competamos la informacion que necesitamos para PFAES con mas de 1 id
 select Clu_Grupo, Cli_Numero, ClClientID
 into   #PFAE
-	from  ( select Cdf_Grupo
+	from  ( select Gpf_Grupo
 				from #GrupPFAES
-				where Cdf_conteo>1 ) Cdf	-- Clientes Unicos con mas de un Cliente Detalle Persona Fisica con actividad empresarial
-	inner join CLCLIUNI noholdlock on Clu_Grupo = Cdf_Grupo
+				where Gpf_conteo>1 ) Cdf	-- Clientes Unicos con mas de un Cliente Detalle Persona Fisica con actividad empresarial
+	inner join CLCLIUNI noholdlock on Clu_Grupo = Gpf_Grupo
 	inner join CLCLIENT noholdlock on Cli_Numero = Clu_Client
 						
 									and Cli_Tipo = @Cli_TipPF
@@ -166,7 +165,7 @@ from #PFAE
 -- Sacamos solo PFS
 
 insert into #SoloGrupPFS
-select Clu_Grupo Cdf_Grupo
+select Clu_Grupo 
 				from CLCLIUNI noholdlock
 				inner join CLCLIENT noholdlock on Cli_Numero = Clu_Client
 												and Cli_Status = @Cli_StaSi
@@ -178,15 +177,15 @@ select Clu_Grupo Cdf_Grupo
 
 				
 				
-select distinct fis.Cdf_Grupo 
+select distinct fis.Gpf_Grupo 
 into  #PFPFAES
-from #SoloGrupPFS fis inner join #GrupPFAES act on fis.Cdf_Grupo=act.Cdf_Grupo
+from #SoloGrupPFS fis inner join #GrupPFAES act on fis.Gpf_Grupo=act.Gpf_Grupo
 	
  -- se borra la informacion de los registros que ya estan solo como PF
 delete 
 from SOCLIREC 
 where Clr_Grupo in (
-select Cdf_Grupo
+select Gpf_Grupo
 from #PFPFAES 
 )
 	
@@ -194,7 +193,7 @@ from #PFPFAES
 insert into  SOCLIREC
 select	@Ent_Cuatro,	@Ent_Cero,		Clu_Grupo,	Cli_Numero,		ClClientID,
 		case when Cli_ActEmp = @Cli_ActEmp then @Tip_PersPF
-		     when Cli_ActEmp = @Cli_StaSi then @Tip_PePFAE
+		      else @Tip_PePFAE
 		     end,	@Str_No,	@Str_No,		@Str_Vacio,			@Str_Vacio,		
 		@Ent_Cero,		@Ent_Cero,		@Str_Si,		@Str_No,	@Str_No,		
 		@Str_Vacio,		@Str_Vacio,		@Ent_Cero,		@Ent_Cero,	@Str_Vacio,			
@@ -205,10 +204,11 @@ select	@Ent_Cuatro,	@Ent_Cero,		Clu_Grupo,	Cli_Numero,		ClClientID,
 		@Ent_Cero,		@Str_Vacio,		@Ent_Cero,		@Ent_Cero,	@NumTransac,
 		@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,	@SucDestino    
 
-from #PFPFAES inner join CLCLIUNI noholdlock on Clu_Grupo = Cdf_Grupo
+from #PFPFAES inner join CLCLIUNI noholdlock on Clu_Grupo = Gpf_Grupo
 			  inner join CLCLIENT noholdlock on Cli_Numero = Clu_Client
 			  inner join CLCLACLI noholdlock on Clc_Client = ClClientID
 									and Clc_Clasif = @Cla_ClaHey
 where Cli_Tipo = @Cli_TipPF
 
  
+drop table #GrupPFAES, #SoloGrupPFS
