@@ -1537,6 +1537,76 @@ select  Clr_Grupo
 -- ================================================================================== --
 
 
+-- Identificar a los casos que se tiene que actualizar (restar sus cifras) para el 103
+
+select @Num_Detalle = count(*)
+	from SOCLIREC noholdlock
+inner join #Grupos200 on  Cli_Grupo = Clr_Grupo
+					  and Clr_Caso  = @Ent_CieTre 
+
+
+insert into #ClientesGrupos
+select Clr_Grupo
+	from SOCLIREC noholdlock
+inner join #Grupos200 on  Cli_Grupo = Clr_Grupo
+					  and Clr_Caso  = @Ent_CieTre 
+group by Clr_Grupo
+
+
+select @Num_Grupos = count(*)
+	from #ClientesGrupos
+
+
+-- Hacemos la disminucion para el caso 103
+
+update SOCICORE set Ccr_ClDeTo = Ccr_ClDeTo - @Num_Detalle,
+					Ccr_ClGrTo = Ccr_ClGrTo - @Num_Grupos,
+					Ccr_ClDeAc = Ccr_ClDeAc - @Num_Detalle,
+					Ccr_ClGrAc = Ccr_ClGrAc - @Num_Grupos
+where Ccr_IdCaso = @Ent_CieTre 
+and   Ccr_TipCas = @Ent_Dos
+and   Ccr_FecCla = @FechaSis
+
+delete from #ClientesGrupos
+where Cli_Grupo is not null
+
+-- Identificar a los casos que se tiene que actualizar (restar sus cifras) para el 100
+		
+
+select @Num_Detalle = count(*)
+	from SOCLIREC noholdlock
+inner join #Grupos200 on  Cli_Grupo = Clr_Grupo
+					  and Clr_Caso  = @Ent_Cien 
+
+
+insert into #ClientesGrupos
+select Clr_Grupo
+	from SOCLIREC noholdlock
+inner join #Grupos200 on  Cli_Grupo = Clr_Grupo
+					  and Clr_Caso  = @Ent_Cien 
+group by Clr_Grupo
+
+
+select @Num_Grupos = count(*)
+	from #ClientesGrupos
+
+
+-- Hacemos la disminucion para el caso 100
+
+update SOCICORE set Ccr_ClDeTo = Ccr_ClDeTo - @Num_Detalle,
+					Ccr_ClGrTo = Ccr_ClGrTo - @Num_Grupos
+where Ccr_IdCaso = @Ent_Cien
+and   Ccr_TipCas = @Ent_Dos
+and   Ccr_FecCla = @FechaSis
+and   Ccr_ClDeAc = @Ent_Cero
+and   Ccr_ClGrAc = @Ent_Cero
+
+
+delete from #ClientesGrupos
+where Cli_Grupo is not null
+
+
+
 -- vamos por el detalle antes del update para el caso 200 del tipo caso 2
 select @Num_Detalle = count(*)
    from SOCLIREC noholdlock
