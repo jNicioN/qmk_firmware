@@ -23,8 +23,8 @@ as
 ** dar acceso al usuario BLOQUEAR										****
 ****************************************************************************
 ** Modifico:		Francisco Minajas									****
-** Fecha:			31/05/2020											****
-** Help:			1396836												****
+** Fecha:			09/06/2022											****
+** Help:			1649525												****
 ** Descripcion:		Se agrega consulta C7 y L7 para obtener Usu_Numero	****
 ****************************************************************************
 ** Modifico:		Esthepny Aguilar									****
