@@ -470,7 +470,7 @@ select Clr_CliNum, count(*)
 
 update  SOCLIREC set  
 	Clr_CrCCAc	= Ccc_Cantid
-	from SOCLIREC 
+	from SOCLIREC noholdlock
 	inner join #ClientesCreCC   noholdlock	on Ccc_Client = Clr_CliNum
 	
 	
@@ -485,7 +485,7 @@ select Clr_CliNum, count(*)
 
 update SOCLIREC set 
 	Clr_CanCas	= Clr_CanCas + Ccc_Cantid
-	from SOCLIREC 
+	from SOCLIREC noholdlock
 	inner join #ClientesCreCasCC	noholdlock	on Ccc_Client = Clr_CliNum	
 
 
@@ -514,7 +514,7 @@ select Clr_CliNum, count(*)
 
 update SOCLIREC set 
 	Clr_CedAct = Ced_Cantid
-	from SOCLIREC
+	from SOCLIREC noholdlock
 	inner join #CEDClientes noholdlock	on Ced_Client = Clr_CliNum
 
 
@@ -527,7 +527,7 @@ select Clr_CliNum, count(*)
 	
 update SOCLIREC set 
 Clr_CapAct = Cap_Cantid
-from SOCLIREC  
+from SOCLIREC noholdlock  
 inner join  #Capitales noholdlock	on Cap_Client = Clr_CliNum
  
    
