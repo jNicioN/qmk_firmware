@@ -15,8 +15,12 @@ as
 ** REFERENCIAS: 														   *
 ****************************************************************************
 ** Creo:		Fatima Sanchez Luis										****
+** Fecha:		14/Junio/2022											****
+** Help:		1637684													****
+****************************************************************************
+** Creo:		Fatima Sanchez Luis										****
 ** Fecha:		31/Mayo/2022											****
-** Help:		1637684														****
+** Help:		1637684													****
 ****************************************************************************/
 -- Declaración de constantes 
 declare @Ent_Dos	int,	
@@ -64,6 +68,7 @@ Gpf_Grupo varchar(15)
 create nonclustered index SoloGrupPSGru on #SoloGrupPFS (Gpf_Grupo)
 with index_compression = none , index_hash_caching = default
 
+delete from SOCLIREC where Clr_Identi is not null
 
 -----------------------------------------------------------------------------------------
 -- Insercion de clientes PF mas de un id en tabla temporal para recompensas
