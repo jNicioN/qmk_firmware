@@ -14,13 +14,13 @@ as
 ****************************************************************************
 ** REFERENCIAS: 														   *
 ****************************************************************************
-** Creo:		Fatima Sanchez Luis										****
-** Fecha:		14/Junio/2022											****
+** Creo:		Julian Cano Carballo									****
+** Fecha:		17/Junio/2022											****
 ** Help:		1637684													****
 ****************************************************************************
 ** Creo:		Fatima Sanchez Luis										****
 ** Fecha:		31/Mayo/2022											****
-** Help:		1637684													****
+** Help:		1637684														****
 ****************************************************************************/
 -- Declaración de constantes 
 declare @Ent_Dos	int,	
@@ -57,7 +57,7 @@ Gpf_Grupo varchar(15),
 Gpf_Conteo int
 )
 
-create nonclustered index GrupPFAES on #GrupPFAES (Gpf_Grupo)
+create nonclustered index GrupPFAESGru on #GrupPFAES (Gpf_Grupo)
 with index_compression = none , index_hash_caching = default
 
 
@@ -65,26 +65,14 @@ Create table #SoloGrupPFS(
 Gpf_Grupo varchar(15)
 )
 
-create nonclustered index SoloGrupPFS on #SoloGrupPFS (Gpf_Grupo)
+create nonclustered index SoloGrupPSGru on #SoloGrupPFS (Gpf_Grupo)
 with index_compression = none , index_hash_caching = default
 
-delete from SOCLIREC where Clr_Identi is not null
 
 -----------------------------------------------------------------------------------------
 -- Insercion de clientes PF mas de un id en tabla temporal para recompensas
 -----------------------------------------------------------------------------------------
 insert into  SOCLIREC
-		(Clr_TipCas,	Clr_Caso,		Clr_Grupo,	Clr_CliNum,	Clr_CliIde,
-		Clr_TipPer,		Clr_Contex,		Clr_Nbusua, Clr_UsuBan, Clr_UsrSta,
-		Clr_CueAct,		Clr_SalCue,		Clr_AplRec, Clr_NbCuOr, Clr_NbTaBr,
-		Clr_LinCre,		Clr_LinSta,		Clr_SalCre, Clr_CaLiCr, Clr_LinVir,
-		Clr_StLiVi,		Clr_ProRec,		Clr_SaLiVi, Clr_CanLiv, Clr_LiViUs, 
-		Clr_TdLiRe,		Clr_CaCuRe,		Clr_CaInAc, Clr_CuNoHe, Clr_CreAct,
-		Clr_FonInv,		Clr_CrABAc,		Clr_CliIna, Clr_Proces, Clr_Observ, 
-		Clr_CedAct,		Clr_CapAct,		Clr_CrCCAc, Clr_CuMeAc, Clr_SegAct,
-		Clr_CanCas,		Clr_TieNbt,		Clr_MDInve, Clr_TitAct, NumTransac,
-		Transaccio,		Usuario,		FechaSis,	SucOrigen,	SucDestino )
-
 select	@Ent_Dos,		@Ent_Cero,		Clu_Grupo,	Cli_Numero,	ClClientID,
 		@Tip_PersPF,	@Str_No,		@Str_No,	@Str_Vacio,	@Str_Vacio,		
 		@Ent_Cero,		@Ent_Cero,		@Str_Si,	@Str_No,	@Str_No,		
@@ -159,16 +147,6 @@ from #PFAE
 
 -- Guardamos la informacion
 insert into  SOCLIREC
-		(Clr_TipCas,	Clr_Caso,		Clr_Grupo,	Clr_CliNum,	Clr_CliIde,
-		Clr_TipPer,		Clr_Contex,		Clr_Nbusua, Clr_UsuBan, Clr_UsrSta,
-		Clr_CueAct,		Clr_SalCue,		Clr_AplRec, Clr_NbCuOr, Clr_NbTaBr,
-		Clr_LinCre,		Clr_LinSta,		Clr_SalCre, Clr_CaLiCr, Clr_LinVir,
-		Clr_StLiVi,		Clr_ProRec,		Clr_SaLiVi, Clr_CanLiv, Clr_LiViUs, 
-		Clr_TdLiRe,		Clr_CaCuRe,		Clr_CaInAc, Clr_CuNoHe, Clr_CreAct,
-		Clr_FonInv,		Clr_CrABAc,		Clr_CliIna, Clr_Proces, Clr_Observ, 
-		Clr_CedAct,		Clr_CapAct,		Clr_CrCCAc, Clr_CuMeAc, Clr_SegAct,
-		Clr_CanCas,		Clr_TieNbt,		Clr_MDInve, Clr_TitAct, NumTransac,
-		Transaccio,		Usuario,		FechaSis,	SucOrigen,	SucDestino )
 select	@Ent_Tres,		@Ent_Cero,		Clu_Grupo,	Cli_Numero,	ClClientID,
 		@Tip_PePFAE	,	@Str_No,		@Str_No,	@Str_Vacio,	@Str_Vacio,		
 		@Ent_Cero,		@Ent_Cero,		@Str_Si,	@Str_No,	@Str_No,		
@@ -214,22 +192,12 @@ select Gpf_Grupo
 from #PFPFAES 
 )
 	
-
+		
 insert into  SOCLIREC
-		(Clr_TipCas,	Clr_Caso,		Clr_Grupo,	Clr_CliNum,	Clr_CliIde,
-		Clr_TipPer,		Clr_Contex,		Clr_Nbusua, Clr_UsuBan, Clr_UsrSta,
-		Clr_CueAct,		Clr_SalCue,		Clr_AplRec, Clr_NbCuOr, Clr_NbTaBr,
-		Clr_LinCre,		Clr_LinSta,		Clr_SalCre, Clr_CaLiCr, Clr_LinVir,
-		Clr_StLiVi,		Clr_ProRec,		Clr_SaLiVi, Clr_CanLiv, Clr_LiViUs, 
-		Clr_TdLiRe,		Clr_CaCuRe,		Clr_CaInAc, Clr_CuNoHe, Clr_CreAct,
-		Clr_FonInv,		Clr_CrABAc,		Clr_CliIna, Clr_Proces, Clr_Observ, 
-		Clr_CedAct,		Clr_CapAct,		Clr_CrCCAc, Clr_CuMeAc, Clr_SegAct,
-		Clr_CanCas,		Clr_TieNbt,		Clr_MDInve, Clr_TitAct, NumTransac,
-		Transaccio,		Usuario,		FechaSis,	SucOrigen,	SucDestino )
 select	@Ent_Cuatro,	@Ent_Cero,		Clu_Grupo,	Cli_Numero,		ClClientID,
 		case when Cli_ActEmp = @Cli_ActEmp then @Tip_PersPF
-			  else @Tip_PePFAE
-			 end,	@Str_No,	@Str_No,		@Str_Vacio,			@Str_Vacio,		
+		      else @Tip_PePFAE
+		     end,	@Str_No,	@Str_No,		@Str_Vacio,			@Str_Vacio,		
 		@Ent_Cero,		@Ent_Cero,		@Str_Si,		@Str_No,	@Str_No,		
 		@Str_Vacio,		@Str_Vacio,		@Ent_Cero,		@Ent_Cero,	@Str_Vacio,			
 		@Str_Vacio,		@Str_Vacio,		@Ent_Cero,		@Ent_Cero,	@Str_No,				
