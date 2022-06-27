@@ -16,9 +16,14 @@ as
 ****************************************************************************
 ** REFERENCIAS: 														   *
 ****************************************************************************
+** Modifico:	Fatima Sanchez Luis										****
+** Fecha:		22/Junio/2022											****
+** Help:		1637684													****
+** Descripcion:	Se quita actualización de cuentas que no son hey		****
+****************************************************************************
 ** Creo:		Fatima Sanchez Luis										****
 ** Fecha:		31/Mayo/2022											****
-** Help:		1637684														****
+** Help:		1637684													****
 ****************************************************************************/
 
 -- Declaración de constantes 
@@ -101,10 +106,6 @@ create table #NBTABRCO (
 Brc_Grupo char(8),
 Brc_Usuari char(6), 
 Brc_Cantid int ) 
-
-create table  #TiposHey (
-Tip_Numero char(2)
-)
 
 create table #CuentasNOHey (
 Cue_Client char(8),
@@ -347,34 +348,6 @@ update SOCLIREC set
 									and Lin_Numero = Clr_LinVir
 	where Clr_UsuBan <> @Str_Vacio
 	
-	
--- tipos cuenta HEY
-insert into #TiposHey
-select	Tip_Numero
-	from CHTIPOS noholdlock
-	inner join SOPRTICU noholdlock	on Ptc_TipCue	= Tip_Numero
-									and Ptc_Moneda	= Tip_Moneda
-	inner join SOCLAPRO noholdlock	on Clp_Produc	= Ptc_Produc
-									and Clp_Clasif	= @Cla_ClaHey 
-						
-insert into #TiposHey
-values(@Cue_Tipo)
-
--- Cantidad de Cuentas que no son HEY
-insert into #CuentasNOHey
-select Clr_CliNum, count(*)
-	from SOCLIREC noholdlock
-	inner join CHCUENTA noholdlock	on Cue_Client =  Clr_CliNum
-									and Cue_Status in ( @Str_Activo,@Str_Bloque)
-	left join #TiposHey  on Tip_Numero = Cue_Tipo
-	where Tip_Numero is null								
-	group by Clr_CliNum
-	
-update SOCLIREC set 
-	Clr_CuNoHe	= Cue_Cantid
-	from SOCLIREC Rec noholdlock
-	inner join #CuentasNOHey noholdlock	on Cue_Client = Clr_CliNum
-
 
 -- Cantidad de clientes con inversiones activas
 insert into #InvClientes
@@ -578,10 +551,9 @@ update SOCLIREC set
 	
 	
 	
-drop table	#Saldos,		#CantidadLineasV,	#CantidadLineasCre,#CuentasRec,
-			#NBCUEORI,		#NBTABRCO,			#TiposHey,			#CuentasNOHey,
-			#InvClientes,	#CEDClientes,		#Capitales,			#ClientesFondos,
-			#ClientesCreCC,	#ClientesCreAB,		#ClientesCre,		#Menores,
-			#ClientesCreCas,#ClientesCreCasAB,	#ClientesCreCasCC,	#MDClientes,
-			#TitulosClientes,#ClientesLinCreCas 
+drop table	#Saldos,		#CantidadLineasV,	#CantidadLineasCre,	#CuentasRec,
+			#NBCUEORI,		#NBTABRCO,			#InvClientes,		#CEDClientes,	
+			#Capitales,		#ClientesFondos,	#ClientesCreCC,		#ClientesCreAB,
+			#ClientesCre,	#Menores,			#ClientesCreCas,	#ClientesCreCasAB,
+			#ClientesCreCasCC,	#MDClientes,	#TitulosClientes,	#ClientesLinCreCas 
 		
