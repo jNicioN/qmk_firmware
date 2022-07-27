@@ -47,7 +47,7 @@ if @Tip_ConTip = @Tra_Consul begin
 	end
 end else if @Tip_ConTip = @Tra_Lista begin
 	if @Tip_ConCon = @Str_Uno begin
-		select	Can_Numero,	Can_Nombre
+		select	Can_Numero,	Can_Nombre,	Can_Abrevi,	Can_Origen,	Can_Tipo
 			from SOCANAL noholdlock
 			order by Can_Numero
 	end
