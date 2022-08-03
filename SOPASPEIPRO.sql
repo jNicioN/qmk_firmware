@@ -21,7 +21,7 @@ as
 /***************************************************************************
 ** Modifico:		Edgar Cabriales             						****
 ** Fecha:			06/Abril/2022							  			****
-** Help:			    	  											****
+** Help:			1215351	  											****
 ** Descripcion:		Se crea el proceso para el neteo de pagos          	****
 **                  spei a cuentas hey									****
 ****************************************************************************/	
