@@ -17,6 +17,11 @@ as
 ** Referencias:													****
 ********************************************************************
 ** Modifico:	Marcelo Bautista Hernandez						****
+** Fecha:		02/Agosto/2022									****
+** Help:		01379522										****
+** Descripcion:	Si banco activo es Hey concatenar prefijo HEY	****
+********************************************************************
+** Modifico:	Marcelo Bautista Hernandez						****
 ** Fecha:		19/Enero/2021									****
 ** Help:		01379522										****
 ** Descripcion:	Se optimiza consulta de SOUSUARI				****
@@ -29,7 +34,10 @@ as
 /* Declaracion de Variables */
 declare	@Peu_Grupo	char(8),	/* Persona Grupo */
 		@Peu_Person	char(8),	/* Persona */
-		@Ent_Encont int			/* Econtrado */
+		@Ent_Encont int,		/* Econtrado */
+		@Val_BanAct char(1),	/* Banco Actual */
+		@Val_SepAct	char(1),	/* Separación activa */
+		@Str_PreBRM	char(3)		/* Prefijo BRM */
 
 /* Declaracion de Constantes */
 declare	@Str_Vacio	char(1),
@@ -39,7 +47,12 @@ declare	@Str_Vacio	char(1),
 		@Int_Cuatro	smallint,
 		@Int_Seis	smallint,
 		@Str_Cero	char(1),
-		@Str_BRM	char(3)
+		@Str_BRM	char(3),
+		@Str_HEY	char(3),
+		@Str_BanAct	char(11),
+		@Str_SepAct	char(16),
+		@Par_SepAct	char(1),
+		@Par_BanHey	char(1)
 		
 /* Asignacion de Constantes */
 select	@Str_Vacio	= '',	/* String vacío */
@@ -49,7 +62,13 @@ select	@Str_Vacio	= '',	/* String vacío */
 		@Int_Cuatro	= 4,	/* Entero en cuatro */
 		@Int_Seis	= 6,	/* Entero en seis */
 		@Str_Cero	= '0',	/*String 0*/
-		@Str_BRM	= 'BRM'
+		@Str_BRM	= 'BRM', /* Prefijo BRM Banregio */
+		@Str_HEY	= 'HEY', /* Prefijo BRM Hey */
+		@Str_BanAct	= 'BancoActual', /* String parametro en SOPARGEN BancoActual */
+		@Str_SepAct	= 'SeparacionActiva', /* String parametro en SOPARGEN SeparacionActiva */
+		@Par_SepAct	= '1', /* Identificar si la separacion está activa */
+		@Par_BanHey	= '1' /* Identificar si el banco actual es Hey */
+		
 
 create table #Personas(
 	Per_Numero  char(8)  not null
@@ -61,6 +80,19 @@ create table #UsuarioClave(
 	Usc_NumBrm	char(8)
 )
 
+select	@Val_SepAct	= isnull(Par_Valor, @Str_Cero)
+	from SOPARGEN noholdlock
+	where Par_Nombre = @Str_SepAct
+
+select	@Val_BanAct	= isnull(Par_Valor, @Str_Vacio)
+	from SOPARGEN noholdlock
+	where Par_Nombre = @Str_BanAct
+
+select	@Str_PreBRM	= @Str_BRM
+
+if @Val_SepAct = @Par_SepAct and @Val_BanAct = @Par_BanHey begin
+	select	@Str_PreBRM	= @Str_HEY
+end
 select	@Peu_Grupo = Peu_Grupo
 	from SOUNIPER noholdlock
 	where	Peu_Person = @Per_Numero
@@ -78,7 +110,7 @@ insert into #UsuarioClave
 		
 update #UsuarioClave set 
 	Usc_NumEmp	= Emp_Numero,
-	Usc_NumBrm	= @Str_BRM+right(Emp_Numero,5)			
+	Usc_NumBrm	= @Str_PreBRM+right(Emp_Numero,5)			
 	from RHEMPLEA noholdlock
 	where Emp_Client	= Usc_NumCli
 
