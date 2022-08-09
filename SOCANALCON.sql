@@ -19,7 +19,7 @@ as
 ****************************************************************************
 ** Modifico:	Erick Eduardo Vielma Martinez							****
 ** Fecha:		25 de Julio del 2022									****
-** Help:		        												****
+** Help:		15787      												****
 ** Descripcion:	Se crea sp para la consulta de canales             		****
 ****************************************************************************/
 
