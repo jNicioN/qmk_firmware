@@ -23,14 +23,14 @@ as
 ** Modifico:	Adriana Gomez											****
 ** Fecha:		05/05/2021												****
 ** Help Desk:	1376175 									 			****
-** Descripción:	Se  ajusta validacion de fecha de nacimiento			****
+** DescripciÃ³n:	Se  ajusta validacion de fecha de nacimiento			****
 ****************************************************************************
-** Modifico:	Erika Báez	 											****
+** Modifico:	Erika BÃ¡ez	 											****
 ** Fecha:		17/03/2021												****
 ** Help Desk:	1376175										 			****
 ** Descri:		Se agregan parametros generales para tabla SOSUNAEX		****
 ****************************************************************************
-** Modifico:	Erika Báez	 											****
+** Modifico:	Erika BÃ¡ez	 											****
 ** Fecha:		17/03/2021												****
 ** Help Desk:	1376175										 			****
 ** Descri:		Se agrega insert a bitacora VEBITADD y se actualiza		****
@@ -50,6 +50,7 @@ declare	@Fec_Actual		smalldatetime,
 								/* Declaracion de constantes */
 declare	@Sta_Activo		char(1),
 		@Sta_Inacti		char(1),
+		@Sta_Cancel		char(1),
 		@Une_TaOrNa		char(1),	
 		@Une_TaOrEx		char(1)	,
 		@Biu_DesEst		varchar(150),
@@ -65,6 +66,7 @@ declare	@Sta_Activo		char(1),
 								/* Asignacion de valores a constantes */
 select	@Sta_Activo	= 'A',		/* Estatus activo */
 		@Sta_Inacti	= 'I',		/* Estatus inactivo */
+		@Sta_Cancel = 'C',
 		@Une_TaOrNa	= '1',		/*tabla origen nacionales SOPERSON */
 		@Une_TaOrEx	= '2',		/*tabla origen extranjeros SOUSUEXT*/
 		@Biu_DesEst	= 'Inactivacion de Usuario de compra venta por actvacion de Cuenta',  /*descripcion de inactivacion de usuarios de cv */
@@ -142,7 +144,7 @@ update VEACUDLL set
 	  	
 		
 update SOUSNAEX set 
-	Une_Estatu	= @Sta_Inacti,
+	Une_Estatu	= @Sta_Cancel,
 		
 	NumTransac	= @NumTransac,
 	Transaccio	= @Transaccio,
@@ -152,5 +154,4 @@ update SOUSNAEX set
 	SucDestino	= @SucDestino
 	from SOBITUSU noholdlock
 	inner join SOUSNAEX noholdlock on	Biu_FolUsu	= Une_Identi 
-	where	SOBITUSU.NumTransac	= @NumTransac 
-	
+	where	SOBITUSU.NumTransac	= @NumTransac
