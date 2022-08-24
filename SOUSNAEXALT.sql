@@ -19,6 +19,11 @@ as
 ****************************************************************************
 **	REFERENCIAS:														****
 ****************************************************************************
+** Modifico:	Juan Jose Sandoval Marin								****
+** Fecha:		22/Julio/2021											****
+** Help Desk:	1376175										 			****
+** Descripción:	Se cambia para que usuario nazca con estatus inactivo	****
+****************************************************************************
 ** Modifico:	Erika Báez	 											****
 ** Fecha:		17/Marzo/2021											****
 ** Help Desk:	1376175										 			****
@@ -45,7 +50,7 @@ declare	@Str_Vacio	char(1),
 		@Ent_Cero	int,
 		@Ent_Uno	int,
 		@Str_Cero	varchar(1),
-		@Str_LetraA varchar(1),
+		@Str_LetraI varchar(1),
 		@Biu_Canal	int,
 		@Biu_DesEst	varchar(180)
 
@@ -54,7 +59,7 @@ select	@Str_Vacio	= '',		/* String Vacio */
 		@Ent_Cero	= 0,			/* Entero cero */
 		@Ent_Uno	= 1,			/* Entero uno */
 		@Str_Cero	= '0',		/* String Cero */
-		@Str_LetraA	= 'A',		/* String Letra A */
+		@Str_LetraI	= 'I',		/* String Letra I */
 		@Biu_Canal	= 5,			/* Canal de originacion del usuario correspondiente a Apertura*/
 		@Biu_DesEst	= 'Creacion de Usuario de compra venta'  /* Descripcion para la bitacora */
 
@@ -101,12 +106,12 @@ insert into SOUSNAEX (
 	Une_FecReg,	Une_FecEst,	NumTransac,	Transaccio,	Usuario,	
 	FechaSis,	SucOrigen,	SucDestino)
 	values (
-	@Une_Identi,	@Une_IdeInt,	@Une_TabOri,	@Str_LetraA,	@Str_Cero, 
+	@Une_Identi,	@Une_IdeInt,	@Une_TabOri,	@Str_LetraI,	@Str_Cero, 
 	@FechaSis,		@FechaSis,		@NumTransac,	@Transaccio,	@Usuario,	   
 	@FechaSis,		@SucOrigen,		@SucDestino)
 
 exec @Status = SOBITUSUALT 
-	@Une_Identi,	@Str_LetraA,	@FechaSis,		@Usuario,		@SucOrigen,  
+	@Une_Identi,	@Str_LetraI,	@FechaSis,		@Usuario,		@SucOrigen,  
 	@Biu_Canal,		@Biu_DesEst,	@NumTransac,	@Transaccio,	@Usuario,	  
 	@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
 	
