@@ -43,7 +43,10 @@ as
 								/* Declaracion de Variables */
 declare	@Ent_Existe	int,
 		@Une_IdeInt	int,
-		@Status		int
+		@Status		int,
+		@Fec_Actual  	smalldatetime,	
+		@Fec_IniMes		smalldatetime,
+		@Fec_FinMes 	smalldatetime
 		
 								/* Declaracion de constantes */
 declare	@Str_Vacio	char(1),
@@ -52,7 +55,9 @@ declare	@Str_Vacio	char(1),
 		@Str_Cero	varchar(1),
 		@Str_LetraI varchar(1),
 		@Biu_Canal	int,
-		@Biu_DesEst	varchar(180)
+		@Biu_DesEst	varchar(180),
+		@Sta_Inacti varchar(1)
+
 
 								/* Asignacion de valores a constantes */
 select	@Str_Vacio	= '',		/* String Vacio */
@@ -61,9 +66,20 @@ select	@Str_Vacio	= '',		/* String Vacio */
 		@Str_Cero	= '0',		/* String Cero */
 		@Str_LetraI	= 'I',		/* String Letra I */
 		@Biu_Canal	= 5,			/* Canal de originacion del usuario correspondiente a Apertura*/
-		@Biu_DesEst	= 'Creacion de Usuario de compra venta'  /* Descripcion para la bitacora */
+		@Biu_DesEst	= 'Creacion de Usuario de compra venta',  /* Descripcion para la bitacora */
+		@Sta_Inacti = 'I'		/* Estatus inactivo */
+
 
 select @Une_IdeInt = (convert(int, str_replace(ltrim(str_replace(@Une_IdeUsu , '0', ' ')),' ', '0') ))
+
+/*Consulta de fecha del sistema */
+select @Fec_Actual = Par_FecAct
+from SOPARAMS noholdlock
+where Par_Sucurs = @SucOrigen
+
+/*Fecha de inicio y fin de mes*/
+select @Fec_IniMes = dateadd(dd, 1 - datepart(dd, @Fec_Actual), @Fec_Actual)
+select @Fec_FinMes = dateadd(dd, -1, dateadd(mm,  1, @Fec_IniMes))
 
 /* Validacion general de parametros vacios */
 if isnull(@Une_Identi, @Ent_Cero) = @Ent_Cero begin
@@ -93,7 +109,8 @@ select	@Ent_Existe	= @Ent_Uno
 	from SOUSNAEX noholdlock
 	where	Une_IdeUsu	= @Une_IdeInt 
 	  and	Une_TabOri = @Une_TabOri
-	
+	  and   @FechaSis >= @Fec_IniMes and	@FechaSis	<= @Fec_FinMes 
+
 if @Ent_Existe = @Ent_Uno begin
 	select	Err_Codigo = '000004',
 			Err_Mensaj = 'No se puede dar de alta usuario, favor aperturar cliente'
