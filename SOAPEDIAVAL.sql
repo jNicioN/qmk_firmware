@@ -28,9 +28,17 @@ as
 **              Inicio de Cámara,Bitacora de Inicio de Cámara,          ****
 **              SPEI fuera de horario,Nominas pendientes,Validaciones de****
 **              contabilidad,Liquidación final SPEI                     ****
-*****************************************************************************/
+*****************************************************************************
+****************************************************************************
+** Modificó:	Edgar Oziel 										****
+** Fecha:		25/Agosto/2022										****
+** Help Desk:	1640569													****
+** Descripción: Se valida si necesita transaccion de Abono masivo de Mesa de Dinero	****
+****************************************************************************/
 
-declare			@Ent_count		int,
+declare		@Par_ApAbMa char(1)
+
+declare		@Ent_count		int,
 			@Tip_CABIPAFI	char(3),
 			@Tip_ESBIINDI	char(3),
 			@Tip_NBSPFUHO	char(3),
@@ -50,7 +58,11 @@ declare			@Ent_count		int,
 			@Tip_LiqFin		char(3),
 			@Par_FecApe		smalldatetime,
 			@Par_FeSiAp		smalldatetime,
-			@Ent_Cero		int
+			@Ent_Cero		int,
+			@Par_BoMaMD		char(21),
+			@Str_Si     char(1),
+			@Str_No     char(1),
+			@Ent_09     int				
 			
 			
 select 			@Ent_count		= 0,
@@ -71,8 +83,15 @@ select 			@Ent_count		= 0,
 			@Str_61			= '61',
 			@Str_CFP		= 'CFP',
 			@Tip_LiqFin		= 'LFS',
-			@Ent_Cero		= 0
+			@Ent_Cero		= 0,
+			@Par_BoMaMD		= 'AplicaAbonoMasivodeMD',
+			@Str_Si     	= '1',
+			@Str_No         = '0',
+			@Ent_09		= 9	
 
+select @Par_ApAbMa = Par_Valor
+from SOPARGEN noholdlock
+where Par_Nombre = @Par_BoMaMD
 
 if @Tip_Consul = @Tip_CABIPAFI begin
 
@@ -80,14 +99,14 @@ if @Tip_Consul = @Tip_CABIPAFI begin
 		from	CABIPAFI noholdlock
 		where	Bpf_Fecha >= @Fecha
 	
-	if	@Ent_count < @Ent_10	begin
+	if	@Ent_count < @Ent_10 and @Par_ApAbMa = @Str_Si	begin
 		
 		select	Err_Codigo	= '000001',
 				Err_Mensaj	= 'La apertura no se ha realizado por completo, validar con CAMARA DE COMPENSACION ' ,
 				Err_Variab	= 'CABIPAFI'
 		
 	end
-	if	@Ent_count >= @Ent_10	begin
+	if	@Ent_count >= @Ent_10	or (@Ent_count >= @Ent_09 and  @Par_ApAbMa = @Str_No)begin
 	
 		select	Err_Codigo	= '000002',
 				Err_Mensaj	= 'El Inicio de Camara fue Exitoso' ,
@@ -96,7 +115,7 @@ if @Tip_Consul = @Tip_CABIPAFI begin
 		
 	end
 	
-end  
+	end  
 
 If @Tip_Consul = @Tip_ESBIINDI begin
 
