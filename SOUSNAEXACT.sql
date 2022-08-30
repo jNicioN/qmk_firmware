@@ -17,6 +17,11 @@ as
 ******************************************************************************/
 /* REFERENCIAS:
 ****************************************************************************
+** Modifico:	Martin Adonis Lopez Mendoza								****
+** Fecha:		30/08/2022												****
+** Help Desk:	1643006 									 			****
+** DescripciÃ³n:	Se agrega mensaje retorno al cancelar usuarios			****
+****************************************************************************
 ** Modifico:	Juan Jose Sandoval Marin								****
 ** Fecha:		22/07/2021												****
 ** Help Desk:	1376175 									 			****
