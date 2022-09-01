@@ -11,13 +11,24 @@ create procedure SOSUCURSAPE (
 
 as
 
+/*****************************************************************************/
+/** REFERENCIAS: 
+****************************************************************************
+** Modificó:	Edgar Oziel 										****
+** Fecha:		23/Agosto/2022										****
+** Help Desk:	1640569													****
+** Descripción: Se valida si necesita cierre de pasivos para aperturar sucursal		****
+****************************************************************************/
+
 declare @Par_FecAct	smalldatetime,		/*	Declaracion de Variables	*/
 		@Suc_UltDia	char(1),
 		@Fecha_Val	smalldatetime,
 		@Sucursal	char(4),
 		@Cen_Numero	char(3),
 		@Suc_StaCre	char(1),
-		@Suc_CiCrCe	char(1)
+		@Suc_CiCrCe	char(1),
+		@Par_NecCie char(1)
+
 		
 		
 declare	@Sta_CiCeCr	char(1),			/*	Declaracion de Constantes	*/
@@ -28,18 +39,23 @@ declare	@Sta_CiCeCr	char(1),			/*	Declaracion de Constantes	*/
 		@Sta_No		char(1),
 		@Dia_Inhabi	char(1),
 		@Dia_Habil	char(1),
-		@Suc_OpeCon	char(3)
+		@Suc_OpeCon	char(3),
+		@Par_VaCiPa char(19),
+		@Str_Si     char(1)
+		
 	
 /*	Asignacion de Constantes	*/
 select	@Sta_CiCeCr	= 'C',				/*	Status: Cierre de Creditos Centralizado */
 		@Sta_Proces	= 'N',				/*	Status: Proceso							*/
 		@Ent_Cero	= 0,				/*	Entero Cero								*/
-		@Sta_Finali	= 'A',				/*	Status: Fianlizado camara de compensaciÃÂ³n */
+		@Sta_Finali	= 'A',				/*	Status: Fianlizado camara de compensaciÃƒÂ³n */
 		@Sta_Si		= 'S',				/*	Status: Si								*/
 		@Sta_No		= 'N',				/*	Status: No								*/
 		@Dia_Inhabi	= 'I',				/*	Dia Inhabil								*/
 		@Dia_Habil	= 'H',				/*	Dia Habil								*/
-		@Suc_OpeCon	= '799'				/*	Sucursal de Operaciones/Contabilidad	*/
+		@Suc_OpeCon	= '799',				/*	Sucursal de Operaciones/Contabilidad	*/
+		@Par_VaCiPa	= 'ValidaCierrePasivos',       /*	Valida CIerre Pasivos	*/
+		@Str_Si     = '1'             
 
 select	@Cen_Numero = Cen_Numero
 	from SOSUCURS noholdlock,
@@ -68,6 +84,10 @@ if @Suc_UltDia = @Dia_Inhabi begin
 		@Fecha_Val output, @Ent_Cero, 'N', 'N'
 	select	@Par_FecAct	= @Fecha_Val
 end
+
+select @Par_NecCie = Par_Valor
+	from SOPARGEN noholdlock
+	where Par_Nombre = @Par_VaCiPa
 
 /* Fin de la camara de compensacion */
 /* -------------------------------- */
@@ -100,19 +120,21 @@ if @Suc_CiCrCe = @Sta_Si begin
 	end
 end
 
-/* Pasivos en Dolares */
-/* ------------------ */
-if	@SucOrigen = @Suc_OpeCon and (select	Cie_Pasivo
-									from ESCIERRE noholdlock )	= @Sta_No begin
-	select	@Error = 'Imposible realizar Apertura, No se ha hecho el cierre de Pasivos en Dolares'
-	if @@nestlevel = 1 begin
-		select 	Err_Codigo = '000004',
-				Err_Mensaj = @Error, 
-				Err_Variab = 'Suc_Numero'
+if @Par_NecCie = @Str_Si begin
+	/* Pasivos en Dolares */
+	/* ------------------ */
+	if	@SucOrigen = @Suc_OpeCon and (select	Cie_Pasivo
+										from ESCIERRE noholdlock )	= @Sta_No begin
+		select	@Error = 'Imposible realizar Apertura, No se ha hecho el cierre de Pasivos en Dolares'
+		if @@nestlevel = 1 begin
+			select 	Err_Codigo = '000004',
+					Err_Mensaj = @Error, 
+					Err_Variab = 'Suc_Numero'
+		end
+	
+		return 1
 	end
-
-	return 1
-end
+end 
 
 if (select count(Suc_Numero) 
 		from SOSUCURS noholdlock 
