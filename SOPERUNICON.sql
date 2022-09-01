@@ -21,6 +21,13 @@ as
 /*******************************************************************
 ** DESCRIPCION: Consulta de Persona Unica						****
 ********************************************************************
+** Modifico:	Roberto Carlos Acosta Gutierrez					****
+** Fecha:		29/06/2022										****
+** Help:		1662542	 										****
+** Descripcion:	Se agregó la consulta LD por nombre ordenado	****
+**				y se modificó consulta L1 para agregar a la 	****	
+**				salida el campo de Per_ActEmp					****
+********************************************************************
 ** Modifico:	Armando Alexis Sepulveda Cruz					****
 ** Fecha:		11/11/2021										****
 ** Help:		1379522	 										****
@@ -195,6 +202,7 @@ declare	@Str_Vacio	char(1), /* Vacio */
 		@Str_Siete	char(1), /* Tipo 7 */
 		@Str_Ocho   char(1), /* Tipo 8*/
 		@Str_Nueve	char(1), /* Tipo 9*/
+		@Str_D	    char(1), /* Tipo D*/
 		@Len_RFCOrd	int,
 		@Len_RFCHom int,
 		@Len_RFCEmp int,		/* RFC de 9 posiciones */
@@ -224,6 +232,7 @@ select	@Str_Vacio	= '',
 		@Str_Siete	= '7',
 		@Str_Ocho	= '8',
 		@Str_Nueve  = '9',
+		@Str_D      = 'D',
 		@Len_RFCOrd	= 10,								/* Longitud de rfc ordinario*/
 		@Len_RFCHom = 13,								/* Longitud de rfc con homoclave*/
 		@Len_RFCEmp = 9,
@@ -374,7 +383,7 @@ end else begin
 		select	P.Per_Numero,	P.Per_Tipo,		P.Per_Benefi,	P.Per_NuSeFi,	P.Per_Titulo,
 				P.Per_Nombre,	P.Per_ApePat,	P.Per_ApeMat,	P.Per_RazSoc,	P.Per_Comple,
 				P.Per_ComOrd,	P.Per_RFC,		A.Adi_Client as Per_Client,		P.Per_CURP,
-				P.FechaSis as 	Per_Fecha,		P.Per_Entida,	P.Per_Locali
+				P.FechaSis as 	Per_Fecha,		P.Per_Entida,	P.Per_Locali, 	P.Per_ActEmp
 		  from	SOPERSON P noholdlock
 		  left	join
 		  		CLADICIO A noholdlock
@@ -898,8 +907,7 @@ end else begin
 			
 		drop table #Personas
 	end 
-
-
+	
 	if @Tip_ConCon = @Str_A begin /* LA - Busqueda persona unica por RFC*/
 		select @Per_RFC = left(ltrim(rtrim(@Per_RFC)) + replicate(@Str_Porcen,@Ent_Quinc) , @Ent_Quinc)
 		create table #PersonasRFC (
@@ -990,5 +998,15 @@ end else begin
 			inner join #PersonaUnicaRFC on #PersonaUnicaRFC.Per_Grupo = SOPERSON.Per_Numero
 			
 		drop table #PersonaUnicaRFC
+	end
+	
+	if @Tip_ConCon	= @Str_D begin /* LD - Consulta de Personas por nombre ordenado */
+		select @Per_Comple = @Per_Comple + @Str_Porcen
+		select	P.Per_Numero,	P.Per_Tipo,		P.Per_Benefi,	P.Per_NuSeFi,	P.Per_Titulo,
+				P.Per_Nombre,	P.Per_ApePat,	P.Per_ApeMat,	P.Per_RazSoc,	P.Per_Comple,
+				P.Per_ComOrd,	P.Per_RFC,		P.Per_CURP,		P.FechaSis as 	Per_Fecha,
+				P.Per_Entida,	P.Per_Locali, 	P.Per_ActEmp
+		  from	SOPERSON P noholdlock
+		 where	P.Per_ComOrd like @Per_Comple
 	end
 end
