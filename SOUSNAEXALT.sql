@@ -19,9 +19,14 @@ as
 ****************************************************************************
 **	REFERENCIAS:														****
 ****************************************************************************
+** Modifico:	Martin Adonis Lopez Mendoza								****
+** Fecha:		01/09/2022												****
+** Help Desk:	16431										 			****
+** Descripción:	Se agrega estatus cancelado								****
+****************************************************************************
 ** Modifico:	Juan Jose Sandoval Marin								****
 ** Fecha:		22/Julio/2021											****
-** Help Desk:	1376175										 			****
+** Help Desk:	16431										 			****
 ** Descripción:	Se cambia para que usuario nazca con estatus inactivo	****
 ****************************************************************************
 ** Modifico:	Erika Báez	 											****

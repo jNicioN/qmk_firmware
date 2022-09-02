@@ -34,6 +34,11 @@ as
 *********************************************************************************
 ** Referencias: 															  	*
 *********************************************************************************
+** Modifico:	Martin Adonis Lopez Mendoza													*
+** Descripcion : Busqueda  de usuarios de divisas nacionales y extrangeros 											*
+** Fecha:	01/09/2022															*
+** Help:	16431     														*
+*********************************************************************************
 ** Modifico:	Carlos Copto													*
 ** Descripcion : Se agrego el retorno del campo Une_Estatu en la consulta 		*
 **				 cuando Une_TabCon es 1											*
@@ -144,7 +149,7 @@ if @Une_TabCon = '' begin   /* Si consulta SOUSUEXT  */
 						@Ucv_NomUsu as Biu_Usuari,
 						@Biu_descri as Biu_descri,
 						Pai_Gentil as Biu_Pais
-				from	#UsuarioCompraVentaNacional inner join SOPAIS on Pai_Numero = Use_Nacion
+				from	#UsuarioCompraVentaNacional inner join SOPAIS noholdlock on Pai_Numero = Use_Nacion
 				where	Une_Identi	= @Une_Identi
 				
 				drop table #UsuarioCompraVentaNacional				
@@ -175,7 +180,7 @@ if @Une_TabCon = '' begin   /* Si consulta SOUSUEXT  */
 						@Ucv_NomUsu as Biu_Usuari,
 						@Biu_descri as Biu_descri,
 						Pai_Gentil as Biu_Pais
-				from	#UsuarioCompraVentaExtranjero inner join SOPAIS  on Pai_Numero = Use_PaNaUs
+				from	#UsuarioCompraVentaExtranjero inner join SOPAIS noholdlock on Pai_Numero = Use_PaNaUs
 				where	Une_Identi	= @Une_Identi
 				
 				drop table #UsuarioCompraVentaExtranjero			
