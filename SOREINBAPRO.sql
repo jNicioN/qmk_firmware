@@ -17,6 +17,11 @@ as
 /* DESCRIPCION: Procesamiento de copia de registros de Reporte	*/
 /*				de Informacion Basica							*/
 /****************************************************************/
+/** Modifico:		Jose Romeo Rodriguez Zenteno				*/
+/** Descripcion:    Se corrige busqueda de RIB base         	*/
+/** Fecha:			01/09/2022                               	*/
+/** Help:			1643668					 					*/
+/****************************************************************/
 /** Modifico:		Raul Muniz									*/
 /** Descripcion:	Se agregan generalidades a la copia de RIB	*/
 /** Fecha:			06/01/2021                               	*/
@@ -69,6 +74,7 @@ if @Tip_Proces	= @Str_A begin /* 'A': Proceso para realizar la copia de RIB cuan
 		where Rib_NumPer = @Rib_NumPer 
 		  and Rib_NumSol = @Ent_Cero 
 		  and Rib_NumInt = @Ent_Cero
+		  and Rib_FecEla <> @Str_Vacio
 			
 	if @Int_RibBas <> @Ent_Cero  begin
 		
