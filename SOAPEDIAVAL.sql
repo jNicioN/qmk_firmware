@@ -34,6 +34,11 @@ as
 ** Fecha:		25/Agosto/2022										****
 ** Help Desk:	1640569													****
 ** Descripción: Se valida si necesita transaccion de Abono masivo de Mesa de Dinero	****
+****************************************************************************
+** Modificó:	Carlos Hdz 										****
+** Fecha:		06/Sept/2022										****
+** Help Desk:	1640569													****
+** Descripción: Se valida cantidad de transacciones ejecutadas****
 ****************************************************************************/
 
 declare		@Par_ApAbMa char(1)
@@ -99,7 +104,7 @@ if @Tip_Consul = @Tip_CABIPAFI begin
 		from	CABIPAFI noholdlock
 		where	Bpf_Fecha >= @Fecha
 	
-	if	@Ent_count < @Ent_10 and @Par_ApAbMa = @Str_Si	begin
+	if	@Ent_count < @Ent_10 and @Par_ApAbMa = @Str_Si or (@Ent_count < @Ent_09 and @Par_ApAbMa = @Str_No)	begin
 		
 		select	Err_Codigo	= '000001',
 				Err_Mensaj	= 'La apertura no se ha realizado por completo, validar con CAMARA DE COMPENSACION ' ,
