@@ -24,6 +24,11 @@ as
 ** HelpDesk:	1694392													****
 ** Descripcion:	Se modifica C1 para dar salida al campo  SoEstadoID 	****
 ****************************************************************************
+** Modifico:	Alan Santamaria											****
+** Fecha:		27/Julio/2021											****
+** HelpDesk:	1505299													****
+** Descripcion:	se agrega el campo de categoria en la consulta			****
+****************************************************************************
 ** Modifico:	Juan Pablo Mendez Cabrales								****
 ** Fecha:		06/Abr/2020												****
 ** HelpDesk:	01352603												****
