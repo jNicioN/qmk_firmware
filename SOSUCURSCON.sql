@@ -18,10 +18,11 @@ as
 ****************************************************************************
 **                           Store CONVERTIDO 							****
 ****************************************************************************
-** Modifico:	Alan Santamaria								****
-** Fecha:		27/Julio/2021												****
-** HelpDesk:	1505299												****
-** Descripcion:	se agrega el campo de categoria en la consulta			****
+****************************************************************************
+** Modificó:	Francisco Javier Carrillo Rojas							****
+** Fecha:		19/sep/2022												****
+** HelpDesk:	1694392													****
+** Descripcion:	Se modifica C1 para dar salida al campo  SoEstadoID 	****
 ****************************************************************************
 ** Modifico:	Juan Pablo Mendez Cabrales								****
 ** Fecha:		06/Abr/2020												****
@@ -315,7 +316,7 @@ end else begin													/* Cliente:  Visual Basic */
 					Suc_Estado,	Suc_Pais,	Suc_UltDia,	Suc_Apertu,	Suc_Plaza,
 					Suc_Gerent,	Suc_MaiGer,	Suc_SubGer,	Suc_MaiSub, Suc_CiCrCe,
 					Suc_Zona,	Suc_IVA,	Suc_FecApe,	Suc_DifHor, Suc_ApeSab,
-					@Suc_Cerrad as Suc_Cerrad,	Suc_Catego
+					@Suc_Cerrad as Suc_Cerrad,	Suc_Catego,	SoEstadoID
 				from SOSUCURS noholdlock
 				where	Suc_Numero	= @Suc_Numero
 		end else if @Tip_ConCon = @Con_LlaFor begin				/* Consulta de Llave Foranea */
@@ -433,7 +434,7 @@ end else begin													/* Cliente:  Visual Basic */
 		select	@Suc_Nombre	= ltrim(rtrim(@Suc_Nombre)) + @Str_Porcen
 		
 		if @Tip_ConCon = @Lis_Genera							/* Lista General L1*/
-			select	Suc_Numero,	Suc_Nombre, Suc_StaCre, Suc_Catego
+			select	Suc_Numero,	Suc_Nombre, Suc_StaCre
 				from SOSUCURS noholdlock
 				where	upper(Suc_Nombre)	like upper(@Suc_Nombre)
 				order by Suc_Nombre
