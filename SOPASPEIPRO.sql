@@ -20,6 +20,11 @@ as
 ***************************************************************************/
 /***************************************************************************
 ** Modifico:		Edgar Cabriales             						****
+** Fecha:			05/Septiembre/2022							  		****
+** Help:			    	  											****
+** Descripcion:		Cambio insert a SYDIACTA por SYDIACTAALT            ****
+****************************************************************************
+** Modifico:		Edgar Cabriales             						****
 ** Fecha:			01/Septiembre/2022							  		****
 ** Help:			    	  											****
 ** Descripcion:		Ajuste a cargos y abonos Recibidos y Enviados       ****
