@@ -24,7 +24,7 @@ as
 ****************************************************************************
 ** Modifico:	Juan Jose Sandoval Marin								****
 ** Fecha:		22/07/2021												****
-** Help Desk:	1376175 									 			****
+** Help Desk:	1643006 									 			****
 ** DescripciÃ³n:	Se agrega mensaje retorno al inactivar usuario			****
 ****************************************************************************
 ** Modifico:	Adriana Gomez 											****
