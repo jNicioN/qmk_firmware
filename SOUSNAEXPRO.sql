@@ -20,17 +20,23 @@ as
 ****************************************************************************
 **	REFERENCIAS:														****
 ****************************************************************************
+** Modifico:	Martin Adonis Lopez										****
+** Fecha:		30/08/2022												****
+** Help Desk:	1643006 									 			****
+** DescripciÃ³n:	Se ajusto la actualizacion de usuarios activos 
+					e inactivos a cancelado								****
+****************************************************************************
 ** Modifico:	Adriana Gomez											****
 ** Fecha:		05/05/2021												****
 ** Help Desk:	1376175 									 			****
-** Descripción:	Se  ajusta validacion de fecha de nacimiento			****
+** DescripciÃ³n:	Se  ajusta validacion de fecha de nacimiento			****
 ****************************************************************************
-** Modifico:	Erika Báez	 											****
+** Modifico:	Erika BÃ¡ez	 											****
 ** Fecha:		17/03/2021												****
 ** Help Desk:	1376175										 			****
 ** Descri:		Se agregan parametros generales para tabla SOSUNAEX		****
 ****************************************************************************
-** Modifico:	Erika Báez	 											****
+** Modifico:	Erika BÃ¡ez	 											****
 ** Fecha:		17/03/2021												****
 ** Help Desk:	1376175										 			****
 ** Descri:		Se agrega insert a bitacora VEBITADD y se actualiza		****
@@ -50,6 +56,7 @@ declare	@Fec_Actual		smalldatetime,
 								/* Declaracion de constantes */
 declare	@Sta_Activo		char(1),
 		@Sta_Inacti		char(1),
+		@Sta_Cancel		char(1),
 		@Une_TaOrNa		char(1),	
 		@Une_TaOrEx		char(1)	,
 		@Biu_DesEst		varchar(150),
@@ -65,6 +72,7 @@ declare	@Sta_Activo		char(1),
 								/* Asignacion de valores a constantes */
 select	@Sta_Activo	= 'A',		/* Estatus activo */
 		@Sta_Inacti	= 'I',		/* Estatus inactivo */
+		@Sta_Cancel = 'C',
 		@Une_TaOrNa	= '1',		/*tabla origen nacionales SOPERSON */
 		@Une_TaOrEx	= '2',		/*tabla origen extranjeros SOUSUEXT*/
 		@Biu_DesEst	= 'Inactivacion de Usuario de compra venta por actvacion de Cuenta',  /*descripcion de inactivacion de usuarios de cv */
@@ -98,7 +106,7 @@ insert into SOBITUSU	(Biu_FolUsu,	Biu_Estatu,	Biu_FecEst,	Biu_Usuari,	Biu_Sucurs
 		inner join SOUSNAEX noholdlock on	PerPersoID	= Une_IdeUsu and Une_TabOri	= @Une_TaOrNa
 		where	Per_Comple	= @Une_Nombre 
 		  and   convert(date, Adi_FecNac) = convert(date, @Une_FecNac)
-		  and	Une_Estatu	= @Sta_Activo
+		  and	(Une_Estatu	= @Sta_Activo or Une_Estatu = @Sta_Inacti)
 	
 /* se busca en extranjeros el numero de usuario por nombre y fecha de nacimiento*/
 insert into SOBITUSU	(Biu_FolUsu,	Biu_Estatu,	Biu_FecEst,	Biu_Usuari,	Biu_Sucurs, 
@@ -111,7 +119,7 @@ insert into SOBITUSU	(Biu_FolUsu,	Biu_Estatu,	Biu_FecEst,	Biu_Usuari,	Biu_Sucurs
 	inner join SOUSNAEX noholdlock on	Une_IdeUsu	= Use_IdUsEx and	Une_TabOri =@Une_TaOrEx
 	where	Use_NoCoUs	= @Une_Nombre
 	  and   convert(date, Use_FecNac)	= convert(date, @Une_FecNac)
-	  and	Une_Estatu	= @Sta_Activo
+	  and	(Une_Estatu	= @Sta_Activo or Une_Estatu = @Sta_Inacti)
 	  	  
 /*Buscar movimientos de usuarios para pasarlos a la bitacora*/
 insert into VEBITADD	(Bit_Client,	Bit_Usuari,	Bit_NumTra,	Bit_Monto,	Bit_Fecha,
@@ -142,7 +150,7 @@ update VEACUDLL set
 	  	
 		
 update SOUSNAEX set 
-	Une_Estatu	= @Sta_Inacti,
+	Une_Estatu	= @Sta_Cancel,
 		
 	NumTransac	= @NumTransac,
 	Transaccio	= @Transaccio,
@@ -152,5 +160,4 @@ update SOUSNAEX set
 	SucDestino	= @SucDestino
 	from SOBITUSU noholdlock
 	inner join SOUSNAEX noholdlock on	Biu_FolUsu	= Une_Identi 
-	where	SOBITUSU.NumTransac	= @NumTransac 
-	
+	where	SOBITUSU.NumTransac	= @NumTransac

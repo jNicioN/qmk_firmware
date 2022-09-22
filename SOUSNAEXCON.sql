@@ -34,6 +34,11 @@ as
 *********************************************************************************
 ** Referencias: 															  	*
 *********************************************************************************
+** Modifico:	Martin Adonis Lopez Mendoza													*
+** Descripcion : Busqueda  de usuarios de divisas nacionales y extrangeros 											*
+** Fecha:	01/09/2022															*
+** Help:	1643006     														*
+*********************************************************************************
 ** Modifico:	Carlos Copto													*
 ** Descripcion : Se agrego el retorno del campo Une_Estatu en la consulta 		*
 **				 cuando Une_TabCon es 1											*
@@ -50,8 +55,14 @@ as
 declare	@Tip_ConTip	char(1),
 		@Tip_ConCon	char(1),
 		@Status		int,
-		@Ent_Identi	int
-		
+		@Ent_Identi	int,
+		@Ucv_IdTaOr int,
+		@Ucv_TabOri char(1),
+		@Ucv_Estatu char(1),
+		@Ucv_UlUsMo	char(6),
+		@Ucv_NomUsu	varchar(70),
+		@Biu_descri varchar(150)
+				
 select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
 		@Tip_ConCon	= substring(@Tip_Consul, 2, 1)
 		
@@ -65,7 +76,10 @@ declare	@Str_LetraI char(1),
 		@Str_TipL 	char(1),
 		@Str_Vacio 	char(1),
 		@Ent_Cero	int,
-		@Ent_Uno	int
+		@Ent_Uno	int,
+		@Str_Uno 	char(1),
+		@Tab_UsuNac	char(1),
+		@Tab_UsuExt	char(1)
 
 								/* Asignacion de valores a constantes */
 select	@Str_LetraI = 'I',		/* String I: ID de relacion */
@@ -77,9 +91,107 @@ select	@Str_LetraI = 'I',		/* String I: ID de relacion */
 		@Str_TipL 	= 'L',		/* Tipo Lista */
 		@Str_Vacio  = '',		/* String vacio */
 		@Ent_Cero	= 0,		/* Entero cero */
-		@Ent_Uno	= 1			/* Entero uno */
+		@Ent_Uno	= 1,			/* Entero uno */
+		@Str_Uno	= '1',		/* String: Uno */
+		@Tab_UsuNac	= '1',		/* Tabla Origen: SOPERSON usuario nacional */
+		@Tab_UsuExt	= '2'		/* Tabla Origen: SOUSUEXT usuario extranjero */
+if @Une_TabCon = '' begin   /* Si consulta SOUSUEXT  */
+	
+	if @Tip_ConTip = @Str_TipC begin	/*	CONSULTAS */ 
+		
+		/* Consulta Usuarios por Identificador */
+		if @Tip_ConCon = @Str_Uno begin
+			
+			select	@Ucv_IdTaOr =  Une_IdeUsu,
+					@Ucv_TabOri =  Une_TabOri,
+					@Ucv_Estatu = Une_Estatu
+			from 	SOUSNAEX noholdlock 
+			where 	Une_Identi	= @Une_Identi
+			
+			if @Str_Vacio = isnull(@Ucv_TabOri, @Str_Vacio) begin
+				select	Err_Codigo	= '000001',
+						Err_Mensaj	= 'Usuario no existe'
+				rollback
+				return @Ent_Uno
+			end
+			
+			if @Ucv_TabOri = @Tab_UsuNac begin
+				
+				select  @Une_Identi as Une_Identi,
+						@Ucv_Estatu as Une_Estatu,
+						Per_Comple	as Use_NoCoUs,
+						Adi_FecNac	as Use_FecNac,
+						SOPERSON.SucOrigen as Origen,
+						CASE Adi_TipIde	
+							WHEN 'O' THEN Adi_OtrIde
+							ELSE  Tid_Descri 
+						END as Use_TiIdUs,
+						Per_Fecha 	as Use_FecCre,
+						Per_Nacion as Use_Nacion
+				into #UsuarioCompraVentaNacional
+				from SOPERSON noholdlock
+				inner join SOPERADI noholdlock on Per_Numero = Adi_PerNum
+				inner join CLTIPIDE noholdlock on Adi_TipIde = Tid_Variab 
+				where	PerPersoID	= @Ucv_IdTaOr
+				
+				select 	top 1 @Ucv_UlUsMo = Biu_Usuari,
+				@Biu_descri = Biu_DesEst
+				from	SOBITUSU noholdlock
+				where	Biu_FolUsu	= @Une_Identi
+				order by  Biu_Consec desc
+				
+				select 	@Ucv_NomUsu = ltrim(rtrim(Usu_Clave)) + ' - ' + ltrim(rtrim(Usu_Nombre))
+				from 	SOUSUARI noholdlock
+				where 	Usu_Numero	= @Ucv_UlUsMo
+				
+				select	Une_Identi, Une_Estatu, Use_NoCoUs, Use_FecNac, Use_TiIdUs,
+						Use_FecCre,Origen,
+						@Ucv_NomUsu as Biu_Usuari,
+						@Biu_descri as Biu_descri,
+						Pai_Gentil as Biu_Pais
+				from	#UsuarioCompraVentaNacional inner join SOPAIS noholdlock on Pai_Numero = Use_Nacion
+				where	Une_Identi	= @Une_Identi
+				
+				drop table #UsuarioCompraVentaNacional				
+				
+			end else if @Ucv_TabOri = @Tab_UsuExt begin
+				
+				select  @Une_Identi as Une_Identi,
+						@Ucv_Estatu as Une_Estatu,
+						Use_NoCoUs,	Use_FecNac,	 Tid_Descri as Use_TiIdUs,	Use_FecCre,SOUSUEXT.SucOrigen as Origen
+						,Use_PaNaUs
+				into #UsuarioCompraVentaExtranjero
+				from SOUSUEXT noholdlock
+				inner join CLTIPIDE noholdlock on Use_TiIdUs = Tid_Variab 
+				where	Use_IdUsEx	= @Ucv_IdTaOr
+				
+				select 	top 1 @Ucv_UlUsMo = Biu_Usuari,
+				@Biu_descri = Biu_DesEst
+				from	SOBITUSU noholdlock
+				where	Biu_FolUsu	= @Une_Identi
+				order by  Biu_Consec desc
+				
+				select 	@Ucv_NomUsu = ltrim(rtrim(Usu_Clave)) + ' - ' + ltrim(rtrim(Usu_Nombre))
+				from 	SOUSUARI noholdlock
+				where 	Usu_Numero	= @Ucv_UlUsMo
+				
+				select	Une_Identi, Une_Estatu, Use_NoCoUs, Use_FecNac, Use_TiIdUs,
+						Use_FecCre,Origen,
+						@Ucv_NomUsu as Biu_Usuari,
+						@Biu_descri as Biu_descri,
+						Pai_Gentil as Biu_Pais
+				from	#UsuarioCompraVentaExtranjero inner join SOPAIS noholdlock on Pai_Numero = Use_PaNaUs
+				where	Une_Identi	= @Une_Identi
+				
+				drop table #UsuarioCompraVentaExtranjero			
+				
+			end			
+			
+		end		
+	
+	end
 
-if @Une_TabCon = '0' begin   /* Consultas propias a SOUSNAEX */
+end else if @Une_TabCon = '0' begin   /* Consultas propias a SOUSNAEX */
 
 	if @Tip_ConTip = @Str_TipC begin	/*	CONSULTAS */ 
 	
