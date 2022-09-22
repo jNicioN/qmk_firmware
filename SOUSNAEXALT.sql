@@ -24,11 +24,6 @@ as
 ** Help Desk:	1643006										 			****
 ** Descripción:	Se agrega estatus cancelado								****
 ****************************************************************************
-** Modifico:	Juan Jose Sandoval Marin								****
-** Fecha:		22/Julio/2021											****
-** Help Desk:	1643006										 			****
-** Descripción:	Se cambia para que usuario nazca con estatus inactivo	****
-****************************************************************************
 ** Modifico:	Erika Báez	 											****
 ** Fecha:		17/Marzo/2021											****
 ** Help Desk:	1376175										 			****
