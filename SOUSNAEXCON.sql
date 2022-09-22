@@ -37,7 +37,7 @@ as
 ** Modifico:	Martin Adonis Lopez Mendoza													*
 ** Descripcion : Busqueda  de usuarios de divisas nacionales y extrangeros 											*
 ** Fecha:	01/09/2022															*
-** Help:	16431     														*
+** Help:	1643006     														*
 *********************************************************************************
 ** Modifico:	Carlos Copto													*
 ** Descripcion : Se agrego el retorno del campo Une_Estatu en la consulta 		*
