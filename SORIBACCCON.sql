@@ -16,6 +16,12 @@ as
 /****************************************************************/
 /* DESCRIPCION: Consulta de registros de Accionistas RIB		*/
 /****************************************************************/
+/** Modifico:		Jose R. Rodriguez Zenteno					*/
+/** Fecha:			21/09/2022                               	*/
+/** Descripcion:	Se modificaron C1, L1 y L2 para regresar	*/
+/**					Ria_NomAcc									*/
+/** Help:			1643668					 					*/
+/****************************************************************/
 /** Modifico:		Esthepny Aguilar							*/
 /** Fecha:			25/02/2020                               	*/
 /** Descripcion:	Se ordena desc por el campo Ria_PorPar en la*/
@@ -55,8 +61,8 @@ if @Tip_ConTip	= @Str_C begin /* 'C': Consulta */
 	if @Tip_ConCon = @Str_Uno begin		/* C1 */
 		select
 			Ria_Numero,		Ria_NumRib,		Ria_NumPer,		Ria_PorPar,		Ria_Activo,
-			NumTransac,		Transaccio,		Usuario,		FechaSis,		SucOrigen,		
-			SucDestino
+			Ria_NomAcc,		NumTransac,		Transaccio,		Usuario,		FechaSis,
+			SucOrigen,		SucDestino
 		from SORIBACC noholdlock
 		where Ria_Numero = @Ria_Numero
 	end
@@ -64,16 +70,16 @@ end else begin
 	if @Tip_ConCon = @Str_Uno begin		/* L1 */
 		select
 			Ria_Numero,		Ria_NumRib,		Ria_NumPer,		Ria_PorPar,		Ria_Activo,
-			NumTransac,		Transaccio,		Usuario,		FechaSis,		SucOrigen,		
-			SucDestino
+			Ria_NomAcc,		NumTransac,		Transaccio,		Usuario,		FechaSis,
+			SucOrigen,		SucDestino
 		from SORIBACC noholdlock
 	   where Ria_Activo = @Raa_Activo
 	end
 	if @Tip_ConCon = @Str_Dos begin		/* L2 */
 		select
 			Ria_Numero,		Ria_NumRib,		Ria_NumPer,		Ria_PorPar,		Ria_Activo,
-			NumTransac,		Transaccio,		Usuario,		FechaSis,		SucOrigen,		
-			SucDestino
+			Ria_NomAcc,		NumTransac,		Transaccio,		Usuario,		FechaSis,
+			SucOrigen,		SucDestino
 		from SORIBACC noholdlock
 		where Ria_NumRib = @Ria_NumRib
 		  and Ria_Activo = @Raa_Activo

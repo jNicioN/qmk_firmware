@@ -17,6 +17,11 @@ as
 /* DESCRIPCION: Procesamiento de copia de registros de Reporte	*/
 /*				de Informacion Basica							*/
 /****************************************************************/
+/** Modifico:		Jose R. Rodriguez Zenteno					*/
+/** Descripcion:	Se agrega Ria_NomAcc a insert de SORIBACC	*/
+/** Fecha:			21/09/2022                               	*/
+/** Help:			1643668					 					*/
+/****************************************************************/
 /** Modifico:		Jose Romeo Rodriguez Zenteno				*/
 /** Descripcion:    Se corrige busqueda de RIB base         	*/
 /** Fecha:			01/09/2022                               	*/
@@ -147,10 +152,12 @@ if @Tip_Proces	= @Str_A begin /* 'A': Proceso para realizar la copia de RIB cuan
 
 
 		insert into SORIBACC (
-				Ria_NumRib,		Ria_NumPer,		Ria_PorPar,		Ria_Activo,		NumTransac,
-				Transaccio,		Usuario,		FechaSis,		SucOrigen,		SucDestino)
-		select	@Int_RibCop,	Ria_NumPer,		Ria_PorPar,		Ria_Activo,		@NumTransac,
-				@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
+				Ria_NumRib,		Ria_NumPer,		Ria_PorPar,		Ria_NomAcc,		Ria_Activo,
+				NumTransac,		Transaccio,		Usuario,		FechaSis,		SucOrigen,
+				SucDestino)
+		select	@Int_RibCop,	Ria_NumPer,		Ria_PorPar,		Ria_NomAcc,		Ria_Activo,
+				@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,
+				@SucDestino
 		from SORIBACC noholdlock
 		where Ria_NumRib = @Int_RibBas
 		  and Ria_Activo = @Ent_Uno
