@@ -3,6 +3,7 @@ create procedure SORIBACCALT (
 	@Ria_NumRib int,
 	@Ria_NumPer char(8),
 	@Ria_PorPar numeric(10,2),
+	@Ria_NomAcc	varchar(200),
 	@NumTransac char(10),
 	@Transaccio char(3),
 	@Usuario char(6),
@@ -15,9 +16,14 @@ as
 /****************************************************************/
 /* DESCRIPCION: Alta de registros de Accionistas SORIBACC		*/
 /****************************************************************/
-/** Creo:		Victor Osorio									*/
-/** Fecha:		07/04/2017                               		*/
-/** Help:		929417 					 						*/
+/** Modifico:		Jose R. Rodriguez Zenteno					*/
+/** Descripcion:	Se agrega Ria_NomAcc a insert de SORIBACC	*/
+/** Fecha:			21/09/2022                               	*/
+/** Help:			1643668					 					*/
+/****************************************************************/
+/** Creo:			Victor Osorio								*/
+/** Fecha:			07/04/2017                             		*/
+/** Help:			929417 				 						*/
 /****************************************************************/
 
 /* Declaracion de Constantes */
@@ -27,11 +33,13 @@ DECLARE @Int_Uno int
 SELECT  @Int_Uno = 1
 
 insert into SORIBACC 
-	(Ria_NumRib,	Ria_NumPer,		Ria_PorPar,		Ria_Activo,		NumTransac,
-	Transaccio,		Usuario,		FechaSis,		SucOrigen,		SucDestino)
+	(Ria_NumRib,	Ria_NumPer,		Ria_PorPar,		Ria_Activo,		Ria_NomAcc,
+	NumTransac,		Transaccio,		Usuario,		FechaSis,		SucOrigen,
+	SucDestino)
 	values (
-	@Ria_NumRib,    @Ria_NumPer,    @Ria_PorPar,	@Int_Activo,	@NumTransac,
-	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino)
+	@Ria_NumRib,    @Ria_NumPer,    @Ria_PorPar,	@Int_Activo,	@Ria_NomAcc,
+	@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,
+	@SucDestino)
 
 select @Ria_Numero = @@IDENTITY
 

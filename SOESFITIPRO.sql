@@ -21,6 +21,12 @@ as
 /* DESCRIPCION: Proceso de Estados Financieros Tipo Cuenta		*/
 /****************************************************************
 ** Modifica:		Jose R. Rodriguez Zenteno                   **
+** Fecha:			04/10/2022                               	**
+** Descripcion:		Se modifica proceso G para actualizar 		**
+**					cuenta de VENTAS / ACTIVO     			    **
+** Help:			1643668 					 				*/
+/****************************************************************
+** Modifica:		Jose R. Rodriguez Zenteno                   **
 ** Fecha:			09/02/2022                               	**
 ** Descripcion:		Se modifica proceso G para regresar 		**
 **					cuentas adicionales de CXC y Proveedores    **
@@ -116,7 +122,9 @@ declare	@Tip_ProA char(1),		/* Caracter A */
 		@Tip_Provee int,		/* Tipo Cuenta PROVEEDORES*/
 		@Tip_CXCRep int,		/* Tipo Cuenta C X COBRAR solo Resumen Financiero */
 		@Tip_ProRep int,		/* Tipo Cuenta PROVEEDORES solo Resumen Financiero */
-		@Tip_CarMon int			/* Tipo Cuenta Cartgos no Monetarios*/
+		@Tip_CarMon int,		/* Tipo Cuenta Cartgos no Monetarios*/
+		@Tip_RotAct int,		/* Tipo cuenta Rotacion Activos */
+		@Tip_VenAct int			/* Tipo cuenta VENTAS / ACTIVOS */
 		
 /* Asignacion de Constantes */
 select	@Ent_Cero	= 0,
@@ -161,7 +169,9 @@ select	@Ent_Cero	= 0,
 		@Tip_Provee = 44,
 		@Tip_CXCRep = 926,
 		@Tip_ProRep = 927,
-		@Tip_CarMon = 346
+		@Tip_CarMon = 346,
+		@Tip_RotAct = 269,
+		@Tip_VenAct = 907
 		
 select	@Ent_Cuenta = @Ent_Uno,
 		@Ent_i		= @Ent_Uno
@@ -919,6 +929,20 @@ end	else if @Tip_Proces = @Tip_ProG begin
 		Eft_Valor1 = @Esf_ValDep1,
 		Eft_Valor2 = @Esf_ValDep2
 		where #CuentaValorEeff.Eft_TipCue = @Tip_Depres
+		
+	update #CuentaValorEeff set
+		Eft_Valor1 = Eft_Valor
+	from SOESFITI efv noholdlock
+	where efv.Eft_EstFin = Eft_EsFin1
+	and efv.Eft_TipCue = @Tip_RotAct
+	and #CuentaValorEeff.Eft_TipCue = @Tip_VenAct
+	
+	update #CuentaValorEeff set
+		Eft_Valor2 = Eft_Valor
+	from SOESFITI efv noholdlock
+	where efv.Eft_EstFin = Eft_EsFin2
+	and efv.Eft_TipCue = @Tip_RotAct
+	and #CuentaValorEeff.Eft_TipCue = @Tip_VenAct
 	
 	select	Eft_TipCue,
 			Eft_DesRep AS Eft_Descri,
