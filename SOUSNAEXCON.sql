@@ -120,6 +120,9 @@ if @Une_TabCon = '' begin   /* Si consulta SOUSUEXT  */
 				select  @Une_Identi as Une_Identi,
 						@Ucv_Estatu as Une_Estatu,
 						Per_Comple	as Use_NoCoUs,
+						Per_Nombre as Une_nombre,
+						Per_ApePat as Une_ApellPat,
+						Per_ApeMat as Une_ApellMat,
 						Adi_FecNac	as Use_FecNac,
 						SOPERSON.SucOrigen as Origen,
 						CASE Adi_TipIde	
@@ -145,7 +148,7 @@ if @Une_TabCon = '' begin   /* Si consulta SOUSUEXT  */
 				where 	Usu_Numero	= @Ucv_UlUsMo
 				
 				select	Une_Identi, Une_Estatu, Use_NoCoUs, Use_FecNac, Use_TiIdUs,
-						Use_FecCre,Origen,
+						Use_FecCre,Origen,Une_nombre,Une_ApellPat,Une_ApellMat,
 						@Ucv_NomUsu as Biu_Usuari,
 						@Biu_descri as Biu_descri,
 						Pai_Gentil as Biu_Pais
@@ -158,6 +161,9 @@ if @Une_TabCon = '' begin   /* Si consulta SOUSUEXT  */
 				
 				select  @Une_Identi as Une_Identi,
 						@Ucv_Estatu as Une_Estatu,
+						Use_NomUsu as Une_nombre,
+						Use_ApPaUs as Une_ApellPat,
+						Use_ApMaUs as Une_ApellMat,
 						Use_NoCoUs,	Use_FecNac,	 Tid_Descri as Use_TiIdUs,	Use_FecCre,SOUSUEXT.SucOrigen as Origen
 						,Use_PaNaUs
 				into #UsuarioCompraVentaExtranjero
@@ -176,7 +182,7 @@ if @Une_TabCon = '' begin   /* Si consulta SOUSUEXT  */
 				where 	Usu_Numero	= @Ucv_UlUsMo
 				
 				select	Une_Identi, Une_Estatu, Use_NoCoUs, Use_FecNac, Use_TiIdUs,
-						Use_FecCre,Origen,
+						Use_FecCre,Origen,Une_nombre,Une_ApellPat,Une_ApellMat,
 						@Ucv_NomUsu as Biu_Usuari,
 						@Biu_descri as Biu_descri,
 						Pai_Gentil as Biu_Pais
