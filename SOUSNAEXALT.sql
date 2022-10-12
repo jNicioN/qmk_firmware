@@ -103,21 +103,6 @@ if isnull(@Une_TabOri, @Str_Vacio) = @Str_Vacio begin
 	return @Ent_Uno
 end 
 
-/*  Revisar si ya existe la relacion  */	
-select	@Ent_Existe	= @Ent_Cero
-select	@Ent_Existe	= @Ent_Uno
-	from SOUSNAEX noholdlock
-	where	Une_IdeUsu	= @Une_IdeInt 
-	  and	Une_TabOri = @Une_TabOri
-	  and   @FechaSis >= @Fec_IniMes and	@FechaSis	<= @Fec_FinMes 
-
-if @Ent_Existe = @Ent_Uno begin
-	select	Err_Codigo = '000004',
-			Err_Mensaj = 'No se puede dar de alta usuario, favor aperturar cliente'
-	rollback
-	return @Ent_Uno
-end
-
 insert into SOUSNAEX ( 
 	Une_Identi,	Une_IdeUsu,	Une_TabOri,	Une_Estatu, Une_Migrad,	
 	Une_FecReg,	Une_FecEst,	NumTransac,	Transaccio,	Usuario,	
