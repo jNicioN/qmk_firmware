@@ -61,7 +61,9 @@ declare	@Tip_ConTip	char(1),
 		@Ucv_Estatu char(1),
 		@Ucv_UlUsMo	char(6),
 		@Ucv_NomUsu	varchar(70),
-		@Biu_descri varchar(150)
+		@Biu_descri varchar(150),
+		@Biu_sucursal varchar(15)
+		
 				
 select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
 		@Tip_ConCon	= substring(@Tip_Consul, 2, 1)
@@ -124,7 +126,6 @@ if @Une_TabCon = '' begin   /* Si consulta SOUSUEXT  */
 						Per_ApePat as Une_ApellPat,
 						Per_ApeMat as Une_ApellMat,
 						Adi_FecNac	as Use_FecNac,
-						SOPERSON.SucOrigen as Origen,
 						CASE Adi_TipIde	
 							WHEN 'O' THEN Adi_OtrIde
 							ELSE  Tid_Descri 
@@ -138,7 +139,8 @@ if @Une_TabCon = '' begin   /* Si consulta SOUSUEXT  */
 				where	PerPersoID	= @Ucv_IdTaOr
 				
 				select 	top 1 @Ucv_UlUsMo = Biu_Usuari,
-				@Biu_descri = Biu_DesEst
+				@Biu_descri = Biu_DesEst,
+				@Biu_sucursal = Biu_Sucurs
 				from	SOBITUSU noholdlock
 				where	Biu_FolUsu	= @Une_Identi
 				order by  Biu_Consec desc
@@ -148,10 +150,11 @@ if @Une_TabCon = '' begin   /* Si consulta SOUSUEXT  */
 				where 	Usu_Numero	= @Ucv_UlUsMo
 				
 				select	Une_Identi, Une_Estatu, Use_NoCoUs, Use_FecNac, Use_TiIdUs,
-						Use_FecCre,Origen,Une_nombre,Une_ApellPat,Une_ApellMat,
+						Use_FecCre,Une_nombre,Une_ApellPat,Une_ApellMat,
 						@Ucv_NomUsu as Biu_Usuari,
 						@Biu_descri as Biu_descri,
-						Pai_Gentil as Biu_Pais
+						Pai_Gentil as Biu_Pais,
+						@Biu_sucursal as Origen
 				from	#UsuarioCompraVentaNacional inner join SOPAIS noholdlock on Pai_Numero = Use_Nacion
 				where	Une_Identi	= @Une_Identi
 				
@@ -164,7 +167,7 @@ if @Une_TabCon = '' begin   /* Si consulta SOUSUEXT  */
 						Use_NomUsu as Une_nombre,
 						Use_ApPaUs as Une_ApellPat,
 						Use_ApMaUs as Une_ApellMat,
-						Use_NoCoUs,	Use_FecNac,	 Tid_Descri as Use_TiIdUs,	Use_FecCre,SOUSUEXT.SucOrigen as Origen
+						Use_NoCoUs,	Use_FecNac,	 Tid_Descri as Use_TiIdUs,	Use_FecCre,SOUSUEXT.Use_NumSuc as Origen
 						,Use_PaNaUs
 				into #UsuarioCompraVentaExtranjero
 				from SOUSUEXT noholdlock
