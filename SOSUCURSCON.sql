@@ -439,7 +439,7 @@ end else begin													/* Cliente:  Visual Basic */
 		select	@Suc_Nombre	= ltrim(rtrim(@Suc_Nombre)) + @Str_Porcen
 		
 		if @Tip_ConCon = @Lis_Genera							/* Lista General L1*/
-			select	Suc_Numero,	Suc_Nombre, Suc_StaCre
+			select	Suc_Numero,	Suc_Nombre, Suc_StaCre, Suc_Catego
 				from SOSUCURS noholdlock
 				where	upper(Suc_Nombre)	like upper(@Suc_Nombre)
 				order by Suc_Nombre
