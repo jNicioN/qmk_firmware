@@ -19,6 +19,11 @@ as
 **                           Store CONVERTIDO 							****
 ****************************************************************************
 ****************************************************************************
+** Modificó:	David Fernando Gutiérrez Benítez						****
+** Fecha:		13/Octubre/2022											****
+** HelpDesk:	1742453													****
+** Descripcion:	Se agrega Campo Suc_Catego a la lista L1             	****
+****************************************************************************
 ** Modificó:	Francisco Javier Carrillo Rojas							****
 ** Fecha:		19/sep/2022												****
 ** HelpDesk:	1694392													****
