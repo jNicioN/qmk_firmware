@@ -2,6 +2,7 @@ create procedure SOUSNAEXACT (
 	@Une_Identi	int,
 	@Une_Estatu	varchar(1),
 	@Tip_Actual	char(2),
+	@Biu_descri	varchar(150),
 
 	@NumTransac	char(10),
 	@Transaccio	char(3),
@@ -16,33 +17,38 @@ as
 ******************************************************************************/
 /* REFERENCIAS:
 ****************************************************************************
+** Modifico:	Martin Adonis Lopez Mendoza								****
+** Fecha:		30/08/2022												****
+** Help Desk:	1643006 									 			****
+** DescripciÃ³n:	Se agrega mensaje retorno al cancelar usuarios			****
+****************************************************************************
 ** Modifico:	Adriana Gomez 											****
 ** Fecha:		24/03/2021												****
 ** Help Desk:	1376175 									 			****
-** Descripción:	Se corrige validacion 									****
+** DescripciÃ³n:	Se corrige validacion 									****
 ****************************************************************************
 ** Modifico:	Adriana Gomez 											****
 ** Fecha:		05/03/2021												****
 ** Help Desk:	1376175 									 			****
-** Descripción:	Se agrega validación para reactivar usuario				****
+** DescripciÃ³n:	Se agrega validaciÃ³n para reactivar usuario				****
 ****************************************************************************
 ** Modifico:	Adriana Gomez 											****
 ** Fecha:		05/03/2021												****
 ** Help Desk:	1468365										 			****
-** Descripción:	Se modifica validacion de usuarios y clientes existentes****
+** DescripciÃ³n:	Se modifica validacion de usuarios y clientes existentes****
 ****************************************************************************
 ** Modifico:	Carlos Copto 											****
 ** Fecha:		15/Diciembre/2020										****
 ** Help Desk:	1376175										 			****
-** Descripción:	Se agrega registro a Bitacora							****
+** DescripciÃ³n:	Se agrega registro a Bitacora							****
 ****************************************************************************
 ** Creo:		Carlos Copto 											****
 ** Fecha:		11/Noviembre/2020										****
 ** Help Desk:	1376175										 			****
-** Descripción:	Se crea SP y tipo de actualizacion del campo Une_Status	****
+** DescripciÃ³n:	Se crea SP y tipo de actualizacion del campo Une_Status	****
 ****************************************************************************
 **/
-declare	@Use_NoCoUs 	varchar(150),			/* Declaración de Variables */
+declare	@Use_NoCoUs 	varchar(150),			/* DeclaraciÃ³n de Variables */
 		@Use_FecNac		smalldatetime,
 		@Une_TabOri		char(1),
 		@Persona		int,
@@ -62,11 +68,13 @@ declare	@Use_NoCoUs 	varchar(150),			/* Declaración de Variables */
 		@PerPersoID		int
 		
 
-declare	@Tip_ActEst 	varchar(1),			/* Declaración de Constantes */
+declare	@Tip_ActEst 	varchar(1),			/* DeclaraciÃ³n de Constantes */
 		@Str_Vacio	 	varchar(1),			
 		@Ent_Cero	 	int,
 		@Ent_Uno	 	int,
 		@Sta_Activo	 	varchar(1),
+		@Sta_Inacti	 	varchar(1),
+		@Sta_Cancelado	varchar(1),
 		@Sta_Bloque		varchar(1),
 		@Cue_CashBa		char(2),
 		@Cue_Refere		char(2),
@@ -85,12 +93,14 @@ declare	@Tip_ActEst 	varchar(1),			/* Declaración de Constantes */
 		@Sta_Cancel		char(1)
 		
 
-											-- Asignación de valores a constantes 	
+											-- AsignaciÃ³n de valores a constantes 	
 select	@Tip_ActEst	= 'A',					--	Tipo Act Estatus de Usuario								
 		@Str_Vacio	= '',					--	String Vacio							
 		@Ent_Cero	= 0,					--	Entero Cero								
 		@Ent_Uno	= 1,					--	Entero Uno							
 		@Sta_Activo = 'A',					--	Status Activo						
+		@Sta_Inacti = 'I',					--	Status Inactivo	
+		@Sta_Cancelado = 'C',					-- Status Cancelado
 		@Sta_Bloque	= 'B',					--	Status Bloqueado					
 		@Cue_CashBa = '31',					-- Tipo de Cuenta: Cashback
 		@Cue_Refere = '50',					-- Tipo de Cuenta: Referenciado
@@ -107,7 +117,6 @@ select	@Tip_ActEst	= 'A',					--	Tipo Act Estatus de Usuario
 		@Str_Punto	= '.',					/* String: Punto							*/
 		@Str_Guion	= '-',					/* String: Guion							*/
 		@Sta_Cancel = 'C'
-
 /*Consulta de fecha del sistema */
 select @Fec_Actual = Par_FecAct
 from SOPARAMS noholdlock
@@ -181,14 +190,16 @@ if @Tip_ActTip = @Tip_ActEst begin
 	select	@Persona= @Ent_Cero
 	select	@Cliente = @Ent_Cero
 	select	@UsuarioCV = @Ent_Cero
-	
+		
 	select	PerPersoID,
 			Per_Numero, 
 			Per_RFC
 		into #PersonasMismoNombre
 		from SOPERSON noholdlock 
 		where	Per_Comple	= @Use_NoCoUs
-			
+		and Per_Numero = @Per_Numero	
+		
+		
 	select	PerPersoID,
 			Per_Numero, 
 			Per_RFC
@@ -241,7 +252,7 @@ if @Tip_ActTip = @Tip_ActEst begin
 					  
 				if @Acumul > @Ent_Cero begin	
 					select	Err_Codigo	= '000006',
-							Err_Mensaj = 'No se puede activar/reactivar usuario hasta el próximo mes calendario'	
+							Err_Mensaj = 'No se puede activar/reactivar usuario hasta el prÃ³ximo mes calendario'	
 					rollback
 					return @Ent_Uno
 				end 				
@@ -288,8 +299,6 @@ if @Tip_ActTip = @Tip_ActEst begin
 	end
 	
 	drop table #Personas
-	
-	
 	/* se checa si el cambio del estatus es activacion o inactivacion, si es inactivacion no hace la validacion de cuenta activa */
 	if @Tip_ActAct = @Str_A begin 
 	
@@ -307,13 +316,18 @@ if @Tip_ActTip = @Tip_ActEst begin
 			return @Ent_Uno
 		end
 		
-	select	@Biu_DesEst	= 'Reactivacion de estatus de Usuario de compra venta'  /* Descripcion para la bitacora */
+	select	@Biu_DesEst	= 'Activacion de estatus de Usuario de compra venta'  /* Descripcion para la bitacora */
 	
 	end else if @Tip_ActAct = @Str_I begin 
-		
-		select	@Biu_DesEst	= 'Inactivacion de Usuario de compra venta por actvacion de Cuenta'  /* Descripcion para la bitacora */
 	
-	end
+		select	@Biu_DesEst	= 'Creacion de cuenta de usuario de compra venta'  /* Descripcion para la bitacora */
+	
+	end else if @Tip_ActAct = @Sta_Cancelado begin
+		
+		select	@Biu_DesEst	=  @Biu_descri /* Descripcion para la bitacora */
+		
+		end
+		
 	
 	update SOUSNAEX set 
 		Une_Estatu	= @Une_Estatu,
@@ -335,11 +349,24 @@ if @Tip_ActTip = @Tip_ActEst begin
 		return @Ent_Uno
 	end
 	
-	if @@nestlevel = @Ent_Uno and @Une_Estatu = @Sta_Activo
+	if @@nestlevel = @Ent_Uno and @Une_Estatu = @Sta_Activo begin
 		select	Err_Codigo	= '000000',
 				Err_Mensaj	= 'Usuario Activado',
 				Use_Numero	= @Une_Identi
 		return @Ent_Uno
-		
+	end
+	
+	if @@nestlevel = @Ent_Uno and @Une_Estatu = @Sta_Inacti begin
+		select	Err_Codigo	= '000000',
+				Err_Mensaj	= 'Usuario Inactivo',
+				Use_Numero	= @Une_Identi
+		return @Ent_Uno
+	end
+	
+	if @@nestlevel = @Ent_Uno and @Une_Estatu = @Sta_Cancelado begin
+		select	Err_Codigo	= '000000',
+				Err_Mensaj	= 'Usuario Cancelado',
+				Use_Numero	= @Une_Identi
+		return @Ent_Uno
+	end
 end
-
