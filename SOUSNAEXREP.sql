@@ -1,0 +1,283 @@
+CREATE PROCEDURE SOUSNAEXREP(
+	@Une_Identi	int,
+	@Sucursal	char(3),
+	@FechaIni	smalldatetime,
+	@FechaFin	smalldatetime,
+	@Une_Estatu	char(1),
+	
+	@numtransac	char(10),
+	@transaccio	char(3),
+	@usuario	char(6),
+	@fechasis	smalldatetime,
+	@sucorigen	char(3),
+	@sucdestino	char(3),
+	@modulo		char(2)
+)
+as
+
+	/***********************************************************************************
+	** Descripcion:		Reporte de Usuarios de Divisas por Sucursal.				****
+	************************************************************************************
+	** Referencias:
+	************************************************************************************
+	** Creo:			Ezequiel Gonzalez Cobix										****
+	** Fecha:			06/Octubre/2022												****
+	** Req.	:			1643006														****
+	** Descripción:		Creación de SP												**** 
+	************************************************************************************/
+	
+	/* Declaracion de constantes  */
+	declare	@Str_Vacio	char(1),
+			@Ent_Cero	int,
+			@Str_Inacti	char(1),
+			@Str_Activo	char(1),
+			@Str_Cancel	char(1),
+			@Fec_Vacia	smalldatetime,
+			@Des_Inacti	char(8),
+			@Des_Activo	char(6),
+			@Des_Cancel	char(9),
+			@Tab_OriUno	char(1),
+			@Tab_OriDos	char(2),
+			@Ent_Tres	int
+
+	/* Declaracion de variables */
+	declare	@Conteo		int,
+			@Val_Fecha  smalldatetime,
+			@IdeUsuario	int,
+			@Estatus	char(1)
+	
+	/* Asignacion de constantes*/	
+	select	@Str_Vacio	=	'',				/*Cadena vacia*/
+			@Ent_Cero	=	0,				/*Entero cero*/
+			@Str_Inacti	=	'I',			/*Estatus de inactivo*/
+			@Str_Activo	=	'A',			/*Estatus de activo*/
+			@Str_Cancel	=	'C',			/*Estatus de cancelado*/
+			@Fec_Vacia	=	'1900-01-01',	/*Fecha Vacia*/
+			@Des_Inacti	=	'Inactivo',		/*Descripción de estatus inactivo*/
+			@Des_Activo	=	'Activo',		/*Descripción de estatus activo*/
+			@Des_Cancel	=	'Cancelado',	/*Descripción de estatus Cancelado*/
+			@Tab_OriUno	=	'1',			/*Tabla origen 1 SOPERSON*/
+			@Tab_OriDos	=	'2',			/*Tabla origen 1 SOUSREXT*/
+			@Ent_Tres   =	3 				/* Entero tres */
+			
+	/* Asignacion de variables */
+
+	
+	--Se obtiene el rango limite para fecha
+	select @Val_Fecha	=	dateadd(month, @Ent_Tres, @FechaIni)
+	select @IdeUsuario	=	@Une_Identi
+	select @Estatus		=	@Une_Estatu
+	
+
+	--Se evalua rango de fechas
+	if @FechaFin > @Val_Fecha
+	begin
+	select	Err_Codigo	= '000001', 
+			Err_Mensaj	= 'Ha sobrepasado el rango de fechas',
+			Err_Variab	= 'FechaIni, FechaFin' 
+			rollback
+			return 1
+	end	
+	
+
+	Create Table #UltimoEstatus(
+	Numero						int identity not 	null,
+	Folio						int					null,
+	FechaEstatus				smalldatetime		null,
+	Consecutivo					int					null
+	)
+	
+	create nonclustered index TmpUltFolio on #UltimoEstatus (Folio)
+	
+	Create Table #UltimoEstatuResp(
+	Numero						int identity not 	null,
+	Folio						int					null,
+	FechaEstatus				smalldatetime		null,
+	Consecutivo					int					null,
+	)
+	
+	create nonclustered index TmpUlEsReFolio on #UltimoEstatuResp (Folio)
+	
+	create Table #RegUltEstatus(
+	Numero						int identity not 	null,
+	Folio						int					null,
+	Estatus						char(1)				null,
+	FechaEstatus				smalldatetime		null,
+	Consecutivo					int					null,
+	FechaMenor					smalldatetime		null
+	)
+	create nonclustered index TmpRegUltEstEst on #RegUltEstatus (Estatus, Folio)	
+	
+	Create Table #RegistroDeEstatus(
+	Numero						int identity not 	null,
+	Folio						int					null,
+	Estatus						char(1)				null,
+	FechaEstatus				smalldatetime		null,
+	Usuario						char(6)				null,
+	Sucursal					char(3)				null,
+	DescripcionEstatus			char(180)			null,
+	NombreUsuario				char(50)			null,
+	Consecutivo					int					null,
+	FechaMenor					smalldatetime		null	
+	)
+	
+	create nonclustered index TmpRegFolio on #RegistroDeEstatus (Folio)	
+	create nonclustered index TmpRegEstatus on #RegistroDeEstatus (Estatus,Folio)
+	
+	
+	Create Table #UsuariosDivisa(
+	Numero						int identity not 	null,
+	Folio						int					null
+	)
+	create nonclustered index TmpUsuFolio on #UsuariosDivisa (Folio)
+	
+	Create Table #ReporteUsuarioDivisa(
+	Numero						int identity not 	null,
+	Sucursal					char(3)				null,
+	IdeUsuario					int					null,
+	Nombre						varchar(180)		null,	
+	Estatus						char(9)				null,
+	NombreRegistro				varchar(180)		null,
+	NombreActivo				varchar(180)		null,
+	NombreCancelo				varchar(180)		null,
+	MotivoCancelacion			varchar(180) 		null,		
+	FechaRegistro				smalldatetime		null,
+	FechaCancela				smalldatetime		null
+	)
+	
+	--Se valida trae id de usuario de divisa
+	if isnull(@IdeUsuario,@Ent_Cero) <> @Ent_Cero begin
+		--Se obtiene información del usuario de divisa, validando información en la bitacora de usuario de divisa
+		Insert into #UltimoEstatus(Folio, FechaEstatus, Consecutivo)
+		Select distinct Biu_FolUsu, Biu_FecEst, Biu_Consec
+		from SOUSNAEX noholdlock
+		inner join SOBITUSU noholdlock on ( Biu_Estatu =  Une_Estatu  and Une_Identi = SOBITUSU.Biu_FolUsu)
+		where   Une_Identi 	=	@IdeUsuario
+		order by Biu_FecEst
+		
+		select @Conteo = count(*) from #UltimoEstatus noholdlock
+		
+		if isnull(@Conteo,@Ent_Cero)=@Ent_Cero begin
+			--Si no hay información de bitacora se obtiene la información de SOUSNAEX
+			Insert into #UltimoEstatus(Folio, FechaEstatus, Consecutivo)
+			Select  Une_Identi,  Une_FecEst , Une_Consec 
+			from SOUSNAEX  noholdlock
+			where   Une_Identi  =	@IdeUsuario
+
+			insert into #UsuariosDivisa(Folio)
+			Select distinct Folio
+			from #UltimoEstatus noholdlock 			
+			
+			Insert into #RegistroDeEstatus(Folio, Estatus, FechaEstatus, Usuario, Sucursal, DescripcionEstatus, NombreUsuario, Consecutivo, FechaMenor)
+			Select  Une_Identi,  Une_Estatu ,   Une_FecEst , @Str_Vacio,	@Str_Vacio,	@Str_Vacio, @Str_Vacio, Une_Consec, Une_FecEst  
+			from SOUSNAEX  noholdlock
+			where  Une_Identi	=	@IdeUsuario
+			
+		end else begin
+			Insert into #RegUltEstatus (Folio,	Estatus,	FechaEstatus,	Consecutivo, FechaMenor)
+			Select  Biu_FolUsu,  Biu_Estatu, Max(Biu_FecEst), Max(Biu_Consec), min(Biu_FecEst)  
+			from SOBITUSU noholdlock
+			Inner join #UltimoEstatus noholdlock on (Folio= Biu_FolUsu)
+			group by Biu_FolUsu,  Biu_Estatu			
+			
+			insert into #UsuariosDivisa(Folio)
+			Select distinct Folio
+			from #RegUltEstatus noholdlock 		
+			
+			--se obtiene los otros cambios de estatus para saber quien realizó el cambio y cuando.
+			Insert into #RegistroDeEstatus(Folio, Estatus, FechaEstatus, Usuario, Sucursal, DescripcionEstatus, NombreUsuario, Consecutivo, FechaMenor)
+			Select Biu_FolUsu, Biu_Estatu, Biu_FecEst, Biu_Usuari, Biu_Sucurs, Biu_DesEst,  Usu_Nombre,	 Biu_Consec,	FechaMenor 
+			from SOBITUSU noholdlock
+			inner join #RegUltEstatus noholdlock on (Consecutivo	=	Biu_Consec)
+			left outer join SOUSUARI noholdlock on ( Usu_Numero =  Biu_Usuari )				
+		end
+	
+	end else begin
+		Insert into #UltimoEstatuResp(Folio, FechaEstatus, Consecutivo)
+		Select Biu_FolUsu, max(Biu_FecEst), max(Biu_Consec) from (
+			Select   Biu_FolUsu,  Biu_FecEst, Biu_Consec
+			from SOBITUSU noholdlock 
+			where SOBITUSU.Biu_FecEst  between @FechaIni and @FechaFin
+		) as tabla
+		group by Biu_FolUsu
+		order by max(Biu_FecEst)		
+	
+	
+		--Se valida si no trae sucursal ni estatus
+		if ((isnull(@Sucursal,@Str_Vacio)=@Str_Vacio) and (isnull(@Estatus,@Str_Vacio)=@Str_Vacio) ) begin
+			Insert into #UltimoEstatus(Folio, FechaEstatus, Consecutivo)
+			select Folio, FechaEstatus, Consecutivo from #UltimoEstatuResp
+
+		end else if ((isnull(@Sucursal,@Str_Vacio)<>@Str_Vacio) and (isnull(@Estatus,@Str_Vacio)=@Str_Vacio)) begin
+			--Se valida si no trae estatus y si trae sucursal
+			Insert into #UltimoEstatus(Folio, FechaEstatus, Consecutivo)
+			Select Biu_FolUsu,  Biu_FecEst, Biu_Consec
+			from SOBITUSU noholdlock 
+			inner join #UltimoEstatuResp UlEsRe noholdlock on (UlEsRe.Consecutivo	=	SOBITUSU. Biu_Consec )
+			where SOBITUSU.Biu_Sucurs	=	@Sucursal
+		end else if ((isnull(@Sucursal,@Str_Vacio)=@Str_Vacio) and (isnull(@Estatus,@Str_Vacio)<>@Str_Vacio)) begin
+			--Se valida si no trae sucursal y si trae estatus
+			Insert into #UltimoEstatus(Folio, FechaEstatus, Consecutivo)
+			Select Biu_FolUsu,  Biu_FecEst, Biu_Consec
+			from SOBITUSU noholdlock 
+			inner join #UltimoEstatuResp UlEsRe noholdlock on (UlEsRe.Consecutivo	=	SOBITUSU. Biu_Consec )
+			where SOBITUSU.Biu_Estatu 	=	@Estatus
+		end else if ((isnull(@Sucursal,@Str_Vacio)<>@Str_Vacio) and (isnull(@Estatus,@Str_Vacio)<>@Str_Vacio)) begin
+			---Se valida si trae estatus y sucursal.	
+			Insert into #UltimoEstatus(Folio, FechaEstatus, Consecutivo)
+			Select Biu_FolUsu,  Biu_FecEst, Biu_Consec
+			from SOBITUSU noholdlock 
+			inner join #UltimoEstatuResp UlEsRe noholdlock on (UlEsRe.Consecutivo	=	SOBITUSU. Biu_Consec )
+			where SOBITUSU.Biu_Sucurs	=	@Sucursal
+				and SOBITUSU.Biu_Estatu =	@Estatus
+		end
+		
+		Insert into #RegUltEstatus (Folio,	Estatus,	FechaEstatus,	Consecutivo, FechaMenor)
+		Select  Biu_FolUsu,  Biu_Estatu, Max(Biu_FecEst), Max(Biu_Consec), Min(Biu_FecEst)  
+		from SOBITUSU noholdlock
+		Inner join #UltimoEstatus noholdlock on (Folio= Biu_FolUsu)
+		group by Biu_FolUsu,  Biu_Estatu
+		
+		insert into #UsuariosDivisa(Folio)
+		Select distinct Folio
+		from #RegUltEstatus noholdlock 		
+		
+		--se obtiene los otros cambios de estatus para saber quien realizó el cambio y cuando.
+		Insert into #RegistroDeEstatus(Folio, Estatus, FechaEstatus, Usuario, Sucursal, DescripcionEstatus, NombreUsuario, Consecutivo, FechaMenor)
+		Select Biu_FolUsu, Biu_Estatu, Biu_FecEst, Biu_Usuari, Biu_Sucurs, Biu_DesEst,  Usu_Nombre,  Biu_Consec,	FechaMenor   
+		from SOBITUSU noholdlock
+		inner join #RegUltEstatus noholdlock on (Consecutivo	=	Biu_Consec /*Folio	=	Biu_FolUsu and Biu_Estatu=Estatus and FechaEstatus= Biu_FecEst and*/ )
+		left outer join SOUSUARI noholdlock on ( Usu_Numero =  Biu_Usuari )		
+		
+	end
+	
+	--Se termina de obtener la información solicitada para el reporte de usuario de divisa
+	insert into #ReporteUsuarioDivisa(Sucursal, IdeUsuario, Nombre, Estatus, NombreRegistro, NombreActivo, NombreCancelo, MotivoCancelacion, FechaRegistro,FechaCancela)
+	Select case SOUSNAEX.Une_Estatu when @Str_Inacti then RegIna.Sucursal when @Str_Activo then RegAct.Sucursal when @Str_Cancel then RegCan.Sucursal end Sucursal,
+		 SOUSNAEX.Une_Identi  , 
+		 case SOUSNAEX.Une_TabOri when @Tab_OriUno then SOPERSON.Per_Comple  when @Tab_OriDos then SOUSUEXT.Use_NoCoUs   end Nombre, 
+		 case SOUSNAEX.Une_Estatu when @Str_Inacti then @Des_Inacti when @Str_Activo then @Des_Activo when @Str_Cancel then @Des_Cancel end , 
+		 RegIna.NombreUsuario as NombreRegistro, 
+		 RegAct.NombreUsuario as NombreActivo, 
+		 RegCan.NombreUsuario as NombreCancelo,
+		 RegCan.DescripcionEstatus, 
+		 case when RegAct.Folio is null then @Fec_Vacia else RegAct.FechaEstatus end,   
+		 case when RegCan.Folio is null then @Fec_Vacia else RegCan.FechaEstatus end
+	from #UsuariosDivisa UsuDivisa  noholdlock  
+	inner join SOUSNAEX  noholdlock on (UsuDivisa.Folio	=	SOUSNAEX.Une_Identi)
+	left outer join SOPERSON noholdlock on (PerPersoID = Une_IdeUsu and Une_TabOri = @Tab_OriUno)
+	left outer join SOUSUEXT noholdlock on (Use_IdUsEx = Une_IdeUsu and Une_TabOri = @Tab_OriDos)
+	left outer join #RegistroDeEstatus  RegIna noholdlock on (Une_Identi 	=	RegIna.Folio and RegIna.Estatus	=	@Str_Inacti )
+	left outer join #RegistroDeEstatus  RegAct noholdlock on (Une_Identi 	=	RegAct.Folio and RegAct.Estatus	=	@Str_Activo	)
+	left outer join #RegistroDeEstatus  RegCan noholdlock on (Une_Identi 	=	RegCan.Folio and RegCan.Estatus	=	@Str_Cancel	)
+
+
+	select	Sucursal,		IdeUsuario as Une_Identi,		Nombre,				Estatus,		NombreRegistro, 
+			NombreActivo,	NombreCancelo,	MotivoCancelacion,	FechaRegistro,	FechaCancela 
+	from #ReporteUsuarioDivisa
+	Order by IdeUsuario
+	
+	
+	--Se borrar tabla
+	drop table #UltimoEstatus, #RegistroDeEstatus, #ReporteUsuarioDivisa, #UltimoEstatuResp, #RegUltEstatus, #UsuariosDivisa	
+	
