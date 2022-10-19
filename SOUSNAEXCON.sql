@@ -34,12 +34,6 @@ as
 *********************************************************************************
 ** Referencias: 															  	*
 *********************************************************************************
-** Modifico:	Ezequiel Gonzalez Cobix											*
-** Descripcion : Busqueda por nombre de usuarios de divisa				 		*
-** Fecha:	17/10/2022															*
-** Help:	1643006     														*
-*********************************************************************************
-*********************************************************************************
 ** Modifico:	Martin Adonis Lopez Mendoza													*
 ** Descripcion : Busqueda  de usuarios de divisas nacionales y extrangeros 											*
 ** Fecha:	01/09/2022															*
@@ -87,9 +81,7 @@ declare	@Str_LetraI char(1),
 		@Ent_Uno	int,
 		@Str_Uno 	char(1),
 		@Tab_UsuNac	char(1),
-		@Tab_UsuExt	char(1),
-		@Str_Dos	char(1),
-		@Str_Porcen	char(1)
+		@Tab_UsuExt	char(1)
 
 								/* Asignacion de valores a constantes */
 select	@Str_LetraI = 'I',		/* String I: ID de relacion */
@@ -104,9 +96,7 @@ select	@Str_LetraI = 'I',		/* String I: ID de relacion */
 		@Ent_Uno	= 1,			/* Entero uno */
 		@Str_Uno	= '1',		/* String: Uno */
 		@Tab_UsuNac	= '1',		/* Tabla Origen: SOPERSON usuario nacional */
-		@Tab_UsuExt	= '2',		/* Tabla Origen: SOUSUEXT usuario extranjero */
-		@Str_Dos	= '2',		/* String: dos */
-		@Str_Porcen	= '%'		/* porcentanje*/
+		@Tab_UsuExt	= '2'		/* Tabla Origen: SOUSUEXT usuario extranjero */
 		
 if @Une_TabCon = '' begin   /* Si consulta SOUSUEXT  */
 	
@@ -206,32 +196,7 @@ if @Une_TabCon = '' begin   /* Si consulta SOUSUEXT  */
 				drop table #UsuarioCompraVentaExtranjero			
 				
 			end			
-			
-		end	else if @Tip_ConCon = @Str_Dos begin
-			/* consulta por nombre de usuario de divisa */
-			
-			
-			Select  Une_Identi,  Per_Comple as Use_NoCoUs, Pai_Gentil as Biu_Pais,  Adi_FecNac as Use_FecNac 
-			--into #usuariosDivisaNombres
-			from SOUSNAEX noholdlock
-			inner join SOPERSON noholdlock on (PerPersoID = Une_IdeUsu)
-			inner join SOPERADI noholdlock on Per_Numero = Adi_PerNum
-			inner join SOPAIS noholdlock on Pai_Numero =  Per_Nacion 
-			where  Une_TabOri = @Tab_UsuNac 
-				and Per_Comple	like	@Use_NoCoUs+@Str_Porcen
-			union
-			--insert into #usuariosDivisaNombres(Une_Identi,  Use_NoCoUs, Biu_Pais,  Use_FecNac  )
-			Select Une_Identi,  Use_NoCoUs, Pai_Gentil as Biu_Pais,  Use_FecNac     
-			from SOUSNAEX noholdlock
-			inner join SOUSUEXT noholdlock on (Use_IdUsEx = Une_IdeUsu)
-			inner join SOPAIS noholdlock on Pai_Numero = Use_PaNaUs
-			where	Une_TabOri = @Tab_UsuExt 
-				and  Use_NoCoUs	like	@Use_NoCoUs+@Str_Porcen	
-				
-			--Select Une_Identi,  Use_NoCoUs, Biu_Pais,  Use_FecNac  
-			--from #usuariosDivisaNombres	
-			
-			--drop table #usuariosDivisaNombres			
+
 		end
 	
 	end
