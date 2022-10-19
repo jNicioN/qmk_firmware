@@ -142,7 +142,13 @@ as
 	NombreCancelo				varchar(180)		null,
 	MotivoCancelacion			varchar(180) 		null,		
 	FechaRegistro				smalldatetime		null,
-	FechaCancela				smalldatetime		null
+	FechaCancela				smalldatetime		null,
+	TablaOrigen					char(1)				null,
+	IdUsuTabla					int					null,
+	SucursalInactivo			char(3)				null,
+	SucursalActivo				char(3)				null,
+	SucursalCancelado			char(3)				null
+	
 	)
 	
 	--Se valida trae id de usuario de divisa
@@ -252,27 +258,65 @@ as
 	end
 	
 	--Se termina de obtener la información solicitada para el reporte de usuario de divisa
-	insert into #ReporteUsuarioDivisa(Sucursal, IdeUsuario, Nombre, Estatus, NombreRegistro, NombreActivo, NombreCancelo, MotivoCancelacion, FechaRegistro,FechaCancela)
-	Select case SOUSNAEX.Une_Estatu when @Str_Inacti then RegIna.Sucursal when @Str_Activo then RegAct.Sucursal when @Str_Cancel then RegCan.Sucursal end Sucursal,
+	insert into #ReporteUsuarioDivisa(Sucursal, IdeUsuario, Nombre, Estatus, NombreRegistro, NombreActivo, NombreCancelo, MotivoCancelacion, FechaRegistro,	
+										FechaCancela, TablaOrigen, IdUsuTabla, SucursalInactivo, SucursalActivo, SucursalCancelado)
+	Select @Str_Vacio,
 		 SOUSNAEX.Une_Identi  , 
-		 case SOUSNAEX.Une_TabOri when @Tab_OriUno then SOPERSON.Per_Comple  when @Tab_OriDos then SOUSUEXT.Use_NoCoUs   end Nombre, 
+		 @Str_Vacio , 
 		 case SOUSNAEX.Une_Estatu when @Str_Inacti then @Des_Inacti when @Str_Activo then @Des_Activo when @Str_Cancel then @Des_Cancel end , 
-		 RegIna.NombreUsuario as NombreRegistro, 
-		 RegAct.NombreUsuario as NombreActivo, 
-		 RegCan.NombreUsuario as NombreCancelo,
-		 RegCan.DescripcionEstatus, 
-		 case when RegAct.Folio is null then @Fec_Vacia else RegAct.FechaEstatus end,   
-		 case when RegCan.Folio is null then @Fec_Vacia else RegCan.FechaEstatus end
+		 @Str_Vacio , 
+		 @Str_Vacio , 
+		 @Str_Vacio ,
+		 @Str_Vacio , 
+		 @Fec_Vacia ,   
+		 @Fec_Vacia ,
+		 Une_TabOri, Une_IdeUsu, @Str_Vacio, @Str_Vacio, @Str_Vacio 
 	from #UsuariosDivisa UsuDivisa  noholdlock  
 	inner join SOUSNAEX  noholdlock on (UsuDivisa.Folio	=	SOUSNAEX.Une_Identi)
-	left outer join SOPERSON noholdlock on (PerPersoID = Une_IdeUsu and Une_TabOri = @Tab_OriUno)
-	left outer join SOUSUEXT noholdlock on (Use_IdUsEx = Une_IdeUsu and Une_TabOri = @Tab_OriDos)
-	left outer join #RegistroDeEstatus  RegIna noholdlock on (Une_Identi 	=	RegIna.Folio and RegIna.Estatus	=	@Str_Inacti )
-	left outer join #RegistroDeEstatus  RegAct noholdlock on (Une_Identi 	=	RegAct.Folio and RegAct.Estatus	=	@Str_Activo	)
-	left outer join #RegistroDeEstatus  RegCan noholdlock on (Une_Identi 	=	RegCan.Folio and RegCan.Estatus	=	@Str_Cancel	)
 
+	
+	
+	Update #ReporteUsuarioDivisa
+		set #ReporteUsuarioDivisa.Nombre	=	SOPERSON.Per_Comple	
+		from #ReporteUsuarioDivisa
+		inner join SOPERSON noholdlock on (PerPersoID = #ReporteUsuarioDivisa.IdUsuTabla)
+		where #ReporteUsuarioDivisa.TablaOrigen	=	@Tab_OriUno
+	
+	Update #ReporteUsuarioDivisa
+		set #ReporteUsuarioDivisa.Nombre	=	SOUSUEXT.Use_NoCoUs	
+		from #ReporteUsuarioDivisa
+		inner join SOUSUEXT noholdlock on (Use_IdUsEx = IdUsuTabla)
+		where TablaOrigen	=	@Tab_OriDos
+	
+	Update #ReporteUsuarioDivisa
+		set #ReporteUsuarioDivisa.NombreRegistro		=	RegIna.NombreUsuario,
+				#ReporteUsuarioDivisa.SucursalInactivo	= 	RegIna.Sucursal 
+		from #ReporteUsuarioDivisa
+		left outer join #RegistroDeEstatus  RegIna noholdlock on (#ReporteUsuarioDivisa.IdeUsuario 	=	RegIna.Folio and RegIna.Estatus	=	@Str_Inacti )
+		where RegIna.Folio is not null
+		
+	Update #ReporteUsuarioDivisa
+		set #ReporteUsuarioDivisa.NombreActivo			=	RegAct.NombreUsuario,
+				#ReporteUsuarioDivisa.SucursalActivo	=	RegAct.Sucursal,
+				#ReporteUsuarioDivisa.FechaRegistro		=	RegAct.FechaEstatus 
+		from #ReporteUsuarioDivisa
+		left outer join #RegistroDeEstatus  RegAct noholdlock on (#ReporteUsuarioDivisa.IdeUsuario 	=	RegAct.Folio and RegAct.Estatus	=	@Str_Activo	)
+		where RegAct.Folio is not null		
+		
+	Update #ReporteUsuarioDivisa
+		set #ReporteUsuarioDivisa.NombreCancelo			=	RegCan.NombreUsuario,
+				#ReporteUsuarioDivisa.SucursalCancelado	=	RegCan.Sucursal,
+				#ReporteUsuarioDivisa.FechaCancela		=	RegCan.FechaEstatus,
+				#ReporteUsuarioDivisa.MotivoCancelacion	=	RegCan.DescripcionEstatus
+		from #ReporteUsuarioDivisa
+		left outer join #RegistroDeEstatus  RegCan noholdlock on (#ReporteUsuarioDivisa.IdeUsuario 	=	RegCan.Folio and RegCan.Estatus	=	@Str_Cancel	)
+		where RegCan.Folio is not null		
+		
+		
+		
 
-	select	Sucursal,		IdeUsuario as Une_Identi,		Nombre,				Estatus,		NombreRegistro, 
+	select	case Estatus when @Des_Inacti then SucursalInactivo when @Des_Activo then SucursalActivo when @Des_Cancel then SucursalCancelado end Sucursal,		
+			IdeUsuario as Une_Identi,		Nombre,				Estatus,		NombreRegistro, 
 			NombreActivo,	NombreCancelo,	MotivoCancelacion,	FechaRegistro,	FechaCancela 
 	from #ReporteUsuarioDivisa
 	Order by IdeUsuario
