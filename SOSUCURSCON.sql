@@ -19,6 +19,11 @@ as
 **                           Store CONVERTIDO 							****
 ****************************************************************************
 ****************************************************************************
+** Modificó:	David Fernando Gutiérrez Benítez						****
+** Fecha:		13/Octubre/2022											****
+** HelpDesk:	1742453													****
+** Descripcion:	Se agrega Campo Suc_Catego a la lista L1             	****
+****************************************************************************
 ** Modificó:	Francisco Javier Carrillo Rojas							****
 ** Fecha:		19/sep/2022												****
 ** HelpDesk:	1694392													****
@@ -439,7 +444,7 @@ end else begin													/* Cliente:  Visual Basic */
 		select	@Suc_Nombre	= ltrim(rtrim(@Suc_Nombre)) + @Str_Porcen
 		
 		if @Tip_ConCon = @Lis_Genera							/* Lista General L1*/
-			select	Suc_Numero,	Suc_Nombre, Suc_StaCre
+			select	Suc_Numero,	Suc_Nombre, Suc_StaCre, Suc_Catego
 				from SOSUCURS noholdlock
 				where	upper(Suc_Nombre)	like upper(@Suc_Nombre)
 				order by Suc_Nombre
