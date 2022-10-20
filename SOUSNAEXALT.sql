@@ -89,7 +89,7 @@ select @Fec_FinMes = dateadd(dd, -1, dateadd(mm,  1, @Fec_IniMes))
 
 
 --activar cambio de divisas
-select @Str_Divisas=Par_Valor from  SOPARGEN where Par_Nombre = "UsuarioDivisas"
+select @Str_Divisas=Par_Valor from  SOPARGEN where Par_Nombre = 'UsuarioDivisas'
 
 
 /* Validacion general de parametros vacios */

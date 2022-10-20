@@ -95,7 +95,7 @@ select @Fec_Actual = Par_FecAct
 from SOPARAMS noholdlock
 where Par_Sucurs = @SucOrigen
 --activar cambio de divisas
-select @Str_Divisas=Par_Valor from  SOPARGEN where Par_Nombre = "UsuarioDivisas"
+select @Str_Divisas=Par_Valor from  SOPARGEN where Par_Nombre = 'UsuarioDivisas'
 
 /*Fecha de inicio y fin de mes*/
 select @Fec_IniMes = dateadd(dd, 1 - datepart(dd, @Fec_Actual), @Fec_Actual)
