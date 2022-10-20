@@ -142,6 +142,7 @@ as
 	NombreCancelo				varchar(180)		null,
 	MotivoCancelacion			varchar(180) 		null,		
 	FechaRegistro				smalldatetime		null,
+	FechaActivo					smalldatetime		null,
 	FechaCancela				smalldatetime		null,
 	TablaOrigen					char(1)				null,
 	IdUsuTabla					int					null,
@@ -212,7 +213,10 @@ as
 		--Se valida si no trae sucursal ni estatus
 		if ((isnull(@Sucursal,@Str_Vacio)=@Str_Vacio) and (isnull(@Estatus,@Str_Vacio)=@Str_Vacio) ) begin
 			Insert into #UltimoEstatus(Folio, FechaEstatus, Consecutivo)
-			select Folio, FechaEstatus, Consecutivo from #UltimoEstatuResp
+			Select Biu_FolUsu,  Biu_FecEst, Biu_Consec
+			from SOBITUSU noholdlock 
+			inner join #UltimoEstatuResp UlEsRe noholdlock on (UlEsRe.Consecutivo	=	SOBITUSU. Biu_Consec )
+			Inner join SOUSNAEX noholdlock on ( Une_Estatu = SOBITUSU.Biu_Estatu and   Biu_FolUsu =  Une_Identi )
 
 		end else if ((isnull(@Sucursal,@Str_Vacio)<>@Str_Vacio) and (isnull(@Estatus,@Str_Vacio)=@Str_Vacio)) begin
 			--Se valida si no trae estatus y si trae sucursal
@@ -220,6 +224,7 @@ as
 			Select Biu_FolUsu,  Biu_FecEst, Biu_Consec
 			from SOBITUSU noholdlock 
 			inner join #UltimoEstatuResp UlEsRe noholdlock on (UlEsRe.Consecutivo	=	SOBITUSU. Biu_Consec )
+			Inner join SOUSNAEX noholdlock on ( Une_Estatu = SOBITUSU.Biu_Estatu and   Biu_FolUsu =  Une_Identi )
 			where SOBITUSU.Biu_Sucurs	=	@Sucursal
 		end else if ((isnull(@Sucursal,@Str_Vacio)=@Str_Vacio) and (isnull(@Estatus,@Str_Vacio)<>@Str_Vacio)) begin
 			--Se valida si no trae sucursal y si trae estatus
@@ -227,6 +232,7 @@ as
 			Select Biu_FolUsu,  Biu_FecEst, Biu_Consec
 			from SOBITUSU noholdlock 
 			inner join #UltimoEstatuResp UlEsRe noholdlock on (UlEsRe.Consecutivo	=	SOBITUSU. Biu_Consec )
+			Inner join SOUSNAEX noholdlock on ( Une_Estatu = SOBITUSU.Biu_Estatu and   Biu_FolUsu =  Une_Identi )
 			where SOBITUSU.Biu_Estatu 	=	@Estatus
 		end else if ((isnull(@Sucursal,@Str_Vacio)<>@Str_Vacio) and (isnull(@Estatus,@Str_Vacio)<>@Str_Vacio)) begin
 			---Se valida si trae estatus y sucursal.	
@@ -234,6 +240,7 @@ as
 			Select Biu_FolUsu,  Biu_FecEst, Biu_Consec
 			from SOBITUSU noholdlock 
 			inner join #UltimoEstatuResp UlEsRe noholdlock on (UlEsRe.Consecutivo	=	SOBITUSU. Biu_Consec )
+			Inner join SOUSNAEX noholdlock on ( Une_Estatu = SOBITUSU.Biu_Estatu and   Biu_FolUsu =  Une_Identi )
 			where SOBITUSU.Biu_Sucurs	=	@Sucursal
 				and SOBITUSU.Biu_Estatu =	@Estatus
 		end
@@ -259,7 +266,7 @@ as
 	
 	--Se termina de obtener la información solicitada para el reporte de usuario de divisa
 	insert into #ReporteUsuarioDivisa(Sucursal, IdeUsuario, Nombre, Estatus, NombreRegistro, NombreActivo, NombreCancelo, MotivoCancelacion, FechaRegistro,	
-										FechaCancela, TablaOrigen, IdUsuTabla, SucursalInactivo, SucursalActivo, SucursalCancelado)
+										FechaCancela, TablaOrigen, IdUsuTabla, SucursalInactivo, SucursalActivo, SucursalCancelado, FechaActivo)
 	Select @Str_Vacio,
 		 SOUSNAEX.Une_Identi  , 
 		 @Str_Vacio , 
@@ -270,7 +277,7 @@ as
 		 @Str_Vacio , 
 		 @Fec_Vacia ,   
 		 @Fec_Vacia ,
-		 Une_TabOri, Une_IdeUsu, @Str_Vacio, @Str_Vacio, @Str_Vacio 
+		 Une_TabOri, Une_IdeUsu, @Str_Vacio, @Str_Vacio, @Str_Vacio, @Fec_Vacia 
 	from #UsuariosDivisa UsuDivisa  noholdlock  
 	inner join SOUSNAEX  noholdlock on (UsuDivisa.Folio	=	SOUSNAEX.Une_Identi)
 
@@ -290,7 +297,8 @@ as
 	
 	Update #ReporteUsuarioDivisa
 		set #ReporteUsuarioDivisa.NombreRegistro		=	RegIna.NombreUsuario,
-				#ReporteUsuarioDivisa.SucursalInactivo	= 	RegIna.Sucursal 
+				#ReporteUsuarioDivisa.SucursalInactivo	= 	RegIna.Sucursal,
+				#ReporteUsuarioDivisa.FechaRegistro		=	RegIna.FechaEstatus  
 		from #ReporteUsuarioDivisa
 		left outer join #RegistroDeEstatus  RegIna noholdlock on (#ReporteUsuarioDivisa.IdeUsuario 	=	RegIna.Folio and RegIna.Estatus	=	@Str_Inacti )
 		where RegIna.Folio is not null
@@ -298,7 +306,7 @@ as
 	Update #ReporteUsuarioDivisa
 		set #ReporteUsuarioDivisa.NombreActivo			=	RegAct.NombreUsuario,
 				#ReporteUsuarioDivisa.SucursalActivo	=	RegAct.Sucursal,
-				#ReporteUsuarioDivisa.FechaRegistro		=	RegAct.FechaEstatus 
+				#ReporteUsuarioDivisa.FechaActivo		=	RegAct.FechaEstatus 
 		from #ReporteUsuarioDivisa
 		left outer join #RegistroDeEstatus  RegAct noholdlock on (#ReporteUsuarioDivisa.IdeUsuario 	=	RegAct.Folio and RegAct.Estatus	=	@Str_Activo	)
 		where RegAct.Folio is not null		
@@ -316,8 +324,8 @@ as
 		
 
 	select	case Estatus when @Des_Inacti then SucursalInactivo when @Des_Activo then SucursalActivo when @Des_Cancel then SucursalCancelado end Sucursal,		
-			IdeUsuario as Une_Identi,		Nombre,				Estatus,		NombreRegistro, 
-			NombreActivo,	NombreCancelo,	MotivoCancelacion,	FechaRegistro,	FechaCancela 
+			IdeUsuario as Une_Identi,		Nombre,				Estatus,		NombreRegistro, NombreActivo,	
+			NombreCancelo,					MotivoCancelacion,	FechaRegistro,	FechaCancela, 	FechaActivo 
 	from #ReporteUsuarioDivisa
 	Order by IdeUsuario
 	
