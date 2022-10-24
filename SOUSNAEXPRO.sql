@@ -20,17 +20,23 @@ as
 ****************************************************************************
 **	REFERENCIAS:														****
 ****************************************************************************
+** Modifico:	Martin Adonis Lopez										****
+** Fecha:		30/08/2022												****
+** Help Desk:	1643006 									 			****
+** DescripciÃ³n:	Se ajusto la actualizacion de usuarios activos 
+					e inactivos a cancelado								****
+****************************************************************************
 ** Modifico:	Adriana Gomez											****
 ** Fecha:		05/05/2021												****
 ** Help Desk:	1376175 									 			****
-** Descripción:	Se  ajusta validacion de fecha de nacimiento			****
+** DescripciÃ³n:	Se  ajusta validacion de fecha de nacimiento			****
 ****************************************************************************
-** Modifico:	Erika Báez	 											****
+** Modifico:	Erika BÃ¡ez	 											****
 ** Fecha:		17/03/2021												****
 ** Help Desk:	1376175										 			****
 ** Descri:		Se agregan parametros generales para tabla SOSUNAEX		****
 ****************************************************************************
-** Modifico:	Erika Báez	 											****
+** Modifico:	Erika BÃ¡ez	 											****
 ** Fecha:		17/03/2021												****
 ** Help Desk:	1376175										 			****
 ** Descri:		Se agrega insert a bitacora VEBITADD y se actualiza		****
@@ -50,6 +56,7 @@ declare	@Fec_Actual		smalldatetime,
 								/* Declaracion de constantes */
 declare	@Sta_Activo		char(1),
 		@Sta_Inacti		char(1),
+		@Sta_Cancel		char(1),
 		@Une_TaOrNa		char(1),	
 		@Une_TaOrEx		char(1)	,
 		@Biu_DesEst		varchar(150),
@@ -60,11 +67,15 @@ declare	@Sta_Activo		char(1),
 		@Str_Punto		char(1),
 		@Str_Guion		char(1),
 		@Str_Ceros		char(8),
-		@Ent_Ocho		int
+		@Ent_Ocho		int,
+		@Str_Divisas   	char(8),
+		@Str_Status 	char(1),
+		@Str_Uno		char(1)
 
 								/* Asignacion de valores a constantes */
 select	@Sta_Activo	= 'A',		/* Estatus activo */
 		@Sta_Inacti	= 'I',		/* Estatus inactivo */
+		@Sta_Cancel = 'C',
 		@Une_TaOrNa	= '1',		/*tabla origen nacionales SOPERSON */
 		@Une_TaOrEx	= '2',		/*tabla origen extranjeros SOUSUEXT*/
 		@Biu_DesEst	= 'Inactivacion de Usuario de compra venta por actvacion de Cuenta',  /*descripcion de inactivacion de usuarios de cv */
@@ -75,44 +86,81 @@ select	@Sta_Activo	= 'A',		/* Estatus activo */
 		@Str_Punto	= '.',		/* String: Punto							*/
 		@Str_Guion	= '-',		/* String: Guion							*/
 		@Str_Ceros	= '00000000',/*String ceros*/
-		@Ent_Ocho	= 8
+		@Ent_Ocho	= 8,
+		@Str_Uno = '1',
+		@Str_Status = 'I'
 
 /*Consulta de fecha del sistema */
 select @Fec_Actual = Par_FecAct
 from SOPARAMS noholdlock
 where Par_Sucurs = @SucOrigen
+--activar cambio de divisas
+select @Str_Divisas=Par_Valor from  SOPARGEN where Par_Nombre = 'UsuarioDivisas'
 
 /*Fecha de inicio y fin de mes*/
 select @Fec_IniMes = dateadd(dd, 1 - datepart(dd, @Fec_Actual), @Fec_Actual)
 select @Fec_FinMes = dateadd(dd, -1, dateadd(mm,  1, @Fec_IniMes))					
 
+if @Str_Divisas = @Str_Uno begin 
+	/*se buscan concidencias en personas */
+			insert into SOBITUSU	(Biu_FolUsu,	Biu_Estatu,	Biu_FecEst,	Biu_Usuari,	Biu_Sucurs, 
+									 Biu_Canal,	Biu_DesEst,	NumTransac,	Transaccio,	Usuario,	 
+									 FechaSis,		SucOrigen,	SucDestino)
+				select		Une_Identi,	@Sta_Inacti,	@FechaSis,		@Usuario,	@SucOrigen,
+							@Biu_Canal,	@Biu_DesEst,	@NumTransac,	@Transaccio, @Usuario,	
+							@FechaSis,	@SucOrigen,		@SucDestino
+					from SOPERSON noholdlock 
+					inner join SOPERADI noholdlock on	Adi_PerNum	= Per_Numero 
+					inner join SOUSNAEX noholdlock on	PerPersoID	= Une_IdeUsu and Une_TabOri	= @Une_TaOrNa
+					where	Per_Comple	= @Une_Nombre 
+					  and   convert(date, Adi_FecNac) = convert(date, @Une_FecNac)
+					  and	(Une_Estatu	= @Sta_Activo or Une_Estatu = @Sta_Inacti)
+			  
+			  /* se busca en extranjeros el numero de usuario por nombre y fecha de nacimiento*/
+			insert into SOBITUSU	(Biu_FolUsu,	Biu_Estatu,	Biu_FecEst,	Biu_Usuari,	Biu_Sucurs, 
+									 Biu_Canal,		Biu_DesEst,	NumTransac,	Transaccio,	Usuario,	 
+									 FechaSis,	 SucOrigen,		SucDestino)
+				select	Une_Identi,	@Sta_Inacti,	@FechaSis,	@Usuario,	@SucOrigen,
+						@Biu_Canal,	@Biu_DesEst,	@NumTransac,	@Transaccio, @Usuario,	
+						@FechaSis,	@SucOrigen,		@SucDestino
+				from SOUSUEXT noholdlock 
+				inner join SOUSNAEX noholdlock on	Une_IdeUsu	= Use_IdUsEx and	Une_TabOri =@Une_TaOrEx
+				where	Use_NoCoUs	= @Une_Nombre
+				  and   convert(date, Use_FecNac)	= convert(date, @Une_FecNac)
+				  and	(Une_Estatu	= @Sta_Activo or Une_Estatu = @Sta_Inacti)
+	  	  
+end else begin
 /*se buscan concidencias en personas */
-insert into SOBITUSU	(Biu_FolUsu,	Biu_Estatu,	Biu_FecEst,	Biu_Usuari,	Biu_Sucurs, 
-						 Biu_Canal,	Biu_DesEst,	NumTransac,	Transaccio,	Usuario,	 
-						 FechaSis,		SucOrigen,	SucDestino)
-	select		Une_Identi,	@Sta_Inacti,	@FechaSis,		@Usuario,	@SucOrigen,
+	insert into SOBITUSU	(Biu_FolUsu,	Biu_Estatu,	Biu_FecEst,	Biu_Usuari,	Biu_Sucurs, 
+							 Biu_Canal,	Biu_DesEst,	NumTransac,	Transaccio,	Usuario,	 
+							 FechaSis,		SucOrigen,	SucDestino)
+		select		Une_Identi,	@Sta_Inacti,	@FechaSis,		@Usuario,	@SucOrigen,
+					@Biu_Canal,	@Biu_DesEst,	@NumTransac,	@Transaccio, @Usuario,	
+					@FechaSis,	@SucOrigen,		@SucDestino
+			from SOPERSON noholdlock 
+			inner join SOPERADI noholdlock on	Adi_PerNum	= Per_Numero 
+			inner join SOUSNAEX noholdlock on	PerPersoID	= Une_IdeUsu and Une_TabOri	= @Une_TaOrNa
+			where	Per_Comple	= @Une_Nombre 
+			  and   convert(date, Adi_FecNac) = convert(date, @Une_FecNac)
+			  and	Une_Estatu	= @Sta_Activo
+		  
+		  /* se busca en extranjeros el numero de usuario por nombre y fecha de nacimiento*/
+	insert into SOBITUSU	(Biu_FolUsu,	Biu_Estatu,	Biu_FecEst,	Biu_Usuari,	Biu_Sucurs, 
+							 Biu_Canal,		Biu_DesEst,	NumTransac,	Transaccio,	Usuario,	 
+							 FechaSis,	 SucOrigen,		SucDestino)
+		select	Une_Identi,	@Sta_Inacti,	@FechaSis,	@Usuario,	@SucOrigen,
 				@Biu_Canal,	@Biu_DesEst,	@NumTransac,	@Transaccio, @Usuario,	
 				@FechaSis,	@SucOrigen,		@SucDestino
-		from SOPERSON noholdlock 
-		inner join SOPERADI noholdlock on	Adi_PerNum	= Per_Numero 
-		inner join SOUSNAEX noholdlock on	PerPersoID	= Une_IdeUsu and Une_TabOri	= @Une_TaOrNa
-		where	Per_Comple	= @Une_Nombre 
-		  and   convert(date, Adi_FecNac) = convert(date, @Une_FecNac)
+		from SOUSUEXT noholdlock 
+		inner join SOUSNAEX noholdlock on	Une_IdeUsu	= Use_IdUsEx and	Une_TabOri =@Une_TaOrEx
+		where	Use_NoCoUs	= @Une_Nombre
+		  and   convert(date, Use_FecNac)	= convert(date, @Une_FecNac)
 		  and	Une_Estatu	= @Sta_Activo
+
+end 
+
 	
-/* se busca en extranjeros el numero de usuario por nombre y fecha de nacimiento*/
-insert into SOBITUSU	(Biu_FolUsu,	Biu_Estatu,	Biu_FecEst,	Biu_Usuari,	Biu_Sucurs, 
-						 Biu_Canal,		Biu_DesEst,	NumTransac,	Transaccio,	Usuario,	 
-						 FechaSis,	 SucOrigen,		SucDestino)
-	select	Une_Identi,	@Sta_Inacti,	@FechaSis,	@Usuario,	@SucOrigen,
-			@Biu_Canal,	@Biu_DesEst,	@NumTransac,	@Transaccio, @Usuario,	
-			@FechaSis,	@SucOrigen,		@SucDestino
-	from SOUSUEXT noholdlock 
-	inner join SOUSNAEX noholdlock on	Une_IdeUsu	= Use_IdUsEx and	Une_TabOri =@Une_TaOrEx
-	where	Use_NoCoUs	= @Une_Nombre
-	  and   convert(date, Use_FecNac)	= convert(date, @Une_FecNac)
-	  and	Une_Estatu	= @Sta_Activo
-	  	  
+
 /*Buscar movimientos de usuarios para pasarlos a la bitacora*/
 insert into VEBITADD	(Bit_Client,	Bit_Usuari,	Bit_NumTra,	Bit_Monto,	Bit_Fecha,
 						 Bit_TipOpe,	NumTransac,	Transaccio,		Usuario,	FechaSis,
@@ -140,10 +188,13 @@ update VEACUDLL set
 	where	Adl_NumTra	= Bit_NumTra
 	  and  v.NumTransac	= @NumTransac 
 	  	
+
+if @Str_Divisas = @Str_Uno begin 
+	select @Str_Status = @Sta_Cancel
+end 
 		
 update SOUSNAEX set 
-	Une_Estatu	= @Sta_Inacti,
-		
+	Une_Estatu	= @Str_Status,
 	NumTransac	= @NumTransac,
 	Transaccio	= @Transaccio,
 	Usuario		= @Usuario,
@@ -152,5 +203,4 @@ update SOUSNAEX set
 	SucDestino	= @SucDestino
 	from SOBITUSU noholdlock
 	inner join SOUSNAEX noholdlock on	Biu_FolUsu	= Une_Identi 
-	where	SOBITUSU.NumTransac	= @NumTransac 
-	
+	where	SOBITUSU.NumTransac	= @NumTransac
