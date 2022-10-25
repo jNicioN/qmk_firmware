@@ -108,6 +108,7 @@ select	@Str_LetraI = 'I',		/* String I: ID de relacion */
 		@Str_Dos	= '2',		/* String: dos */
 		@Str_Porcen	= '%',		/* porcentanje*/
 		@Fec_Vacia	= '1900-01-01'	/*Fecha Vacia*/		
+
 		
 if @Une_TabCon = '' begin   /* Si consulta SOUSUEXT  */
 	

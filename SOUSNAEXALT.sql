@@ -56,7 +56,10 @@ declare	@Str_Vacio	char(1),
 		@Str_LetraI varchar(1),
 		@Biu_Canal	int,
 		@Biu_DesEst	varchar(180),
-		@Sta_Inacti varchar(1)
+		@Sta_Inacti varchar(1),		
+		@Str_Status 	char(1),
+		@Str_Uno		char(1),
+		@Str_Divisas   	char(8)
 
 
 								/* Asignacion de valores a constantes */
@@ -67,7 +70,10 @@ select	@Str_Vacio	= '',		/* String Vacio */
 		@Str_LetraI	= 'I',		/* String Letra I */
 		@Biu_Canal	= 5,			/* Canal de originacion del usuario correspondiente a Apertura*/
 		@Biu_DesEst	= 'Creacion de Usuario de compra venta',  /* Descripcion para la bitacora */
-		@Sta_Inacti = 'I'		/* Estatus inactivo */
+		@Sta_Inacti = 'I',		/* Estatus inactivo */
+		@Str_Uno = '1',
+		@Str_Status = 'A'
+		
 
 
 select @Une_IdeInt = (convert(int, str_replace(ltrim(str_replace(@Une_IdeUsu , '0', ' ')),' ', '0') ))
@@ -80,6 +86,11 @@ where Par_Sucurs = @SucOrigen
 /*Fecha de inicio y fin de mes*/
 select @Fec_IniMes = dateadd(dd, 1 - datepart(dd, @Fec_Actual), @Fec_Actual)
 select @Fec_FinMes = dateadd(dd, -1, dateadd(mm,  1, @Fec_IniMes))
+
+
+--activar cambio de divisas
+select @Str_Divisas=Par_Valor from  SOPARGEN where Par_Nombre = 'UsuarioDivisas'
+
 
 /* Validacion general de parametros vacios */
 if isnull(@Une_Identi, @Ent_Cero) = @Ent_Cero begin
@@ -109,18 +120,24 @@ select	@Ent_Existe	= @Ent_Uno
 	where	Une_IdeUsu	= @Une_IdeInt 
 	  and	Une_TabOri = @Une_TabOri
 	
+
 if @Ent_Existe = @Ent_Uno begin
 	select	Err_Codigo = '000004',
 			Err_Mensaj = 'No se puede dar de alta usuario, favor aperturar cliente'
 	rollback
 	return @Ent_Uno
 end
+
+
+if @Str_Divisas = @Str_Uno begin 
+	select @Str_Status = @Str_LetraI
+end 
 insert into SOUSNAEX ( 
 	Une_Identi,	Une_IdeUsu,	Une_TabOri,	Une_Estatu, Une_Migrad,	
 	Une_FecReg,	Une_FecEst,	NumTransac,	Transaccio,	Usuario,	
 	FechaSis,	SucOrigen,	SucDestino)
 	values (
-	@Une_Identi,	@Une_IdeInt,	@Une_TabOri,	@Str_LetraI,	@Str_Cero, 
+	@Une_Identi,	@Une_IdeInt,	@Une_TabOri,	@Str_Status,	@Str_Cero, 
 	@FechaSis,		@FechaSis,		@NumTransac,	@Transaccio,	@Usuario,	   
 	@FechaSis,		@SucOrigen,		@SucDestino)
 
