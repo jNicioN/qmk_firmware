@@ -19,6 +19,11 @@ as
 ****************************************************************************
 **	REFERENCIAS:														****
 ****************************************************************************
+** Modifico:	Martin Adonis Lopez Mendoza								****
+** Fecha:		01/09/2022												****
+** Help Desk:	1643006										 			****
+** Descripción:	Se agrega estatus cancelado								****
+****************************************************************************
 ** Modifico:	Erika Báez	 											****
 ** Fecha:		17/Marzo/2021											****
 ** Help Desk:	1376175										 			****
@@ -38,27 +43,54 @@ as
 								/* Declaracion de Variables */
 declare	@Ent_Existe	int,
 		@Une_IdeInt	int,
-		@Status		int
+		@Status		int,
+		@Fec_Actual  	smalldatetime,	
+		@Fec_IniMes		smalldatetime,
+		@Fec_FinMes 	smalldatetime
 		
 								/* Declaracion de constantes */
 declare	@Str_Vacio	char(1),
 		@Ent_Cero	int,
 		@Ent_Uno	int,
 		@Str_Cero	varchar(1),
-		@Str_LetraA varchar(1),
+		@Str_LetraI varchar(1),
 		@Biu_Canal	int,
-		@Biu_DesEst	varchar(180)
+		@Biu_DesEst	varchar(180),
+		@Sta_Inacti varchar(1),		
+		@Str_Status 	char(1),
+		@Str_Uno		char(1),
+		@Str_Divisas   	char(8)
+
 
 								/* Asignacion de valores a constantes */
 select	@Str_Vacio	= '',		/* String Vacio */
 		@Ent_Cero	= 0,			/* Entero cero */
 		@Ent_Uno	= 1,			/* Entero uno */
 		@Str_Cero	= '0',		/* String Cero */
-		@Str_LetraA	= 'A',		/* String Letra A */
+		@Str_LetraI	= 'I',		/* String Letra I */
 		@Biu_Canal	= 5,			/* Canal de originacion del usuario correspondiente a Apertura*/
-		@Biu_DesEst	= 'Creacion de Usuario de compra venta'  /* Descripcion para la bitacora */
+		@Biu_DesEst	= 'Creacion de Usuario de compra venta',  /* Descripcion para la bitacora */
+		@Sta_Inacti = 'I',		/* Estatus inactivo */
+		@Str_Uno = '1',
+		@Str_Status = 'A'
+		
+
 
 select @Une_IdeInt = (convert(int, str_replace(ltrim(str_replace(@Une_IdeUsu , '0', ' ')),' ', '0') ))
+
+/*Consulta de fecha del sistema */
+select @Fec_Actual = Par_FecAct
+from SOPARAMS noholdlock
+where Par_Sucurs = @SucOrigen
+
+/*Fecha de inicio y fin de mes*/
+select @Fec_IniMes = dateadd(dd, 1 - datepart(dd, @Fec_Actual), @Fec_Actual)
+select @Fec_FinMes = dateadd(dd, -1, dateadd(mm,  1, @Fec_IniMes))
+
+
+--activar cambio de divisas
+select @Str_Divisas=Par_Valor from  SOPARGEN where Par_Nombre = 'UsuarioDivisas'
+
 
 /* Validacion general de parametros vacios */
 if isnull(@Une_Identi, @Ent_Cero) = @Ent_Cero begin
@@ -81,7 +113,6 @@ if isnull(@Une_TabOri, @Str_Vacio) = @Str_Vacio begin
 	rollback
 	return @Ent_Uno
 end 
-
 /*  Revisar si ya existe la relacion  */	
 select	@Ent_Existe	= @Ent_Cero
 select	@Ent_Existe	= @Ent_Uno
@@ -89,6 +120,7 @@ select	@Ent_Existe	= @Ent_Uno
 	where	Une_IdeUsu	= @Une_IdeInt 
 	  and	Une_TabOri = @Une_TabOri
 	
+
 if @Ent_Existe = @Ent_Uno begin
 	select	Err_Codigo = '000004',
 			Err_Mensaj = 'No se puede dar de alta usuario, favor aperturar cliente'
@@ -96,17 +128,21 @@ if @Ent_Existe = @Ent_Uno begin
 	return @Ent_Uno
 end
 
+
+if @Str_Divisas = @Str_Uno begin 
+	select @Str_Status = @Str_LetraI
+end 
 insert into SOUSNAEX ( 
 	Une_Identi,	Une_IdeUsu,	Une_TabOri,	Une_Estatu, Une_Migrad,	
 	Une_FecReg,	Une_FecEst,	NumTransac,	Transaccio,	Usuario,	
 	FechaSis,	SucOrigen,	SucDestino)
 	values (
-	@Une_Identi,	@Une_IdeInt,	@Une_TabOri,	@Str_LetraA,	@Str_Cero, 
+	@Une_Identi,	@Une_IdeInt,	@Une_TabOri,	@Str_Status,	@Str_Cero, 
 	@FechaSis,		@FechaSis,		@NumTransac,	@Transaccio,	@Usuario,	   
 	@FechaSis,		@SucOrigen,		@SucDestino)
 
 exec @Status = SOBITUSUALT 
-	@Une_Identi,	@Str_LetraA,	@FechaSis,		@Usuario,		@SucOrigen,  
+	@Une_Identi,	@Str_LetraI,	@FechaSis,		@Usuario,		@SucOrigen,  
 	@Biu_Canal,		@Biu_DesEst,	@NumTransac,	@Transaccio,	@Usuario,	  
 	@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
 	
