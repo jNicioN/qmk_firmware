@@ -37,7 +37,7 @@ as
 ** Modifico:	Ezequiel Gonzalez Cobix											*
 ** Descripcion : Busqueda por nombre de usuarios de divisa				 	 	*
 ** Fecha:	17/10/2022															*
-** Key Jira:	TRAAC-809 														*
+** Key Jira:	TRAAC-851 														*
 *********************************************************************************
 ** Modifico:	Martin Adonis Lopez Mendoza													*
 ** Descripcion : Busqueda  de usuarios de divisas nacionales y extrangeros 											*
