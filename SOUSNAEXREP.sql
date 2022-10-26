@@ -38,13 +38,16 @@ as
 			@Des_Cancel	char(9),
 			@Tab_OriUno	char(1),
 			@Tab_OriDos	char(2),
-			@Ent_Tres	int
+			@Ent_Tres	int,
+			@Ent_VeiTre	int,
+			@Ent_CinNue	int
 
 	/* Declaracion de variables */
 	declare	@Conteo		int,
 			@Val_Fecha  smalldatetime,
 			@IdeUsuario	int,
-			@Estatus	char(1)
+			@Estatus	char(1),
+			@Fec_Fin	smalldatetime
 	
 	/* Asignacion de constantes*/	
 	select	@Str_Vacio	=	'',				/*Cadena vacia*/
@@ -58,7 +61,10 @@ as
 			@Des_Cancel	=	'Cancelado',	/*Descripción de estatus Cancelado*/
 			@Tab_OriUno	=	'1',			/*Tabla origen 1 SOPERSON*/
 			@Tab_OriDos	=	'2',			/*Tabla origen 1 SOUSREXT*/
-			@Ent_Tres   =	3 				/* Entero tres */
+			@Ent_Tres   =	3, 				/* Entero tres */
+			@Ent_VeiTre	=	23,				/* Entero Veintitres*/
+			@Ent_CinNue	=	59				/* Entero Cincuenta y nueve*/
+			
 			
 	/* Asignacion de variables */
 
@@ -67,7 +73,7 @@ as
 	select @Val_Fecha	=	dateadd(month, @Ent_Tres, @FechaIni)
 	select @IdeUsuario	=	@Une_Identi
 	select @Estatus		=	@Une_Estatu
-	
+	select @Fec_Fin		=   dateadd(second,@Ent_CinNue,dateadd(minute,@Ent_CinNue,dateadd(hour, @Ent_VeiTre, @FechaFin)))
 
 	--Se evalua rango de fechas
 	if @FechaFin > @Val_Fecha
@@ -204,7 +210,7 @@ as
 		Select Biu_FolUsu, max(Biu_FecEst), max(Biu_Consec) from (
 			Select   Biu_FolUsu,  Biu_FecEst, Biu_Consec
 			from SOBITUSU noholdlock 
-			where SOBITUSU.Biu_FecEst  between @FechaIni and @FechaFin
+			where SOBITUSU.Biu_FecEst  between @FechaIni and  @Fec_Fin 
 		) as tabla
 		group by Biu_FolUsu
 		order by max(Biu_FecEst)		
