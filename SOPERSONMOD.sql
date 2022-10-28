@@ -47,7 +47,13 @@ as
 ***************************************************************************/
 /** REFERENCIAS:
 ****************************************************************************
-** Modifico:		Armando Alexis Sepúlveda Cruz							****
+** Modificó:	Yuridia Santiago									 	****
+** Fecha:		23/Sep/2022											   	****
+** Help: 		1739140											   		****
+** Descripcion:	Se agrega validación para que  							****
+**				Per_Tipo acepte sólo 1 o 2								****
+****************************************************************************
+** Modifico:		Armando Alexis Sepúlveda Cruz						****
 ** Fecha:		26/Junio/2017											****
 ** Help:		991811													****
 ** Descripcion: Se elimina la concatenación de Per_Titulo en Per_ComOrd	****
@@ -194,7 +200,14 @@ declare	@Per_Comple	varchar(180),	/*	Declaracion de Variables	*/
 		@Loc_Pais	char(3),
 		@Val_Sucurs	char(3),
 		@Cli_Sucurs	char(3),
-		@Cli_Numero	char(8)
+		@Cli_Numero	char(8),
+		@Aux_Sector char (3),
+		@Aux_ActINE	varchar(10),	
+		@Aux_Locali	char(8),		
+		@Aux_Entida char(3),		
+		@Aux_Nacion char(3),		
+		@Aux_CodPos char(6),
+		@Aux_PerNum char(8)			
 
 declare	@Str_Vacio	char(1),		/*	Declaracion de Constantes	*/
 		@Str_Espaci	char(1),
@@ -219,7 +232,7 @@ declare	@Str_Vacio	char(1),		/*	Declaracion de Constantes	*/
 		@Tip_Apode	char(1),
 		@Tip_Hered	char(1),
 		@Tip_Titula	char(1),
-		@Str_No123	char(6),
+		@Str_No12	char(6),
 		@Str_23		char(4),
 		@Mod_FabCon	char(2),
 		@Mod_AplOnl	char(2),
@@ -252,7 +265,7 @@ select	@Str_Vacio	= '',				-- String Vacio
 		@Tip_Apode	= '2',				-- Apoderado de la Cuenta para Personas Morales de CHCOTBEN
 		@Tip_Hered	= 'H',
 		@Tip_Titula	= '1',
-		@Str_No123	= '[^123]',
+		@Str_No12	= '[^12]',
 		@Str_23		= '[23]',
 		@Mod_FabCon	= 'FB',				-- Modulo de Fabrica de Crédito al Consumo
 		@Mod_AplOnl	= 'OL',				-- Modulo de Aplicaciones Online
@@ -285,7 +298,7 @@ if @Modulo = @Mod_AplOnl begin
 				Err_Mensaj	= 'El cliente tiene cuentas que requieren de la sucursal para realizar cambios.',
 				Err_Variab	= 'Cli_Numero'
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 
 	select	@Per_Titulo	= Per_Titulo,
@@ -325,7 +338,7 @@ if @Cob_Tipo = @Tip_Titula begin
 			select	Err_Codigo	= '000023',
 					Err_Mensaj	=  'LADA ó Teléfono Incorrecto, favor de verificarlos'
 			rollback
-			return 1
+			return @Ent_Uno
 		end
 
 	end
@@ -351,7 +364,7 @@ if @Numero = @Str_Vacio begin
 			Err_Mensaj	= 'La persona no existe',
 			Err_Variab	= 'Per_Numero'
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Tip_Proces = @Tip_CueChe and @Cob_Tipo = @Tip_Titula begin
@@ -371,7 +384,7 @@ if @Modulo not in (@Pan_DatCon, @Pan_Promot, @Pan_PerCli, @Pan_ActFin) begin
 					Err_Mensaj	= 'Proporcione la Razon social' + @Err_Descri,
 					Err_Variab	= 'Per_RazSoc'
 			rollback
-			return 1
+			return @Ent_Uno
 		end
 
 		if @Per_RFC = @Str_Vacio begin
@@ -379,7 +392,7 @@ if @Modulo not in (@Pan_DatCon, @Pan_Promot, @Pan_PerCli, @Pan_ActFin) begin
 					Err_Mensaj	= 'Proporcione el RFC' + @Err_Descri,
 					Err_Variab	= 'Per_RFC'
 			rollback
-			return 1
+			return @Ent_Uno
 		end
 	end
 
@@ -390,7 +403,7 @@ if @Modulo not in (@Pan_DatCon, @Pan_Promot, @Pan_PerCli, @Pan_ActFin) begin
 					Err_Mensaj	= 'Proporcione el Nombre' + @Err_Descri,
 					Err_Variab	= 'Per_Nombre'
 			rollback
-			return 1
+			return @Ent_Uno
 		end
 
 		if @Per_ApePat = @Str_Vacio begin
@@ -398,7 +411,7 @@ if @Modulo not in (@Pan_DatCon, @Pan_Promot, @Pan_PerCli, @Pan_ActFin) begin
 					Err_Mensaj	= 'Proporcione el Apellido Paterno' + @Err_Descri,
 					Err_Variab	= 'Per_ApePat'
 			rollback
-			return 1
+			return @Ent_Uno
 		end
 
 		if (@Per_ApeMat = @Str_Vacio) and @Cob_Tipo <> @Tip_Hered begin
@@ -406,7 +419,7 @@ if @Modulo not in (@Pan_DatCon, @Pan_Promot, @Pan_PerCli, @Pan_ActFin) begin
 					Err_Mensaj	= 'Proporcione el Apellido Materno' + @Err_Descri,
 					Err_Variab	= 'Per_ApeMat'
 			rollback
-			return 1
+			return @Ent_Uno
 		end
 
 		/* Si no se captura el RFC debe armarse su estructura a apartir de su nombre y Fecha de nacimiento*/
@@ -415,24 +428,24 @@ if @Modulo not in (@Pan_DatCon, @Pan_Promot, @Pan_PerCli, @Pan_ActFin) begin
 					Err_Mensaj	= 'Proporcione el RFC o la fecha de Nacimiento' + @Err_Descri,
 					Err_Variab	= 'Per_RFC'
 			rollback
-			return 1
+			return @Ent_Uno
 		end
 	end
 
 	/* Datos Personales - Validaciones Generales */
-	if (@Per_Tipo like @Str_No123) begin
+	if (@Per_Tipo like @Str_No12) begin
 		if @Cob_Tipo <> @Tip_Titula begin
 			select	Err_Codigo	= '000002',
 					Err_Mensaj	= 'Tipo de Persona incorrecto',
 					Err_Variab	= 'Per_Tipo'
 			rollback
-			return 1
+			return @Ent_Uno
 		end else begin
 			select	Err_Codigo	= '000002',
 					Err_Mensaj	= 'Tipo de Cliente incorrecto',
 					Err_Variab	= 'Per_Tipo'
 			rollback
-			return 1
+			return @Ent_Uno
 		end
 	end
 
@@ -459,20 +472,22 @@ if (@Modulo <> @Ban_Electr) and (@Tip_Proces = @Tip_CueChe and @Cob_Tipo <> @Per
 					Err_Mensaj	= 'La persona ' + @PerExist + ' ya tiene este RFC. (Mod)',
 					Err_Variab	= 'Per_RFC'
 			rollback
-			return 1
+			return @Ent_Uno
 		end
 
 	end
 
 	if @Per_Sector <> @Str_Vacio begin
-		if not exists (select Sec_Numero
-						from CLSECTOR noholdlock
-						where	Sec_Numero	= @Per_Sector) begin
+		select @Aux_Sector	= Sec_Numero
+			from CLSECTOR noholdlock
+			where	Sec_Numero	= @Per_Sector
+
+		if isnull(  @Aux_Sector, @Str_Vacio) = @Str_Vacio begin
 			select	Err_Codigo	= '000011',
 					Err_Mensaj	= 'El sector' + @Err_Descri + ' no existe',
 					Err_Variab	= 'Per_Sector'
 			rollback
-			return 1
+			return @Ent_Uno
 		end
 	end
 
@@ -490,7 +505,7 @@ if (@Modulo <> @Ban_Electr) and (@Tip_Proces = @Tip_CueChe and @Cob_Tipo <> @Per
 					Err_Mensaj	= 'La actividad' + @Err_Descri + ' no existe',
 					Err_Variab	= 'Per_Activi'
 			rollback
-			return 1
+			return @Ent_Uno
 		end
 
 		if @Act_Status = @Sta_ActIna begin
@@ -498,20 +513,23 @@ if (@Modulo <> @Ban_Electr) and (@Tip_Proces = @Tip_CueChe and @Cob_Tipo <> @Per
 					Err_Mensaj	= 'La actividad' + @Err_Descri + ' esta inactiva',
 					Err_Variab	= 'Per_Activi'
 			rollback
-			return 1
+			return @Ent_Uno
 		end
 
 	end
 
 	if @Per_ActINE <> @Str_Vacio begin
-		if not exists (select	Act_Numero
-						from CLACTINE noholdlock
-						where	Act_Numero	= @Per_ActINE) begin
+
+		select @Aux_ActINE = Act_Numero
+			from CLACTINE noholdlock
+			where	Act_Numero	= @Per_ActINE
+
+		if  isnull(@Aux_ActINE, @Str_Vacio) = @Str_Vacio  begin
 			select	Err_Codigo	= '000014',
 					Err_Mensaj	= 'La actividad INEGI' + @Err_Descri + ' no existe',
 					Err_Variab	= 'Per_ActINE'
 			rollback
-			return 1
+			return @Ent_Uno
 		end
 	end
 
@@ -522,7 +540,7 @@ if (@Modulo <> @Ban_Electr) and (@Tip_Proces = @Tip_CueChe and @Cob_Tipo <> @Per
 					Err_Mensaj	= 'Proporcione la calle del domicilio' + @Err_Descri,
 					Err_Variab	= 'Per_Calle'
 			rollback
-			return 1
+			return @Ent_Uno
 		end
 
 		if @Per_CalNum = @Str_Vacio begin
@@ -530,62 +548,69 @@ if (@Modulo <> @Ban_Electr) and (@Tip_Proces = @Tip_CueChe and @Cob_Tipo <> @Per
 					Err_Mensaj	= 'Proporcione el numero del Domicilio' + @Err_Descri,
 					Err_Variab	= 'Per_CalNum'
 			rollback
-			return 1
+			return @Ent_Uno
 		end
 
-		if not exists (select	Loc_Numero
-						from CLLOCALI noholdlock
-						where	Loc_Numero	= @Per_Locali
-						  and	Loc_Entida	= @Per_Entida) begin
+		select	@Aux_Locali = Loc_Numero
+			from CLLOCALI noholdlock
+			where	Loc_Numero	= @Per_Locali
+				and	Loc_Entida	= @Per_Entida
+
+		if isnull(@Aux_Locali, @Str_Vacio) = @Str_Vacio begin
 			select	Err_Codigo	= '000017',
 					Err_Mensaj	= 'La ciudad' + @Err_Descri + ' no existe' + @Per_Locali,
 					Err_Variab	= 'Per_Locali'
 			rollback
-			return 1
+			return @Ent_Uno
 		end
 
-		if not exists (select	Ent_Numero
-							from CLENTIDA noholdlock,
-									CLLOCALI noholdlock
-							where	Ent_Numero	= @Per_Entida
-							and		Loc_Numero  = @Per_Locali
-							and		Loc_Entida	= Ent_Numero
-							and		Ent_Pais	= Loc_Pais) begin
+		select	@Aux_Entida = Ent_Numero
+			from CLENTIDA noholdlock,
+					CLLOCALI noholdlock
+			where	Ent_Numero	= @Per_Entida
+			and		Loc_Numero  = @Per_Locali
+			and		Loc_Entida	= Ent_Numero
+			and		Ent_Pais	= Loc_Pais
+
+		if isnull(@Aux_Entida, @Str_Vacio) = @Str_Vacio begin
 			select	Err_Codigo	= '000018',
 					Err_Mensaj	= 'El estado'  + @Err_Descri + ' no existe',
 					Err_Variab	= 'Per_Locali'
 			rollback
-			return 1
+			return @Ent_Uno
 		end
 
 	end
 
 	if @Per_Nacion <> @Str_Vacio begin
 
-		if (@Per_Tipo like @Str_23) and not exists (select	Pai_Numero
-														from SOPAIS noholdlock
-														where	Pai_Numero	= @Per_Nacion) begin
+		select	@Aux_Nacion = Pai_Numero
+			from SOPAIS noholdlock
+			where	Pai_Numero	= @Per_Nacion
+
+		if (@Per_Tipo like @Str_23) and (isnull(@Aux_Nacion, @Str_Vacio)) = @Str_Vacio begin
 			select	Err_Codigo	= '000019',
 					Err_Mensaj	= 'Nacionalidad' + @Err_Descri + ' Incorrecta',
 					Err_Variab	= 'Per_Nacion'
 			rollback
-			return 1
+			return @Ent_Uno
 		end
 
 	end
 
 	if @Tip_Proces = @Tip_CueChe and @Cob_Tipo not in (@Tip_Apode,@Tip_Hered) begin
 
-		if (@Per_CodPos = @Str_Vacio or not exists (select	Cpc_Numero
-														from CLCODPOS noholdlock
-														where	Cpc_Entida	= @Per_Entida
-														  and	Cpc_Locali	= @Per_Locali
-														  and	Cpc_CodPos	= @Per_CodPos)) and @Per_Nacion = @Per_PaiMex begin
+		select	@Aux_CodPos = Cpc_Numero
+			from CLCODPOS noholdlock
+			where	Cpc_Entida	= @Per_Entida
+				and	Cpc_Locali	= @Per_Locali
+				and	Cpc_CodPos	= @Per_CodPos
+		if (@Per_CodPos = @Str_Vacio or (isnull(@Aux_CodPos, @Str_Vacio) = @Str_Vacio)) and @Per_Nacion = @Per_PaiMex begin
 			select	Err_Codigo	= '000020',
 					Err_Mensaj	= 'Código Postal' + @Err_Descri + ' Incorrecto',
 					Err_Variab	= 'Per_CodPos'
 			rollback
-			return 1
+			return @Ent_Uno
 		end
 
 		if @Modulo not in (@Mod_AplOnl) begin
@@ -594,7 +619,7 @@ if (@Modulo <> @Ban_Electr) and (@Tip_Proces = @Tip_CueChe and @Cob_Tipo <> @Per
 						Err_Mensaj	= 'Comprobante de domicilio' + @Err_Descri + ' incorrecto',
 						Err_Variab	= 'Per_ComDom'
 				rollback
-				return 1
+				return @Ent_Uno
 			end
 
 			if (@Per_Tipo like @Str_23) and (@Per_EstCiv = @Str_Vacio) and @Cob_Tipo not in (@Tip_Benefi,@Tip_Hered,@Tip_ProRec,@Tip_ProRea,@Tip_Apode) begin
@@ -602,7 +627,7 @@ if (@Modulo <> @Ban_Electr) and (@Tip_Proces = @Tip_CueChe and @Cob_Tipo <> @Per
 						Err_Mensaj	= 'Proporcione el estado civil' + @Err_Descri,
 						Err_Variab	= 'Per_EstCiv'
 				rollback
-				return 1
+				return @Ent_Uno
 			end
 
 		end
@@ -630,11 +655,13 @@ if isnull(@Per_NumTra, @Str_Vacio) = @Str_Vacio begin
 			@Per_NumTra	= @NumTransac
 end
 
-if not exists (select	Per_Numero
-				from SOPERSON noholdlock
-				where	Per_Numero	= @Per_Numero
-				  and	Per_NumTra	= @Per_NumTra
-				  and	Per_Fecha	= @Per_Fecha) begin
+select	@Aux_PerNum = isnull(Per_Numero, @Str_Vacio)
+	from SOPERSON noholdlock
+	where	Per_Numero	= @Per_Numero
+		and	Per_NumTra	= @Per_NumTra
+		and	Per_Fecha	= @Per_Fecha
+
+if @Aux_PerNum = @Str_Vacio begin
 
 	select	@Bit_NumPer	= Per_Numero,
 			@Bit_Fecha	= Per_Fecha,
@@ -682,7 +709,7 @@ if not exists (select	Per_Numero
 		@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 
 end
