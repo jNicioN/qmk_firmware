@@ -20,9 +20,9 @@ as
 	************************************************************************************
 	** Referencias:
 	************************************************************************************
-	** Creo:			Ezequiel Gonzalez Cobix										****
+	** Modifico:			Ezequiel Gonzalez Cobix										****
 	** Fecha:			03/Noviembre/2022											****
-	** Req.	:			TRAAC-933													****
+	** Help:			TRAAC-933													****
 	** Descripción:		La consulta regresa la nacionalidad							**** 
 	************************************************************************************
 	** Creo:			Ezequiel Gonzalez Cobix										****
