@@ -20,6 +20,11 @@ as
 	************************************************************************************
 	** Referencias:
 	************************************************************************************
+	** Modifico:			Ezequiel Gonzalez Cobix										****
+	** Fecha:			03/Noviembre/2022											****
+	** Help:			TRAAC-933													****
+	** Descripción:		La consulta regresa la nacionalidad							**** 
+	************************************************************************************
 	** Creo:			Ezequiel Gonzalez Cobix										****
 	** Fecha:			06/Octubre/2022												****
 	** Req.	:			TRAAC-851														****
@@ -40,7 +45,9 @@ as
 			@Tab_OriDos	char(2),
 			@Ent_Tres	int,
 			@Ent_VeiTre	int,
-			@Ent_CinNue	int
+			@Ent_CinNue	int,
+			@Str_Nacion char(8),
+			@Str_Extran	char(10)
 
 	/* Declaracion de variables */
 	declare	@Conteo		int,
@@ -63,8 +70,9 @@ as
 			@Tab_OriDos	=	'2',			/*Tabla origen 1 SOUSREXT*/
 			@Ent_Tres   =	3, 				/* Entero tres */
 			@Ent_VeiTre	=	23,				/* Entero Veintitres*/
-			@Ent_CinNue	=	59				/* Entero Cincuenta y nueve*/
-			
+			@Ent_CinNue	=	59,				/* Entero Cincuenta y nueve*/
+			@Str_Nacion	=	'NACIONAL',		/* descripción nacional */
+			@Str_Extran	=	'EXTRANJERO'	/* descripción extranjero*/			
 			
 	/* Asignacion de variables */
 
@@ -329,15 +337,17 @@ as
 		left outer join #RegistroDeEstatus  RegCan noholdlock on (#ReporteUsuarioDivisa.IdeUsuario 	=	RegCan.Folio and RegCan.Estatus	=	@Str_Cancel	)
 		where RegCan.Folio is not null		
 		
-		
+	Update #ReporteUsuarioDivisa
+		set Sucursal = case Estatus when @Des_Inacti then SucursalInactivo when @Des_Activo then SucursalActivo when @Des_Cancel then SucursalCancelado end
 		
 
-	select	case Estatus when @Des_Inacti then SucursalInactivo when @Des_Activo then SucursalActivo when @Des_Cancel then SucursalCancelado end Sucursal,		
-			IdeUsuario as Une_Identi,		Nombre,				Estatus,		NombreRegistro, NombreActivo,	
-			NombreCancelo,					MotivoCancelacion,	FechaRegistro,	FechaCancela, 	FechaActivo 
+	select	Sucursal,								IdeUsuario as Une_Identi,			upper(Nombre) Nombre,						Upper(Estatus) Estatus,		
+			Upper(NombreRegistro) NombreRegistro, 	Upper(NombreActivo) NombreActivo,	Upper(NombreCancelo) NombreCancelo,			Upper(MotivoCancelacion) MotivoCancelacion,	
+			FechaRegistro,							FechaCancela, 						FechaActivo, 
+			case when TablaOrigen = @Tab_OriUno then @Str_Nacion  else @Str_Extran end as Biu_Pais 
 	from #ReporteUsuarioDivisa
-	Order by IdeUsuario
-	
+	Order by Sucursal, IdeUsuario
+
 	
 	--Se borrar tabla
 	drop table #UltimoEstatus, #RegistroDeEstatus, #ReporteUsuarioDivisa, #UltimoEstatuResp, #RegUltEstatus, #UsuariosDivisa	
