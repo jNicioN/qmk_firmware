@@ -52,7 +52,7 @@ if @Tip_ConTip = @Str_C begin
 	if @Tip_ConCon	= @Str_Uno begin
 
 		select top 1 Adi_TelCel, Adi_Email,(CASE 
-		    WHEN  Adi_FeMoCl <= @Fec_ModAnt THEN @Bit_PeVeSi
+		    WHEN  Adi_FeMoCl <= @Fec_ModAnt AND (Adi_TelCel !=@Str_Vacio OR Adi_Email !=@Str_Vacio) THEN @Bit_PeVeSi
 		   	ELSE @Bit_PeVeNo	
 		    END) as PermiteVer
 			from  CLADICIO noholdlock
