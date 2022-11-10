@@ -1,6 +1,7 @@
 create procedure SOANTECOCON (
    @Atc_Numero int,
    @Atc_AnaTer int,
+   @Atc_BieInm int,
    @Tip_Consul char(2),
    
    @NumTransac	char(10),
@@ -15,6 +16,11 @@ create procedure SOANTECOCON (
 /*********************************************************************
 ** DESCRIPCION: Consulta de registros de analitica terreno concepto	**
 **********************************************************************
+** Modifico:		Raul Muniz										**
+** Fecha:			10/11/2022                               		**
+** Help:			1643668		 					 				**
+** Descripcion:		Se agrega parametro @Atc_BieInm y consulta L3	**
+**********************************************************************
 ** Creo:			Felipe Castillo Rendon                    	  	**
 ** Fecha:			22/08/2017                               	  	**
 ** Help:			929417 					 					  	**
@@ -26,13 +32,15 @@ declare @Tip_ConTip char(1),		/* Variable de tipo de consulta o lista */
         @Str_C char(1), 			/* Variable de tipo cadena con valor C */
         @Str_Uno char(1), 			/* Variable entera con valor 1 */
         @Str_Dos char(1),			/* Variable entera con valor 2 */
+        @Str_Tres char(1),			/* Variable entera con valor 3 */
         @Ent_Activo smallint		/* Variable entera activa */
 
 select @Tip_ConTip = substring(@Tip_Consul, 1, 1),
        @Tip_ConCon = substring(@Tip_Consul, 2, 1), 
        @Str_C = 'C',
        @Str_Uno = '1',
-       @Str_Dos = '2' ,
+       @Str_Dos = '2',
+       @Str_Tres = '3',
        @Ent_Activo = 1
 
 if @Tip_ConTip	= @Str_C begin /* Consulta */
@@ -59,5 +67,13 @@ end else begin
 		from SOANTECO noholdlock
 		where Atc_AnaTer = @Atc_AnaTer
 			and Atc_EstAna = @Ent_Activo
-   end 
+   end
+   if @Tip_ConCon = @Str_Tres begin		/* L3 Lista de todos los conceptos activos por bien inmueble */
+		select 	Atc_Numero,		Atc_AnaTer,		Atc_BieInm,		Atc_EstAna, 
+				NumTransac,		Transaccio,		Usuario,		FechaSis, 
+				SucOrigen,		SucDestino 
+		from SOANTECO noholdlock
+		where Atc_BieInm = @Atc_BieInm
+			and Atc_EstAna = @Ent_Activo
+   end
 end
