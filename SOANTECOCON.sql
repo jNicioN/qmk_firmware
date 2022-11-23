@@ -19,6 +19,7 @@ create procedure SOANTECOCON (
 ** Modifico:		Raul Muniz										**
 ** Fecha:			10/11/2022                               		**
 ** Help:			1643668		 					 				**
+** C.Cambios:		20119											**
 ** Descripcion:		Se agrega parametro @Atc_BieInm y consulta L3	**
 **********************************************************************
 ** Creo:			Felipe Castillo Rendon                    	  	**
