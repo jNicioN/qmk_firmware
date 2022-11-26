@@ -21,6 +21,13 @@ create procedure SOESTFINCON (
 /*******************************************************************
 ** DESCRIPCION: Consulta de registros de estados financieros      **
 ********************************************************************
+** Modifica:		Raul Muniz					                  **
+** Fecha:			25/11/2022                               	  **
+** Descripcion:		Se modifica consulta L3 para regresar fecha   **
+** 					de modificacion en parametro Esf_FecMod		  **
+** Help: 			1643668		 					 			  **
+** C.Cambios:		20693										  **
+********************************************************************
 ** Modifica:		Jose R. Rodriguez Zenteno	                  **
 ** Fecha:			20/09/2021                               	  **
 ** Descripcion:		Se modifica consulta C8 para regresar         **
@@ -646,8 +653,8 @@ end else begin
 			Esf_TiEsFi,    Esf_ExpCif,    Esf_Moneda,    Esf_PerNum,    Esf_Solici,    
 			Esf_EsEsFi,    Esf_ValInp,    Esf_AplIca,    Esf_Icap,      Esf_CapNet,    
 			Esf_AcSuRi,    Esf_TipSol,    Esf_TipLiq,    Esf_TipEfi,    Esf_NomCon,	
-			Esf_NuCePr,    Esf_DesDic,    NumTransac,    Transaccio,    Usuario,    	
-			FechaSis,      SucOrigen,     SucDestino
+			Esf_NuCePr,    Esf_DesDic,    FechaSis as Esf_FecMod,		NumTransac,
+			Transaccio,    Usuario,		  FechaSis,      SucOrigen,     SucDestino
 		from SOESTFIN noholdlock
 		where Esf_PerNum = @Esf_PerNum
 		  and Esf_Solici = @Esf_Solici
