@@ -4,7 +4,7 @@ create procedure SOPRECAMPRO (
     @Prc_TiOpCa int,
     @Prc_Precio numeric(10,6),
     @Prc_Fecha  smalldatetime,  
-    @Prc_TipCon char(1),
+    @Tip_Proces char(1),
     
     @NumTransac	char(10),
 	@Transaccio	char(3),
@@ -33,50 +33,52 @@ declare @Cam_Encont int,            /* Declaración de Variables */
         @Dif_Fechas	int
 
 declare	@Ent_Cero   int,         	/* Declaración de Constantes */
-        @Str_Vacio  int
+        @Str_Vacio  int,
+        @Prc_Activo bit
 
-select  @Ent_Cero	=  0 			/*	Entero Cero					*/
+select  @Ent_Cero	=  0, 			/*	Entero Cero				 */
+        @Prc_Activo =  1            /*  Status Ativo             */
         
-select @Status = 0
-select @FechaSis = getdate()
-            
-select	@Dif_Fechas	= convert(int, datediff(dd, @Prc_Fecha, @FechaSis))
+select @Status      = @Ent_Cero
+select @FechaSis    = getdate()
+select @Dif_Fechas	= convert(int, datediff(dd, @Prc_Fecha, @FechaSis))
 
-select	Err_Codigo	= '000000',
-            Err_Mensaj	= @Dif_Fechas
-            
-select @Cam_Encont = count(*)
-    from SOPRECAM noholdlock
-    where Prc_Moneda   = @Prc_Moneda
-	  and Prc_TipCam   = @Prc_TipCam
-	  and Prc_TiOpCa   = @Prc_TiOpCa
-
-if @Dif_Fechas = 0 begin
-    if isnull(@Cam_Encont, @Ent_Cero) = @Ent_Cero begin
-        execute @Status = SOPRECAMALT
-            @Prc_Moneda,    @Prc_TipCam,    @Prc_TiOpCa,    @Prc_Precio,    @NumTransac,
-            @Transaccio,    @Usuario,       @FechaSis,      @SucOrigen,     @SucDestino,
-            @Modulo
-    end else begin
-        execute @Status = SOPRECAMACT
-            @Prc_Moneda,    @Prc_TipCam,    @Prc_TiOpCa,    @Prc_Precio,    @Prc_TipCon,
-            @NumTransac,    @Transaccio,    @Usuario,       @FechaSis,      @SucOrigen,
-            @SucDestino,    @Modulo
-    end
-end
-
-if @Status = 0 begin
-    select @Prc_Numero = Prc_Numero
-    from SOPRECAM noholdlock
-    where Prc_Moneda   = @Prc_Moneda
-      and Prc_TipCam   = @Prc_TipCam
-      and Prc_TiOpCa   = @Prc_TiOpCa
+if @Dif_Fechas >= @Ent_Cero begin 
     
-    if isnull(@Cam_Encont, @Ent_Cero) <> @Ent_Cero begin
-     execute SODIPRCAPRO
-        @Prc_Numero,    @Prc_Fecha,     @Prc_Precio,    @NumTransac,    @Transaccio,
-        @Usuario,       @FechaSis,      @SucOrigen,     @SucDestino,    @Modulo
+    select @Cam_Encont = count(*)
+        from SOPRECAM noholdlock
+        where Prc_Moneda   = @Prc_Moneda
+    	  and Prc_TipCam   = @Prc_TipCam
+    	  and Prc_TiOpCa   = @Prc_TiOpCa
+
+    if @Dif_Fechas = @Ent_Cero begin
+        if isnull(@Cam_Encont, @Ent_Cero) = @Ent_Cero begin
+            execute @Status = SOPRECAMALT
+                @Prc_Moneda,    @Prc_TipCam,    @Prc_TiOpCa,    @Prc_Precio,    @NumTransac,
+                @Transaccio,    @Usuario,       @FechaSis,      @SucOrigen,     @SucDestino,
+                @Modulo
+        end else begin
+            execute @Status = SOPRECAMACT
+                @Prc_Moneda,    @Prc_TipCam,    @Prc_TiOpCa,    @Prc_Precio,    @Prc_Activo,     @Tip_Proces,
+                @NumTransac,    @Transaccio,    @Usuario,       @FechaSis,      @SucOrigen,
+                @SucDestino,    @Modulo
+        end
     end
-end
 
+    if @Status = @Ent_Cero begin
+        select @Prc_Numero = Prc_Numero
+        from SOPRECAM noholdlock
+        where Prc_Moneda   = @Prc_Moneda
+          and Prc_TipCam   = @Prc_TipCam
+          and Prc_TiOpCa   = @Prc_TiOpCa
 
+        if isnull(@Prc_Numero, @Ent_Cero) <> @Ent_Cero begin
+         execute SODIPRCAPRO
+            @Prc_Numero,    @Prc_Fecha,     @Prc_Precio,    @NumTransac,    @Transaccio,
+            @Usuario,       @FechaSis,      @SucOrigen,     @SucDestino,    @Modulo
+        end
+    end
+end else begin
+    select	Err_Codigo	= '0000001',
+            Err_Mensaj	= 'No se puede guardar un Fix con fecha futura'
+end            

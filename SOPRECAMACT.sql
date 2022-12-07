@@ -3,7 +3,8 @@ create procedure SOPRECAMACT (
     @Prc_TipCam int,
     @Prc_TiOpCa int,
     @Prc_Precio numeric(10,6),
-    @Prc_TipCon char(1),
+	@Prc_Activo bit,
+    @Tip_Actual char(1),
 
     @NumTransac	char(10),
 	@Transaccio	char(3),
@@ -15,7 +16,6 @@ create procedure SOPRECAMACT (
 )
 
 as
-
 
 /*******************************************************************
 ** Descripcion : Actualizacion de Precios de Cambio                *
@@ -34,17 +34,13 @@ declare @Mon_Encont int,            /* Declaración de Variables */
 
 declare	@Ent_Cero   int,         	/* Declaración de Constantes */
         @Num_Cero   numeric,
-        @Prc_Activo bit,
-        @Tip_Precio char(1),
-        @Tip_Estatu char(1)
+        @Act_Precio char(1),
+        @Act_Estatu char(1)
 
 select  @Ent_Cero	=  0,				    /*	Entero Cero					*/
         @Num_Cero	=  0,				    /*	Numerico Uno				*/
-        @Prc_Activo =  1,                   /*  Status de activo            */
-        @Tip_Precio = 'P',                  /*  Actualizacion de Precio     */
-        @Tip_Estatu = 'E'                   /*  Actualizacion de Estatus    */
-
-
+        @Act_Precio = 'P',                  /*  Actualizacion de Precio     */
+        @Act_Estatu = 'E'                   /*  Actualizacion de Estatus    */
 
 select @Mon_Encont = count(*)
     from SOMONEDA noholdlock
@@ -79,7 +75,7 @@ if isnull(@Ope_Encont, @Ent_Cero) = @Ent_Cero begin
 	return 1
 end
 
-if @Prc_TipCon = @Tip_Precio begin
+if @Tip_Actual = @Act_Precio begin
     if @Prc_Precio <= @Num_Cero begin
     select 	Err_Codigo = '000004', 
 			Err_Mensaj = 'El precio debe ser mayor a 0',
@@ -101,7 +97,7 @@ if @Prc_TipCon = @Tip_Precio begin
 	      and Prc_TiOpCa   = @Prc_TiOpCa
 end
 
-if @Prc_TipCon = @Tip_Estatu begin
+if @Tip_Actual = @Act_Estatu begin
     update SOPRECAM set
 	    Prc_Activo = @Prc_Activo,
 	    NumTransac = @NumTransac,
@@ -114,7 +110,6 @@ if @Prc_TipCon = @Tip_Estatu begin
 	      and Prc_TipCam   = @Prc_TipCam
 	      and Prc_TiOpCa   = @Prc_TiOpCa
 end
-
 
 if @@error != @Ent_Cero begin
 	select	Err_Codigo	= '000005',

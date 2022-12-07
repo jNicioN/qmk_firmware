@@ -47,4 +47,13 @@ if isnull(@Pre_Encont, @Ent_Cero) <> @Ent_Cero begin
             @Usuario,      @FechaSis,      @SucOrigen,     @SucDestino 
     )
     
+    if @@error != @Ent_Cero begin
+    	select	Err_Codigo	= '000001',
+    			Err_Mensaj	= 'Ocurrió un error inesperado, por favor vuelva a intentar.'
+    	rollback
+    	return 1
+    end
+
+    select	Err_Codigo	= '000000',
+            Err_Mensaj	= 'Diario guardado exitosamente'
 end

@@ -48,4 +48,14 @@ if isnull(@Pre_Encont, @Ent_Cero) <> @Ent_Cero begin
         SucDestino = @SucDestino
         where Dpc_PreCam = @Dpc_PreCam
             and Dpc_Fecha  = @Dpc_Fecha
+    
+    if @@error != @Ent_Cero begin
+	    select	Err_Codigo	= '000005',
+	    		Err_Mensaj	= 'Ocurrió un error inesperado, por favor vuelva a intentar.'
+	    rollback
+	    return 1
+    end
+
+    select	Err_Codigo	= '000000',
+            Err_Mensaj	= 'Diario Actualizado exitosamente'
 end

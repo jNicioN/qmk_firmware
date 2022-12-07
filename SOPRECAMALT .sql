@@ -97,5 +97,5 @@ if @@error != @Ent_Cero begin
 	return 1
 end
 
-    select	Err_Codigo	= '000000',
-            Err_Mensaj	= 'Precio guardado exitosamente'
+select	Err_Codigo	= '000000',
+        Err_Mensaj	= 'Precio guardado exitosamente'
