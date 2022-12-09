@@ -21,6 +21,12 @@ as
 ** Inicio de Cámara,Bitacora de Inicio de Cámara,SPEI fuera de ****
 ** horario,Nominas pendientes,Desglose de Nomina,PROSA 325/510,****
 ** Reporte 325/510                                             ****
+*******************************************************************
+** Modificó:	Diego Calvillo                                 ****
+** Fecha:		07/Dic/22                                      ****
+** Help:		SA-427                                         ****
+** Descripción: Ajuste en consulta para obtención de la infor- ****
+** mación del reporte 325/510                                  ****
 ******************************************************************/
 
 declare		@Ent_count		int,
@@ -252,6 +258,7 @@ if @Tip_Consul = @Tip_ProRep begin
 			count(*), 
 			Sum(Con_Cantid)
 		from CTCONPOS noholdlock
+			inner join CTTARJET noholdlock on Con_Tarjet = Tar_Numero
 		where	Con_FecApl	= @Fecha
 		  and	Con_Status	= @Str_N
 
@@ -260,6 +267,7 @@ if @Tip_Consul = @Tip_ProRep begin
 				count(*), 
 				Sum(Con_Cantid)	
 		from	TACONPOS noholdlock
+			inner join TATARCRE noholdlock on Con_Tarjet = Tar_Numero
 		where	Con_FecApl	= @Fecha
 		  and	Con_Status	= @Str_N
 
