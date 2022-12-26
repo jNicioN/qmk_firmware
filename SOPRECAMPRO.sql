@@ -30,7 +30,8 @@ as
 declare @Cam_Encont int,            /* Declaración de Variables */
         @Prc_Numero int,
         @Status     int,
-        @Dif_Fechas	int
+        @Dif_Fechas	int,
+        @Fec_Actual smalldatetime
 
 declare	@Ent_Cero   int,         	/* Declaración de Constantes */
         @Str_Vacio  int,
@@ -43,8 +44,12 @@ select  @Ent_Cero	=  0, 			/*	Entero Cero				 */
 
 if @Tip_Proces = @Pro_Precio begin
     select @Status      = @Ent_Cero
-    select @FechaSis    = getdate()
-    select @Dif_Fechas	= convert(int, datediff(dd, @Prc_Fecha, @FechaSis))
+
+    select @Fec_Actual = Par_FecAct 
+        from SOPARAMS
+        where Par_Sucurs = @SucOrigen
+
+    select @Dif_Fechas	= convert(int, datediff(dd, @Prc_Fecha, @Fec_Actual))
 
     select @Cam_Encont = count(*)
         from SOPRECAM noholdlock
@@ -54,15 +59,23 @@ if @Tip_Proces = @Pro_Precio begin
 
     if @Dif_Fechas = @Ent_Cero begin
         if isnull(@Cam_Encont, @Ent_Cero) = @Ent_Cero begin
-            execute @Status = SOPRECAMALT
+            exec @Status = SOPRECAMALT
                 @Prc_Moneda,    @Prc_TipCam,    @Prc_TiOpCa,    @Prc_Precio,    @NumTransac,
                 @Transaccio,    @Usuario,       @FechaSis,      @SucOrigen,     @SucDestino,
                 @Modulo
+            if @Status <> 0 begin
+                rollback
+                return 1
+            end
         end else begin
-            execute @Status = SOPRECAMACT
-                @Prc_Moneda,    @Prc_TipCam,    @Prc_TiOpCa,    @Prc_Precio,    @Prc_Activo,     @Tip_Proces,
-                @NumTransac,    @Transaccio,    @Usuario,       @FechaSis,      @SucOrigen,
-                @SucDestino,    @Modulo
+            exec @Status = SOPRECAMACT
+                @Prc_Moneda,    @Prc_TipCam,    @Prc_TiOpCa,    @Prc_Precio,    @Prc_Activo, 
+                @Tip_Proces,    @NumTransac,    @Transaccio,    @Usuario,       @FechaSis,
+                @SucOrigen,     @SucDestino,    @Modulo
+            if @Status <> 0 begin
+                rollback
+                return 1
+            end
         end
     end
 
@@ -74,10 +87,14 @@ if @Tip_Proces = @Pro_Precio begin
             and Prc_TiOpCa   = @Prc_TiOpCa
 
         if isnull(@Prc_Numero, @Ent_Cero) <> @Ent_Cero begin
-            execute SODIPRCAPRO
-            @Prc_Numero,    @Prc_Fecha,     @Prc_Precio,    @NumTransac,    @Transaccio,
-            @Usuario,       @FechaSis,      @SucOrigen,     @SucDestino,    @Modulo
+            exec @Status = SODIPRCAPRO
+                @Prc_Numero,    @Prc_Fecha,     @Prc_Precio,    @Tip_Proces,     @NumTransac, 
+                @Transaccio,    @Usuario,       @FechaSis,      @SucOrigen,     @SucDestino,
+                @Modulo 
+            if @Status <> 0 begin
+                rollback
+                return 1
+            end   
         end
     end
 end
-

@@ -77,11 +77,11 @@ end
 
 if @Tip_Actual = @Act_Precio begin
     if @Prc_Precio <= @Num_Cero begin
-    select 	Err_Codigo = '000004', 
-			Err_Mensaj = 'El precio debe ser mayor a 0',
-			Err_Foco   = 'Prc_TiOpCa'
-	rollback 
-	return 1
+		select 	Err_Codigo = '000004', 
+				Err_Mensaj = 'El precio debe ser mayor a 0',
+				Err_Foco   = 'Prc_TiOpCa'
+		rollback 
+		return 1
     end
 
     update SOPRECAM set

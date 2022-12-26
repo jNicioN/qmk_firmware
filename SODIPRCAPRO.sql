@@ -2,6 +2,7 @@ create procedure SODIPRCAPRO (
     @Dpc_PreCam int,
     @Dpc_Fecha  smalldatetime,
     @Dpc_Precio numeric(10,6),
+    @Tip_Proces char(1),
 
     @NumTransac	char(10),
 	@Transaccio	char(3),
@@ -26,13 +27,15 @@ as
 ********************************************************************/
 
 declare @Pre_Encont int,             /* Declaración de Variables */
-        @Dia_Encont int
+        @Dia_Encont int,
+        @Status     int
 
-declare	@Ent_Cero   int         	/* Declaración de Constantes */
+declare	@Ent_Cero   int,         	/* Declaración de Constantes */
+        @Pro_Precio char(1)
 
 /* Asignación de Constantes */
-select	@Ent_Cero   = 0				/* Entero cero */
-
+select	@Ent_Cero   = 0,			/* Entero cero */
+        @Pro_Precio = 'P'           /*  Proceso de Precio        */
 
 select @Pre_Encont = count(*)
 	from SOPRECAM noholdlock
@@ -44,14 +47,21 @@ if isnull(@Pre_Encont, @Ent_Cero) <> @Ent_Cero begin
 	    where Dpc_PreCam = @Dpc_PreCam
           and Dpc_Fecha  = @Dpc_Fecha
     if isnull(@Dia_Encont, @Ent_Cero) = @Ent_Cero begin
-
-        execute SODIPRCAALT @Dpc_PreCam, @Dpc_Fecha, @Dpc_Precio, @NumTransac,
-            @Transaccio, @Usuario, @FechaSis, @SucOrigen, @SucDestino, @Modulo
-
+        exec @Status = SODIPRCAALT
+            @Dpc_PreCam,    @Dpc_Fecha,     @Dpc_Precio,    @NumTransac,    @Transaccio,
+            @Usuario,       @FechaSis,      @SucOrigen,     @SucDestino,    @Modulo
+        if @Status <> 0 begin
+            rollback
+            return 1
+        end
     end else begin
-
-        execute SODIPRCAACT @Dpc_PreCam, @Dpc_Fecha, @Dpc_Precio, @NumTransac,
-            @Transaccio, @Usuario, @FechaSis, @SucOrigen, @SucDestino, @Modulo
-
+        exec @Status = SODIPRCAACT
+            @Dpc_PreCam,    @Dpc_Fecha,     @Dpc_Precio,    @Tip_Proces,    @NumTransac,
+            @Transaccio,    @Usuario,       @FechaSis,      @SucOrigen,     @SucDestino,
+            @Modulo
+        if @Status <> 0 begin
+            rollback
+            return 1
+        end
     end
 end
