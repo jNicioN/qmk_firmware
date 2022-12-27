@@ -46,7 +46,7 @@ if @Tip_Proces = @Pro_Precio begin
     select @Status      = @Ent_Cero
 
     select @Fec_Actual = Par_FecAct 
-        from SOPARAMS
+        from SOPARAMS noholdlock
         where Par_Sucurs = @SucOrigen
 
     select @Dif_Fechas	= convert(int, datediff(dd, @Prc_Fecha, @Fec_Actual))
