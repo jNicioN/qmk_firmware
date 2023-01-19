@@ -35,9 +35,9 @@ as
 ** Referencias: 															  	*
 *********************************************************************************
 ** Modifico:	Ezequiel Gonzalez Cobix											*
-** Descripcion : Busqueda por nombre de usuarios de divisa				 		*
+** Descripcion : Busqueda por nombre de usuarios de divisa				 	 	*
 ** Fecha:	17/10/2022															*
-** Help:	TRAAC-851     														*
+** Key Jira:	TRAAC-851 														*
 *********************************************************************************
 ** Modifico:	Martin Adonis Lopez Mendoza													*
 ** Descripcion : Busqueda  de usuarios de divisas nacionales y extrangeros 											*
@@ -89,7 +89,8 @@ declare	@Str_LetraI char(1),
 		@Tab_UsuExt	char(1),
 		@Str_Dos	char(1),
 		@Str_Porcen	char(1),
-		@Fec_Vacia	smalldatetime
+		@Fec_Vacia	smalldatetime,
+		@Fec_Cre	smalldatetime
 
 								/* Asignacion de valores a constantes */
 select	@Str_LetraI = 'I',		/* String I: ID de relacion */
@@ -107,7 +108,10 @@ select	@Str_LetraI = 'I',		/* String I: ID de relacion */
 		@Tab_UsuExt	= '2',		/* Tabla Origen: SOUSUEXT usuario extranjero */
 		@Str_Dos	= '2',		/* String: dos */
 		@Str_Porcen	= '%',		/* porcentanje*/
-		@Fec_Vacia	= '1900-01-01'	/*Fecha Vacia*/		
+		@Fec_Vacia	= '1900-01-01',	/*Fecha Vacia*/		
+		@Fec_Cre	= '1900-01-01'	/*Fecha Vacia*/		
+		
+
 		
 if @Une_TabCon = '' begin   /* Si consulta SOUSUEXT  */
 	
@@ -152,7 +156,8 @@ if @Une_TabCon = '' begin   /* Si consulta SOUSUEXT  */
 				
 				select 	top 1 @Ucv_UlUsMo = Biu_Usuari,
 				@Biu_descri = Biu_DesEst,
-				@Biu_sucursal = Biu_Sucurs
+				@Biu_sucursal = Biu_Sucurs,
+				@Fec_Cre =  Biu_FecEst
 				from	SOBITUSU noholdlock
 				where	Biu_FolUsu	= @Une_Identi
 				order by  Biu_Consec desc
@@ -162,7 +167,7 @@ if @Une_TabCon = '' begin   /* Si consulta SOUSUEXT  */
 				where 	Usu_Numero	= @Ucv_UlUsMo
 				
 				select	Une_Identi, Une_Estatu, Use_NoCoUs, Use_FecNac, Use_TiIdUs,
-						Use_FecCre,Une_nombre,Une_ApellPat,Une_ApellMat,
+						@Fec_Cre as Use_FecCre,Une_nombre,Une_ApellPat,Une_ApellMat,
 						@Ucv_NomUsu as Biu_Usuari,
 						@Biu_descri as Biu_descri,
 						Pai_Gentil as Biu_Pais,
@@ -187,7 +192,8 @@ if @Une_TabCon = '' begin   /* Si consulta SOUSUEXT  */
 				where	Use_IdUsEx	= @Ucv_IdTaOr
 				
 				select 	top 1 @Ucv_UlUsMo = Biu_Usuari,
-				@Biu_descri = Biu_DesEst
+				@Biu_descri = Biu_DesEst,
+				@Fec_Cre =  Biu_FecEst
 				from	SOBITUSU noholdlock
 				where	Biu_FolUsu	= @Une_Identi
 				order by  Biu_Consec desc
@@ -197,7 +203,7 @@ if @Une_TabCon = '' begin   /* Si consulta SOUSUEXT  */
 				where 	Usu_Numero	= @Ucv_UlUsMo
 				
 				select	Une_Identi, Une_Estatu, Use_NoCoUs, Use_FecNac, Use_TiIdUs,
-						Use_FecCre,Origen,Une_nombre,Une_ApellPat,Une_ApellMat,
+						@Fec_Cre as Use_FecCre,Origen,Une_nombre,Une_ApellPat,Une_ApellMat,
 						@Ucv_NomUsu as Biu_Usuari,
 						@Biu_descri as Biu_descri,
 						Pai_Gentil as Biu_Pais
@@ -207,7 +213,7 @@ if @Une_TabCon = '' begin   /* Si consulta SOUSUEXT  */
 				drop table #UsuarioCompraVentaExtranjero			
 				
 			end			
-
+			
 		end	else if @Tip_ConCon = @Str_Dos begin
 			/* consulta por nombre de usuario de divisa */
 			
@@ -254,7 +260,7 @@ if @Une_TabCon = '' begin   /* Si consulta SOUSUEXT  */
 			Select Une_Identi,  Use_NoCoUs, Biu_Pais,  Use_FecNac  
 			from #BusquedaUsuDivisa	
 			
-			drop table #BusquedaUsuDivisa			
+			drop table #BusquedaUsuDivisa	
 		end
 	
 	end

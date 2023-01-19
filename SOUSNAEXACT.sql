@@ -17,6 +17,11 @@ as
 ******************************************************************************/
 /* REFERENCIAS:
 ****************************************************************************
+** Modifico:	Francisco Minajas										****
+** Fecha:		13/01/2023												****
+** Help Desk:	1643006										 			****
+** Descripción:	Se agrega consulta de fecha x sucursal					****
+****************************************************************************
 ** Modifico:	Martin Adonis Lopez Mendoza								****
 ** Fecha:		30/08/2022												****
 ** Help Desk:	1643006 									 			****
@@ -362,10 +367,9 @@ end else begin
 	end
 	end
 	
-		
-	
 	update SOUSNAEX set 
 		Une_Estatu	= @Une_Estatu,
+		Une_FecEst  = @Fec_Actual,
 		NumTransac	= @NumTransac,
 		Transaccio	= @Transaccio, 
 		Usuario 	= @Usuario,	  
@@ -375,7 +379,7 @@ end else begin
 	where	Une_Identi	= @Une_Identi
 	
 	exec @Status = SOBITUSUALT 
-	@Une_Identi,	@Une_Estatu,	@FechaSis,		@Usuario,		@SucOrigen,  
+	@Une_Identi,	@Une_Estatu,	@Fec_Actual,	@Usuario,		@SucOrigen,  
 	@Biu_Canal,		@Biu_DesEst,	@NumTransac,	@Transaccio,	@Usuario,	  
 	@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
 	
