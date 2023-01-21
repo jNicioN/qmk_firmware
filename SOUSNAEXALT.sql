@@ -21,7 +21,7 @@ as
 ****************************************************************************
 ** Modifico:	Francisco Minajas										****
 ** Fecha:		13/01/2023												****
-** Help Desk:	1643006										 			****
+** Jira:	    TRAAC-1034									 			****
 ** Descripción:	Se agrega consulta de fecha x sucursal					****
 ****************************************************************************
 ** Modifico:	Martin Adonis Lopez Mendoza	/ Francisco Minajas			****
@@ -58,50 +58,47 @@ declare	@Ent_Existe	int,
 		@Fec_IniInt 	date
 		
 								/* Declaracion de constantes */
-declare	@Str_Vacio		char(1),
-		@Ent_Cero		int,
-		@Persona 		int,
-		@Ent_Uno		int,
-		@Str_Cero		varchar(1),
-		@Str_LetraI 	varchar(1),
-		@Biu_Canal		int,
-		@Biu_DesEst		varchar(180),
-		@Sta_Inacti 	varchar(1),		
+declare	@Str_Vacio	char(1),
+		@Ent_Cero	int,
+		@Persona int,
+		@Ent_Existio_activo	int,
+		@Ent_Uno	int,
+		@Str_Cero	varchar(1),
+		@Str_LetraI varchar(1),
+		@Biu_Canal	int,
+		@Biu_DesEst	varchar(180),
+		@Sta_Inacti varchar(1),		
 		@Str_Status 	char(1),
 		@Str_StaCan 	char(1),
 		@Str_Uno		char(1),
 		@Str_Divisas   	char(8),
 		@Str_Comple    varchar(222),
-		@UsuDivi		int,
-		@UsuDiviAct		int,
-		@Ent_Time   	int
+		@UsuDivi	int,
+		@Ent_Time   int
 								/* Asignacion de valores a constantes */
-select	@Str_Vacio		= 	'',		/* String Vacio */
-		@Ent_Cero		= 	0,			/* Entero cero */
-		@Ent_Uno		= 	1,			/* Entero uno */
-		@Str_Cero		= 	'0',		/* String Cero */
-		@Str_LetraI		= 	'I',		/* String Letra I */
-		@Biu_Canal		= 	5,			/* Canal de originacion del usuario correspondiente a Apertura*/
-		@Biu_DesEst		= 	'Creacion de Usuario de compra venta',  /* Descripcion para la bitacora */
-		@Sta_Inacti 	= 	'I',		/* Estatus inactivo */
-		@Str_Uno 		= 	'1',
-		@Str_Status 	= 	'A',
-		@Str_StaCan 	= 	'C',
-		@UsuDivi 		= 	0,
-		@Ent_Time 		= 	0,
-		@UsuDiviAct 	=	0
+select	@Str_Vacio	= '',		/* String Vacio */
+		@Ent_Cero	= 0,			/* Entero cero */
+		@Ent_Uno	= 1,			/* Entero uno */
+		@Str_Cero	= '0',		/* String Cero */
+		@Str_LetraI	= 'I',		/* String Letra I */
+		@Biu_Canal	= 5,			/* Canal de originacion del usuario correspondiente a Apertura*/
+		@Biu_DesEst	= 'Creacion de Usuario de compra venta',  /* Descripcion para la bitacora */
+		@Sta_Inacti = 'I',		/* Estatus inactivo */
+		@Str_Uno = '1',
+		@Str_Status = 'A',
+		@Str_StaCan = 'C',
+		@UsuDivi = 0,
+		@Ent_Time = 0,
+		@Ent_Existio_activo	= 0
 		
 select @Une_IdeInt = (convert(int, str_replace(ltrim(str_replace(@Une_IdeUsu , '0', ' ')),' ', '0') ))
-
 /*Consulta de fecha del sistema */
 select @Fec_Actual = Par_FecAct
-	from SOPARAMS noholdlock
-	where Par_Sucurs = @SucOrigen 
-
+from SOPARAMS noholdlock
+where Par_Sucurs = @SucOrigen 
 /*Fecha de inicio y fin de mes*/
 select @Fec_IniMes = dateadd(dd, 1 - datepart(dd, @Fec_Actual), @Fec_Actual)
 select @Fec_FinMes = dateadd(dd, -1, dateadd(mm,  1, @Fec_IniMes))
-
 --activar cambio de divisas
 select @Str_Divisas=Par_Valor from  SOPARGEN noholdlock where Par_Nombre = 'UsuarioDivisas'
 
@@ -152,8 +149,8 @@ select  @Persona = count(*) from #PersonasConMismoNombre noholdlock
 	from #PersonasConMismoNombre noholdlock
 	inner join SOUSNAEX noholdlock on Une_IdeUsu = Per_ID 
 	where Une_TabOri=@Str_Uno and  Une_Estatu = @Str_LetraI
-	
-drop table 	#Personas	
+
+drop table 	#Personas
 		
 if @Ent_Existe_usuario = @Ent_Uno begin
 	select	Err_Codigo = '000005',
@@ -171,6 +168,16 @@ select	@Ent_Existe	= @Ent_Uno
 	  
 if @Ent_Existe = @Ent_Uno begin
 	
+	/*CALCULO DE ACTIVOS*/
+	select	@Ent_Existio_activo = count(*) 
+	from SOUSNAEX noholdlock
+	inner join SOBITUSU noholdlock on  Biu_FolUsu  = Une_Identi 
+	where	Une_IdeUsu	= @Une_IdeInt and   Biu_Estatu  = @Str_Status
+	
+	/*fin de calculo de activos*/
+	
+	select @Ent_Existio_activo
+	/*MES CALENDARIO*/
 	select	TOP 1 @UsuDivi = Une_Identi
 		from SOUSNAEX noholdlock
 		where	Une_IdeUsu	= @Une_IdeInt 
@@ -178,40 +185,29 @@ if @Ent_Existe = @Ent_Uno begin
 		  and  Une_Estatu  = @Str_StaCan
 		order by  Une_FecEst DESC
 			
-	if @UsuDivi <> @Ent_Cero begin
+	if @UsuDivi <> @Ent_Cero and @Ent_Existio_activo > 0 begin
 		
-		select	TOP 1 @UsuDiviAct = Une_Identi
-			from SOUSNAEX noholdlock
-			where	Une_IdeUsu	= @Une_IdeInt 
-			  and	Une_TabOri = @Une_TabOri
-			  and  Une_Estatu  = @Str_Status
-			order by  Une_FecEst DESC
-			
-		if @UsuDiviAct = @Ent_Cero begin
-			
-			/*VALIDACION DEL MES CALENDARIO*/
-			select @Fec_Cancel = Biu_FecEst from SOBITUSU noholdlock
-				where Biu_FolUsu   = @UsuDivi 
-				and   Biu_Estatu   = @Str_StaCan
-				order by  Biu_FecEst DESC
-			
-			-- OBtencion de la fecha del siguiente mes calendario
-			select @Fec_Cancel = dateadd(dd, 1 - datepart(dd, @Fec_Cancel), @Fec_Cancel)
-			select @Fec_Cancel = dateadd(dd, 1, dateadd(mm,  1, @Fec_Cancel))
-			select @Fec_Cancel = dateadd(dd, 1 - datepart(dd, @Fec_Cancel), @Fec_Cancel)
-			
-			-- se elimina la hora de ambas fechas
-			select @Fec_CanInt = @Fec_IniMes
-			select @Fec_IniInt = @Fec_Cancel
-			
-			select @Ent_Time = datediff(mm, @Fec_Cancel, @Fec_CanInt)
-			
-			if @Ent_Time < 0 begin
-				select	Err_Codigo = '000004',
-					Err_Mensaj = 'No se puede dar de alta como usuario, favor aperturar como cliente o regresar el siguiente mes.'
-					rollback
-				return @Ent_Uno
-			end
+		select @Fec_Cancel = Biu_FecEst from SOBITUSU noholdlock
+			where Biu_FolUsu   = @UsuDivi 
+			and   Biu_Estatu   = @Str_StaCan
+			order by  Biu_FecEst DESC
+		
+		-- OBtencion de la fecha del siguiente mes calendario
+		select @Fec_Cancel = dateadd(dd, 1 - datepart(dd, @Fec_Cancel), @Fec_Cancel)
+		select @Fec_Cancel = dateadd(dd, 1, dateadd(mm,  1, @Fec_Cancel))
+		select @Fec_Cancel = dateadd(dd, 1 - datepart(dd, @Fec_Cancel), @Fec_Cancel)
+		
+		-- se elimina la hora de ambas fechas
+		select @Fec_CanInt = @Fec_IniMes
+		select @Fec_IniInt = @Fec_Cancel
+		
+		select @Ent_Time = datediff(mm, @Fec_Cancel, @Fec_CanInt)
+		
+		if @Ent_Time < 0 begin
+			select	Err_Codigo = '000004',
+				Err_Mensaj = 'No se puede dar de alta como usuario, favor aperturar como cliente o regresar el siguiente mes.'
+				rollback
+			return @Ent_Uno
 		end
 	end
 end
