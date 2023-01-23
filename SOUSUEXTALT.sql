@@ -161,7 +161,7 @@ select	@PerExist = isnull(@PerExist, @Ent_Cero)
 if @PerExist <> @Ent_Cero begin
 	
 	select @Une_Identi = right('00000000' + ltrim(rtrim(convert(char, Une_Identi))), 8), 
-		   @Une_Status = Une_Estatu, @Une_Numero = convert(char(8), Use_IdUsEx), @Use_FecCre = Use_FecCre from SOUSNAEX 
+		   @Une_Status = Une_Estatu, @Une_Numero = convert(char(8), Use_IdUsEx), @Use_FecCre = Use_FecCre from SOUSNAEX noholdlock 
 	inner join SOUSUEXT noholdlock on Une_IdeUsu = Use_IdUsEx 
 	where Use_NomUsu = @Use_NomUsu
 		and	Use_ApPaUs	= @Use_ApPaUs
