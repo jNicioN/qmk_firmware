@@ -18,24 +18,24 @@ as
 /* REFERENCIAS:
 ****************************************************************************
 ** Modifico:	Francisco Minajas										****
-** Fecha:		13/01/2023												****
-** Help Desk:	1643006										 			****
+** Fecha:		23/01/2023												****
+** Jira:	    TRAAC-1162									 			****
 ** Descripción:	Se agrega consulta de fecha x sucursal					****
 ****************************************************************************
 ** Modifico:	Martin Adonis Lopez Mendoza								****
 ** Fecha:		30/08/2022												****
 ** Help Desk:	1643006 									 			****
-** DescripciÃ³n:	Se agrega mensaje retorno al cancelar usuarios			****
+** DescripciÃ³n:	Se agrega mensaje retorno al cancelar usuarios		****
 ****************************************************************************
 ** Modifico:	Adriana Gomez 											****
 ** Fecha:		24/03/2021												****
 ** Help Desk:	1376175 									 			****
-** DescripciÃ³n:	Se corrige validacion 									****
+** DescripciÃ³n:	Se corrige validacion 								****
 ****************************************************************************
 ** Modifico:	Adriana Gomez 											****
 ** Fecha:		05/03/2021												****
 ** Help Desk:	1376175 									 			****
-** DescripciÃ³n:	Se agrega validaciÃ³n para reactivar usuario				****
+** DescripciÃ³n:	Se agrega validaciÃ³n para reactivar usuario		****
 ****************************************************************************
 ** Modifico:	Adriana Gomez 											****
 ** Fecha:		05/03/2021												****
@@ -45,7 +45,7 @@ as
 ** Modifico:	Carlos Copto 											****
 ** Fecha:		15/Diciembre/2020										****
 ** Help Desk:	1376175										 			****
-** DescripciÃ³n:	Se agrega registro a Bitacora							****
+** DescripciÃ³n:	Se agrega registro a Bitacora						****
 ****************************************************************************
 ** Creo:		Carlos Copto 											****
 ** Fecha:		11/Noviembre/2020										****

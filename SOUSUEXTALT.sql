@@ -54,6 +54,11 @@ as
 *****************************************************************
 ** Referencias: 												*
 *****************************************************************
+* ** Modifico:	Francisco Minajas							 ****
+** Fecha:		13/01/2023							         ****
+** Jira:	    TRAAC-1162									 ****
+** Descripción:	Se agrega consulta de fecha x sucursal		 ****
+*****************************************************************
 ** modifico: Francisco Minajas									*
 ** Fecha:	 09/01/2023											*
 ** Jira:	 TRAAC-1034		     								*

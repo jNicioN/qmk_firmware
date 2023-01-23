@@ -34,6 +34,12 @@ as
 *********************************************************************************
 ** Referencias: 															  	*
 *********************************************************************************
+* ** Modifico:	Francisco Minajas											 ****
+** Fecha:		23/01/2023													 ****
+** Jira:	    TRAAC-1162									 				 ****
+** Descripción:	Se agrega consulta de fecha de creacion de la bitacora		 ****
+* 				SOBITUSU													 ****
+*********************************************************************************
 ** Modifico:	Ezequiel Gonzalez Cobix											*
 ** Descripcion : Busqueda por nombre de usuarios de divisa				 	 	*
 ** Fecha:	17/10/2022															*

@@ -20,13 +20,13 @@ as
 **	REFERENCIAS:														****
 ****************************************************************************
 ** Modifico:	Francisco Minajas										****
-** Fecha:		13/01/2023												****
-** Jira:	    TRAAC-1034									 			****
+** Fecha:		23/01/2023												****
+** Jira:	    TRAAC-1162									 			****
 ** Descripción:	Se agrega consulta de fecha x sucursal					****
 ****************************************************************************
 ** Modifico:	Martin Adonis Lopez Mendoza	/ Francisco Minajas			****
 ** Fecha:		09/01/2023												****
-** Help Desk:	1643006										 			****
+** Jira:	    TRAAC-1162									 			****
 ** Descripción:	Se agrega estatus cancelado	y se valida mes calendario	****
 ****************************************************************************
 ** Modifico:	Erika Báez	 											****
@@ -46,10 +46,10 @@ as
 **/
 
 								/* Declaracion de Variables */
-declare	@Ent_Existe	int,
+declare	@Ent_Existe		int,
 		@Ent_Existe_usuario	int,
-		@Une_IdeInt	int,
-		@Status		int,
+		@Une_IdeInt		int,
+		@Status			int,
 		@Fec_Actual  	smalldatetime,	
 		@Fec_IniMes		smalldatetime,
 		@Fec_FinMes 	smalldatetime,
@@ -58,23 +58,23 @@ declare	@Ent_Existe	int,
 		@Fec_IniInt 	date
 		
 								/* Declaracion de constantes */
-declare	@Str_Vacio	char(1),
-		@Ent_Cero	int,
-		@Persona int,
+declare	@Str_Vacio		char(1),
+		@Ent_Cero		int,
+		@Persona 		int,
 		@Ent_Existio_activo	int,
-		@Ent_Uno	int,
-		@Str_Cero	varchar(1),
-		@Str_LetraI varchar(1),
-		@Biu_Canal	int,
-		@Biu_DesEst	varchar(180),
-		@Sta_Inacti varchar(1),		
+		@Ent_Uno		int,
+		@Str_Cero		varchar(1),
+		@Str_LetraI 	varchar(1),
+		@Biu_Canal		int,
+		@Biu_DesEst		varchar(180),
+		@Sta_Inacti 	varchar(1),		
 		@Str_Status 	char(1),
 		@Str_StaCan 	char(1),
 		@Str_Uno		char(1),
 		@Str_Divisas   	char(8),
-		@Str_Comple    varchar(222),
-		@UsuDivi	int,
-		@Ent_Time   int
+		@Str_Comple    	varchar(222),
+		@UsuDivi		int,
+		@Ent_Time   	int
 								/* Asignacion de valores a constantes */
 select	@Str_Vacio	= '',		/* String Vacio */
 		@Ent_Cero	= 0,			/* Entero cero */
@@ -84,23 +84,21 @@ select	@Str_Vacio	= '',		/* String Vacio */
 		@Biu_Canal	= 5,			/* Canal de originacion del usuario correspondiente a Apertura*/
 		@Biu_DesEst	= 'Creacion de Usuario de compra venta',  /* Descripcion para la bitacora */
 		@Sta_Inacti = 'I',		/* Estatus inactivo */
-		@Str_Uno = '1',
+		@Str_Uno 	= '1',
 		@Str_Status = 'A',
 		@Str_StaCan = 'C',
-		@UsuDivi = 0,
-		@Ent_Time = 0,
+		@UsuDivi 	= 0,
+		@Ent_Time 	= 0,
 		@Ent_Existio_activo	= 0
 		
 select @Une_IdeInt = (convert(int, str_replace(ltrim(str_replace(@Une_IdeUsu , '0', ' ')),' ', '0') ))
 /*Consulta de fecha del sistema */
-select @Fec_Actual = Par_FecAct
-from SOPARAMS noholdlock
-where Par_Sucurs = @SucOrigen 
+select @Fec_Actual = Par_FecAct	from SOPARAMS noholdlock where Par_Sucurs = @SucOrigen 
 /*Fecha de inicio y fin de mes*/
 select @Fec_IniMes = dateadd(dd, 1 - datepart(dd, @Fec_Actual), @Fec_Actual)
 select @Fec_FinMes = dateadd(dd, -1, dateadd(mm,  1, @Fec_IniMes))
 --activar cambio de divisas
-select @Str_Divisas=Par_Valor from  SOPARGEN noholdlock where Par_Nombre = 'UsuarioDivisas'
+select @Str_Divisas=Par_Valor from SOPARGEN noholdlock where Par_Nombre = 'UsuarioDivisas'
 
 /* Validacion general de parametros vacios */
 if isnull(@Une_Identi, @Ent_Cero) = @Ent_Cero begin
