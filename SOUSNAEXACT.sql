@@ -136,7 +136,7 @@ select @Fec_IniMes = dateadd(dd, 1 - datepart(dd, @Fec_Actual), @Fec_Actual)
 select @Fec_FinMes = dateadd(dd, -1, dateadd(mm,  1, @Fec_IniMes))					
 
 --activar cambio de divisas
-select @Str_Divisas=Par_Valor from  SOPARGEN where Par_Nombre = 'UsuarioDivisas'				
+select @Str_Divisas=Par_Valor from  SOPARGEN noholdlock where Par_Nombre = 'UsuarioDivisas'				
 
 if isnull(@Tip_Actual, @Str_Vacio) = @Str_Vacio  begin
 		select	Err_Codigo = '000001',
