@@ -17,20 +17,25 @@ as
 ******************************************************************************/
 /* REFERENCIAS:
 ****************************************************************************
+** Modifico:	Francisco Minajas										****
+** Fecha:		23/01/2023												****
+** Jira:	    TRAAC-1162									 			****
+** Descripción:	Se agrega consulta de fecha x sucursal					****
+****************************************************************************
 ** Modifico:	Martin Adonis Lopez Mendoza								****
 ** Fecha:		30/08/2022												****
 ** Help Desk:	1643006 									 			****
-** DescripciÃ³n:	Se agrega mensaje retorno al cancelar usuarios			****
+** DescripciÃ³n:	Se agrega mensaje retorno al cancelar usuarios		****
 ****************************************************************************
 ** Modifico:	Adriana Gomez 											****
 ** Fecha:		24/03/2021												****
 ** Help Desk:	1376175 									 			****
-** DescripciÃ³n:	Se corrige validacion 									****
+** DescripciÃ³n:	Se corrige validacion 								****
 ****************************************************************************
 ** Modifico:	Adriana Gomez 											****
 ** Fecha:		05/03/2021												****
 ** Help Desk:	1376175 									 			****
-** DescripciÃ³n:	Se agrega validaciÃ³n para reactivar usuario				****
+** DescripciÃ³n:	Se agrega validaciÃ³n para reactivar usuario		****
 ****************************************************************************
 ** Modifico:	Adriana Gomez 											****
 ** Fecha:		05/03/2021												****
@@ -40,7 +45,7 @@ as
 ** Modifico:	Carlos Copto 											****
 ** Fecha:		15/Diciembre/2020										****
 ** Help Desk:	1376175										 			****
-** DescripciÃ³n:	Se agrega registro a Bitacora							****
+** DescripciÃ³n:	Se agrega registro a Bitacora						****
 ****************************************************************************
 ** Creo:		Carlos Copto 											****
 ** Fecha:		11/Noviembre/2020										****
@@ -131,7 +136,7 @@ select @Fec_IniMes = dateadd(dd, 1 - datepart(dd, @Fec_Actual), @Fec_Actual)
 select @Fec_FinMes = dateadd(dd, -1, dateadd(mm,  1, @Fec_IniMes))					
 
 --activar cambio de divisas
-select @Str_Divisas=Par_Valor from  SOPARGEN where Par_Nombre = 'UsuarioDivisas'				
+select @Str_Divisas=Par_Valor from  SOPARGEN noholdlock where Par_Nombre = 'UsuarioDivisas'				
 
 if isnull(@Tip_Actual, @Str_Vacio) = @Str_Vacio  begin
 		select	Err_Codigo = '000001',
@@ -362,10 +367,9 @@ end else begin
 	end
 	end
 	
-		
-	
 	update SOUSNAEX set 
 		Une_Estatu	= @Une_Estatu,
+		Une_FecEst  = @Fec_Actual,
 		NumTransac	= @NumTransac,
 		Transaccio	= @Transaccio, 
 		Usuario 	= @Usuario,	  
@@ -375,7 +379,7 @@ end else begin
 	where	Une_Identi	= @Une_Identi
 	
 	exec @Status = SOBITUSUALT 
-	@Une_Identi,	@Une_Estatu,	@FechaSis,		@Usuario,		@SucOrigen,  
+	@Une_Identi,	@Une_Estatu,	@Fec_Actual,	@Usuario,		@SucOrigen,  
 	@Biu_Canal,		@Biu_DesEst,	@NumTransac,	@Transaccio,	@Usuario,	  
 	@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
 	
