@@ -54,6 +54,15 @@ as
 *****************************************************************
 ** Referencias: 												*
 *****************************************************************
+* ** Modifico:	Francisco Minajas							 ****
+** Fecha:		13/01/2023							         ****
+** Jira:	    TRAAC-1162									 ****
+** Descripción:	Se agrega consulta de fecha x sucursal		 ****
+*****************************************************************
+** modifico: Francisco Minajas									*
+** Fecha:	 09/01/2023											*
+** Jira:	 TRAAC-1034		     								*
+*****************************************************************
 ** modifico: Carlos Copto										*
 ** Fecha:	 05/07/2020											*
 ** Help:	 1376175		     								*
@@ -68,7 +77,10 @@ declare	@Use_NoCoUs	varchar(120),	/*	Declaracion de Variables	*/
 		@PerPersoID	int,
 		@PerExist	int,
 		@Err_Descri	char(12),
-		@Une_Identi char(8)
+		@Une_Identi char(8),
+		@Fec_Actual  	smalldatetime,	
+		@Une_Numero char(8),
+		@Une_Status char(1)
 
 declare	@Str_Vacio	char(1),		/*	Declaracion de Constantes	*/
 		@Str_Espaci	char(1),
@@ -123,6 +135,9 @@ if isnull (@Use_FecNac, @Str_Vacio) = @Str_Vacio begin
 	return @Ent_Uno
 end
 
+select @Fec_Actual = Par_FecAct
+from SOPARAMS noholdlock
+where Par_Sucurs = @SucOrigen 
 
 select @Use_NoCoUs = (ltrim(rtrim(@Use_ApPaUs))+' '+ltrim(rtrim(@Use_ApMaUs))+' '+ltrim(rtrim(@Use_NomUsu)))
 
@@ -145,18 +160,27 @@ select	@PerExist = isnull(@PerExist, @Ent_Cero)
 
 if @PerExist <> @Ent_Cero begin
 	
-	select @Une_Identi = right('00000000' + ltrim(rtrim(convert(char, Une_Identi))), 8) from SOUSNAEX 
+	select @Une_Identi = right('00000000' + ltrim(rtrim(convert(char, Une_Identi))), 8), 
+		   @Une_Status = Une_Estatu, @Une_Numero = convert(char(8), Use_IdUsEx), @Use_FecCre = Use_FecCre from SOUSNAEX noholdlock 
 	inner join SOUSUEXT noholdlock on Une_IdeUsu = Use_IdUsEx 
 	where Use_NomUsu = @Use_NomUsu
 		and	Use_ApPaUs	= @Use_ApPaUs
 		and	Use_ApMaUs  = @Use_ApMaUs
 		and	Use_FecNac	= @Use_FecNac
 	
-	select	Err_Codigo	= '000005',
+	if @Une_Status = 'C' begin
+		select	Err_Codigo	= '000000',
+			Err_Mensaj	= 'Registro agregado',
+			Use_Numero	= @Une_Numero,
+			Use_FecCre	= @Use_FecCre
+	end else begin
+		select	Err_Codigo	= '000005',
 			Err_Mensaj	= 'El usuario ' + @Une_Identi + ' ya existe',
 			Err_Variab	= 'Use_NoCoUs'
 		rollback
 		return @Ent_Uno
+	end
+	
 end
 /*----------------------------------------------*/
 
@@ -291,7 +315,7 @@ insert into SOUSUEXT (
 	Use_CpDoEx,	Use_TelExt, NumTransac, Transaccio, Usuario,    
 	FechaSis, 	SucOrigen,  SucDestino		
 ) values	(
-	@SucOrigen, @Use_FecCre, @Use_NomUsu, @Use_ApPaUs, @Use_ApMaUs,	
+	@SucOrigen, @Fec_Actual, @Use_NomUsu, @Use_ApPaUs, @Use_ApMaUs,	
 	@Use_NoCoUs, @Use_FecNac, @Use_SexUsu, @Use_PaNaUs, @Use_LuNaUs, 	
 	@Use_CaDoUs, @Use_PrEnCa, @Use_SeEnCa, @Use_NuDoUs, @Use_CoDoUs, 
 	@Use_EntDom, @Use_LocDom, @Use_CpDoUs, @Use_LaTeUs, @Use_TelUsu,	
@@ -301,6 +325,8 @@ insert into SOUSUEXT (
 	@Use_CpDoEx, @Use_TelExt, @NumTransac, @Transaccio, @Usuario,    
 	@FechaSis,   @SucOrigen,  @SucDestino		
 )
+
+select @Use_FecCre = @Fec_Actual
 
 select @PerPersoID = @@identity
 
