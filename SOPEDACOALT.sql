@@ -40,7 +40,8 @@ as
 ** Modificó:	Citlally Francisco	Sebastian							****
 ** Fecha:		09/02/2023												****
 ** Help:		22932	 												****
-** Descripción:	Se estandarizó insert									****
+** Descripción:	Se especifica las columnas para agregar informacion     ****
+** 				 a la tabla SOPEDACO									****
 ****************************************************************************
 ** Modificó:	Armando Alexis Sepúlveda Cruz							****
 ** Fecha:		11/Jul/2018												****
