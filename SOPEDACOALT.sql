@@ -37,6 +37,12 @@ as
 ***************************************************************************/
 /* REFERENCIAS:															****
 ****************************************************************************
+** Modificó:	Citlally Francisco	Sebastian							****
+** Fecha:		09/02/2023												****
+** Help:		22932	 												****
+** Descripción:	Se especifica las columnas para agregar informacion     ****
+** 				 a la tabla SOPEDACO									****
+****************************************************************************
 ** Modificó:	Armando Alexis Sepúlveda Cruz							****
 ** Fecha:		11/Jul/2018												****
 ** Help:		1088831 												****
@@ -84,13 +90,20 @@ select @Per_Numero	= DaP_Person
 select	@Per_Numero	= isnull(@Per_Numero, @Str_Vacio)
 
 if @Per_Numero = @Str_Vacio begin
-	insert into SOPEDACO values (
-		@DaP_Person,	@DaP_Firma,		@DaP_CaNuIn,	@DaP_FuPuPe,	@DaP_NoFaPe,
-		@DaP_ApPaPe,	@DaP_ApMaPe,	@DaP_EntBan,	@DaP_EsPEP,		@DaP_EsPaPE,
-		@DaP_ParPEP,	@DaP_PaiNac,	@DaP_EntNac,    @DaP_CoVeDi,	@DaP_FolFid,	
-		@DaP_TipFid,	@DaP_TiIdAd, 	@DaP_NuIdAd, 	@DaP_ExIdAd, 	@DaP_VeIdAd,
-		@DaP_ClvEle,	@DaP_NumEmi,    @NumTransac,	@Transaccio,	@Usuario,		
-		@FechaSis,		@SucOrigen,		@SucDestino)
+	insert into SOPEDACO (DaP_Person,    DaP_Firma,    	DaP_CaNuIn,    	DaP_EsPEP,		DaP_FuPuPe,
+						  DaP_EsPaPE,    DaP_ParPEP,    DaP_NoFaPe,		DaP_ApPaPe,   	DaP_ApMaPe,
+						  DaP_EntBan,    DaP_PaiNac,	DaP_EntNac,    	DaP_CoVeDi,    	DaP_FolFid,
+						  DaP_TipFid,    DaP_TiIdAd,    DaP_NuIdAd,     DaP_ExIdAd,     DaP_VeIdAd,
+                          DaP_ClvEle,    DaP_NumEmi,    NumTransac,    Transaccio,		Usuario,
+						  FechaSis,    	 SucOrigen,    SucDestino
+                          )
+        values (
+        @DaP_Person,    @DaP_Firma,     @DaP_CaNuIn,    @DaP_EsPEP,		@DaP_FuPuPe,
+		@DaP_EsPaPE,    @DaP_ParPEP,    @DaP_NoFaPe,    @DaP_ApPaPe,	@DaP_ApMaPe, 
+		@DaP_EntBan,    @DaP_PaiNac,	@DaP_EntNac,    @DaP_CoVeDi,    @DaP_FolFid,
+		@DaP_TipFid,	@DaP_TiIdAd,    @DaP_NuIdAd,   	@DaP_ExIdAd,    @DaP_VeIdAd,
+        @DaP_ClvEle,    @DaP_NumEmi,    @NumTransac,    @Transaccio,	@Usuario,
+		@FechaSis,      @SucOrigen,     @SucDestino)
 
 end
 	
