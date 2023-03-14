@@ -3,7 +3,6 @@ create procedure SORIBACCMOD (
 	@Ria_NumRib int,
 	@Ria_NumPer char(8),
 	@Ria_PorPar numeric(10,2),
-	@Ria_NomAcc	varchar(200),
 	@Ria_Activo bit,
 	@NumTransac	char(10),
 	@Transaccio	char(3),
@@ -16,14 +15,9 @@ create procedure SORIBACCMOD (
 /****************************************************************/
 /* DESCRIPCION: Modificacion de registros de Accionistas RIB	*/
 /****************************************************************/
-/** Modifico:		Jose R. Rodriguez Zenteno   				*/
-/** Fecha:			21/09/2022                               	*/
-/** Descripcion:	Se agrego parametro Ria_NomAcc				*/
-/** Help:			1643668					 					*/
-/****************************************************************/
-/** Creo:			Victor Osorio								*/
-/** Fecha:			07/04/2017                             		*/
-/** Help:			929417 				 						*/
+/** Creo:		Victor Osorio									*/
+/** Fecha:		07/04/2017                               		*/
+/** Help:		929417 					 						*/
 /****************************************************************/
 
 if not exists (select Ria_Numero
@@ -40,7 +34,6 @@ Update SORIBACC set
 	Ria_NumRib	= @Ria_NumRib,
 	Ria_NumPer	= @Ria_NumPer,
 	Ria_PorPar	= @Ria_PorPar,
-	Ria_NomAcc	= @Ria_NomAcc,
 	NumTransac	= @NumTransac, 
 	Transaccio	= @Transaccio,
 	Usuario		= @Usuario,
