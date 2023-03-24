@@ -2,9 +2,6 @@ create procedure SOPECUTACON (
 	@Pct_PerUni	char(8),
 	@Tip_Consul	char(2),
 
-
-
-
 	@NumTransac	char(10),
 	@Transaccio	char(3),
 	@Usuario	char(6),
@@ -14,27 +11,19 @@ create procedure SOPECUTACON (
 	@Modulo		char(2))
 as
 
-
-
-
-/*******************************************************************
-** DESCRIPCION: Consulta de cuentas y tarjetas de una persona	****
-********************************************************************
-** Creo:		Marcelo Bautista Hernandez				        ****
-** Fecha:		24/Marzo/2023									****
-** Help:		TCELID-13293											****
-** Descripcion:	Creacion consulta cuentas y tarjetas por persona****
+/******************************************************************
+** DESCRIPCION: Consulta de cuentas y tarjetas de una persona  ****
+*******************************************************************
+** Creo:		Marcelo Bautista Hernandez		 ****
+** Fecha:		24/Marzo/2023				 ****
+** Help:		TCELID-13293				 ****
+** Descripcion:	Creacion consulta cuentas y tarjetas 	 ****
+			por persona				 ****
 *******************************************************************/
-
-
-
 
 /* Declaracion de Variables */
 declare	@Tip_ConTip	char(1), /* Consulta Tipo C/L*/
 		@Tip_ConCon	char(1)
-
-
-
 
 /* Declaracion de Constantes */
 declare	@Str_Vacio			char(1), /* Vacio */
@@ -53,9 +42,6 @@ declare	@Str_Vacio			char(1), /* Vacio */
 		@Tar_NarDolar    	char(4), /*NARANJA DOLARES */
 		@Tar_FronDOlar    	char(4) /*FRONTERIZA DOLARES */
 
-
-
-
 /* Asignacion de Constantes */
 select	@Str_Vacio			= '',
 		@Str_C				= 'C',
@@ -73,19 +59,12 @@ select	@Str_Vacio			= '',
 		@Tar_NarDolar    	= '0303',
 		@Tar_FronDOlar		= '0316'
 
-
 /* Asignacion de Variables */
 select	@Tip_ConTip	= substring(@Tip_Consul,1 , 1),
 		@Tip_ConCon	= substring(@Tip_Consul, 2, 1)
 
-
-
-
 if @Tip_ConTip = @Str_C begin
 	if @Tip_ConCon	= @Str_Uno begin
-
-
-
 
 		create table #PersonaCueTar (
 			Pct_PerUni	char(8),
@@ -122,24 +101,15 @@ if @Tip_ConTip = @Str_C begin
 				@Tar_FronDOlar
 			)
 
-
-
-
 		update #PersonaCueTar set
 			Pct_CueReg	=	Sol_Regime
 		from #PersonaCueTar pct
 		inner join CHSOLICI sol noholdlock on Pct_NumCta = Sol_Cuenta
 
-
-
-
 		update #PersonaCueTar set
 			Pct_ClaCli	=	Clc_Clasif
 		from #PersonaCueTar pct
 		inner join CLCLACLI noholdlock on pct.Pct_CliID = Clc_Client
-
-
-
 
 		update #PersonaCueTar set
 			Pct_CueNiv	=	Cun_NivCue
@@ -150,9 +120,6 @@ if @Tip_ConTip = @Str_C begin
 				Pct_CueSta,	Pct_CueNiv,	Pct_CueReg,	Pct_NumTar,	Pct_TitAdi,
 				Pct_TipTar,	Pct_StaTar
 		from #PersonaCueTar pct
-
-
-
 
 		drop table #PersonaCueTar
 	end
