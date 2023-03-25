@@ -14,18 +14,19 @@ as
 
 if (@Pla_Numero = '') and (@Pla_Nombre = '')
 	select	Pla_Numero,	Pla_Nombre,	Pla_Abrevi,	Pla_CenPro, Pla_PlaCec,
-			Pla_Clabe,	Pla_ClaMin
+			Pla_Clabe,	Pla_ClaMin, SoPlazaID
 		from SOPLAZAS noholdlock
 		order by Pla_Nombre
 else if (@Pla_Nombre = '')
 	select	Pla_Numero,	Pla_Nombre,	Pla_Abrevi,	Pla_CenPro, Pla_PlaCec,
-			Pla_Clabe,	Pla_ClaMin
+			Pla_Clabe,	Pla_ClaMin, SoPlazaID
 		from SOPLAZAS noholdlock
 		where	Pla_Numero	= @Pla_Numero
 else begin
 	select	@Pla_Nombre	= ltrim(rtrim(@Pla_Nombre)) + '%'
 	
-	select	Pla_Numero,	Pla_Nombre, Pla_PlaCec, Pla_Clabe,	Pla_ClaMin
+	select	Pla_Numero,	Pla_Nombre, Pla_PlaCec, Pla_Clabe,	Pla_ClaMin,
+			SoPlazaID
 		from SOPLAZAS noholdlock
 		where	Pla_Nombre	like @Pla_Nombre
 		order by Pla_Nombre
