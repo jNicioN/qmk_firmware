@@ -1,7 +1,6 @@
 create procedure SOPECLDCCON (
-	@Per_Numero char(8),
-	@NumDiaAct  int,
-	@Par_DiaNue int,
+	@Per_Numero	char(8),
+	@NumDiaAct int,
 	@Tip_Consul	char(2),
 
 	@NumTransac	char(10),
@@ -17,12 +16,6 @@ as
 ** DESCRIPCION: Consulta datos de contacto del cliente			****
 **				ligado a la persona								****
 ********************************************************************
-** Modificó:	Joseph Santos							        ****
-** Fecha:		30/Marzo/2023									****
-** ID Jira:		TCELID-13733									****
-** Descripcion:	Se agrega validación de personas nuevas y 		****
-**  			parametro para definir cuando es nueva			****
-********************************************************************
 ** Creo:		Melissa Reyna							        ****
 ** Fecha:		03/Oct/2022										****
 ** Help:		1379522											****
@@ -32,9 +25,7 @@ as
 /* Declaracion de Variables */
 declare	@Tip_ConTip	char(1), /* Consulta Tipo C/L*/
 		@Tip_ConCon	char(1),
-		@Fec_ModAnt date,
-		@Fec_CliNue date
-
+		@Fec_ModAnt date
 
 /* Declaracion de Constantes */
 declare	@Str_Vacio	char(1), /* Vacio */
@@ -55,41 +46,20 @@ select	@Str_Vacio	= '',
 /* Asignacion de Variables */
 select	@Tip_ConTip	= substring(@Tip_Consul,1 , 1),
 		@Tip_ConCon	= substring(@Tip_Consul, 2, 1),
-		@Fec_ModAnt = dateadd(dd, -@NumDiaAct, current_date()) ,
-		@Fec_CliNue = dateadd(dd, -@Par_DiaNue, current_date())
+		@Fec_ModAnt = dateadd(dd, -@NumDiaAct, current_date()) 
 
 if @Tip_ConTip = @Str_C begin
 	if @Tip_ConCon	= @Str_Uno begin
-		
-		select 
-			top 1
-			cio.Adi_NumPer,
-			MIN(ent.Cli_Fecha) Cli_Fecha,
-			cio.Adi_TelCel, 
-			cio.Adi_Email,
-			(
-			case 
-			    when  Adi_FeMoCl <= @Fec_ModAnt 
-			           and (Adi_TelCel !=@Str_Vacio or Adi_Email !=@Str_Vacio) then 
-			    	@Bit_PeVeSi
-			   	else 
-			   		case 
-				    when  (MIN(ent.Cli_Fecha) > @Fec_ModAnt) then 
-				    	@Bit_PeVeSi
-				   	else 
-				   		@Bit_PeVeNo	
-				    end
-			    end
-			) as PermiteVer		
-		from  CLADICIO cio noholdlock
-		inner join CLCLIENT ent noholdlock 
-		on cio.ClClientID = ent.ClClientID
-		inner join CLCLACLI cli noholdlock 
-		on cio.ClClientID = cli.Clc_Client
-		and ent.ClClientID = cli.Clc_Client
-		where cio.Adi_NumPer = @Per_Numero
-		and cli.Clc_Clasif = @Cli_ClaBR
-		group by cio.Adi_NumPer 
+
+		select top 1 Adi_TelCel, Adi_Email,(CASE 
+		    WHEN  Adi_FeMoCl <= @Fec_ModAnt AND (Adi_TelCel !=@Str_Vacio OR Adi_Email !=@Str_Vacio) THEN @Bit_PeVeSi
+		   	ELSE @Bit_PeVeNo	
+		    END) as PermiteVer
+			from  CLADICIO noholdlock
+			inner join CLCLACLI noholdlock on ClClientID = Clc_Client
+			where Adi_NumPer = @Per_Numero
+				and Clc_Clasif = @Cli_ClaBR
+			order by Adi_FeMoCl desc
 
 	end
 end
