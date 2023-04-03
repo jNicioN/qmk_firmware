@@ -20,6 +20,12 @@ as
 ********************************************************************
 ** REFERENCIAS:													****
 ********************************************************************
+**	Modifico:		Ricardo de la Fuente Segovia				****
+**  Fecha:			03/04/2023									****
+**  Help:			TCELTO-4381									****
+**	Descripcion:	Se modifican las consultas CD y LA 			****
+**					relacionadas a SMS							****
+********************************************************************
 **	Modifico:	Luis Enrique Ramirez Ortiz						****
 **  Fecha:		06/10/2021										****
 **  Help:		1179955											****
@@ -1224,15 +1230,16 @@ end else begin
 		
 		select	@Rfc_Like	= @Per_RFC	+ @Str_Porcen
 		
-		if char_length(ltrim(rtrim(@Per_RFC)))	= @Ent_Trece
+		if char_length(ltrim(rtrim(@Per_RFC)))	= @Ent_Trece begin
 			select	PerPersoID, Per_RFC, Per_Comple		/* LA - Busqueda con RFC completo*/
 				from SOPERSON noholdlock
 				where	Per_Tipo	<> @Tip_Moral
 				  and	Per_RFC		= @Per_RFC
-		else 
+		end else begin 
 			select	PerPersoID, Per_RFC, Per_Comple		/* LA - Busqueda con RFC incompleto*/
 				from SOPERSON noholdlock
 				where	Per_Tipo	<> @Tip_Moral
 			  	  and	Per_RFC		like @Rfc_Like
+		end
 	end
 end
