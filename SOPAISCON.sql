@@ -17,6 +17,11 @@ as
 /*****************************************************************************/
 /** REFERENCIAS:
 ****************************************************************************
+** Modifico:	Jonatan Diaz Garces								****
+** Fecha:		07/03/2020									****
+** Jira:		TCELTU-1302									****
+** Modificar:	Se modifica L3								****
+****************************************************************************
 ** Modifico:	Joel Barcenas								****
 ** Fecha:		06/03/2020									****
 ** Req:			1367345										****
@@ -76,10 +81,10 @@ end else begin								/*	L I S T A S	*/
 			order by Pai_Gentil
 	end	
 	if @Tip_ConCon = '3' begin	/* Lista de paises filtrados por paises sancionados swift */	
-		select p.Pai_Numero,	p.Pai_Nombre,	p.Pai_Abrevi,	p.Pai_ISR, p.Pai_Gentil, p.Pai_IdeBMX, p.Pai_IdCNBV
+		select p.Pai_Numero,	p.Pai_Nombre,	p.Pai_Abrevi,	p.Pai_ISR, p.Pai_Gentil, p.Pai_IdeBMX, p.Pai_IdCNBV, Pas_EstPai
 		from SOPAIS p noholdlock
-		left  join ITPAISAN ps noholdlock on p.Pai_IdCNBV = ps.Pas_ClaPai
-		where ps.Pas_Numero  is null
+		left  join LDPAISAN ps noholdlock on p.Pai_IdCNBV = ps.Pas_ClaPai
+		where ps.Pas_EstPai <> 2 or ps.Pas_Numero  is null
 		and	Pai_Nombre	like @Pai_Nombre
 		order by Pai_Nombre
 	end
