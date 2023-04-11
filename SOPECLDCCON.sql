@@ -16,6 +16,12 @@ as
 ** DESCRIPCION: Consulta datos de contacto del cliente			****
 **				ligado a la persona								****
 ********************************************************************
+** Creo:		Joseph Santos							        ****
+** Fecha:		11/04/2023										****
+** ID Jira:		TCELID-13889									****
+** Descripcion:	Se modifica consulta C1 para comparar con 		****
+**				bitacora CLBIDAHI el telefono y correo			****
+********************************************************************
 ** Creo:		Melissa Reyna							        ****
 ** Fecha:		03/Oct/2022										****
 ** Help:		1379522											****
@@ -25,7 +31,13 @@ as
 /* Declaracion de Variables */
 declare	@Tip_ConTip	char(1), /* Consulta Tipo C/L*/
 		@Tip_ConCon	char(1),
-		@Fec_ModAnt date
+		@Fec_ModAnt date,
+		@Dias_Act	int,
+		@Str_Cel	varchar(20),
+		@Str_Email	varchar(50),
+		@Mod_Cel	int,
+		@Mod_Email	int,
+		@Per_Verifi	int
 
 /* Declaracion de Constantes */
 declare	@Str_Vacio	char(1), /* Vacio */
@@ -33,33 +45,77 @@ declare	@Str_Vacio	char(1), /* Vacio */
 		@Str_Uno	char(1), /* Tipo 1 */
 		@Cli_ClaBR	smallint,
 		@Bit_PeVeSi BIT,
-		@Bit_PeVeNo BIT
+		@Bit_PeVeNo BIT,
+		@Str_Null	varchar(1)
 
 /* Asignacion de Constantes */
 select	@Str_Vacio	= '',
 		@Str_C		= 'C',
 		@Str_Uno	= '1',
 		@Cli_ClaBR	= 2,
-		@Bit_PeVeSi 	= 1,
-		@Bit_PeVeNo 	= 0
+		@Bit_PeVeSi = 1,
+		@Bit_PeVeNo = 0,
+		@Str_Null 	= null
 
 /* Asignacion de Variables */
 select	@Tip_ConTip	= substring(@Tip_Consul,1 , 1),
 		@Tip_ConCon	= substring(@Tip_Consul, 2, 1),
-		@Fec_ModAnt = dateadd(dd, -@NumDiaAct, current_date()) 
+		@Fec_ModAnt = dateadd(dd, -@NumDiaAct, current_date()),
+		@Dias_Act 	= @NumDiaAct + 1,
+		@Per_Verifi = @Bit_PeVeNo
 
 if @Tip_ConTip = @Str_C begin
 	if @Tip_ConCon	= @Str_Uno begin
-
-		select top 1 Adi_TelCel, Adi_Email,(CASE 
-		    WHEN  Adi_FeMoCl <= @Fec_ModAnt AND (Adi_TelCel !=@Str_Vacio OR Adi_Email !=@Str_Vacio) THEN @Bit_PeVeSi
-		   	ELSE @Bit_PeVeNo	
-		    END) as PermiteVer
-			from  CLADICIO noholdlock
-			inner join CLCLACLI noholdlock on ClClientID = Clc_Client
-			where Adi_NumPer = @Per_Numero
-				and Clc_Clasif = @Cli_ClaBR
-			order by Adi_FeMoCl desc
-
+		
+		create table #Actualizaciones_Recientes(
+			Act_TelCel 	varchar(20),
+			Act_Email 	varchar(50),
+			Act_dias 	int
+		)	
+		
+		insert into #Actualizaciones_Recientes
+		select 
+			str_replace(a.Cli_TelCel, ' ',@Str_Null), 
+			lower(a.Cli_Email),
+			datediff(day,  a.FechaSis, getdate())
+		from CLBIDAHI a
+		inner join CLADICIO b
+		on Cli_Numero = Adi_Client
+		inner join CLCLACLI c noholdlock 
+		on b.ClClientID = c.Clc_Client
+		where Adi_NumPer = @Per_Numero
+		and c.Clc_Clasif = @Cli_ClaBR
+		and (a.Cli_TelCel is not null and a.Cli_TelCel != @Str_Vacio)
+		and (a.Cli_Email is not null and a.Cli_Email != @Str_Vacio)
+		and datediff(day,  a.FechaSis, getdate()) < @Dias_Act
+		
+		select top 1 
+			@Str_Cel = Adi_TelCel, 
+			@Str_Email = Adi_Email
+		from  CLADICIO noholdlock
+		inner join CLCLACLI noholdlock on ClClientID = Clc_Client
+		where Adi_NumPer = @Per_Numero
+		and Clc_Clasif = @Cli_ClaBR
+		order by Adi_FeMoCl desc
+		
+		select @Mod_Cel = count(1)
+		from #Actualizaciones_Recientes
+		where Act_TelCel != @Str_Cel
+		
+		select @Mod_Email = count(1)
+		from #Actualizaciones_Recientes
+		where Act_Email != @Str_Email
+		
+		if @Mod_Cel < 1 or @Mod_Email < 1
+			and (@Str_Cel != @Str_Vacio or @Str_Email != @Str_Vacio) begin
+			select @Per_Verifi = @Bit_PeVeSi
+		end
+		
+		select 
+			@Str_Cel Adi_TelCel,
+			@Str_Email Adi_Email,
+			@Per_Verifi PermiteVer
+	
+		drop table #Actualizaciones_Recientes
 	end
 end
