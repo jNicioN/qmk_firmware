@@ -16,7 +16,7 @@ as
 ** DESCRIPCION: Consulta datos de contacto del cliente			****
 **				ligado a la persona								****
 ********************************************************************
-** Creo:		Joseph Santos							        ****
+** Modifico:	Joseph Santos							        ****
 ** Fecha:		11/04/2023										****
 ** ID Jira:		TCELID-13889									****
 ** Descripcion:	Se modifica consulta C1 para comparar con 		****
