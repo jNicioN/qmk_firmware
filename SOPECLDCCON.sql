@@ -94,7 +94,7 @@ if @Tip_ConTip = @Str_C begin
 		/*Tomo el telefono y correo de CLADICIO (Deberían ser los actuales)*/
 		select top 1 
 			@Str_Cel = str_replace(Adi_TelCel, @Str_Espacio,@Str_Null), 
-			@Str_Email = Adi_Email
+			@Str_Email = lower(Adi_Email)
 		from  CLADICIO noholdlock
 		inner join CLCLACLI noholdlock on ClClientID = Clc_Client
 		where Adi_NumPer = @Per_Numero
@@ -110,10 +110,10 @@ if @Tip_ConTip = @Str_C begin
 		select @Mod_Email = count(1)
 		from #ActReciente
 		where Act_Email != @Str_Email
-
+		
 		/*Si cualquiera de los dos da un count mayor a 0, no permite la verificación o si los campos de CLADICIO están nulos, tampoco*/
-		if @Mod_Cel > 0 or @Mod_Email > 0
-			or (@Str_Cel != @Str_Vacio or @Str_Email != @Str_Vacio) begin
+		if (@Mod_Cel > 0 or @Mod_Email > 0)
+			or (isnull(@Str_Cel,@Str_Vacio) = @Str_Vacio or isnull(@Str_Email,@Str_Vacio) = @Str_Vacio) begin
 			select @Per_Verifi = @Bit_PeVeNo
 		end
 
