@@ -81,8 +81,8 @@ if @Tip_ConTip = @Str_C begin
 			str_replace(a.Cli_TelCel, @Str_Espacio,@Str_Null), 
 			lower(a.Cli_Email),
 			datediff(day,  a.FechaSis, getdate())
-		from CLBIDAHI a
-		inner join CLADICIO b
+		from CLBIDAHI a noholdlock 
+		inner join CLADICIO b noholdlock 
 		on Cli_Numero = Adi_Client
 		inner join CLCLACLI c noholdlock 
 		on b.ClClientID = c.Clc_Client
@@ -113,7 +113,7 @@ if @Tip_ConTip = @Str_C begin
 		where Act_Email != @Str_Email
 		
 		/*Si cualquiera de los dos da un count mayor a 0, no permite la verificación o si los campos de CLADICIO están nulos, tampoco*/
-		if ((@Mod_Cel > 0 or @Mod_Email > 0) and @Fec_Mod <= @Fec_ModAnt )
+		if ((@Mod_Cel > 0 or @Mod_Email > 0) and @Fec_Mod >= @Fec_ModAnt )
 			or (isnull(@Str_Cel,@Str_Vacio) = @Str_Vacio or isnull(@Str_Email,@Str_Vacio) = @Str_Vacio) begin
 			select @Per_Verifi = @Bit_PeVeNo
 		end
