@@ -1,4 +1,3 @@
-
 create procedure SOPECLDCCON (
 	@Per_Numero	char(8),
 	@NumDiaAct int,
@@ -38,16 +37,17 @@ declare	@Tip_ConTip	char(1), /* Consulta Tipo C/L*/
 		@Str_Email	varchar(50),
 		@Mod_Cel	int,
 		@Mod_Email	int,
-		@Per_Verifi	int
+		@Per_Verifi	bit
 
 /* Declaracion de Constantes */
-declare	@Str_Vacio	char(1), /* Vacio */
-		@Str_C		char(1), /* Tipo C */
-		@Str_Uno	char(1), /* Tipo 1 */
-		@Cli_ClaBR	smallint,
-		@Bit_PeVeSi BIT,
-		@Bit_PeVeNo BIT,
-		@Str_Null	varchar(1)
+declare	@Str_Vacio	 char(1), /* Vacio */
+		@Str_C		 char(1), /* Tipo C */
+		@Str_Uno	 char(1), /* Tipo 1 */
+		@Cli_ClaBR	 smallint,
+		@Bit_PeVeSi  BIT,
+		@Bit_PeVeNo  BIT,
+		@Str_Null	 varchar(1),
+		@Str_Espacio varchar(1)
 
 /* Asignacion de Constantes */
 select	@Str_Vacio	= '',
@@ -56,7 +56,8 @@ select	@Str_Vacio	= '',
 		@Cli_ClaBR	= 2,
 		@Bit_PeVeSi = 1,
 		@Bit_PeVeNo = 0,
-		@Str_Null 	= null
+		@Str_Null 	= null,
+		@Str_Espacio = ' '
 
 /* Asignacion de Variables */
 select	@Tip_ConTip	= substring(@Tip_Consul,1 , 1),
@@ -68,15 +69,15 @@ select	@Tip_ConTip	= substring(@Tip_Consul,1 , 1),
 if @Tip_ConTip = @Str_C begin
 	if @Tip_ConCon	= @Str_Uno begin
 		
-		create table #Actualizaciones_Recientes(
+		create table #ActReciente(
 			Act_TelCel 	varchar(20),
 			Act_Email 	varchar(50),
 			Act_dias 	int
 		)	
 		/*Me traigo registros de la bitacora que estén dentro de los 90 días*/
-		insert into #Actualizaciones_Recientes
+		insert into #ActReciente
 		select 
-			str_replace(a.Cli_TelCel, ' ',@Str_Null), 
+			str_replace(a.Cli_TelCel, @Str_Espacio,@Str_Null), 
 			lower(a.Cli_Email),
 			datediff(day,  a.FechaSis, getdate())
 		from CLBIDAHI a
@@ -86,37 +87,41 @@ if @Tip_ConTip = @Str_C begin
 		on b.ClClientID = c.Clc_Client
 		where Adi_NumPer = @Per_Numero
 		and c.Clc_Clasif = @Cli_ClaBR
-		and (a.Cli_TelCel is not null and a.Cli_TelCel != @Str_Vacio)
-		and (a.Cli_Email is not null and a.Cli_Email != @Str_Vacio)
+		and (isnull(a.Cli_TelCel, @Str_Vacio) != @Str_Vacio)
+		and (isnull(a.Cli_Email, @Str_Vacio) != @Str_Vacio)
 		and datediff(day,  a.FechaSis, getdate()) < @Dias_Act
+
 		/*Tomo el telefono y correo de CLADICIO (Deberían ser los actuales)*/
 		select top 1 
-			@Str_Cel = Adi_TelCel, 
+			@Str_Cel = str_replace(Adi_TelCel, @Str_Espacio,@Str_Null), 
 			@Str_Email = Adi_Email
 		from  CLADICIO noholdlock
 		inner join CLCLACLI noholdlock on ClClientID = Clc_Client
 		where Adi_NumPer = @Per_Numero
 		and Clc_Clasif = @Cli_ClaBR
 		order by Adi_FeMoCl desc
+
 		/*Busco si tiene un telefono diferente en la bitacora dentro de los 90 días*/
 		select @Mod_Cel = count(1)
-		from #Actualizaciones_Recientes
+		from #ActReciente
 		where Act_TelCel != @Str_Cel		
+
 		/*Busco si tiene un correo diferente en la bitacora dentro de los 90 días*/
 		select @Mod_Email = count(1)
-		from #Actualizaciones_Recientes
+		from #ActReciente
 		where Act_Email != @Str_Email
-		/*Si cualquiera de los dos da un count mayor a 0, no permite la verificación y si los campos de CLADICIO están nulos, tampoco*/
+
+		/*Si cualquiera de los dos da un count mayor a 0, no permite la verificación o si los campos de CLADICIO están nulos, tampoco*/
 		if @Mod_Cel > 0 or @Mod_Email > 0
 			or (@Str_Cel != @Str_Vacio or @Str_Email != @Str_Vacio) begin
 			select @Per_Verifi = @Bit_PeVeNo
 		end
-		
+
 		select 
 			@Str_Cel Adi_TelCel,
 			@Str_Email Adi_Email,
 			@Per_Verifi PermiteVer
-	
-		drop table #Actualizaciones_Recientes
+
+		drop table #ActReciente
 	end
 end
