@@ -1,3 +1,4 @@
+
 create procedure SOPECLDCCON (
 	@Per_Numero	char(8),
 	@NumDiaAct int,
@@ -107,7 +108,7 @@ if @Tip_ConTip = @Str_C begin
 		where Act_Email != @Str_Email
 		/*Si cualquiera de los dos da un count mayor a 0, no permite la verificación y si los campos de CLADICIO están nulos, tampoco*/
 		if @Mod_Cel > 0 or @Mod_Email > 0
-			and (@Str_Cel != @Str_Vacio or @Str_Email != @Str_Vacio) begin
+			or (@Str_Cel != @Str_Vacio or @Str_Email != @Str_Vacio) begin
 			select @Per_Verifi = @Bit_PeVeNo
 		end
 		
