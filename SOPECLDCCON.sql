@@ -62,7 +62,7 @@ select	@Tip_ConTip	= substring(@Tip_Consul,1 , 1),
 		@Tip_ConCon	= substring(@Tip_Consul, 2, 1),
 		@Fec_ModAnt = dateadd(dd, -@NumDiaAct, current_date()),
 		@Dias_Act 	= @NumDiaAct + 1,
-		@Per_Verifi = @Bit_PeVeNo
+		@Per_Verifi = @Bit_PeVeSi
 
 if @Tip_ConTip = @Str_C begin
 	if @Tip_ConCon	= @Str_Uno begin
@@ -72,7 +72,7 @@ if @Tip_ConTip = @Str_C begin
 			Act_Email 	varchar(50),
 			Act_dias 	int
 		)	
-		
+		/*Me traigo registros de la bitacora que estén dentro de los 90 días*/
 		insert into #Actualizaciones_Recientes
 		select 
 			str_replace(a.Cli_TelCel, ' ',@Str_Null), 
@@ -88,7 +88,7 @@ if @Tip_ConTip = @Str_C begin
 		and (a.Cli_TelCel is not null and a.Cli_TelCel != @Str_Vacio)
 		and (a.Cli_Email is not null and a.Cli_Email != @Str_Vacio)
 		and datediff(day,  a.FechaSis, getdate()) < @Dias_Act
-		
+		/*Tomo el telefono y correo de CLADICIO (Deberían ser los actuales)*/
 		select top 1 
 			@Str_Cel = Adi_TelCel, 
 			@Str_Email = Adi_Email
@@ -97,18 +97,18 @@ if @Tip_ConTip = @Str_C begin
 		where Adi_NumPer = @Per_Numero
 		and Clc_Clasif = @Cli_ClaBR
 		order by Adi_FeMoCl desc
-		
+		/*Busco si tiene un telefono diferente en la bitacora dentro de los 90 días*/
 		select @Mod_Cel = count(1)
 		from #Actualizaciones_Recientes
-		where Act_TelCel != @Str_Cel
-		
+		where Act_TelCel != @Str_Cel		
+		/*Busco si tiene un correo diferente en la bitacora dentro de los 90 días*/
 		select @Mod_Email = count(1)
 		from #Actualizaciones_Recientes
 		where Act_Email != @Str_Email
-		
-		if @Mod_Cel < 1 or @Mod_Email < 1
+		/*Si cualquiera de los dos da un count mayor a 0, no permite la verificación y si los campos de CLADICIO están nulos, tampoco*/
+		if @Mod_Cel > 0 or @Mod_Email > 0
 			and (@Str_Cel != @Str_Vacio or @Str_Email != @Str_Vacio) begin
-			select @Per_Verifi = @Bit_PeVeSi
+			select @Per_Verifi = @Bit_PeVeNo
 		end
 		
 		select 
