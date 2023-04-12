@@ -1,4 +1,4 @@
-﻿create procedure SORENTASPRO (
+create procedure SORENTASPRO (
 	@Amo_MonFin	double precision,	-- Monto a Financiar
 	@Amo_IVAFac	smallmoney,			-- Porcentaje de I.V.A. de Factura
 	@Amo_OpcCom	double precision,	-- opción de Compra
@@ -36,6 +36,12 @@ as
 **				de ArrendaRegio**										****
 ****************************************************************************
 ** REFERENCIAS:															****
+****************************************************************************
+** Modifico:	Joel Moctezuma Guerrero									****
+** Fecha:		22/Marzo/2023											****
+** Help:		22825													****
+** Descripción: Permitir Reclasificacion Arrendamiento Puro B2B a PUCA.	****
+**				Arrendamiento Nuevos y de Lineas ya migradas como PUCA.	****
 ****************************************************************************
 ** Modificó:		Eduardo Montoya										****
 ** Fecha:			20/noviembre/2020			  						****
@@ -145,7 +151,8 @@ declare	@Ren_ResCap	double precision,		/*Resultado capital*/
 		@Adi_Tipo	char(2),				/*Tipo de Bien	*/
 		@Coa_ActFij	int,					/*Tipo de activo fijo	*/
 		@Cot_OpcCom money,					/* Monto de la Opcion de Compra */
-		@Opc_ComIVA money					/* Monto de la Opcion de Compra + IVA */
+		@Opc_ComIVA money,					/* Monto de la Opcion de Compra + IVA */
+		@Tip_ArPuCa	char(1)				/* Arrendamiento Puro Capitalizable S/N */
 
 declare	@Mon_Cero	smallint,				/*	Declaración de Constantes	*/
 		@Mon_Uno	smallint,
@@ -196,7 +203,8 @@ declare	@Mon_Cero	smallint,				/*	Declaración de Constantes	*/
 		@Uni_TCC	smallint,
 		@Cob_NoIVA	char(1),
 		@Cob_SiIVA	char(1),
-		@Str_SieCer char(7)
+		@Str_SieCer char(7),
+		@Str_Porcen	char(1)
 
 /*	Asignación de Constantes	*/
 select	@Mon_Cero	= 0.00,			/*	Moneda Cero																	*/
@@ -248,7 +256,8 @@ select	@Mon_Cero	= 0.00,			/*	Moneda Cero																	*/
 		@Uni_TCC	= 3,			/*	Unidad de negocios TCC														*/
 		@Cob_NoIVA	= 'N',			/*	No cobro de IVA																*/
 		@Cob_SiIVA	= 'S',			/*	Si cobro de IVA																*/																					 
-		@Str_SieCer	= '0000000'		/*	Cadena 7 ceros																*/
+		@Str_SieCer	= '0000000',	/*	Cadena 7 ceros																*/
+		@Str_Porcen	= '%'			/*	Caracter Porcentaje															*/
 
 select @Amo_TipRen = isnull(@Amo_TipRen,@Str_Vacio)
 		
@@ -262,7 +271,7 @@ create table #Rentas (
 	Ren_IvaFac	money,
 	Ren_IvaRen	money, 
 	Ren_Total	money)
-
+	
 select	@Par_DiaMes	= Par_DiaMes,
 		@Par_PorIVA	= Par_PorIVA
 	from ABPARAMS noholdlock
@@ -271,6 +280,16 @@ select	@Par_DiBaCr	= Par_DiBaCr,
 		@Par_IVA	= Par_IVA
 	from SOPARAMS noholdlock
 	where	Par_Sucurs	= @SucOrigen
+	
+select	@Tip_ArPuCa	= @Cad_No
+
+exec @Status = ABARPUCAPRO
+	@Num_Cotiza,	@Tip_ArPuCa output,	@NumTransac,	@Transaccio,	@Usuario,
+	@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
+if @Status <> 0 begin
+	rollback
+	return 1
+end
 	
 /*PROM-37*/	
 if @Num_Cotiza = @Str_SieCer begin 
@@ -329,7 +348,6 @@ end else
 		@Mon_Cero,		@Str_RenExt,	@Mon_Cero,		@Mon_Cero,		@Mon_Cero,
 		@Mon_Cero,		@Mon_Cero,		@Mon_Cero,		@Mon_Cero)
 
-
 -- Inserción de amortización cero "000" correspondiente al pago inicial
 select	@Ren_Consec = @Ent_Cero
 
@@ -381,6 +399,7 @@ if @Amo_TipCon = @Con_ComPur/*Comercial Puro*/ begin
 end
 
 if @Amo_MonCer = @Cad_No begin
+
 	select	@Ren_ResCap	= @Amo_MonFin,
 			@Res_IvaFac	= round((@Amo_MonFin * @Amo_IVAFac) / @Mon_Cien, @Ent_Dos)
 	
@@ -545,7 +564,7 @@ if @Amo_MonCer = @Cad_No begin
 			select	@Ren_Total	= @Mon_Cero
 		end
 
-		if @Amo_TipCon = @Con_B2BPur or @Amo_TipCon = @Con_LeaVIP begin /*B2B Puro*/
+		if @Amo_TipCon = @Con_LeaVIP begin /*B2B Puro*/
 	
 			update #Rentas set
 				Ren_Capita	= @Amo_RenMen,
@@ -623,7 +642,7 @@ if @Amo_MonCer = @Cad_No begin
 	select	@Ren_IvaRen	= @Ren_IvaInt + @Ren_IvaFac 
 	select	@Ren_Total	= @Ren_Capita + @Ren_Intere + @Ren_IvaInt + @Ren_IvaFac
 	
-	if @Amo_TipCon = @Con_B2BPur/*B2B Puro*/ or @Amo_TipCon = @Con_LeaVIP begin
+	if @Amo_TipCon = @Con_LeaVIP begin
 	
 		update #Rentas set
 			Ren_Capita	= @Amo_RenMen,
@@ -637,8 +656,7 @@ if @Amo_MonCer = @Cad_No begin
 
 	end else begin /*Arrendamientos-comerciales puro-credito*/
 	
-		if @Amo_TipArr = @Arr_Puro begin /*Si el tipo de arrendamiento es comercial puro */
-
+		if @Amo_TipArr = @Arr_Puro and @Tip_ArPuCa = @Cad_No begin /*Si el tipo de arrendamiento es comercial puro */
 			update #Rentas set
 				Ren_Capita	= @Ren_Capita,
 				Ren_Intere	= @Ren_Intere,
@@ -688,7 +706,7 @@ if @Amo_MonCer = @Cad_No begin
 
 	end else if @Amo_TipCal = @Cal_Report begin
 
-		if @Amo_TipCon = @Con_B2BPur  or @Amo_TipCon = @Con_LeaVIP begin /*B2B Puro o Auto Leasing Plus*/
+		if @Amo_TipCon = @Con_LeaVIP begin /*B2B Puro o Auto Leasing Plus*/
 
 			update #RenMen set
 				Ren_Cotiza	= @Num_Cotiza,
@@ -723,7 +741,7 @@ if @Amo_MonCer = @Cad_No begin
 	
 	end else begin
 	
-		if @Amo_TipCon = @Con_B2BPur or @Amo_TipCon = @Con_LeaVIP begin /*B2B Puro o Auto Leasing Plus*/
+		if @Amo_TipCon = @Con_LeaVIP begin /*B2B Puro o Auto Leasing Plus*/
 
 			update #RenMen set
 				Ren_Cotiza	= @Num_Cotiza,
@@ -797,6 +815,7 @@ if @Amo_MonCer = @Cad_No begin
 
 end else begin
 	if @Amo_TipCal = @Cal_ConEsp begin
+
 		delete from #RenMen
 		insert into #RenMen
 			(Ren_Cotiza,	Ren_Numero,		Ren_FecIni,		Ren_FecVen,		Ren_FecTer,
@@ -809,7 +828,7 @@ end else begin
 			where	Ren_Numero	not in (@Str_RenExt, @Str_ValFut, @Amo_PagIni)
 	
 	end else begin
-		if @Amo_TipCon = @Con_B2BPur or @Amo_TipCon = @Con_LeaVIP begin /*B2B Puro o Auto Leasing Plus*/
+		if @Amo_TipCon = @Con_LeaVIP begin /*B2B Puro o Auto Leasing Plus*/
 
 			delete from #RenMen
 			insert into #RenMen
