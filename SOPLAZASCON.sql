@@ -11,7 +11,16 @@ create procedure SOPLAZASCON (
 	@Modulo 	char(2))
 
 as
-
+/****************************************************************************/
+/* DESCRIPCION: 	Store de Consulta de Plazas							*/
+/****************************************************************************/
+/* REFERENCIAS: 															*/
+/****************************************************************************
+** Modifico:	Gerardo Arturo Hernández Torres							****
+** Fecha:		13/04/2023												****
+** Descripción:	Se agrega campo SoPlazaID para consultas				****
+** Help Desk:	25528													****
+*****************************************************************************/
 if (@Pla_Numero = '') and (@Pla_Nombre = '')
 	select	Pla_Numero,	Pla_Nombre,	Pla_Abrevi,	Pla_CenPro, Pla_PlaCec,
 			Pla_Clabe,	Pla_ClaMin, SoPlazaID
