@@ -17,6 +17,12 @@ as
 **				ligado a la persona								****
 ********************************************************************
 ** Modifico:	Joseph Santos							        ****
+** Fecha:		18/04/2023										****
+** ID Jira:		TCELID-13889									****
+** Descripcion:	Se modifica select final en C1 para que no devu ****
+**              elva campos nulos								****
+********************************************************************
+** Modifico:	Joseph Santos							        ****
 ** Fecha:		11/04/2023										****
 ** ID Jira:		TCELID-13889									****
 ** Descripcion:	Se modifica consulta C1 para comparar con 		****
@@ -69,22 +75,22 @@ select	@Tip_ConTip	= substring(@Tip_Consul,1 , 1),
 
 if @Tip_ConTip = @Str_C begin
 	if @Tip_ConCon	= @Str_Uno begin
-		
+
 		create table #ActReciente(
 			Act_TelCel 	varchar(20),
 			Act_Email 	varchar(50),
 			Act_dias 	int
-		)	
+		)
 		/*Me traigo registros de la bitacora que estén dentro de los 90 días*/
 		insert into #ActReciente
-		select 
-			str_replace(a.Cli_TelCel, @Str_Espacio,@Str_Null), 
+		select
+			str_replace(a.Cli_TelCel, @Str_Espacio,@Str_Null),
 			lower(a.Cli_Email),
 			datediff(day,  a.FechaSis, getdate())
-		from CLBIDAHI a noholdlock 
-		inner join CLADICIO b noholdlock 
+		from CLBIDAHI a noholdlock
+		inner join CLADICIO b noholdlock
 		on Cli_Numero = Adi_Client
-		inner join CLCLACLI c noholdlock 
+		inner join CLCLACLI c noholdlock
 		on b.ClClientID = c.Clc_Client
 		where Adi_NumPer = @Per_Numero
 		and c.Clc_Clasif = @Cli_ClaBR
@@ -92,8 +98,8 @@ if @Tip_ConTip = @Str_C begin
 		and (isnull(a.Cli_Email, @Str_Vacio) != @Str_Vacio)
 
 		/*Tomo el telefono y correo de CLADICIO (Deberían ser los actuales)*/
-		select top 1 
-			@Str_Cel = str_replace(Adi_TelCel, @Str_Espacio,@Str_Null), 
+		select top 1
+			@Str_Cel = str_replace(Adi_TelCel, @Str_Espacio,@Str_Null),
 			@Str_Email = lower(Adi_Email),
 			@Fec_Mod = Adi_FeMoCl
 		from  CLADICIO noholdlock
@@ -105,22 +111,22 @@ if @Tip_ConTip = @Str_C begin
 		/*Busco si tiene un telefono diferente en la bitacora dentro de los 90 días*/
 		select @Mod_Cel = count(1)
 		from #ActReciente
-		where Act_TelCel != @Str_Cel		
+		where Act_TelCel != @Str_Cel
 
 		/*Busco si tiene un correo diferente en la bitacora dentro de los 90 días*/
 		select @Mod_Email = count(1)
 		from #ActReciente
 		where Act_Email != @Str_Email
-		
+
 		/*Si cualquiera de los dos da un count mayor a 0, no permite la verificación o si los campos de CLADICIO están nulos, tampoco*/
 		if ((@Mod_Cel > 0 or @Mod_Email > 0) and @Fec_Mod >= @Fec_ModAnt )
 			or (isnull(@Str_Cel,@Str_Vacio) = @Str_Vacio or isnull(@Str_Email,@Str_Vacio) = @Str_Vacio) begin
 			select @Per_Verifi = @Bit_PeVeNo
 		end
 
-		select 
-			@Str_Cel Adi_TelCel,
-			@Str_Email Adi_Email,
+		select
+			isnull(@Str_Cel, @Str_Vacio) Adi_TelCel,
+			isnull(@Str_Email, @Str_Vacio) Adi_Email,
 			@Per_Verifi PermiteVer
 
 		drop table #ActReciente
