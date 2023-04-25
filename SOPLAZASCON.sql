@@ -11,21 +11,31 @@ create procedure SOPLAZASCON (
 	@Modulo 	char(2))
 
 as
-
+/****************************************************************************/
+/* DESCRIPCION: 	Store de Consulta de Plazas							*/
+/****************************************************************************/
+/* REFERENCIAS: 															*/
+/****************************************************************************
+** Modifico:	Gerardo Arturo Hernández Torres							****
+** Fecha:		13/04/2023												****
+** Descripción:	Se agrega campo SoPlazaID para consultas				****
+** Help Desk:	25528													****
+*****************************************************************************/
 if (@Pla_Numero = '') and (@Pla_Nombre = '')
 	select	Pla_Numero,	Pla_Nombre,	Pla_Abrevi,	Pla_CenPro, Pla_PlaCec,
-			Pla_Clabe,	Pla_ClaMin
+			Pla_Clabe,	Pla_ClaMin, SoPlazaID
 		from SOPLAZAS noholdlock
 		order by Pla_Nombre
 else if (@Pla_Nombre = '')
 	select	Pla_Numero,	Pla_Nombre,	Pla_Abrevi,	Pla_CenPro, Pla_PlaCec,
-			Pla_Clabe,	Pla_ClaMin
+			Pla_Clabe,	Pla_ClaMin, SoPlazaID
 		from SOPLAZAS noholdlock
 		where	Pla_Numero	= @Pla_Numero
 else begin
 	select	@Pla_Nombre	= ltrim(rtrim(@Pla_Nombre)) + '%'
 	
-	select	Pla_Numero,	Pla_Nombre, Pla_PlaCec, Pla_Clabe,	Pla_ClaMin
+	select	Pla_Numero,	Pla_Nombre, Pla_PlaCec, Pla_Clabe,	Pla_ClaMin,
+			SoPlazaID
 		from SOPLAZAS noholdlock
 		where	Pla_Nombre	like @Pla_Nombre
 		order by Pla_Nombre
