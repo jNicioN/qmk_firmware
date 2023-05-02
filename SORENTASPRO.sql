@@ -6,7 +6,7 @@ create procedure SORENTASPRO (
 	@Amo_Plazo	smallint,			-- Numero de Frecuencia
 	@Amo_PerGra	smallint,			-- Periodo de Gracia
 	@Amo_TasBas	double precision,	-- Tasa Base
-	@Amo_TipArr	char(1),			-- 1(Financiero) - 2(Puro) - 3(Credito Simple)
+	@Amo_TipArr	char(1),			-- 1(Financiero) - 2(Puro) - 3(Credito Simple) - 4(Arrendamiento Puro Capitalizable)
 	@Amo_TipAmo	char(1),			-- 1.Niveladas - 2. Iguales
 	@Amo_Frecue	smallint,			-- 1.Mensualidades - 2. Bimestralidades - 3. Trimestralidades - 4. Cuatrimestrualidades - 5. Semestralidades - 6. Anualidades
 	@Amo_CobIVA	char(1),			-- S. Cobra I.V.A. - N. No Cobra I.V.A.
@@ -38,7 +38,7 @@ as
 ** REFERENCIAS:															****
 ****************************************************************************
 ** Modifico:	Joel Moctezuma Guerrero									****
-** Fecha:		22/Marzo/2023											****
+** Fecha:		21/Abril/2023											****
 ** Help:		22825													****
 ** Descripción: Permitir Reclasificacion Arrendamiento Puro B2B a PUCA.	****
 **				Arrendamiento Nuevos y de Lineas ya migradas como PUCA.	****
@@ -152,7 +152,8 @@ declare	@Ren_ResCap	double precision,		/*Resultado capital*/
 		@Coa_ActFij	int,					/*Tipo de activo fijo	*/
 		@Cot_OpcCom money,					/* Monto de la Opcion de Compra */
 		@Opc_ComIVA money,					/* Monto de la Opcion de Compra + IVA */
-		@Tip_ArPuCa	char(1)				/* Arrendamiento Puro Capitalizable S/N */
+		@Tip_ArPuCa	char(1),				/* Arrendamiento Puro Capitalizable S/N */
+		@Arr_TiPuCa	char(1)					/* Arrendamiento: Tipo Puro Capitalizable - 4 */
 
 declare	@Mon_Cero	smallint,				/*	Declaración de Constantes	*/
 		@Mon_Uno	smallint,
@@ -177,6 +178,7 @@ declare	@Mon_Cero	smallint,				/*	Declaración de Constantes	*/
 		@Arr_Financ	char(1),
 		@Arr_Puro	char(1),
 		@Arr_CreSim	char(1),
+		@Arr_PurCap	char(1),
 		@Amo_Nivela	char(1),
 		@Amo_Iguale	char(1),
 		@Cal_Report	char(1),
@@ -230,6 +232,7 @@ select	@Mon_Cero	= 0.00,			/*	Moneda Cero																	*/
 		@Arr_Financ	= '1',			/*	Arrendamiento Financiero													*/
 		@Arr_Puro	= '2',			/*	Arrendamiento Puro															*/
 		@Arr_CreSim	= '3',			/*	Credito Simple																*/
+		@Arr_PurCap	= '4',			/*	Arrendamiento Puro Capitalizable																*/
 		@Amo_Nivela	= '1',			/*	Amortizaciones niveladas													*/
 		@Amo_Iguale	= '2',			/*	Amortizaciones iguales														*/
 		@Cal_Report	= '1',			/*	el resultado final ira al reporte											*/
@@ -283,14 +286,23 @@ select	@Par_DiBaCr	= Par_DiBaCr,
 	
 select	@Tip_ArPuCa	= @Cad_No
 
-exec @Status = ABARPUCAPRO
-	@Num_Cotiza,	@Tip_ArPuCa output,	@NumTransac,	@Transaccio,	@Usuario,
-	@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
-if @Status <> 0 begin
-	rollback
-	return 1
+if @Amo_TipArr <> @Arr_PurCap begin
+	exec @Status = ABARPUCAPRO
+		@Num_Cotiza,	@Tip_ArPuCa output,	@NumTransac,	@Transaccio,	@Usuario,
+		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
+	if @Status <> 0 begin
+		rollback
+		return 1
+	end
+end 
+
+select	@Arr_TiPuCa = @Amo_TipArr
+
+if @Amo_TipArr = @Arr_PurCap begin
+	select	@Amo_TipArr = @Arr_Puro,
+			@Tip_ArPuCa = @Cad_Si
 end
-	
+
 /*PROM-37*/	
 if @Num_Cotiza = @Str_SieCer begin 
 	select	@Zon_IVA	= @Amo_IVA
@@ -444,7 +456,6 @@ if @Amo_MonCer = @Cad_No begin
 		if (select	count(Pae_Amorti)
 				from ABTMPPEC noholdlock
 				where	Pae_NumCot	= @Num_Cotiza) > @Ent_Cero begin
-	
 			exec @Status	= ABTMPPECPRO
 				@Amo_Plazo,		@Amo_MonFin,	@Amo_TasBas,	@Num_Meses,			@Amo_PerGra,
 				@Amo_OpcCom,	@Amo_TipArr,	@Amo_IVA,		@Amo_Mensua output,	@Num_Cotiza,
@@ -462,11 +473,14 @@ if @Amo_MonCer = @Cad_No begin
 			if @Amo_TipArr in (@Arr_Financ, @Arr_CreSim) begin
 				select	@Mon_InAPag	= round(@Amo_MonFin * @Mon_Intere * power((@Mon_Uno + @Mon_Intere), (@Amo_Plazo - @Amo_PerGra)) / (power((@Mon_Uno + @Mon_Intere), (@Amo_Plazo - @Amo_PerGra)) - @Mon_Uno), @Ent_Dos)
 	
-				end
-			else
+			end else begin
 				select	@Mon_InAPag	= round((@Amo_MonFin - (@Amo_OpcCom * power((@Mon_Uno + @Mon_Intere), (- @Amo_Plazo + @Amo_PerGra)))) * @Mon_Intere * power((@Mon_Uno + @Mon_Intere), (@Amo_Plazo - @Amo_PerGra)) / (power((@Mon_Uno + @Mon_Intere), (@Amo_Plazo - @Amo_PerGra)) - @Mon_Uno), @Ent_Dos)
-	
+			end
 		end
+	end
+	
+	if @Tip_ArPuCa	= @Cad_Si and @Arr_TiPuCa = @Arr_PurCap begin
+		select @Mon_InAPag = @Amo_RenMen
 	end
 	
 	select	@PerGra	= @Ent_Uno
@@ -564,8 +578,7 @@ if @Amo_MonCer = @Cad_No begin
 			select	@Ren_Total	= @Mon_Cero
 		end
 
-		if @Amo_TipCon = @Con_LeaVIP begin /*B2B Puro*/
-	
+		if (@Amo_TipCon = @Con_B2BPur and @Tip_ArPuCa = @Cad_No) or @Amo_TipCon = @Con_LeaVIP begin /*B2B Puro*/
 			update #Rentas set
 				Ren_Capita	= @Amo_RenMen,
 				Ren_Intere	= @Mon_Cero,
@@ -577,7 +590,6 @@ if @Amo_MonCer = @Cad_No begin
 				where	Ren_Consec	= @Ren_Consec
 	
 		 end else begin /*Arrendamiento-comercial puro-credito*/
-	
 			update #Rentas set
 				Ren_Capita	= @Ren_Capita,
 				Ren_Intere	= @Ren_Intere,
@@ -642,8 +654,7 @@ if @Amo_MonCer = @Cad_No begin
 	select	@Ren_IvaRen	= @Ren_IvaInt + @Ren_IvaFac 
 	select	@Ren_Total	= @Ren_Capita + @Ren_Intere + @Ren_IvaInt + @Ren_IvaFac
 	
-	if @Amo_TipCon = @Con_LeaVIP begin
-	
+	if (@Amo_TipCon = @Con_B2BPur and @Tip_ArPuCa = @Cad_No) or @Amo_TipCon = @Con_LeaVIP begin
 		update #Rentas set
 			Ren_Capita	= @Amo_RenMen,
 			Ren_Intere	= @Mon_Cero,
@@ -656,7 +667,7 @@ if @Amo_MonCer = @Cad_No begin
 
 	end else begin /*Arrendamientos-comerciales puro-credito*/
 	
-		if @Amo_TipArr = @Arr_Puro and @Tip_ArPuCa = @Cad_No begin /*Si el tipo de arrendamiento es comercial puro */
+		if @Amo_TipArr = @Arr_Puro and @Tip_ArPuCa	= @Cad_No begin /*Si el tipo de arrendamiento es comercial puro */
 			update #Rentas set
 				Ren_Capita	= @Ren_Capita,
 				Ren_Intere	= @Ren_Intere,
@@ -677,15 +688,17 @@ if @Amo_MonCer = @Cad_No begin
 				where Ren_Numero = @Str_RenExt
 
 		end else begin /*Si el tipo de arrendamiento es comercial financiero o credito */
-			update #Rentas set
-				Ren_Capita	= @Ren_Capita,
-				Ren_Intere	= @Ren_Intere,
-				Ren_TtCaIn	= @Ren_TtCaIn,
-				Ren_IvaInt	= @Ren_IvaInt,
-				Ren_IvaFac	= @Ren_IvaFac,
-				Ren_IvaRen	= @Ren_IvaRen,
-				Ren_Total	= @Ren_Total
-				where	Ren_Consec	= @Amo_Plazo
+			if @Tip_ArPuCa	= @Cad_No begin
+				update #Rentas set
+					Ren_Capita	= @Ren_Capita,
+					Ren_Intere	= @Ren_Intere,
+					Ren_TtCaIn	= @Ren_TtCaIn,
+					Ren_IvaInt	= @Ren_IvaInt,
+					Ren_IvaFac	= @Ren_IvaFac,
+					Ren_IvaRen	= @Ren_IvaRen,
+					Ren_Total	= @Ren_Total
+					where	Ren_Consec	= @Amo_Plazo
+			end
 		end
 	end
 	if @Amo_TipCal = @Cal_ConEsp begin
@@ -706,8 +719,7 @@ if @Amo_MonCer = @Cad_No begin
 
 	end else if @Amo_TipCal = @Cal_Report begin
 
-		if @Amo_TipCon = @Con_LeaVIP begin /*B2B Puro o Auto Leasing Plus*/
-
+		if (@Amo_TipCon = @Con_B2BPur and @Tip_ArPuCa = @Cad_No) or @Amo_TipCon = @Con_LeaVIP begin /*B2B Puro o Auto Leasing Plus*/
 			update #RenMen set
 				Ren_Cotiza	= @Num_Cotiza,
 				Ren_Numero	= #Rentas.Ren_Numero,
@@ -722,7 +734,6 @@ if @Amo_MonCer = @Cad_No begin
 				inner join #RenMen on #Rentas.Ren_Numero = #RenMen.Ren_Numero
 	
 		end else begin /*Arrendamiento-Comercial puro-credito*/
-
 			update #RenMen set
 				Ren_Cotiza	= @Num_Cotiza,
 				Ren_Numero	= #Rentas.Ren_Numero,
@@ -741,8 +752,7 @@ if @Amo_MonCer = @Cad_No begin
 	
 	end else begin
 	
-		if @Amo_TipCon = @Con_LeaVIP begin /*B2B Puro o Auto Leasing Plus*/
-
+		if (@Amo_TipCon = @Con_B2BPur and @Tip_ArPuCa = @Cad_No) or @Amo_TipCon = @Con_LeaVIP begin /*B2B Puro o Auto Leasing Plus*/
 			update #RenMen set
 				Ren_Cotiza	= @Num_Cotiza,
 				Ren_Numero	= #Rentas.Ren_Numero,
@@ -826,9 +836,9 @@ end else begin
 					Ren_IvaRen,		Ren_Total
 			from #Rentas
 			where	Ren_Numero	not in (@Str_RenExt, @Str_ValFut, @Amo_PagIni)
-	
+
 	end else begin
-		if @Amo_TipCon = @Con_LeaVIP begin /*B2B Puro o Auto Leasing Plus*/
+		if (@Amo_TipCon = @Con_B2BPur and @Tip_ArPuCa = @Cad_No) or @Amo_TipCon = @Con_LeaVIP begin /*B2B Puro o Auto Leasing Plus*/
 
 			delete from #RenMen
 			insert into #RenMen
@@ -839,7 +849,7 @@ end else begin
 						Ren_Capita,		Ren_Intere,	Ren_TtCaIn,	Ren_IvaInt,	Ren_IvaFac,
 						Ren_IvaRen,		Ren_Total
 				from #Rentas
-	
+
 		end else begin /*Arrendamiento-comercial puro-credito*/
 
 			delete from #RenMen
@@ -852,7 +862,7 @@ end else begin
 						Ren_IvaRen,		Ren_Total
 				from #Rentas
 				where	Ren_Numero <> @Amo_PagIni
-	
+
 		end
 	end
 end
@@ -876,8 +886,7 @@ if @Amo_UniNeg = @Uni_TCC begin
 			Ren_Total	=	@Opc_ComIVA
 			where Ren_Numero = @Str_ValFut
 			  and Ren_Cotiza = @Num_Cotiza
-			  
+		  
 	end
 end
-
 drop table #Rentas
