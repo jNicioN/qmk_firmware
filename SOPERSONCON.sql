@@ -20,6 +20,12 @@ as
 ********************************************************************
 ** REFERENCIAS:													****
 ********************************************************************
+**	Modifico:		Ricardo de la Fuente Segovia				****
+**  Fecha:			03/04/2023									****
+**  Help:			TCELTO-4381									****
+**	Descripcion:	Se modifican las consultas CD y LA 			****
+**					relacionadas a SMS							****
+********************************************************************
 **	Modifico:	Luis Enrique Ramirez Ortiz						****
 **  Fecha:		06/10/2021										****
 **  Help:		1179955											****
@@ -757,13 +763,13 @@ if @Tip_ConTip = 'C' begin
 			where Per_Tipo in (@Tip_Fisica,@Tip_FisAE)
 			  and Per_RFC = @Per_RFC
 	end else if @Tip_ConCon = 'D' begin /*Consulta para personas que no existen en lIsta negra de Tercero autorizado*/
-			 select top 1	sp.Per_Numero,	sp.Per_Tipo,	sp.Per_Benefi,	sp.Per_NuSeFi,	sp.Per_Titulo,
-				sp.Per_Nombre,	sp.Per_ApePat,	sp.Per_ApeMat,	sp.Per_RazSoc,	sp.Per_Comple,
-				sp.Per_ComOrd,	sp.Per_RFC,		sp.Per_CURP
-			from SOPERSON sp noholdlock
-			where Per_Tipo in (@Tip_Fisica,@Tip_FisAE)
-			and Per_RFC = @Per_RFC	
-			order by  PerPersoID desc
+				select	sp.Per_Numero,	sp.Per_Tipo,	sp.Per_Benefi,	sp.Per_NuSeFi,	sp.Per_Titulo,
+						sp.Per_Nombre,	sp.Per_ApePat,	sp.Per_ApeMat,	sp.Per_RazSoc,	sp.Per_Comple,
+						sp.Per_ComOrd,	sp.Per_RFC,		sp.Per_CURP,	sp.PerPersoID
+				from SOPERSON sp noholdlock
+				where Per_Tipo	in (@Tip_Fisica,@Tip_FisAE)
+				  and Per_RFC	= @Per_RFC	
+				order by  PerPersoID desc
 	end else if @Tip_ConCon = 'F' begin /*Consulta para obtener a todas las personas con el mismo RFC*/
 		select @Per_RFC	= Per_RFC
 		from SOPERSON noholdlock
@@ -1220,13 +1226,20 @@ end else begin
 			order by Per_Comple
 			
 		drop table #PersonasRfc
-	end	else if @Tip_ConCon = @Str_A begin
+	end	else if @Tip_ConCon	= @Str_A begin
 		
-		select @Rfc_Like = @Per_RFC + @Str_Porcen
+		select	@Rfc_Like	= @Per_RFC	+ @Str_Porcen
 		
-		select Per_RFC, Per_Comple
-		from SOPERSON noholdlock
-		where  Per_Tipo <> @Tip_Moral
-		and	Per_RFC like @Rfc_Like
+		if char_length(ltrim(rtrim(@Per_RFC)))	= @Ent_Trece begin
+			select	PerPersoID, Per_RFC, Per_Comple		/* LA - Busqueda con RFC completo*/
+				from SOPERSON noholdlock
+				where	Per_Tipo	<> @Tip_Moral
+				  and	Per_RFC		= @Per_RFC
+		end else begin 
+			select	PerPersoID, Per_RFC, Per_Comple		/* LA - Busqueda con RFC incompleto*/
+				from SOPERSON noholdlock
+				where	Per_Tipo	<> @Tip_Moral
+			  	  and	Per_RFC		like @Rfc_Like
+		end
 	end
 end
