@@ -26,6 +26,11 @@ as
 *****************************************************************
 ** Referencias: 												*
 *****************************************************************
+** Modifico:	Francisco Minajas							 ****
+** Fecha:		04/05/2023   								 ****
+** Descripcion: Se agrega consulta 5 busqueda por nombre	 ****
+** JIRA:		TRAAC-1450						 			 ****
+*****************************************************************
 ** Modifico:	Adriana Gomez								 ****
 ** Fecha:		03/02/2021   								 ****
 ** Descripcion: Se corta la busqueda a 8 digitos 			 ****
