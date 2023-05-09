@@ -16,6 +16,11 @@ as
 /***********************************************************************************/
 /* DESCRIPCION: Consulta de registros de Actividad Preponderante				****/
 /***********************************************************************************/
+/** Modifica:		Raul Muniz												    ****/
+/** Fecha:			09/05/2023			                           		        ****/
+/** C.Cambios:		27203	 				 									****/
+/** Descripcion:	Se modifican consultas para regresar actividad regulatoria	****/
+/***********************************************************************************/
 /** Modifica:		Jose R. Rodriguez Zenteno								    ****/
 /** Fecha:			21/Diciembre/2021                           		        ****/
 /** Help:			1504301 				 									****/
@@ -57,8 +62,8 @@ select @Tip_ConTip = substring(@Tip_Consul, 1, 1),
 
 if @Tip_ConTip	= @Str_C begin /* 'C': Consulta */
 	if @Tip_ConCon = @Str_Uno begin		/* C1 */
-		select	Acp_Numero,	Acp_Descri,	Acp_Activo,	Sur_Numero,	Sur_Descri,
-				Ram_Numero,	Ram_Descri,	Ram_Subsec
+		select	Acp_Numero,	Acp_Descri,	Acp_Activo,	Acp_ActReg,	Sur_Numero,
+				Sur_Descri,	Ram_Numero,	Ram_Descri,	Ram_Subsec
 			into #ActividadSubRama
 			from SOACTPRE noholdlock
 			inner join	SOSUBRAM noholdlock
@@ -67,9 +72,9 @@ if @Tip_ConTip	= @Str_C begin /* 'C': Consulta */
 				on Ram_Numero = Sur_Rama
 			where	Acp_Numero	= @Acp_Numero
 	
-		select	Acp_Numero,	Acp_Descri,	Acp_Activo,	Sur_Numero,	Sur_Descri,
-				Ram_Numero,	Ram_Descri,	Sus_Numero,	Sus_Descri,	Sec_Numero,
-				Sec_Descri, Mac_Numero, Mac_Descri
+		select	Acp_Numero,	Acp_Descri,	Acp_Activo,	Acp_ActReg,	Sur_Numero,
+				Sur_Descri,	Ram_Numero,	Ram_Descri,	Sus_Numero,	Sus_Descri,
+				Sec_Numero,	Sec_Descri, Mac_Numero, Mac_Descri
 			from #ActividadSubRama noholdlock
 			inner join	SOSUBSEC noholdlock
 				on Sus_Numero = Ram_Subsec
@@ -83,15 +88,17 @@ if @Tip_ConTip	= @Str_C begin /* 'C': Consulta */
 	end
 end else begin
 	if @Tip_ConCon = @Str_Uno begin		/* L1 */
-		select	Acp_Numero,	Acp_Descri,	Acp_Activo,	Acp_SubRam,	NumTransac,
-				Transaccio,	Usuario,	FechaSis,	SucOrigen,	SucDestino
+		select	Acp_Numero,	Acp_Descri,	Acp_Activo,	Acp_SubRam,	Acp_ActReg,
+				NumTransac,	Transaccio,	Usuario,	FechaSis,	SucOrigen,
+				SucDestino
 			from SOACTPRE noholdlock
 			where	Acp_Activo = @Est_Activo
 	end else if @Tip_ConCon = @Str_Dos begin		/* L2 */
 		select	@Acp_Descri = ltrim(rtrim(@Acp_Descri))
 		
-		select	Acp_Numero,	Acp_Descri,	Acp_Activo,	Acp_SubRam,	NumTransac,
-				Transaccio,	Usuario,	FechaSis,	SucOrigen,	SucDestino
+		select	Acp_Numero,	Acp_Descri,	Acp_Activo,	Acp_SubRam,	Acp_ActReg,
+				NumTransac,	Transaccio,	Usuario,	FechaSis,	SucOrigen,
+				SucDestino
 			from SOACTPRE noholdlock
 			where	Acp_Activo	= @Est_Activo
 			  and	Acp_Descri like @Str_Porcen + @Acp_Descri + @Str_Porcen
