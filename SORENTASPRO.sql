@@ -38,7 +38,7 @@ as
 ** REFERENCIAS:															****
 ****************************************************************************
 ** Modifico:	Joel Moctezuma Guerrero									****
-** Fecha:		21/Abril/2023											****
+** Fecha:		22/Marzo/2023											****
 ** Help:		22825													****
 ** Descripción: Permitir Reclasificacion Arrendamiento Puro B2B a PUCA.	****
 **				Arrendamiento Nuevos y de Lineas ya migradas como PUCA.	****
@@ -479,7 +479,7 @@ if @Amo_MonCer = @Cad_No begin
 		end
 	end
 	
-	if @Tip_ArPuCa	= @Cad_Si and @Arr_TiPuCa = @Arr_PurCap begin
+	if @Tip_ArPuCa	= @Cad_Si and @Arr_TiPuCa in (@Arr_PurCap, @Arr_Puro) begin
 		select @Mon_InAPag = @Amo_RenMen
 	end
 	
@@ -523,7 +523,7 @@ if @Amo_MonCer = @Cad_No begin
 						from ABTMPPEC noholdlock
 						where	Pae_NumCot	= @Num_Cotiza
 						  and	Pae_Amorti	= right(@Str_3Ceros + ltrim(rtrim(convert(char(3), @Ren_Consec))), @Ent_Tres)) begin
-	
+			 
 				select	@Pae_Cantid	= Pae_Cantid
 					from ABTMPPEC noholdlock
 					where Pae_NumCot	= @Num_Cotiza
