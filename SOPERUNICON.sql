@@ -21,6 +21,12 @@ as
 /*******************************************************************
 ** DESCRIPCION: Consulta de Persona Unica						****
 ********************************************************************
+** Modifico:	Rogelio Uriel Vergara Covarrubias				****
+** Fecha:		11/05/2023										****
+** Help:														****
+** Descripcion:	Se modifico consulta LD para dar salida a   	****
+**				numeroCliente y buscar por RFC y Nombre     	****
+********************************************************************
 ** Modifico:	Roberto Carlos Acosta Gutierrez					****
 ** Fecha:		29/06/2022										****
 ** Help:		1662542	 										****
@@ -211,7 +217,8 @@ declare	@Str_Vacio	char(1), /* Vacio */
 		@Str_A      char(1),	/* Tipo A*/
 		@Ent_Cinco	int,		/*	Entero Cinco */
 		@Ent_Quinc	int,		/*	Entero Quince */
-		@Ent_Dos	int			/*	Entero Dos */
+		@Ent_Dos	int,		/*	Entero Dos */
+		@Banco_Actual char(11)  /* Banco actual */
 
 
 /* Asignacion de Constantes */
@@ -241,7 +248,8 @@ select	@Str_Vacio	= '',
 		@Str_A 		= 'A',
 		@Ent_Cinco	= 5,
 		@Ent_Quinc	= 15,
-		@Ent_Dos	= 2
+		@Ent_Dos	= 2,
+		@Banco_Actual = 'BancoActual'
 
 
 select	@Str_PerRFC = ltrim(rtrim(@Per_RFC)),
@@ -1002,11 +1010,48 @@ end else begin
 	
 	if @Tip_ConCon	= @Str_D begin /* LD - Consulta de Personas por nombre ordenado */
 		select @Per_Comple = @Per_Comple + @Str_Porcen
-		select	P.Per_Numero,	P.Per_Tipo,		P.Per_Benefi,	P.Per_NuSeFi,	P.Per_Titulo,
-				P.Per_Nombre,	P.Per_ApePat,	P.Per_ApeMat,	P.Per_RazSoc,	P.Per_Comple,
-				P.Per_ComOrd,	P.Per_RFC,		P.Per_CURP,		P.FechaSis as 	Per_Fecha,
-				P.Per_Entida,	P.Per_Locali, 	P.Per_ActEmp
-		  from	SOPERSON P noholdlock
-		 where	P.Per_ComOrd like @Per_Comple
+		create table #tmpPerso05(
+			Per_Person 	char(8) null,
+			Per_Grupo 	char(8) null,
+			Cli_Numero	char(8) null
+		)	
+		create nonclustered index #tmpPerso05_Grupo on #tmpPerso05(Per_Grupo)
+		
+		if(@Per_RFC = @Str_Vacio)begin
+			insert into #tmpPerso05
+				select  Per_Numero, Per_Numero, @Str_Vacio
+	        	from SOPERSON P noholdlock
+	        	where P.Per_ComOrd like @Per_Comple		
+		end
+		else begin 
+			insert into #tmpPerso05
+				select  Per_Numero, Per_Numero, @Str_Vacio
+	        	from SOPERSON P noholdlock
+	        	where P.Per_RFC = @Per_RFC					
+		end
+            
+        update #tmpPerso05 set
+            Per_Grupo = Peu_Grupo
+            from SOUNIPER noholdlock
+            where    Peu_Person = Per_Person
+
+        update #tmpPerso05  set
+			Cli_Numero = Adi_Client
+        	from CLADICIO a noholdlock  
+        	inner join CLCLACLI c noholdlock on c.Clc_Client = a.ClClientID
+        	inner join SOPARGEN noholdlock on Clc_Clasif = convert(int,Par_Valor) 
+        	where Adi_NumPer = #tmpPerso05.Per_Person
+          	and Par_Nombre = @Banco_Actual
+
+          	
+        select	P.Per_Numero,	P.Per_Tipo,		P.Per_Benefi,	P.Per_NuSeFi,	P.Per_Titulo,
+			P.Per_Nombre,	P.Per_ApePat,	P.Per_ApeMat,	P.Per_RazSoc,	P.Per_Comple,
+			P.Per_ComOrd,	P.Per_RFC,		P.Per_CURP,		P.FechaSis as 	Per_Fecha,
+			P.Per_Entida,	P.Per_Locali, 	P.Per_ActEmp, per.Cli_Numero as Per_Client
+			from #tmpPerso05 as per
+			inner join SOPERSON P noholdlock on Per_Numero = per.Per_Grupo
+
+		 
+		 drop table #tmpPerso05
 	end
 end
