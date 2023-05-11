@@ -17,10 +17,10 @@ as
 /* REFERENCIAS: 															*/
 /***************************************************************************
 ** Modifico:	Christian Didier Almaraz Mesta		    				****
-** Fecha:		11/May/2023											    ****
+** Fecha:		13/Mar/2022											    ****
 ** Help:		1662542													****
 ** Descripcion:	Se da salida a Pla_Region					            ****
-/****************************************************************************
+****************************************************************************
 ** Modifico:	Gerardo Arturo Hernández Torres							****
 ** Fecha:		13/04/2023												****
 ** Descripción:	Se agrega campo SoPlazaID para consultas				****
