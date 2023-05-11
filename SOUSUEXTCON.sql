@@ -26,6 +26,11 @@ as
 *****************************************************************
 ** Referencias: 												*
 *****************************************************************
+** Modifico:	Francisco Minajas							 ****
+** Fecha:		04/05/2023   								 ****
+** Descripcion: Se agrega consulta 5 busqueda por nombre	 ****
+** JIRA:		TRAAC-1450						 			 ****
+*****************************************************************
 ** Modifico:	Adriana Gomez								 ****
 ** Fecha:		03/02/2021   								 ****
 ** Descripcion: Se corta la busqueda a 8 digitos 			 ****
@@ -155,6 +160,21 @@ if @Tip_ConTip = 'C' begin
 				Use_TelExt
 			from SOUSUEXT noholdlock
 			where	Use_IdUsEx	=  @Use_IdUsEx
+	end
+	if @Tip_ConCon = '5' begin
+		select	Use_IdUsEx, Use_NumSuc, Use_FecCre, Use_NomUsu, Use_ApPaUs,
+				Use_ApMaUs, Use_NoCoUs, Use_FecNac, Use_SexUsu, Use_PaNaUs,
+				Use_LuNaUs, Use_CaDoUs, Use_PrEnCa, Use_SeEnCa, Use_NuDoUs,
+				Use_CoDoUs, Use_EntDom, Use_LocDom, Use_CpDoUs, Use_LaTeUs,
+				Use_TelUsu, Use_CorUsu, Use_ActUsu, Use_OcuUsu, Use_TiIdUs,
+				Use_NumIde, Use_FeExId, Use_FeVeId, Use_CaDoEx, Use_NuDoEx,
+				Use_CoDoEx, Use_LoDoEx, Use_EnDoEx, Use_PaDoEx, Use_CpDoEx,
+				Use_TelExt
+			from SOUSUEXT noholdlock
+			where	Use_NoCoUs	= @Use_NoCoUs
+			  and	Use_ApPaUs	= @Use_ApPaUs
+			  and	Use_ApMaUs  = @Use_ApMaUs
+			  and	Use_FecNac	= @Use_FecNac
 	end
 end	else begin
 	if @Tip_ConCon	= '1' begin	
@@ -352,4 +372,3 @@ end	else begin
 	end
 	drop table #UsuarioCompVentDola 
 end
-

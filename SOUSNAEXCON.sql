@@ -35,6 +35,11 @@ as
 ** Referencias: 															  	*
 *********************************************************************************
 * ** Modifico:	Francisco Minajas											 ****
+** Fecha:		04/05/2023													 ****
+** Jira:	    TRAAC-1450									 				 ****
+** Descripción:	Se agrega consulta 3 para encontrar la relacion de usuarios  ****
+*********************************************************************************
+* ** Modifico:	Francisco Minajas											 ****
 ** Fecha:		23/01/2023													 ****
 ** Jira:	    TRAAC-1162									 				 ****
 ** Descripción:	Se agrega consulta de fecha de creacion de la bitacora		 ****
@@ -335,4 +340,10 @@ end else if @Une_TabCon = '2' begin   /* Si consulta SOUSUEXT  */
 		@Transaccio, @Usuario,	  @FechaSis,   @SucOrigen,	@SucDestino,	
 		@Modulo	
 
+end else if @Une_TabCon = '3' begin   /* Si la consulta es de compra venta nacional  */
+	select @Une_TabOri, @Une_IdeUsu
+	
+	select Une_IdeUsu, Une_Estatu,  Une_FecReg,  Une_FecEst
+	from SOUSNAEX noholdlock
+	where  Une_IdeUsu  = @Une_IdeUsu and Une_TabOri = @Une_TabOri
 end
