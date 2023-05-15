@@ -21,6 +21,12 @@ as
 /* DESCRIPCION: Proceso de Estados Financieros Tipo Cuenta		*/
 /****************************************************************
 ** Modifica:		Jose R. Rodriguez Zenteno                   **
+** Fecha:			12/05/2023                               	**
+** Descripcion:		Se modifica proceso G para validacion de	**
+**					cuenta con valor nulo	     			    **
+** Help:			TCELGR-6167 					 			*/
+/****************************************************************
+** Modifica:		Jose R. Rodriguez Zenteno                   **
 ** Fecha:			04/10/2022                               	**
 ** Descripcion:		Se modifica proceso G para actualizar 		**
 **					cuenta de VENTAS / ACTIVO     			    **
@@ -906,8 +912,9 @@ end	else if @Tip_Proces = @Tip_ProG begin
 		left join SOESFITI noholdlock
 		on	Eft_TipCue = Tot_NumCue
 		and Eft_EstFin = @Eft_EsFin1
-		
-	select @Esf_ValDep1 = Eft_Valor
+	
+	select @Esf_ValDep1 = @Mon_Cero	
+	select @Esf_ValDep1 = isnull(Eft_Valor, @Mon_Cero)
 		from SOESFITI noholdlock
 		where Eft_EstFin = @Eft_EsFin1
 		and SOESFITI.Eft_TipCue = @Tip_CueDep
