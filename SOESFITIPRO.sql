@@ -21,6 +21,12 @@ as
 /* DESCRIPCION: Proceso de Estados Financieros Tipo Cuenta		*/
 /****************************************************************
 ** Modifica:		Jose R. Rodriguez Zenteno                   **
+** Fecha:			12/05/2023                               	**
+** Descripcion:		Se modifica proceso G para validacion de	**
+**					cuenta con valor nulo	     			    **
+** Help:			TCELGR-6167 					 			*/
+/****************************************************************
+** Modifica:		Jose R. Rodriguez Zenteno                   **
 ** Fecha:			04/10/2022                               	**
 ** Descripcion:		Se modifica proceso G para actualizar 		**
 **					cuenta de VENTAS / ACTIVO     			    **
@@ -236,7 +242,8 @@ if @Tip_Proces = @Tip_ProA begin
 		Tot_Identa	int null
 	)
 
-	insert into #CueTot
+	insert into #CueTot (Tot_PaTiCu,   Tot_NumCue,   Tot_Descri,   Tot_Visibl,   Tot_Captur,   Tot_Indice,
+					     Tot_TipAna,   Tot_ParSug, 	 Tot_Visual,   Tot_Identa)
 		select	Tic_PaTiCu, Tic_Numero, rtrim(isnull(Tic_Descri, Tic_DesTot)), Tfc_Visibl, Tcc_Captur, 
 				Tfc_Indice,	Tic_TipAna, Tcc_ParSug,	tf.Tfc_Visual, cl.Tcc_Identa
 		from SOTICUEF tc noholdlock
@@ -263,7 +270,9 @@ if @Tip_Proces = @Tip_ProA begin
 
 	create index #CueTotPa on #CueTot (Tot_PaTiCu)
 
-	insert into #Cuentas
+	insert into #Cuentas(Cue_Report,   Cue_PaTiCu,   Cue_Nivel,   Cue_TipCue,   Cue_Descri,
+					     Cue_Visibl,   Cue_Captur,   Cue_Indice,  Cue_TipAna,   Cue_ParSug,
+					     Cue_NivPad,   Cue_Visual,   Cue_Identa)
 		select	@Ent_Uno,	Tot_PaTiCu, convert(char, Tot_NumCue), Tot_NumCue, Tot_Descri,
 				Tot_Visibl, Tot_Captur,	Tot_Indice,	Tot_TipAna, Tot_ParSug,	@Niv_Padre,	Tot_Visual,
 				Tot_Identa
@@ -286,7 +295,9 @@ if @Tip_Proces = @Tip_ProA begin
 		inner join #Padres on Pad_TipCue = Tot_PaTiCu
 
 	while @Ent_Existe = @Ent_Uno and @Ent_i <= @Ent_Max begin 
-		insert into #Cuentas
+		insert into #Cuentas(Cue_Report,   Cue_PaTiCu,   Cue_Nivel,   Cue_TipCue,   Cue_Descri,
+						     Cue_Visibl,   Cue_Captur,   Cue_Indice,  Cue_TipAna,   Cue_ParSug,
+						     Cue_NivPad,   Cue_Visual,   Cue_Identa)
 			select 	@Max_Report + @Ent_Uno, Tot_PaTiCu,
 					ltrim(rtrim(Cue_Nivel))  + '/' + convert( char(10), Tot_NumCue),
 					Tot_NumCue, Tot_Descri, Tot_Visibl, Tot_Captur,	Tot_Indice,	
@@ -305,7 +316,7 @@ if @Tip_Proces = @Tip_ProA begin
 
 		delete #Padres
 
-		insert into #Padres
+		insert into #Padres(Pad_TipCue)
 			select Cue_TipCue 
 				from #Cuentas
 				where Cue_Report = @Max_Report
@@ -319,7 +330,11 @@ if @Tip_Proces = @Tip_ProA begin
 	end
 	drop table #Padres
 
-	insert into #CueEEFF
+	insert into #CueEEFF(Eft_Report,   Eft_PaTiCu,   Eft_Nivel,   Eft_TipCue,   Eft_Descri,   Eft_Visibl,
+				         Eft_Captur,   Eft_Visual,   Eft_Identa,  Eft_Numero,   Eft_EsFin1,   Eft_Valor1,
+				         Eft_Porce1,   Eft_EsFin2,   Eft_Valor2,  Eft_Porce2,   Eft_EsFin3,   Eft_Valor3,
+				         Eft_Porce3,   Eft_Indice,   Eft_TipAna,  Eft_TieAn1,   Eft_TieAn2,   Eft_TieAn3,
+				         Eft_ParAc1,   Eft_ParAc2,   Eft_ParAc3,  Eft_NivPad)
 		select	Cue_Report, Cue_PaTiCu, Cue_Nivel,	Cue_TipCue,	Cue_Descri,
 				Cue_Visibl, Cue_Captur,	Cue_Visual, Cue_Identa, isnull(Eft_Numero, @Ent_Cero), @Eft_EsFin1,
 				isnull(Eft_Valor, @Mon_Cero),	isnull(Eft_Porcen, @Mon_Cero),
@@ -392,22 +407,22 @@ end	else if @Tip_Proces = @Tip_ProB begin
 				where Esf_Numero = @Eft_EsFin1
 	
 	if @Eft_EsFin1 > @Ent_Cero begin
-		exec SOESTFINCON @Eft_EsFin1, @Esf_PerNum, @Esf_SolNum, @Ent_Cero, 
+		exec @Status = SOESTFINCON @Eft_EsFin1, @Esf_PerNum, @Esf_SolNum, @Ent_Cero, 
 			@Cha_Vacio, @Ent_Cero, @Ent_Cero, @Esf_EfiNu1 output, @Tip_C2, @NumTransac, @Transaccio, @Usuario,
 			@FechaSis, @SucOrigen, @SucDestino, @Modulo
 	end
 	if @Eft_EsFin2 > @Ent_Cero begin
-		exec SOESTFINCON @Eft_EsFin2, @Esf_PerNum, @Esf_SolNum, @Ent_Cero,
+		exec @Status = SOESTFINCON @Eft_EsFin2, @Esf_PerNum, @Esf_SolNum, @Ent_Cero,
 			@Cha_Vacio, @Ent_Cero, @Ent_Cero, @Esf_EfiNu2 output, @Tip_C2, @NumTransac, @Transaccio, @Usuario,
 			@FechaSis, @SucOrigen, @SucDestino, @Modulo
 	end
 	if @Eft_EsFin3 > @Ent_Cero begin
-		exec SOESTFINCON @Eft_EsFin3, @Esf_PerNum, @Esf_SolNum, @Ent_Cero,
+		exec @Status = SOESTFINCON @Eft_EsFin3, @Esf_PerNum, @Esf_SolNum, @Ent_Cero,
 			@Cha_Vacio, @Ent_Cero, @Ent_Cero, @Esf_EfiNu3 output, @Tip_C2, @NumTransac, @Transaccio, @Usuario, 
 			@FechaSis, @SucOrigen, @SucDestino, @Modulo
 	end
 	if @Eft_EsFin4 > @Ent_Cero begin
-		exec SOESTFINCON @Eft_EsFin4, @Esf_PerNum, @Esf_SolNum, @Ent_Cero, 
+		exec @Status = SOESTFINCON @Eft_EsFin4, @Esf_PerNum, @Esf_SolNum, @Ent_Cero, 
 			@Cha_Vacio, @Ent_Cero, @Ent_Cero, @Esf_EfiNu4 output, @Tip_C2, @NumTransac, @Transaccio, @Usuario, 
 			@FechaSis, @SucOrigen, @SucDestino, @Modulo
 	end
@@ -442,21 +457,21 @@ end	else if @Tip_Proces = @Tip_ProC begin
 		where Esf_Numero = @Eft_EsFin3
 
 	if @Eft_EsFin1 > @Ent_Cero begin
-		exec SOESTFINCON 
+		exec @Status = SOESTFINCON 
 			@Eft_EsFin1, 	@Esf_PerNum, 	@Ent_Cero, 			@Ent_Cero, 	@Cha_Vacio, 
 			@Esf_MesIni1, 	@Esf_MesFin1, 	@Esf_EfiNu1 output, @Tip_C4, 	@NumTransac, 
 			@Transaccio, 	@Usuario, 		@FechaSis, 			@SucOrigen, @SucDestino, 
 			@Modulo
 	end
 	if @Eft_EsFin2 > @Ent_Cero begin
-		exec SOESTFINCON 
+		exec @Status = SOESTFINCON 
 			@Eft_EsFin2, 	@Esf_PerNum, 	@Ent_Cero, 			@Ent_Cero, 		@Cha_Vacio, 
 			@Esf_MesIni2, 	@Esf_MesFin2, 	@Esf_EfiNu2 output, @Tip_C4, 		@NumTransac, 
 			@Transaccio, 	@Usuario, 		@FechaSis, 			@SucOrigen, 	@SucDestino, 
 			@Modulo
 	end
 	if @Eft_EsFin3 > @Ent_Cero begin
-		exec SOESTFINCON 
+		exec @Status = SOESTFINCON 
 			@Eft_EsFin3, 	@Esf_PerNum, 	@Ent_Cero, 			@Ent_Cero, 		@Cha_Vacio,
 			@Esf_MesIni3, 	@Esf_MesFin3, 	@Esf_EfiNu3 output, @Tip_C4, 		@NumTransac,
 			@Transaccio, 	@Usuario, 		@FechaSis, 			@SucOrigen, 	@SucDestino,
@@ -529,7 +544,7 @@ end else if @Tip_Proces = @Tip_ProD begin
 		Tot_Indice	int null
 	)
 
-	insert into #TotalesAdi
+	insert into #TotalesAdi(Tot_PaTiCu,   Tot_NumCue,   Tot_Descri,   Tot_Visibl,   Tot_Indice)
 		select	Tic_PaTiCu, Tic_Numero, rtrim(isnull(Tic_Descri, Tic_DesTot)), Tfc_Visibl, Tfc_Indice
 		from SOTICUEF tc noholdlock
 			inner join SOTFOTCU tf noholdlock 
@@ -543,13 +558,18 @@ end else if @Tip_Proces = @Tip_ProD begin
 
 	create index #TotalesAdiPa on #TotalesAdi (Tot_PaTiCu)
 
-	insert into #CuentasAdi
+	insert into #CuentasAdi(Cue_Report,   Cue_PaTiCu,   Cue_TipCue,   Cue_Descri,   Cue_Visibl,   Cue_Indice)
 		select	@Ent_Uno,	Tot_PaTiCu, Tot_NumCue, Tot_Descri,
 				Tot_Visibl, Tot_Indice
 		from #TotalesAdi
 			where Tot_PaTiCu is null
 
-	insert into #EeffAdi
+	insert into #EeffAdi(Eft_Report,   Eft_PaTiCu,   Eft_TipCue,   Eft_Descri,   Eft_Visibl,   Eft_Indice,
+						 Eft_Numero,   Eft_EsFin1,   Esf_ConAct1,  Eft_AplIc1,   Eff_Icap1,    EFf_CapNe1,
+						 Esf_AcSuR1,   Esf_TipSo1,   Esf_TipLi1,   Esf_TipEf1,   Eft_EsFin2,   Esf_ConAct2,
+						 Eft_AplIc2,   Eff_Icap2,    EFf_CapNe2,   Esf_AcSuR2,   Esf_TipSo2,   Esf_TipLi2,
+						 Esf_TipEf2,   Eft_EsFin3,   Esf_ConAct3,  Eft_AplIc3,   Eff_Icap3,    EFf_CapNe3,
+						 Esf_AcSuR3,   Esf_TipSo3,   Esf_TipLi3,   Esf_TipEf3)
 		select	Cue_Report, Cue_PaTiCu, Cue_TipCue,	Cue_Descri,
 				Cue_Visibl, Cue_Indice, isnull(Eft_Numero, @Ent_Cero),
 				@Eft_EsFin1, @Mon_Cero, @Bit_No, @Mon_Cero, @Mon_Cero, @Mon_Cero, @Ent_Cero, @Ent_Cero, @Ent_Cero,
@@ -666,7 +686,8 @@ end else if @Tip_Proces = @Tip_ProE begin		/* EEFF Gobierno */
 		Cet_Identa	int null
 	)
 
-	insert into #CuentasEstadosTotal
+	insert into #CuentasEstadosTotal(Cet_PaTiCu,   Cet_NumCue,   Cet_Descri,   Cet_Visibl,   Cet_Captur,
+	                                 Cet_Indice,   Cet_Visual,   Cet_Identa) 
 		select	Tic_PaTiCu, Tic_Numero, rtrim(isnull(Tic_Descri, Tic_DesTot)), Tfc_Visibl, Tcc_Captur,
 				Tfc_Indice,	tf.Tfc_Visual, cl.Tcc_Identa
 		from SOTICUEF tc noholdlock
@@ -694,7 +715,9 @@ end else if @Tip_Proces = @Tip_ProE begin		/* EEFF Gobierno */
 
 	create index #CuentasEstadosTotalPA on #CuentasEstadosTotal (Cet_PaTiCu)
 
-	insert into #CuentasGobierno
+	insert into #CuentasGobierno(Cgo_Report,   Cgo_PaTiCu,   Cgo_Nivel,   Cgo_TipCue,   Cgo_Descri,
+							     Cgo_Visibl,   Cgo_Captur,   Cgo_Indice,  Cgo_NivPad,   Cgo_Visual,
+							     Cgo_Identa)
 		select	@Ent_Uno,	Cet_PaTiCu, convert(char, Cet_NumCue),	Cet_NumCue, Cet_Descri,
 				Cet_Visibl, Cet_Captur,	Cet_Indice,	@Niv_Padre,	Cet_Visual,		Cet_Identa
 		from #CuentasEstadosTotal
@@ -716,7 +739,9 @@ end else if @Tip_Proces = @Tip_ProE begin		/* EEFF Gobierno */
 		inner join #PadreGobierno on Pad_TipCue = Cet_PaTiCu
 
 	while @Ent_Existe = @Ent_Uno and @Ent_i <= @Ent_Max begin 
-		insert into #CuentasGobierno
+		insert into #CuentasGobierno(Cgo_Report,   Cgo_PaTiCu,   Cgo_Nivel,   Cgo_TipCue,   Cgo_Descri,
+							     Cgo_Visibl,   Cgo_Captur,   Cgo_Indice,  Cgo_NivPad,   Cgo_Visual,
+							     Cgo_Identa)
 			select @Max_Report + @Ent_Uno, Cet_PaTiCu,
 				ltrim(rtrim(Cgo_Nivel))  + '/' + convert( char(10), Cet_NumCue),
 				Cet_NumCue, Cet_Descri, Cet_Visibl,	Cet_Captur, Cet_Indice,	
@@ -735,7 +760,7 @@ end else if @Tip_Proces = @Tip_ProE begin		/* EEFF Gobierno */
 
 		delete #PadreGobierno
 		
-		insert into #PadreGobierno
+		insert into #PadreGobierno(Pad_TipCue)
 			select Cgo_TipCue 
 				from #CuentasGobierno
 				where Cgo_Report = @Max_Report
@@ -749,7 +774,11 @@ end else if @Tip_Proces = @Tip_ProE begin		/* EEFF Gobierno */
 	end
 	drop table #PadreGobierno
 
-	insert into #CuentasEstadosGobierno
+	insert into #CuentasEstadosGobierno(Cef_Report,   Cef_PaTiCu,   Cef_Nivel,   Cef_TipCue,
+			Cef_Descri,   Cef_Visibl,   Cef_Captur,   Cef_Visual,   Cef_Identa,  Cef_Numero,
+			Cef_EsFin1,   Cef_Valor1,   Cef_Porce1,   Cef_EsFin2,   Cef_Valor2,  Cef_Porce2,
+			Cef_EsFin3,   Cef_Valor3,   Cef_Porce3,   Cef_EsFin4,   Cef_Valor4,  Cef_Porce4,
+			Cef_Indice,   Cef_NivPad)
 		select	Cgo_Report, 	Cgo_PaTiCu, 	Cgo_Nivel,		Cgo_TipCue,		Cgo_Descri,
 				Cgo_Visibl,		Cgo_Captur, 	Cgo_Visual, 	Cgo_Identa, 	
 				isnull(Eft_Numero, @Ent_Cero), 	@Eft_EsFin1,	isnull(Eft_Valor, @Mon_Cero),	
@@ -814,28 +843,28 @@ end	else if @Tip_Proces = @Tip_ProF begin
 				where Esf_Numero = @Eft_EsFin1
 	
 	if @Eft_EsFin1 > @Ent_Cero begin
-		exec SOESTFINCON 
+		exec @Status = SOESTFINCON 
 			@Eft_EsFin1, 	@Esf_PerNum, 	@Ent_Cero, 			@Ent_Cero,		@Cha_Vacio, 
 			@Ent_Cero, 		@Ent_Cero, 		@Esf_EfiNu1 output, @Tip_C6, 		@NumTransac, 
 			@Transaccio, 	@Usuario,		@FechaSis, 			@SucOrigen, 	@SucDestino, 
 			@Modulo
 	end
 	if @Eft_EsFin2 > @Ent_Cero begin
-		exec SOESTFINCON 
+		exec @Status = SOESTFINCON 
 			@Eft_EsFin2, 	@Esf_PerNum, 	@Ent_Cero, 			@Ent_Cero,		@Cha_Vacio, 
 			@Ent_Cero, 		@Ent_Cero, 		@Esf_EfiNu2 output, @Tip_C6, 		@NumTransac, 
 			@Transaccio, 	@Usuario,		@FechaSis, 			@SucOrigen, 	@SucDestino, 
 			@Modulo
 	end
 	if @Eft_EsFin3 > @Ent_Cero begin
-		exec SOESTFINCON 
+		exec @Status = SOESTFINCON 
 			@Eft_EsFin3, 	@Esf_PerNum, 	@Ent_Cero, 			@Ent_Cero,		@Cha_Vacio, 
 			@Ent_Cero, 		@Ent_Cero, 		@Esf_EfiNu3 output, @Tip_C6, 		@NumTransac, 
 			@Transaccio, 	@Usuario, 		@FechaSis, 			@SucOrigen, 	@SucDestino, 
 			@Modulo
 	end
 	if @Eft_EsFin4 > @Ent_Cero begin
-		exec SOESTFINCON 
+		exec @Status = SOESTFINCON 
 			@Eft_EsFin4, 	@Esf_PerNum, 	@Ent_Cero, 			@Ent_Cero, 		@Cha_Vacio, 
 			@Ent_Cero, 		@Ent_Cero, 		@Esf_EfiNu4 output, @Tip_C6, 		@NumTransac, 
 			@Transaccio, 	@Usuario, 		@FechaSis, 			@SucOrigen, 	@SucDestino, 
@@ -875,7 +904,7 @@ end	else if @Tip_Proces = @Tip_ProG begin
 		Tot_Estilo  int null
 	)
 
-	insert into #CuentaReporte
+	insert into #CuentaReporte(Tot_NumCue,   Tot_DesRep,   Tot_Indice,   Tot_Estilo)
 		select	Tic_Numero, Tic_DesRep, Tfc_IndRep, Tfc_Estilo
 		from SOTICUEF tc noholdlock
 			inner join SOTFOTCU tf noholdlock
@@ -890,14 +919,15 @@ end	else if @Tip_Proces = @Tip_ProG begin
 			  
 	delete from  #CuentaReporte where Tot_NumCue IN (@Tip_CXC,@Tip_Provee)
 	
-	insert into #CuentaReporte
+	insert into #CuentaReporte(Tot_NumCue,   Tot_DesRep,   Tot_Indice,   Tot_Estilo)
 	select	Tic_Numero, Tic_DesRep, Tfc_IndRep, Tfc_Estilo
 	from SOTICUEF tc noholdlock
 	inner join SOTFOTCU tf noholdlock on Tfc_Cuenta = Tic_Numero and Tfc_Format = @Eft_TipFor and Tfc_Stock <> @Bit_Si
 	inner join SOTICUCL cl noholdlock on Tcc_TipCue = Tic_Numero and Tcc_ClEsFi = @Eft_ClEsFi
 	where Tic_Numero in (@Tip_CXCRep,@Tip_ProRep)
 	
-	insert into #CuentaValorEeff
+	insert into #CuentaValorEeff(Eft_TipCue,   Eft_DesRep,   Eft_Numero,   Eft_EsFin1,   Eft_Valor1,   Eft_Porce1,
+				   Eft_EsFin2,   Eft_Valor2,   Eft_Porce2,   Eft_Indice,   Eft_Estilo) 
 		select	Tot_NumCue,		Tot_DesRep,		isnull(Eft_Numero, @Ent_Cero),
 				@Eft_EsFin1,	isnull(Eft_Valor, @Mon_Cero),	isnull(Eft_Porcen, @Mon_Cero),
 				@Eft_EsFin2,	@Mon_Cero,		@Mon_Cero,
@@ -906,8 +936,9 @@ end	else if @Tip_Proces = @Tip_ProG begin
 		left join SOESFITI noholdlock
 		on	Eft_TipCue = Tot_NumCue
 		and Eft_EstFin = @Eft_EsFin1
-		
-	select @Esf_ValDep1 = Eft_Valor
+	
+	select @Esf_ValDep1 = @Mon_Cero	
+	select @Esf_ValDep1 = isnull(Eft_Valor, @Mon_Cero)
 		from SOESFITI noholdlock
 		where Eft_EstFin = @Eft_EsFin1
 		and SOESFITI.Eft_TipCue = @Tip_CueDep
@@ -1047,21 +1078,22 @@ end else if @Tip_Proces = @Tip_ProI begin
 		Tot_Estilo  int null
 	)
 	
-	insert into #CuentaReporteEF
+	insert into #CuentaReporteEF(Tot_NumCue,  Tot_DesRep, Tot_Indice,  Tot_Estilo)
 	select	Tic_Numero, Tic_DesRep, Tfc_IndRep, Tfc_Estilo
 	from SOTICUEF tc noholdlock
 	inner join SOTFOTCU ft noholdlock on Tfc_Cuenta = Tic_Numero
 	inner join SOTICUCL cl noholdlock on Tcc_TipCue = Tic_Numero
 	where Tfc_Stock <> @Bit_Si and Tfc_Report = @Bit_Si and  Tic_Numero in (@Tip_Uafirda,@Tip_Uafir)
 	
-	insert into #CuentaReporteEF
+	insert into #CuentaReporteEF(Tot_NumCue,  Tot_DesRep, Tot_Indice,  Tot_Estilo)
 	select	Tic_Numero, Tic_DesRep, Tfc_IndRep, Tfc_Estilo
 	from SOTICUEF tc noholdlock
 	inner join SOTFOTCU ft noholdlock on Tfc_Cuenta = Tic_Numero
 	inner join SOTICUCL cl noholdlock on Tcc_TipCue = Tic_Numero
 	where Tic_Numero IN (@Cue_Depres,@Tip_CarMon)
 	
-	insert into #CuentaValorEF
+	insert into #CuentaValorEF(Eft_TipCue,   Eft_DesRep,   Eft_Numero,   Eft_EsFin1,   Eft_Valor1,
+				 Eft_Porce1,   Eft_EsFin2,   Eft_Valor2,   Eft_Porce2,   Eft_Indice,   Eft_Estilo)   
 	select	distinct Tot_NumCue,		Tot_DesRep,		isnull(Eft_Numero, @Ent_Cero),
 				@Eft_EsFin1,	isnull(Eft_Valor, @Mon_Cero),	isnull(Eft_Porcen, @Mon_Cero),
 				@Eft_EsFin2,	@Mon_Cero,		@Mon_Cero,
