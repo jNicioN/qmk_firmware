@@ -16,12 +16,18 @@ as
 /***************************************************************************/
 /* DESCRIPCION: Consulta de Persona Informacion	Complemento				****/
 /***************************************************************************/
-/** Creo:			Jose R. Rodriguez Zenteno							****/
+/** Modifico:		Raul Muniz										    ****/
+/** Fecha:			11/05/2023	                           		        ****/
+/** C.Cambios:		27203			 									****/
+/** Descripcion:	Se modifican consultas para regresar actividad 		****/
+/**					regulatoria											****/
+/***************************************************************************/
+/** Modifico:		Jose R. Rodriguez Zenteno							****/
 /** Fecha:			21/Diciembre/2021                          			****/
 /** Help:			1504301					 							****/
 /**	Descripcion:	Se modifica consulta C1 para regresar MacroSector 	****/
 /***************************************************************************/
-/** Creo:			Eduardo Perez Santiago								****/
+/** Modifico:		Eduardo Perez Santiago								****/
 /** Fecha:			06/12/2021                              			****/
 /** Help:			1438184					 							****/
 /**	Descripcion:	Se crea la consulta C3 para consultar la actividad 	****/
@@ -68,8 +74,8 @@ if @Tip_ConTip	= @Str_C begin /* 'C': Consulta */
 			from SOPEINCO noholdlock
 			where	Pic_PerNum	= @Pic_PerNum
 	end else if @Tip_ConCon = @Str_Dos begin
-		select	Pic_PerNum,	Pic_ActPre,	Acp_Descri,	Sur_Numero,	Sur_Descri,
-				Ram_Numero,	Ram_Subsec,	Ram_Descri
+		select	Pic_PerNum,	Pic_ActPre,	Acp_Descri,	Acp_ActReg,	Sur_Numero,
+				Sur_Descri,	Ram_Numero,	Ram_Subsec,	Ram_Descri
 			into #ActividadSubRama
 			from SOPEINCO noholdlock
 			left join SOACTPRE noholdlock
@@ -80,9 +86,9 @@ if @Tip_ConTip	= @Str_C begin /* 'C': Consulta */
 				on Ram_Numero = Sur_Rama and Ram_Activo = @Sta_Activo
 			where	Pic_PerNum	= @Pic_PerNum
 			
-		select	Pic_PerNum,	Pic_ActPre,	Acp_Descri,	Sur_Numero,	Sur_Descri,
-				Ram_Numero,	Ram_Subsec,	Ram_Descri,	Sus_Numero,	Sus_Descri,
-				Sec_Numero,	Sec_Descri, Mac_Numero, Mac_Descri
+		select	Pic_PerNum,	Pic_ActPre,	Acp_Descri,	Acp_ActReg,	Sur_Numero,
+				Sur_Descri,	Ram_Numero,	Ram_Subsec,	Ram_Descri,	Sus_Numero,
+				Sus_Descri,	Sec_Numero,	Sec_Descri, Mac_Numero, Mac_Descri
 			from #ActividadSubRama noholdlock
 			left join SOSUBSEC noholdlock
 				on Sus_Numero = Ram_Subsec and Sus_Activo = @Sta_Activo
