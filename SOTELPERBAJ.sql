@@ -40,20 +40,20 @@ as
 ** Help:		00946339												****
 ****************************************************************************/
 
-										/* Declaración de variables */
+/* Declaración de variables */
 declare	@Status		int,
 		@Btp_TipTel		int, 
 		@Btp_Lada		int, 
 		@Btp_Telefo		bigint
 		
-										/* Declaración de constantes */
+/* Declaración de constantes */
 declare	@Str_Vacio	char(1),
 		@Fec_Vacia	smalldatetime,
 		@Ent_Cero	int,
 		@Ent_Uno	int, 
 		@Tep_StaBaj char(1)
 
-										/* Asignación de constantes */
+/* Asignación de constantes */
 select	@Str_Vacio	= '',				/* String vacío */
 		@Fec_Vacia	= '1900-01-01',		/* Fecha vacía */
 		@Ent_Cero	= 0,				/* Entero en cero */
