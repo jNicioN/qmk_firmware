@@ -89,6 +89,8 @@ select
 		and Tep_TipTel	= @Tep_TipTel
 		and ClClientID	= @ClClientID
 
+/* Validamos que contengan valor las variables*/
+
 if isnull(@Btp_TipTel, @Ent_Cero) = @Ent_Cero begin
 	select 	Err_Codigo 	= '000003',
 			Err_Mensaj 	= 'No se encontro el valor Btp_TipTel'
