@@ -13,8 +13,15 @@ create procedure SOTELPERBAJ (
 
 as
 
-/****************************************************************************
+/***************************************************************************
 ** Descripción:	 Baja de Telefono de Persona							****
+* **************************************************************************
+** Modifico:	Alberto Pineda Carbajal									****
+** Fecha:		23-05-2023												****
+** Help:		TRACL-4754												****
+** Descipcion : Se agrega una validacion despues de la consulta en la	****
+				tabla SOTELPER, ya que si no traee información y se		****
+				ejecuta el SP SOBITEPEALT muestra un error 				****
 ****************************************************************************
 ** Modifico:	Daniel Bautista Gomez									****
 ** Fecha:		08-03-2018												****
@@ -33,20 +40,20 @@ as
 ** Help:		00946339												****
 ****************************************************************************/
 
-										/* Declaración de variables */
+/* Declaración de variables */
 declare	@Status		int,
 		@Btp_TipTel		int, 
 		@Btp_Lada		int, 
 		@Btp_Telefo		bigint
 		
-										/* Declaración de constantes */
+/* Declaración de constantes */
 declare	@Str_Vacio	char(1),
 		@Fec_Vacia	smalldatetime,
 		@Ent_Cero	int,
 		@Ent_Uno	int, 
 		@Tep_StaBaj char(1)
 
-										/* Asignación de constantes */
+/* Asignación de constantes */
 select	@Str_Vacio	= '',				/* String vacío */
 		@Fec_Vacia	= '1900-01-01',		/* Fecha vacía */
 		@Ent_Cero	= 0,				/* Entero en cero */
@@ -73,7 +80,6 @@ if @Tep_TipTel = @Ent_Cero begin
 
 end
 
-
 select 
 	@Btp_TipTel	= Tep_TipTel, 
 	@Btp_Lada	= Tep_Lada, 
@@ -82,7 +88,30 @@ select
 	where PerPersoID	= @PerPersoID
 		and Tep_TipTel	= @Tep_TipTel
 		and ClClientID	= @ClClientID
-		
+
+/* Validamos que contengan valor las variables*/
+
+if isnull(@Btp_TipTel, @Ent_Cero) = @Ent_Cero begin
+	select 	Err_Codigo 	= '000003',
+			Err_Mensaj 	= 'No se encontro el valor Btp_TipTel'
+	rollback
+	return @Ent_Uno
+end
+
+if isnull(@Btp_Lada, @Ent_Cero) = @Ent_Cero begin
+	select 	Err_Codigo 	= '000004',
+			Err_Mensaj 	= 'No se encontro el valor Btp_Lada'
+	rollback
+	return @Ent_Uno
+end
+
+if isnull(@Btp_Telefo, @Ent_Cero) = @Ent_Cero begin
+	select 	Err_Codigo 	= '000005',
+			Err_Mensaj 	= 'No se encontro el valor Btp_Telefo'
+	rollback
+	return @Ent_Uno
+end
+
 /*Agregamos a registro a la bitacora de Telefonos de Persona*/
 exec @Status = 	SOBITEPEALT 	
 	@PerPersoID, 	@Btp_TipTel,	@ClClientID, 	@Btp_Lada, 		@Btp_Telefo,		
