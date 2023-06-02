@@ -40,6 +40,12 @@ as
 /***************************************************************************/
 /** REFERENCIAS:													   	 */	
 /***************************************************************************
+** Modifico:	Luis Enrique Ramirez Ortiz								****
+** Fecha:		30/05/2023												****
+** Help:	   	TCELTO-4797												****
+** Descripcion:	Se habilita la capacidad de dar de alta una moneda con  ****
+** 				tipo de cambio 0.00										****
+****************************************************************************
 ** Modifico:	Stephanie Zatarain Lizarraga							****
 ** Fecha:		26/Octubre/2018											****
 ** Help:	   	1142503  												****
@@ -222,63 +228,63 @@ if (@Mon_Descri = @Str_Vacio) begin
 	rollback
 	return 1
 end
-if (@Mon_EfeCom <= @Flo_Cero) begin
+if (@Mon_EfeCom < @Flo_Cero) begin
 	select	Err_Codigo	= '000007', 
 			Err_Mensaj	= 'Efectivo Compra incorrecto', 
 			Err_Variab	= 'Mon_EfeCom'
 	rollback
 	return 1
 end
-if (@Mon_EfeVen <= @Flo_Cero) begin
+if (@Mon_EfeVen < @Flo_Cero) begin
 	select	Err_Codigo	= '000008', 
 			Err_Mensaj	= 'Efectivo Venta incorrecto', 
 			Err_Variab	= 'Mon_EfeVen'
 	rollback
 	return 1
 end
-if (@Mon_DocCom <= @Flo_Cero) begin
+if (@Mon_DocCom < @Flo_Cero) begin
 	select	Err_Codigo	= '000009', 
 			Err_Mensaj	= 'Documento Compra incorrecto', 
 			Err_Variab	= 'Mon_DocCom'
 	rollback
 	return 1
 end
-if (@Mon_DocVen <= @Flo_Cero) begin
+if (@Mon_DocVen < @Flo_Cero) begin
 	select	Err_Codigo	= '000010', 
 			Err_Mensaj	= 'Documento Venta incorrecto', 
 			Err_Variab	= 'Mon_DocVen'
 	rollback
 	return 1
 end
-if (@Mon_CieCom <= @DPr_Cero) begin
+if (@Mon_CieCom < @DPr_Cero) begin
 	select	Err_Codigo	= '000013',	
 			Err_Mensaj	= 'Cierre Compra incorrecto', 
 			Err_Variab	= 'Mon_CieCom'
 	rollback
 	return 1	
 end
-if (@Mon_CieVen <= @DPr_Cero) begin
+if (@Mon_CieVen < @DPr_Cero) begin
 	select	Err_Codigo	= '000014', 
 			Err_Mensaj	= 'Cierre Venta incorrecto', 
 			Err_Variab	= 'Mon_CieVen'
 	rollback
 	return 1	
 end
-if (@Mon_SpoCom <= @DPr_Cero) begin
+if (@Mon_SpoCom < @DPr_Cero) begin
 	select	Err_Codigo	= '000015',	
 			Err_Mensaj	= 'Spot Compra incorrecto', 
 			Err_Variab	= 'Mon_CieCom'
 	rollback
 	return 1	
 end
-if (@Mon_SpoVen <= @DPr_Cero) begin
+if (@Mon_SpoVen < @DPr_Cero) begin
 	select	Err_Codigo	= '000016', 
 			Err_Mensaj	= 'Spot Venta incorrecto', 
 			Err_Variab	= 'Mon_CieVen'
 	rollback
 	return 1	
 end
-if (@Mon_CieDia <= @DPr_Cero) begin
+if (@Mon_CieDia < @DPr_Cero) begin
 	select	Err_Codigo	= '000017', 
 			Err_Mensaj	= 'Tipo de Cambio al Cierre del dia a Dolares incorrecto', 
 			Err_Variab	= 'Mon_CieDia'
@@ -341,7 +347,7 @@ if exists (select	Mon_DesCor
 	rollback
 	return 1
 end
-if (@Mon_FixVal <= @DPr_Cero) begin
+if (@Mon_FixVal < @DPr_Cero) begin
 	select	Err_Codigo	= '000024', 
 			Err_Mensaj	= 'Tipo de Cambio FIX utilizado en la Valuación incorrecto', 
 			Err_Variab	= 'Mon_FixVal'
