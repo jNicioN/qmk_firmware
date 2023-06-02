@@ -42,7 +42,8 @@ if @Tip_Proces = @Pro_Operad begin
 
 	select @Ope_Encont = count(*)
     	from SOOPPAMO noholdlock
-    	where Opm_Numero = @Opm_Numero
+    	where Opm_MonBas = @Opm_MonBas
+          and Opm_MonCot = @Opm_MonCot
 
 	if isnull(@Ope_Encont, @Ent_Cero) = @Ent_Cero begin
 		exec @Status = SOOPPAMOALT
@@ -63,7 +64,3 @@ if @Tip_Proces = @Pro_Operad begin
         end
 	end
 end
-
-
-
-

@@ -56,11 +56,14 @@ if @Tip_ConTip = @Str_L begin
 	end
 
 	if @Tip_ConCon = @Str_Dos begin
-
-		select Opm_Numero, Opm_MonBas, Opm_MonCot,  Opm_OpePar 
+		select Opm_Numero, Opm_MonBas, Opm_MonCot,  Opm_OpePar, base.Mon_Descri Opm_BasDes,
+			 base.Mon_Simbol Opm_BasSim, coti.Mon_Descri Opm_CotDes, coti.Mon_Simbol Opm_CotSim,
+			 Opp_Nombre
 		from SOOPPAMO 
-		inner join SOOPEPAR on Opm_OpePar =  Opp_Numero 
+		inner join SOOPEPAR on Opm_OpePar =  Opp_Numero
+		inner join SOMONEDA base on Opm_MonBas = base.SoMonedaID
+		inner join SOMONEDA coti on Opm_MonCot = coti.SoMonedaID
 		where Opm_MonBas = @Opm_MonBas
-		
+
 	end
 end

@@ -40,7 +40,8 @@ select  @Ent_Cero	=  0,			/*	Entero Cero	    */
 
 select @Ope_Encont = count(*)
     from SOOPPAMO noholdlock
-    where Opm_Numero = @Opm_Numero
+    where Opm_MonBas = @Opm_MonBas
+      and Opm_MonCot = @Opm_MonCot
 if isnull(@Ope_Encont, @Ent_Cero) = @Ent_Cero begin
     select 	Err_Codigo = '000003', 
 			Err_Mensaj = 'El Operador de Paridad de la Moneda no Existe',
@@ -58,7 +59,8 @@ if @Tip_Actual = @Act_Operad begin
 	    FechaSis = @FechaSis,
 	    SucOrigen = @SucOrigen,
 	    SucDestino = @SucDestino
-        where Opm_Numero   = @Opm_Numero
+        where Opm_MonBas = @Opm_MonBas
+		  and Opm_MonCot = @Opm_MonCot
 end
 
 
