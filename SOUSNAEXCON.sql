@@ -34,6 +34,11 @@ as
 *********************************************************************************
 ** Referencias: 															  	*
 *********************************************************************************
+*  Modifico:	Francisco Minajas											 ****
+** Fecha:		08/06/2023													 ****
+** Jira:	    TRAAC-1514									 				 ****
+** Descripción:	Se agrega elimina select innecesario 						 ****
+*********************************************************************************
 * ** Modifico:	Francisco Minajas											 ****
 ** Fecha:		04/05/2023													 ****
 ** Jira:	    TRAAC-1450									 				 ****
@@ -50,8 +55,8 @@ as
 ** Fecha:	17/10/2022															*
 ** Key Jira:	TRAAC-851 														*
 *********************************************************************************
-** Modifico:	Martin Adonis Lopez Mendoza													*
-** Descripcion : Busqueda  de usuarios de divisas nacionales y extrangeros 											*
+** Modifico:	Martin Adonis Lopez Mendoza										*
+** Descripcion : Busqueda  de usuarios de divisas nacionales y extrangeros 		*
 ** Fecha:	01/09/2022															*
 ** Help:	1643006     														*
 *********************************************************************************
@@ -341,7 +346,6 @@ end else if @Une_TabCon = '2' begin   /* Si consulta SOUSUEXT  */
 		@Modulo	
 
 end else if @Une_TabCon = '3' begin   /* Si la consulta es de compra venta nacional  */
-	select @Une_TabOri, @Une_IdeUsu
 	
 	select Une_IdeUsu, Une_Estatu,  Une_FecReg,  Une_FecEst
 	from SOUSNAEX noholdlock
