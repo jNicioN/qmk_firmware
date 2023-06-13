@@ -49,20 +49,20 @@ if @Tip_ConTip = @Str_L begin
 	if @Tip_ConCon = @Str_Uno begin
 
 		select Opm_Numero, Opm_MonBas, Opm_MonCot,  Opm_OpePar 
-		from SOOPPAMO 
-		inner join SOOPEPAR on Opm_OpePar =  Opp_Numero 
+		from SOOPPAMO noholdlock
+		inner join SOOPEPAR noholdlock on Opm_OpePar =  Opp_Numero 
 		where Opm_OpePar = @Opm_OpePar
 
 	end
 
 	if @Tip_ConCon = @Str_Dos begin
-		select Opm_Numero, Opm_MonBas, Opm_MonCot,  Opm_OpePar, base.Mon_Descri Opm_BasDes,
-			 base.Mon_Simbol Opm_BasSim, coti.Mon_Descri Opm_CotDes, coti.Mon_Simbol Opm_CotSim,
+		select Opm_Numero, Opm_MonBas, Opm_MonCot,  Opm_OpePar, Bas.Mon_Descri Opm_BasDes,
+			 Bas.Mon_Simbol Opm_BasSim, Cot.Mon_Descri Opm_CotDes, Cot.Mon_Simbol Opm_CotSim,
 			 Opp_Nombre
-		from SOOPPAMO 
-		inner join SOOPEPAR on Opm_OpePar =  Opp_Numero
-		inner join SOMONEDA base on Opm_MonBas = base.SoMonedaID
-		inner join SOMONEDA coti on Opm_MonCot = coti.SoMonedaID
+		from SOOPPAMO noholdlock
+		inner join SOOPEPAR noholdlock on Opm_OpePar =  Opp_Numero
+		inner join SOMONEDA Bas noholdlock on Opm_MonBas = Bas.SoMonedaID
+		inner join SOMONEDA Cot noholdlock on Opm_MonCot = Cot.SoMonedaID
 		where Opm_MonBas = @Opm_MonBas
 
 	end
