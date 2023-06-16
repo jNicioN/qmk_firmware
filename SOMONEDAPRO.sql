@@ -1,5 +1,5 @@
 create procedure SOMONEDAPRO(
-    @So@MonedaID   int,
+    @SoMonedaID   int,
 	@Mon_Numero   char(2),
 	@Mon_Descri   varchar(30),
 	@Mon_Simbol   varchar(10),
