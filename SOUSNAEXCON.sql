@@ -34,10 +34,11 @@ as
 *********************************************************************************
 ** Referencias: 															  	*
 *********************************************************************************
-*  Modifico:	Francisco Minajas											 ****
-** Fecha:		08/06/2023													 ****
-** Jira:	    TRAAC-1514									 				 ****
-** Descripción:	Se agrega elimina select innecesario 						 ****
+* ** Modifico:	Francisco Minajas											 ****
+** Fecha:		20/06/2023													 ****
+** Jira:	    TRAAC-1542									 				 ****
+** Descripción:	Se genera consulta para localizar usuarios activos y		 ****
+				cancelados													 ****
 *********************************************************************************
 * ** Modifico:	Francisco Minajas											 ****
 ** Fecha:		04/05/2023													 ****
@@ -55,8 +56,8 @@ as
 ** Fecha:	17/10/2022															*
 ** Key Jira:	TRAAC-851 														*
 *********************************************************************************
-** Modifico:	Martin Adonis Lopez Mendoza										*
-** Descripcion : Busqueda  de usuarios de divisas nacionales y extrangeros 		*
+** Modifico:	Martin Adonis Lopez Mendoza													*
+** Descripcion : Busqueda  de usuarios de divisas nacionales y extrangeros 											*
 ** Fecha:	01/09/2022															*
 ** Help:	1643006     														*
 *********************************************************************************
@@ -106,7 +107,8 @@ declare	@Str_LetraI char(1),
 		@Str_Dos	char(1),
 		@Str_Porcen	char(1),
 		@Fec_Vacia	smalldatetime,
-		@Fec_Cre	smalldatetime
+		@Fec_Cre	smalldatetime,
+		@Str_Status char(1)
 
 								/* Asignacion de valores a constantes */
 select	@Str_LetraI = 'I',		/* String I: ID de relacion */
@@ -115,6 +117,7 @@ select	@Str_LetraI = 'I',		/* String I: ID de relacion */
 		@Str_LetraE = 'E',		/* String E: Estatus	*/
 		@Str_LetraM = 'M',		/* String M: Usuario Migrado */
 		@Str_TipC 	= 'C',		/* Tipo Consulta */
+		@Str_Status = 'A',		/* Estatus activo */
 		@Str_TipL 	= 'L',		/* Tipo Lista */
 		@Str_Vacio  = '',		/* String vacio */
 		@Ent_Cero	= 0,		/* Entero cero */
@@ -345,9 +348,26 @@ end else if @Une_TabCon = '2' begin   /* Si consulta SOUSUEXT  */
 		@Transaccio, @Usuario,	  @FechaSis,   @SucOrigen,	@SucDestino,	
 		@Modulo	
 
-end else if @Une_TabCon = '3' begin   /* Si la consulta es de compra venta nacional  */
+end else if @Une_TabCon = '3' begin   /* Localiza usuario por numero de persona  */
 	
-	select Une_IdeUsu, Une_Estatu,  Une_FecReg,  Une_FecEst
+	select Une_Identi, Une_IdeUsu, Une_Estatu,  Une_FecReg,  Une_FecEst
 	from SOUSNAEX noholdlock
 	where  Une_IdeUsu  = @Une_IdeUsu and Une_TabOri = @Une_TabOri
+	
+end else if @Une_TabCon = '4' begin   /* Localiza usuarios activos  */
+	
+	select	Une_Identi, Une_IdeUsu, Une_Estatu,  Une_FecReg,  Une_FecEst
+	from SOUSNAEX noholdlock
+	inner join SOBITUSU noholdlock on  Biu_FolUsu  = Une_Identi 
+	where	Une_IdeUsu	= @Une_IdeUsu and Une_TabOri = @Une_TabOri and   Biu_Estatu  = @Str_Status 
+	order by  Biu_FecEst DESC
+	
+end else if @Une_TabCon = '5' begin   /* Localiza usuarios cancelados en bitacora  */
+	
+	select	Biu_FolUsu as Une_Identi,  Biu_Estatu  as Une_Estatu, Biu_FecEst as  Une_FecEst
+	from SOUSNAEX noholdlock
+	inner join SOBITUSU noholdlock on  Biu_FolUsu  = Une_Identi 
+	where	Une_IdeUsu	= @Une_IdeUsu and Une_TabOri = @Une_TabOri and   Biu_Estatu  = @Str_TipC
+	order by  Biu_FecEst DESC
+
 end

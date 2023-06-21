@@ -20,6 +20,11 @@ as
 **	REFERENCIAS:														****
 ****************************************************************************
 ** Modifico:	Francisco Minajas										****
+** Fecha:		16/06/2023												****
+** Jira:	    TRAAC-1542									 			****
+** Descripción:	Se elimina select innecesario							****
+****************************************************************************
+** Modifico:	Francisco Minajas										****
 ** Fecha:		23/01/2023												****
 ** Jira:	    TRAAC-1162									 			****
 ** Descripción:	Se agrega consulta de fecha x sucursal					****
@@ -173,8 +178,6 @@ if @Ent_Existe = @Ent_Uno begin
 	where	Une_IdeUsu	= @Une_IdeInt and   Biu_Estatu  = @Str_Status
 	
 	/*fin de calculo de activos*/
-	
-	select @Ent_Existio_activo
 	/*MES CALENDARIO*/
 	select	TOP 1 @UsuDivi = Une_Identi
 		from SOUSNAEX noholdlock
