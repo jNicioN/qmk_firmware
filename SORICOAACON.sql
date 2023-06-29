@@ -41,26 +41,36 @@ select @Tip_ConTip = substring(@Tip_Consul, 1, 1),
 
 
 if @Tip_ConTip	= @Str_C begin /* 'C': Consulta */
-   if @Tip_ConCon = @Str_Uno begin		/* C1 */
-     select 
-          Rca_Numero,	Rca_NumRib,	Rca_Tipo,	Rca_PoPaMu,	Rca_ConMuj,
-          Rca_PeAlDi, 	Rca_MuAlDi,	Rca_DiPrMi,	Rca_GeDiGe,	Rca_GePrCo
-     from SORICOAA noholdlock 
-     where Rca_Numero = @Rca_Numero
-   end
+	if @Tip_ConCon = @Str_Uno begin		/* C1 */
+		select 
+			Rca_Numero,	Rca_NumRib,	Rca_Tipo,	Rca_PoPaMu,	Rca_ConMuj,
+			Rca_PeAlDi, 	Rca_MuAlDi,	Rca_DiPrMi,	Rca_GeDiGe,	Dir.Gep_Descri,
+			Rca_GePrCo,	Pre.Gep_Descri
+		from SORICOAA noholdlock
+		left join	SOGENPER Dir noholdlock
+			on Dir.Gep_Numero = Rca_GeDiGe
+		left join	SOGENPER Pre noholdlock
+			on Pre.Gep_Numero = Rca_GePrCo
+		where Rca_Numero = @Rca_Numero
+	end
 end else begin
-   if @Tip_ConCon = @Str_Uno begin		/* L1 */
-     select 
-          Rca_Numero,	Rca_NumRib,	Rca_Tipo,	Rca_PoPaMu,	Rca_ConMuj,
-          Rca_PeAlDi, 	Rca_MuAlDi,	Rca_DiPrMi,	Rca_GeDiGe,	Rca_GePrCo
-     from SORICOAA noholdlock 
-  end
+	if @Tip_ConCon = @Str_Uno begin		/* L1 */
+		select 
+			Rca_Numero,	Rca_NumRib,	Rca_Tipo,	Rca_PoPaMu,	Rca_ConMuj,
+			Rca_PeAlDi, 	Rca_MuAlDi,	Rca_DiPrMi,	Rca_GeDiGe,	Rca_GePrCo
+		from SORICOAA noholdlock 
+	end
 
-   if @Tip_ConCon = @Str_Dos begin 
-     select 
-          Rca_Numero,	Rca_NumRib,	Rca_Tipo,	Rca_PoPaMu,	Rca_ConMuj,
-          Rca_PeAlDi, 	Rca_MuAlDi,	Rca_DiPrMi,	Rca_GeDiGe,	Rca_GePrCo
-     from SORICOAA noholdlock 
-      where Rca_NumRib = @Rca_NumRib 
-   end 
+	if @Tip_ConCon = @Str_Dos begin 
+		select 
+			Rca_Numero,	Rca_NumRib,	Rca_Tipo,	Rca_PoPaMu,	Rca_ConMuj,
+			Rca_PeAlDi, 	Rca_MuAlDi,	Rca_DiPrMi,	Rca_GeDiGe,	Dir.Gep_Descri,
+			Rca_GePrCo,	Pre.Gep_Descri
+		from SORICOAA noholdlock
+		left join	SOGENPER Dir noholdlock
+			on Dir.Gep_Numero = Rca_GeDiGe
+		left join	SOGENPER Pre noholdlock
+			on Pre.Gep_Numero = Rca_GePrCo
+		where Rca_NumRib = @Rca_NumRib
+	end
 end
