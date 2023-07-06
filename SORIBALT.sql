@@ -63,7 +63,7 @@ as
 DECLARE @Int_Cero	int,			/* Constante para valor Cero */
 		@Int_Uno 	int,			/* Constante para valor Uno */
 		@Fec_Null	smalldatetime,	/* Constante con valor de la fecha null */
-		@Status		int				/* Campo de retorno */
+		@Int_RibBas	int				/* Variable Entero RIB Base*/
 
 
 /* Asignacion de Constantes */
@@ -73,26 +73,9 @@ SELECT	@Int_Cero	= 0,
 		
 /* Validar si es RIB Base */
 if	@Rib_NumSol = @Int_Cero begin
-	/* Si existe Rib Persona Base, se actualiza registro */
-	if exists (select Rib_Numero from SORIB where Rib_NumPer = @Rib_NumPer and Rib_NumSol = @Int_Cero) begin
-		exec @Status = SORIBMOD
-			@Rib_Numero,	@Rib_NumPer,	@Rib_NumInt,	@Rib_NumSol,	@Rib_TipSol,
-			@Rib_TipRib,	@Rib_FecEla,	@Rib_SucSol,	@Rib_ConNom,	@Rib_ConPue,
-			@Rib_PagWeb,	@Rib_ActCat,	@Rib_ActEsp,	@Rib_MerObj,	@Rib_LlViOc,
-			@Rib_UsuCap,	@Rib_NoAlGo,	@Rib_PaEnPo,	@Rib_CabCon,	@Rib_FeCaPo,
-			@Rib_EmOtCr,	@Rib_EmSuRe,	@Rib_FeInOp,	@Rib_DurSoc,	@Rib_CotBol,
-			@Rib_NumApo,	@Rib_NumCon,	@Rib_CliSuc,	@Rib_ZonUsu,	@Rib_EdoCiv,
-			@Rib_NumExt,	@Rib_LugCon,	@NumTransac,	@Transaccio,	@Usuario,
-			@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
-			
-		if @Status <> @Int_Cero begin
-			select	Err_Codigo	= '000001',
-				Err_Mensaj	= 'Error en proceso de modificacion de Rib BASE'
-
-			rollback
-			return @Int_Uno
-		end
-	end else begin
+	/* Si existe Rib Persona Base, no se realiza insert */
+	select @Int_RibBas = (select count(1) from SORIB where Rib_NumPer = @Rib_NumPer and Rib_NumSol = @Int_Cero)
+	if @Int_RibBas = @Int_Cero begin
 		insert into SORIB (
 				Rib_NumPer,    	Rib_NumInt,		Rib_NumSol,    	Rib_TipSol,		Rib_TipRib,
 				Rib_FecEla,		Rib_SucSol,    	Rib_ConNom,		Rib_ConPue,    	Rib_PagWeb,
