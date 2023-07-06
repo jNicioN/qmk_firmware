@@ -43,6 +43,12 @@ as
 /****************************************************************/
 /* DESCRIPCION: Alta de Reporte de Informacion Basica	      	*/
 /****************************************************************/
+/* Modifico:		Raul Muniz									*/
+/* Fecha:			06/07/2023									*/
+/* C.Cambios:		29013										*/
+/* Descripcion:		Se agrega validacion para evitar duplicidad	*/
+/*					de RIB base									*/
+/****************************************************************/
 /** Modifica:		Victor Osorio								*/
 /** Descripcion:	Se agrega campo Rib_LugCon					*/
 /** Fecha:			18/10/2017                               	*/
@@ -56,31 +62,74 @@ as
 /* Declaracion de Constantes */
 DECLARE @Int_Cero	int,			/* Constante para valor Cero */
 		@Int_Uno 	int,			/* Constante para valor Uno */
-		@Fec_Null	smalldatetime	/* Constante con valor de la fecha null */
+		@Fec_Null	smalldatetime,	/* Constante con valor de la fecha null */
+		@Status		int				/* Campo de retorno */
 
 
 /* Asignacion de Constantes */
 SELECT	@Int_Cero	= 0,
 		@Int_Uno 	= 1,
 		@Fec_Null	= null
+		
+/* Validar si es RIB Base */
+if	@Rib_NumSol = @Int_Cero begin
+	/* Si existe Rib Persona Base, se actualiza registro */
+	if exists (select Rib_Numero from SORIB where Rib_NumPer = @Rib_NumPer and Rib_NumSol = @Int_Cero) begin
+		exec @Status = SORIBMOD
+			@Rib_Numero,	@Rib_NumPer,	@Rib_NumInt,	@Rib_NumSol,	@Rib_TipSol,
+			@Rib_TipRib,	@Rib_FecEla,	@Rib_SucSol,	@Rib_ConNom,	@Rib_ConPue,
+			@Rib_PagWeb,	@Rib_ActCat,	@Rib_ActEsp,	@Rib_MerObj,	@Rib_LlViOc,
+			@Rib_UsuCap,	@Rib_NoAlGo,	@Rib_PaEnPo,	@Rib_CabCon,	@Rib_FeCaPo,
+			@Rib_EmOtCr,	@Rib_EmSuRe,	@Rib_FeInOp,	@Rib_DurSoc,	@Rib_CotBol,
+			@Rib_NumApo,	@Rib_NumCon,	@Rib_CliSuc,	@Rib_ZonUsu,	@Rib_EdoCiv,
+			@Rib_NumExt,	@Rib_LugCon,	@NumTransac,	@Transaccio,	@Usuario,
+			@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
+			
+		if @Status <> @Int_Cero begin
+			select	Err_Codigo	= '000001',
+				Err_Mensaj	= 'Error en proceso de modificacion de Rib BASE'
 
-insert into SORIB (
-		Rib_NumPer,    	Rib_NumInt,		Rib_NumSol,    	Rib_TipSol,		Rib_TipRib,
-		Rib_FecEla,		Rib_SucSol,    	Rib_ConNom,		Rib_ConPue,    	Rib_PagWeb,
-		Rib_ActCat,		Rib_ActEsp,    	Rib_MerObj,		Rib_LlViOc,    	Rib_UsuCap,
-		Rib_NoAlGo,		Rib_PaEnPo,		Rib_CabCon,		Rib_FeCaPo,		Rib_EmOtCr,
-		Rib_EmSuRe,		Rib_FeInOp,		Rib_DurSoc,		Rib_CotBol,		Rib_NumApo,
-		Rib_NumCon,	    Rib_CliSuc, 	Rib_ZonUsu, 	Rib_EdoCiv, 	Rib_NumExt,
-		Rib_LugCon,		NumTransac,		Transaccio,		Usuario,		FechaSis,
-		SucOrigen,		SucDestino)
-values (@Rib_NumPer,    @Rib_NumInt,	@Rib_NumSol,    @Rib_TipSol,	@Rib_TipRib,
-		@Fec_Null,		@Rib_SucSol,    @Rib_ConNom,	@Rib_ConPue,    @Rib_PagWeb,
-		@Rib_ActCat,	@Rib_ActEsp,    @Rib_MerObj,	@Rib_LlViOc,    @Rib_UsuCap,
-		@Rib_NoAlGo,	@Rib_PaEnPo,	@Rib_CabCon,    @Rib_FeCaPo,	@Rib_EmOtCr,
-		@Rib_EmSuRe,	@Rib_FeInOp,	@Rib_DurSoc,	@Rib_CotBol,	@Rib_NumApo,
-		@Rib_NumCon,	@Rib_CliSuc,	@Rib_ZonUsu,	nullif(@Rib_EdoCiv, @Int_Cero),
-		@Rib_NumExt,	@Rib_LugCon,	@NumTransac,	@Transaccio,	@Usuario,
-		@FechaSis,		@SucOrigen,		@SucDestino)
+			rollback
+			return @Int_Uno
+		end
+	end else begin
+		insert into SORIB (
+				Rib_NumPer,    	Rib_NumInt,		Rib_NumSol,    	Rib_TipSol,		Rib_TipRib,
+				Rib_FecEla,		Rib_SucSol,    	Rib_ConNom,		Rib_ConPue,    	Rib_PagWeb,
+				Rib_ActCat,		Rib_ActEsp,    	Rib_MerObj,		Rib_LlViOc,    	Rib_UsuCap,
+				Rib_NoAlGo,		Rib_PaEnPo,		Rib_CabCon,		Rib_FeCaPo,		Rib_EmOtCr,
+				Rib_EmSuRe,		Rib_FeInOp,		Rib_DurSoc,		Rib_CotBol,		Rib_NumApo,
+				Rib_NumCon,	    Rib_CliSuc, 	Rib_ZonUsu, 	Rib_EdoCiv, 	Rib_NumExt,
+				Rib_LugCon,		NumTransac,		Transaccio,		Usuario,		FechaSis,
+				SucOrigen,		SucDestino)
+		values (@Rib_NumPer,    @Rib_NumInt,	@Rib_NumSol,    @Rib_TipSol,	@Rib_TipRib,
+				@Fec_Null,		@Rib_SucSol,    @Rib_ConNom,	@Rib_ConPue,    @Rib_PagWeb,
+				@Rib_ActCat,	@Rib_ActEsp,    @Rib_MerObj,	@Rib_LlViOc,    @Rib_UsuCap,
+				@Rib_NoAlGo,	@Rib_PaEnPo,	@Rib_CabCon,    @Rib_FeCaPo,	@Rib_EmOtCr,
+				@Rib_EmSuRe,	@Rib_FeInOp,	@Rib_DurSoc,	@Rib_CotBol,	@Rib_NumApo,
+				@Rib_NumCon,	@Rib_CliSuc,	@Rib_ZonUsu,	nullif(@Rib_EdoCiv, @Int_Cero),
+				@Rib_NumExt,	@Rib_LugCon,	@NumTransac,	@Transaccio,	@Usuario,
+				@FechaSis,		@SucOrigen,		@SucDestino)
+	end
+end else begin
+	insert into SORIB (
+			Rib_NumPer,    	Rib_NumInt,		Rib_NumSol,    	Rib_TipSol,		Rib_TipRib,
+			Rib_FecEla,		Rib_SucSol,    	Rib_ConNom,		Rib_ConPue,    	Rib_PagWeb,
+			Rib_ActCat,		Rib_ActEsp,    	Rib_MerObj,		Rib_LlViOc,    	Rib_UsuCap,
+			Rib_NoAlGo,		Rib_PaEnPo,		Rib_CabCon,		Rib_FeCaPo,		Rib_EmOtCr,
+			Rib_EmSuRe,		Rib_FeInOp,		Rib_DurSoc,		Rib_CotBol,		Rib_NumApo,
+			Rib_NumCon,	    Rib_CliSuc, 	Rib_ZonUsu, 	Rib_EdoCiv, 	Rib_NumExt,
+			Rib_LugCon,		NumTransac,		Transaccio,		Usuario,		FechaSis,
+			SucOrigen,		SucDestino)
+	values (@Rib_NumPer,    @Rib_NumInt,	@Rib_NumSol,    @Rib_TipSol,	@Rib_TipRib,
+			@Fec_Null,		@Rib_SucSol,    @Rib_ConNom,	@Rib_ConPue,    @Rib_PagWeb,
+			@Rib_ActCat,	@Rib_ActEsp,    @Rib_MerObj,	@Rib_LlViOc,    @Rib_UsuCap,
+			@Rib_NoAlGo,	@Rib_PaEnPo,	@Rib_CabCon,    @Rib_FeCaPo,	@Rib_EmOtCr,
+			@Rib_EmSuRe,	@Rib_FeInOp,	@Rib_DurSoc,	@Rib_CotBol,	@Rib_NumApo,
+			@Rib_NumCon,	@Rib_CliSuc,	@Rib_ZonUsu,	nullif(@Rib_EdoCiv, @Int_Cero),
+			@Rib_NumExt,	@Rib_LugCon,	@NumTransac,	@Transaccio,	@Usuario,
+			@FechaSis,		@SucOrigen,		@SucDestino)
+end
 
 select @Rib_Numero = @@IDENTITY
 
