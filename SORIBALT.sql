@@ -74,7 +74,7 @@ SELECT	@Int_Cero	= 0,
 /* Validar si es RIB Base */
 if	@Rib_NumSol = @Int_Cero begin
 	/* Si existe Rib Persona Base, no se realiza insert */
-	select @Int_RibBas = (select count(1) from SORIB where Rib_NumPer = @Rib_NumPer and Rib_NumSol = @Int_Cero)
+	select @Int_RibBas = (select count(1) from SORIB noholdlock where Rib_NumPer = @Rib_NumPer and Rib_NumSol = @Int_Cero)
 	if @Int_RibBas = @Int_Cero begin
 		insert into SORIB (
 				Rib_NumPer,    	Rib_NumInt,		Rib_NumSol,    	Rib_TipSol,		Rib_TipRib,
