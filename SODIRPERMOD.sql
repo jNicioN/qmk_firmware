@@ -2,7 +2,7 @@ create procedure SODIRPERMOD (
 	@PerPersoID int,
 	@Dip_TipDir	int,
 	@ClClientID	int,
-	@Dip_Calle	char(40),
+	@Dip_Calle	char(60),
 	@Dip_NumExt	char(10),
 	@Dip_NumInt	char(10),
 	@Dip_NumCP	char(6),
@@ -22,6 +22,12 @@ as
 
 /***************************************************************************
 ** Descripción:	 Modificación de Descripcion							****
+****************************************************************************
+** Modifico:		Alberto Pineda										****
+** Fecha:			15-07-2022											****
+** Help:			TRACL-5312												****
+** Descripcion: 	Se agregan mas caracteres al campo Dip_Calle        ****
+                    De 40 se pasa a 60                          		****
 ****************************************************************************
 ** Modifico:		Adriana Gomez										****
 ** Fecha:		    06-06-2022											****

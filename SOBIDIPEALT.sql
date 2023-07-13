@@ -2,7 +2,7 @@ create procedure SOBIDIPEALT (
 	@PerPersoID		int,
 	@Bdp_TipDir 	int,
 	@ClClientID		int,	
-	@Bdp_Calle		char(40), 
+	@Bdp_Calle		char(60), 
 	@Bdp_NumExt    	char(10),
 	@Bdp_NumInt    	char(10),
 	@Bdp_NumCP     	char(6),
@@ -24,6 +24,12 @@ as
 
 /***************************************************************************
 ** Descripción:	 Alta Bitacora de Direcciones de Persona				****
+****************************************************************************
+** Modifico:		Alberto Pineda										****
+** Fecha:			15-07-2022											****
+** Help:			TRACL-5312												****
+** Descripcion: 	Se agregan mas caracteres al campo Bdp_Calle        ****
+                    De 40 se pasa a 60                          		****
 ****************************************************************************
 ** Modifico:		Adriana Gomez										****
 ** Fecha:			06-05-2022											****
@@ -86,4 +92,3 @@ insert into SOBIDIPE values(
 	@PerPersoID,		@Bdp_TipDir,	@ClClientID,	@Bdp_Calle,		@Bdp_NumExt,	@Bdp_NumInt,	@Bdp_NumCP,
 	@Bdp_EntCa1,		@Bdp_EntCa2,	@Bdp_Refere,    @Bdp_Status,	@Bdp_FecCam,	@NumTransac,	@Transaccio,		
 	@Usuario,			@FechaSis,		@SucOrigen,		@SucDestino)
-
