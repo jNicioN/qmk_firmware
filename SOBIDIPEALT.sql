@@ -29,8 +29,8 @@ as
 ** Fecha:			15-07-2022											****
 ** Help:			TRACL-5312											****
 ** Descripcion: 	Se agregan mas caracteres al campo Bdp_Calle        ****
-                    De 40 se pasa a 60, se agregan los valores a insertar****
-					En SOBIDIPE											****
+**                  De 40 se pasa a 60, se agregan los valores a insertar****
+**					En SOBIDIPE 										****
 ****************************************************************************
 ** Modifico:		Adriana Gomez										****
 ** Fecha:			06-05-2022											****
@@ -91,7 +91,7 @@ end
 /* Alta de Bitacora de Direcciones de Persona */
 insert into SOBIDIPE (PerPersoID, Bdp_TipDir, ClClientID, Bdp_Calle, Bdp_NumExt, 
 Bdp_NumInt, Bdp_NumCP, Bdp_EntCa1, Bdp_EntCa2, Bdp_Refere, Bdp_Status, Bdp_FecCam, NumTransac, 
-Transaccio, Usuario,FechaSise, SucOrigen, SucDestino) 
+Transaccio, Usuario,FechaSis, SucOrigen, SucDestino) 
 values(
 	@PerPersoID,		@Bdp_TipDir,	@ClClientID,	@Bdp_Calle,		@Bdp_NumExt,	@Bdp_NumInt,	@Bdp_NumCP,
 	@Bdp_EntCa1,		@Bdp_EntCa2,	@Bdp_Refere,    @Bdp_Status,	@Bdp_FecCam,	@NumTransac,	@Transaccio,		
