@@ -17,6 +17,11 @@ as
 /* DESCRIPCION: Procesamiento de copia de registros de Reporte	*/
 /*				de Informacion Basica							*/
 /****************************************************************/
+/** Modifico:		Raul Muniz									*/
+/** Fecha:			21/06/2023									*/
+/** C.Cambios:		29013										*/
+/** Descripcion: 	Se agregan campos de inclusion de la mujer	*/
+/****************************************************************/
 /** Modifico:		Jose R. Rodriguez Zenteno					*/
 /** Descripcion:	Se agrega Ria_NomAcc a insert de SORIBACC	*/
 /** Fecha:			21/09/2022                               	*/
@@ -319,10 +324,13 @@ if @Tip_Proces	= @Str_A begin /* 'A': Proceso para realizar la copia de RIB cuan
 
 
 		insert into SORICOAA (
-				Rca_NumRib,		Rca_Tipo,		NumTransac,		Transaccio,		Usuario,
+				Rca_NumRib,		Rca_Tipo,		Rca_PoPaMu,	Rca_ConMuj,	Rca_PeAlDi,
+				Rca_MuAlDi,		Rca_DiPrMi,		Rca_GeDiGe,	Rca_GePrCo,	NumTransac,
+				Transaccio,		Usuario,
 				FechaSis,		SucOrigen,		SucDestino)
-		select	@Int_RibCop,	Rca_Tipo,		@NumTransac,	@Transaccio,	@Usuario,
-				@FechaSis,		@SucOrigen,		@SucDestino
+		select	@Int_RibCop,	Rca_Tipo,		Rca_PoPaMu,	Rca_ConMuj,	Rca_PeAlDi,
+				Rca_MuAlDi,		Rca_DiPrMi,		Rca_GeDiGe,	Rca_GePrCo,	@NumTransac,
+				@Transaccio,	@Usuario,		@FechaSis,	@SucOrigen,	@SucDestino
 		from SORICOAA noholdlock
 		where Rca_NumRib = @Int_RibBas
 
