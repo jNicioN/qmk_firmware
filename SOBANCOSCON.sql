@@ -20,6 +20,11 @@ as
 ************************************************************************************
 **	REFERENCIAS:
 ************************************************************************************
+** Modificó:	Diego Ovando													****
+** Fecha:		29/06/2023														****
+** Help:		29189															****
+** Descripción:	Se ajusta consulta de Llave Foranea Numero (C2)					****
+************************************************************************************
 ** Modificó:	Jesus Edwin Silva												****
 ** Fecha:		27 de Julio del 2021											****
 ** Help:		1438184															****
@@ -155,7 +160,7 @@ end else begin			/* Cliente:  Visual Basic	*/
 				from SOBANCOS noholdlock
 				where	Ban_Numero = @Ban_Numero
 		end else if @Tip_ConCon = @Str_Dos begin		/* Consulta de Llave Foranea Numero */
-			select	Ban_Numero,	Ban_Nombre
+			select	Ban_Numero,	Ban_Nombre, Ban_NumSis
 				from SOBANCOS noholdlock
 				where	Ban_Numero = @Ban_Numero
 		end else if @Tip_ConCon = @Str_Tres begin		/* Consulta de Llave Foranea NumSis */
