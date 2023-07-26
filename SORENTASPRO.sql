@@ -38,6 +38,12 @@ as
 ** REFERENCIAS:															****
 ****************************************************************************
 ** Modifico:	Joel Moctezuma Guerrero									****
+** Fecha:		07/Julio/2023											****
+** Help:		29951 - TCELA-13194										****
+** Descripción: No Reclasificar Arrenamidnto Puro a PUCA si la Linea de	****
+**				Credito tiene otros Arrendamientos Puros Vigentes.		****
+****************************************************************************
+** Modifico:	Joel Moctezuma Guerrero									****
 ** Fecha:		22/Marzo/2023											****
 ** Help:		22825													****
 ** Descripción: Permitir Reclasificacion Arrendamiento Puro B2B a PUCA.	****
@@ -153,7 +159,10 @@ declare	@Ren_ResCap	double precision,		/*Resultado capital*/
 		@Cot_OpcCom money,					/* Monto de la Opcion de Compra */
 		@Opc_ComIVA money,					/* Monto de la Opcion de Compra + IVA */
 		@Tip_ArPuCa	char(1),				/* Arrendamiento Puro Capitalizable S/N */
-		@Arr_TiPuCa	char(1)					/* Arrendamiento: Tipo Puro Capitalizable - 4 */
+		@Arr_TiPuCa	char(1),				/* Arrendamiento: Tipo Puro Capitalizable - 4 */
+		@Lic_Linea	char(12),				/*	Linea de Credito Asignada a la Cotizacion */
+		@Eva_ArrPuc	char(1),				/*	Evaluar Arrendamiento Puro */
+		@Arr_PurVig	int						/*	Total de Arrendamientos Puros Vigentes de la Linea de Credito */
 
 declare	@Mon_Cero	smallint,				/*	Declaración de Constantes	*/
 		@Mon_Uno	smallint,
@@ -206,7 +215,8 @@ declare	@Mon_Cero	smallint,				/*	Declaración de Constantes	*/
 		@Cob_NoIVA	char(1),
 		@Cob_SiIVA	char(1),
 		@Str_SieCer char(7),
-		@Str_Porcen	char(1)
+		@Str_Porcen	char(1),
+		@Sta_Proces	char(1)
 
 /*	Asignación de Constantes	*/
 select	@Mon_Cero	= 0.00,			/*	Moneda Cero																	*/
@@ -260,7 +270,8 @@ select	@Mon_Cero	= 0.00,			/*	Moneda Cero																	*/
 		@Cob_NoIVA	= 'N',			/*	No cobro de IVA																*/
 		@Cob_SiIVA	= 'S',			/*	Si cobro de IVA																*/																					 
 		@Str_SieCer	= '0000000',	/*	Cadena 7 ceros																*/
-		@Str_Porcen	= '%'			/*	Caracter Porcentaje															*/
+		@Str_Porcen	= '%',			/*	Caracter Porcentaje															*/
+		@Sta_Proces	= 'N'			/*	Estatus: En Proceso															*/
 
 select @Amo_TipRen = isnull(@Amo_TipRen,@Str_Vacio)
 		
@@ -287,13 +298,43 @@ select	@Par_DiBaCr	= Par_DiBaCr,
 select	@Tip_ArPuCa	= @Cad_No
 
 if @Amo_TipArr <> @Arr_PurCap begin
-	exec @Status = ABARPUCAPRO
-		@Num_Cotiza,	@Tip_ArPuCa output,	@NumTransac,	@Transaccio,	@Usuario,
-		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
-	if @Status <> 0 begin
-		rollback
-		return 1
+	select	@Eva_ArrPuc = @Cad_Si
+	
+	if @Amo_TipArr = @Arr_Puro begin
+		select	@Lic_Linea = Lic_Linea
+			from ABTMPLIC noholdlock
+			where Lic_NumTra = @NumTransac
+			
+		select	@Lic_Linea = isnull(@Lic_Linea, @Str_Vacio)
+		
+		if @Lic_Linea = @Str_Vacio begin
+			select	@Eva_ArrPuc = @Cad_Si
+		end else begin
+			select	@Arr_PurVig = count(Cre_Numero)
+				from ABCREDIT noholdlock
+				where Cre_Linea = @Lic_Linea
+				  and Cre_Status = @Sta_Proces
+				  
+			select	@Arr_PurVig	= isnull(@Arr_PurVig, @Ent_Cero)
+			
+			if @Arr_PurVig = @Ent_Cero begin
+				select	@Eva_ArrPuc = @Cad_Si
+			end else begin
+				select	@Eva_ArrPuc = @Cad_No
+			end
+		
+		end
 	end
+	
+	if @Eva_ArrPuc = @Cad_Si begin
+		exec @Status = ABARPUCAPRO
+			@Num_Cotiza,	@Tip_ArPuCa output,	@NumTransac,	@Transaccio,	@Usuario,
+			@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
+		if @Status <> 0 begin
+			rollback
+			return 1
+		end
+	end 
 end 
 
 select	@Arr_TiPuCa = @Amo_TipArr
@@ -360,7 +401,7 @@ end else
 		@Mon_Cero,		@Str_RenExt,	@Mon_Cero,		@Mon_Cero,		@Mon_Cero,
 		@Mon_Cero,		@Mon_Cero,		@Mon_Cero,		@Mon_Cero)
 
--- Inserción de amortización cero "000" correspondiente al pago inicial
+-- Inserción de amortización cero '000' correspondiente al pago inicial
 select	@Ren_Consec = @Ent_Cero
 
 select	@Ren_Numero	= convert(char, @Ren_Consec)
