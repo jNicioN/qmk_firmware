@@ -23,6 +23,11 @@ as
 ****************************************************************************
 **	REFERENCIAS:														****
 ****************************************************************************
+** Modificó:	Javier Eduardo Ceron Rangel		                    	****
+** Fecha:	    28/07/2023      					                    ****
+** Help:	    TRACL-5359 						                        ****
+** Descripción:	Se agrega UPPER para guardar informacion en MAYUSCULAS	****
+****************************************************************************
 ** Creo:		José Antonio Mandujano Salgado							****
 ** Fecha:		03/05/2022   											****
 ** Help Desk:	1621179	 									 			****
@@ -83,14 +88,17 @@ if @Ent_Existe = @Ent_Uno begin
 	return @Ent_Uno
 end
 
-insert into SODATFIS (
-				PerPersoID,  Daf_Nombre , Daf_Regime, Daf_UsoCfd, 
-				Daf_ApePat, Daf_ApeMat, Daf_RazSoc, NumTransac,	
-				Transaccio, Usuario, FechaSis, SucOrigen, SucDestino)
-	values (
-	@PerPersoID, @Daf_Nombre, @Daf_Regime, @Daf_UsoCfd, 
-	@Daf_ApePat, @Daf_ApeMat, @Daf_RazSoc, @NumTransac,	
-	@Transaccio, @Usuario, @FechaSis, @SucOrigen, @SucDestino)
+select  @Daf_Nombre = UPPER(@Daf_Nombre),
+		@Daf_ApePat = UPPER(@Daf_ApePat),
+		@Daf_ApeMat = UPPER(@Daf_ApeMat),
+		@Daf_RazSoc = UPPER(@Daf_RazSoc)
+
+insert into SODATFIS (PerPersoID,  Daf_Nombre , Daf_Regime, Daf_UsoCfd, Daf_ApePat, 
+					Daf_ApeMat, Daf_RazSoc, NumTransac,	Transaccio, Usuario, 
+					FechaSis, SucOrigen, SucDestino)
+	values (@PerPersoID, @Daf_Nombre, @Daf_Regime, @Daf_UsoCfd, @Daf_ApePat, 
+			@Daf_ApeMat, @Daf_RazSoc, @NumTransac, @Transaccio, @Usuario, 
+			@FechaSis, @SucOrigen, @SucDestino)
 	
 exec @Status = SOBIDAFIALT 
 	@PerPersoID, @Daf_Nombre, @Daf_Regime, @Daf_UsoCfd, 

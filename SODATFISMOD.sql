@@ -24,6 +24,11 @@ as
 ****************************************************************************
 **	REFERENCIAS:														****
 ****************************************************************************
+** Modificó:	Javier Eduardo Ceron Rangel		                    	****
+** Fecha:	    28/07/2023      					                    ****
+** Help:	    TRACL-5359 						                        ****
+** Descripción:	Se agrega UPPER para guardar informacion en MAYUSCULAS	****
+****************************************************************************
 ** Creo:		José Antonio Mandujano Salgado							****
 ** Fecha:		03/05/2022   											****
 ** Help Desk:	1621179	 									 			****
@@ -65,6 +70,10 @@ if isnull(@Daf_Nombre, @Str_Vacio) = @Str_Vacio and isnull(@Daf_RazSoc, @Str_Vac
 	return @Ent_Uno	
 end 
 
+select  @Daf_Nombre = UPPER(@Daf_Nombre),
+		@Daf_ApePat = UPPER(@Daf_ApePat),
+		@Daf_ApeMat = UPPER(@Daf_ApeMat),
+		@Daf_RazSoc = UPPER(@Daf_RazSoc)
 
 update SODATFIS  set
 	Daf_Nombre = @Daf_Nombre,
