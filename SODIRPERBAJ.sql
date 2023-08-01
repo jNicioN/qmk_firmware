@@ -16,6 +16,12 @@ as
 /***************************************************************************
 ** Descripción:	 Baja de Direcciones Persona					        ****
 ****************************************************************************
+** Modifico:		Alberto Pineda										****
+** Fecha:			15-07-2022											****
+** Help:			TRACL-5312												****
+** Descripcion: 	Se agregan mas caracteres al campo Bdp_Calle        ****
+                    De 40 se pasa a 60                          		****
+****************************************************************************
 ** Modifico:	Martin Moreno											****
 ** Fecha:		15-05-2017												****
 ** Help:		00979131												****
@@ -34,7 +40,7 @@ as
 										/* Declaración de variables */
 declare	@Status		int,
 		@Bdp_TipDir 	int,
-		@Bdp_Calle		char(40), 
+		@Bdp_Calle		char(60), 
 		@Bdp_NumExt    	char(10),
 		@Bdp_NumInt    	char(10),
 		@Bdp_NumCP     	char(6),
