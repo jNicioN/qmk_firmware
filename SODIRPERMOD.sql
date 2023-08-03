@@ -24,10 +24,10 @@ as
 ** Descripción:	 Modificación de Descripcion							****
 ****************************************************************************
 ** Modifico:		Alberto Pineda										****
-** Fecha:			15-07-2022											****
-** Help:			TRACL-5312												****
+** Fecha:			02-08-2023											****
+** Help:			TRACL-5496											****
 ** Descripcion: 	Se agregan mas caracteres al campo Dip_Calle        ****
-                    De 40 se pasa a 60                          		****
+                    De 40 se pasa a 60   								****
 ****************************************************************************
 ** Modifico:		Adriana Gomez										****
 ** Fecha:		    06-06-2022											****
@@ -71,9 +71,9 @@ declare	@Status		int,
 		@Bdp_NumExt char(10),
 		@Bdp_NumInt char(10),
 		@Bdp_NumCP  char(6),
-		@Bdp_EntCa1 varchar(255),
-		@Bdp_EntCa2 varchar(255),
-		@Bdp_Refere varchar(255),
+		@Bdp_EntCa1 varchar(254),
+		@Bdp_EntCa2 varchar(254),
+		@Bdp_Refere varchar(254),
 		@Bdp_Status	char(1),
 		@Bdp_FecCam	smalldatetime,
 		@Bdp_NumTra	char(10),

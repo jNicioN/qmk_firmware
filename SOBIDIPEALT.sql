@@ -26,8 +26,8 @@ as
 ** Descripción:	 Alta Bitacora de Direcciones de Persona				****
 ****************************************************************************
 ** Modifico:		Alberto Pineda										****
-** Fecha:			15-07-2022											****
-** Help:			TRACL-5312											****
+** Fecha:			02-08-2023											****
+** Help:			TRACL-5496											****
 ** Descripcion: 	Se agregan mas caracteres al campo Bdp_Calle        ****
 **                  De 40 se pasa a 60, se agregan los valores a insertar****
 **					En SOBIDIPE 										****
