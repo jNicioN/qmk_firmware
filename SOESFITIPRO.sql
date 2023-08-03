@@ -27,6 +27,12 @@ as
 ** C.Cambios:		30985	 					 				*/
 /****************************************************************
 ** Modifica:		Jose R. Rodriguez Zenteno                   **
+** Fecha:			12/05/2023                               	**
+** Descripcion:		Se modifica proceso G para validacion de	**
+**					cuenta con valor nulo	     			    **
+** Help:			TCELGR-6167 					 			*/
+/****************************************************************
+** Modifica:		Jose R. Rodriguez Zenteno                   **
 ** Fecha:			04/10/2022                               	**
 ** Descripcion:		Se modifica proceso G para actualizar 		**
 **					cuenta de VENTAS / ACTIVO     			    **
