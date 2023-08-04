@@ -28,12 +28,6 @@ as
 ****************************************************************************
 ** REFERENCIAS: 														****
 ****************************************************************************
-** Modifico:	Erik Ruben Cordero Moreno								****
-** Fecha:		04/Agosto/2023											****
-** Help:		TCELID-15406											****
-** Descripcion:	Se elimina la actualizacion del campo Per_Entida, 		****
-** en la tabla SOPERSON cuando el tipo de proceos de act es por Datos	****
-****************************************************************************
 ** Modifico:	Armando Alexis Sepulveda Cruz							****
 ** Fecha:		05/Enero/2022											****
 ** Help:		1379522													****
@@ -394,6 +388,7 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 		Per_Comple	= @Gpc_Comple,
 		Per_ComOrd	= @Gpc_ComOrd,
 		Per_Nacion	= @Per_Nacion,
+		Per_Entida	= @Per_Entida,
 		Per_RFC		= @Gpc_RFC,
 		Per_CURP	= @Gpc_CURP,
 
@@ -528,4 +523,3 @@ end	else if @Tip_Proces = @Pro_GruMin or @Tip_Proces = @Pro_GrClUn begin		/*Agru
 	/*Salida: Notificación cambio Persona IDE*/
 	select @Gpc_GrpAnt as Gpc_Person, @Gpc_Grupo as Gpc_Grupo
 end
-
