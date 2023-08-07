@@ -35,6 +35,11 @@ as
 /** DESCRIPCION: Proceso de guardado de estados financieros		*/
 /****************************************************************/
 /** Modifico:		Raul Muniz									*/
+/** Fecha:			31/07/2023                             		*/
+/** C.Cambios:		30820				 						*/
+/** Descripcion:	Corrección para evitar bloqueos de BD		*/
+/****************************************************************/
+/** Modifico:		Raul Muniz									*/
 /** Fecha:			12/12/2019                             		*/
 /** Help:			1318047				 						*/
 /** Descripcion:	Se modificaron parametros @Eft_Valor1,		*/
@@ -45,16 +50,16 @@ as
 /** Help:			929417 				 						*/
 /****************************************************************/
 
-declare @Tip_ProA char(1),
-		@Ent_Cero int,
-		@Ent_Eeff int
+declare @Tip_ProA char(1),		/* Tipo de Proceso */
+		@Ent_Cero int,			/* Entero Cero */
+		@Ent_Eeff int			/* Estado Financiero */
 
 SET @Tip_ProA = 'A',
 	@Ent_Cero = 0
 
 if @Tip_Proces = @Tip_ProA begin
 	if(@Eft_EstFi1>@Ent_Cero) begin
-		select @Ent_Eeff = (select count(1) from SOESFITI where Eft_EstFin=@Eft_EstFi1 and Eft_TipCue = @Eft_TipCue)
+		select @Ent_Eeff = (select count(1) from SOESFITI noholdlock where Eft_EstFin=@Eft_EstFi1 and Eft_TipCue = @Eft_TipCue)
 		if (@Ent_Eeff > 0) begin
 			update SOESFITI set
 				Eft_Valor	=	@Eft_Valor1, 
@@ -81,7 +86,7 @@ if @Tip_Proces = @Tip_ProA begin
 	end
 
 	if(@Eft_EstFi2>@Ent_Cero) begin
-		select @Ent_Eeff = (select count(1) from SOESFITI where Eft_EstFin=@Eft_EstFi2 and Eft_TipCue = @Eft_TipCue)
+		select @Ent_Eeff = (select count(1) from SOESFITI noholdlock where Eft_EstFin=@Eft_EstFi2 and Eft_TipCue = @Eft_TipCue)
 		if (@Ent_Eeff > 0) begin
 			update SOESFITI set
 				Eft_Valor	=	@Eft_Valor2, 
@@ -108,7 +113,7 @@ if @Tip_Proces = @Tip_ProA begin
 	end
 
 	if(@Eft_EstFi3>@Ent_Cero) begin
-		select @Ent_Eeff = (select count(1) from SOESFITI where Eft_EstFin=@Eft_EstFi3 and Eft_TipCue = @Eft_TipCue)
+		select @Ent_Eeff = (select count(1) from SOESFITI noholdlock where Eft_EstFin=@Eft_EstFi3 and Eft_TipCue = @Eft_TipCue)
 		if (@Ent_Eeff > 0) begin
 			update SOESFITI set
 				Eft_Valor	=	@Eft_Valor3, 
@@ -135,7 +140,7 @@ if @Tip_Proces = @Tip_ProA begin
 	end
 
 	if(@Eft_EstFi4>@Ent_Cero) begin
-		select @Ent_Eeff = (select count(1) from SOESFITI where Eft_EstFin=@Eft_EstFi4 and Eft_TipCue = @Eft_TipCue)
+		select @Ent_Eeff = (select count(1) from SOESFITI noholdlock where Eft_EstFin=@Eft_EstFi4 and Eft_TipCue = @Eft_TipCue)
 		if (@Ent_Eeff > 0) begin
 			update SOESFITI set
 				Eft_Valor	=	@Eft_Valor4, 
