@@ -394,7 +394,6 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 		Per_Comple	= @Gpc_Comple,
 		Per_ComOrd	= @Gpc_ComOrd,
 		Per_Nacion	= @Per_Nacion,
-		Per_RFC		= @Gpc_RFC,
 		Per_CURP	= @Gpc_CURP,
 
 		NumTransac	= @NumTransac,
