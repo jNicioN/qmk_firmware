@@ -28,12 +28,18 @@ as
 ****************************************************************************
 ** REFERENCIAS: 														****
 ****************************************************************************
+** Modifico:	Erik Ruben Cordero Moreno								****
+** Fecha:		04/Agosto/2023											****
+** Help:		TCELID-15406											****
+** Descripcion:	Se elimina la actualizacion del campo Per_Entida, 		****
+** en la tabla SOPERSON cuando el tipo de proceos de act es por Datos	****
+****************************************************************************
 ** Modifico:	Armando Alexis Sepulveda Cruz							****
 ** Fecha:		05/Enero/2022											****
 ** Help:		1379522													****
 ** Descripcion:	Se añade la actualización de los campos DaP_PaiNac, 	****
 **              DaP_EntNac, Per_Entida, Per_Nacion y Adi_NacExt para	****
-**				para asignar la nacionalidad correspondiente			****  
+**				para asignar la nacionalidad correspondiente			****
 ****************************************************************************
 ** Modifico:	Armando Alexis Sepulveda Cruz							****
 ** Fecha:		01/Noviembre/2021										****
@@ -114,7 +120,7 @@ declare	@Status		int,					/*Estatus de Procedimiento*/
 		@Bit_ApaPos	char(6),				/* Bitacora Apartado Postal */
 		@Bit_LadTel	varchar(5),				/* Bitacora lada telefono */
 		@Bit_Telefo	char(15),				/* Bitacora telefono */
-		@Bit_Email	varchar(50),			/* Bitacora email */	
+		@Bit_Email	varchar(50),			/* Bitacora email */
 		@Bit_ComDom	char(1),				/* Bitacora Comprobante de domicilio */
 		@Bit_EstCiv	varchar(20),			/* Bitacora Estado civil */
 		@Bit_Nacion	char(3),				/* Bitacora nacionalidad */
@@ -122,7 +128,7 @@ declare	@Status		int,					/*Estatus de Procedimiento*/
 		@Bit_Giro	char(30),				/* Bitacora giro */
 		@Bit_Sector	char(3),				/* Bitacora sector */
 		@Bit_Activi	char(10),				/* Bitacora actividad */
-		@Bit_ActINE	varchar(10),			/* Bitacora Actividad según INEGI */	
+		@Bit_ActINE	varchar(10),			/* Bitacora Actividad según INEGI */
 		@Bit_LugNac	varchar(50),			/* Bitacora Lugar Nacimiento */
 		@Bit_Sexo	char(1),				/* Bitacora Sexo */
 		@Bit_FecNac	smalldatetime,			/* Bitacora Fecha Nacimiento */
@@ -194,7 +200,7 @@ select	@Ent_Uno	= 1,
 		@Str_NacExt = 'E',
 		@Str_EntExt = 'NE',
 		@Str_PaiMex = '001'
-		
+
 if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 	select @Gpc_Nombre	= isnull(ltrim(rtrim(@Gpc_Nombre)), @Str_Vacio)
 	select @Gpc_ApePat	= isnull(ltrim(rtrim(@Gpc_ApePat)), @Str_Punto)
@@ -257,7 +263,7 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 			return 1
 		end
 	end
-	
+
 	select @Bit_PerNum = @Str_Vacio
 
 	select	@Bit_PerNum = Adi_PerNum,
@@ -328,59 +334,59 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 			return 1
 		end
 	end else begin
-		exec @Status = SOPERADIALT @Gpc_Person, @Str_Vacio,  @Str_Vacio, @Str_Vacio, @Gpc_Sexo, 
-						 @Gpc_FecNac, @Str_Vacio, @Str_Vacio, @Ent_Cero, @Str_Vacio, 
-						 @Ent_Cero, @Str_Vacio, @Str_Vacio, @Ent_Cero, @Str_Vacio, 
-						 @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio, 
-						 @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio,  
-						 @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio, 
-						 @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio,  
-						 @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio,  
-						 @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio,  
-						 @Str_Vacio, @Str_Vacio,   @NumTransac, @Transaccio, @Usuario, 
+		exec @Status = SOPERADIALT @Gpc_Person, @Str_Vacio,  @Str_Vacio, @Str_Vacio, @Gpc_Sexo,
+						 @Gpc_FecNac, @Str_Vacio, @Str_Vacio, @Ent_Cero, @Str_Vacio,
+						 @Ent_Cero, @Str_Vacio, @Str_Vacio, @Ent_Cero, @Str_Vacio,
+						 @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio,
+						 @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio,
+						 @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio,
+						 @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio,
+						 @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio,
+						 @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio, @Str_Vacio,
+						 @Str_Vacio, @Str_Vacio,   @NumTransac, @Transaccio, @Usuario,
 						 @FechaSis,   @SucOrigen,  @SucDestino, @Modulo
-		
+
 		if @Status <> @Ent_Cero begin
 			rollback
 			return 1
 		end
 	end
-	
+
 	select	@Gpc_Comple = @Gpc_ApePat + ' ' + @Gpc_ApeMat + ' ' + @Gpc_Nombre,
 			@Gpc_ComOrd = @Gpc_Nombre + ' ' + @Gpc_ApePat + ' ' + @Gpc_ApeMat
-	
+
 	if @Gpc_EntNac = @Str_EntExt begin
 		-- Se otorga la misma entidad en caso de ser capturado anteriormente
 		select @Per_Nacion = isnull(Per_Nacion, @Str_Vacio),
 			   @Per_Entida = isnull(Per_Entida , @Str_Vacio)
 		  from SOPERSON noholdlock
 		 where Per_Numero = @Gpc_Person
-		
+
 		select @Adi_NacExt = @Str_NacExt
-		
-		
+
+
 		if @Per_Nacion = @Str_Vacio begin
 			select @Per_Nacion = isnull(DaP_PaiNac , @Str_Vacio)
 			  from SOPEDACO noholdlock
 			 where DaP_Person = @Gpc_Person
 		end
-		
+
 		if @Per_Entida = @Str_Vacio begin
 			select @Per_Entida = isnull(DaP_EntNac , @Str_Vacio)
 			  from SOPEDACO noholdlock
 			 where DaP_Person = @Gpc_Person
 		end
 	end else begin
-		select @Per_Entida = Ent_Numero 
+		select @Per_Entida = Ent_Numero
 		  from CLENTIDA noholdlock
 		 where Ent_Abrevi = @Gpc_EntNac
 		   and Ent_Status = @Sta_Activo
-		   
+
 		select @Adi_NacExt = @Str_NacMex,
 			   @Per_Nacion = @Str_PaiMex
-			   
+
 	end
-			
+
 	update SOPERSON set
 		Per_Nombre	= @Gpc_Nombre,
 		Per_ApePat	= @Gpc_ApePat,
@@ -388,10 +394,8 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 		Per_Comple	= @Gpc_Comple,
 		Per_ComOrd	= @Gpc_ComOrd,
 		Per_Nacion	= @Per_Nacion,
-		Per_Entida	= @Per_Entida,
-		Per_RFC		= @Gpc_RFC,
 		Per_CURP	= @Gpc_CURP,
-		
+
 		NumTransac	= @NumTransac,
 		Transaccio	= @Transaccio,
 		Usuario		= @Usuario,
@@ -399,12 +403,12 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 		SucOrigen	= @SucOrigen,
 		SucDestino	= @SucDestino
 	where Per_Numero = @Gpc_Person
-	
+
 	update SOPERADI set
 		Adi_FecNac	= @Gpc_FecNac,
 		Adi_Sexo	= @Gpc_Sexo,
 		Adi_NacExt	= @Adi_NacExt,
-		
+
 		NumTransac	= @NumTransac,
 		Transaccio	= @Transaccio,
 		Usuario		= @Usuario,
@@ -412,11 +416,11 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 		SucOrigen	= @SucOrigen,
 		SucDestino	= @SucDestino
 	where Adi_PerNum = @Gpc_Person
-	
-	update SOPEDACO 
+
+	update SOPEDACO
 	   set DaP_PaiNac 	= @Per_Nacion,
 	       DaP_EntNac 	= @Per_Entida,
-	   
+
 	   	   NumTransac	= @NumTransac,
 		   Transaccio	= @Transaccio,
 		   Usuario		= @Usuario,
@@ -424,7 +428,7 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 		   SucOrigen	= @SucOrigen,
 		   SucDestino	= @SucDestino
 	 where DaP_Person = @Gpc_Person
-	
+
 end	else if @Tip_Proces = @Pro_DesAgr begin		/*Desagrupacion de Registros*/
 	/*Consulta de la persona del Cliente Unico ligada a la persona consultada*/
 	select @Gpc_PrClUn = AdiUni.Adi_NumPer
@@ -433,17 +437,17 @@ end	else if @Tip_Proces = @Pro_DesAgr begin		/*Desagrupacion de Registros*/
 	 inner join CLADICIO as AdiUni   noholdlock on CliOuter.Clu_Grupo = AdiUni.Adi_Client
 	 where AicionalOuter.Adi_NumPer = @Gpc_Person
 	 group by AdiUni.Adi_NumPer
-	 
+
 	/*Si existe le asigna la persona del Cliente Único*/
 	if isnull(@Gpc_PrClUn, @Str_Vacio) <> @Str_Vacio begin
 		select @Gpc_Grupo = @Gpc_PrClUn
-	end else begin 
+	end else begin
 		select @Gpc_Grupo = @Gpc_Person
 	end
-	
+
 	update SOUNIPER set
 		Peu_Grupo = @Gpc_Grupo,
-		
+
 		NumTransac	= @NumTransac,
 		Transaccio	= @Transaccio,
 		Usuario		= @Usuario,
@@ -451,18 +455,18 @@ end	else if @Tip_Proces = @Pro_DesAgr begin		/*Desagrupacion de Registros*/
 		SucOrigen	= @SucOrigen,
 		SucDestino	= @SucDestino
 	where Peu_Person = @Gpc_Person
-	
+
 	/*Salida: Notificación cambio Persona IDE*/
 	select @Gpc_GrpAnt as Gpc_Person, @Gpc_Grupo as Gpc_Grupo
-	
+
 end	else if @Tip_Proces = @Pro_GruMin or @Tip_Proces = @Pro_GrClUn begin		/*Agrupacion de Registros*/
-	if @Tip_Proces = @Pro_GrClUn begin 
+	if @Tip_Proces = @Pro_GrClUn begin
 		/*Consulta de la persona del Cliente Unico ligada a la persona consultada*/
 		select @Gpc_PrClUn = Adi_NumPer
 		  from CLCLIUNI noholdlock
 		 inner join CLADICIO noholdlock on Clu_Grupo = Adi_Client
 		 where Clu_Grupo = @Gpc_Grupo
-		 
+
 		/*Si existe le asigna la persona del Cliente Único*/
 		if isnull(@Gpc_PrClUn, @Str_Vacio) <> @Str_Vacio begin
 			select @Gpc_Grupo = @Gpc_PrClUn
@@ -470,9 +474,9 @@ end	else if @Tip_Proces = @Pro_GruMin or @Tip_Proces = @Pro_GrClUn begin		/*Agru
 			select @Gpc_Grupo = @Gpc_Person
 		end
 	end
-	
+
 	select @Gpc_Grupo = rtrim(ltrim(isnull(@Gpc_Grupo, @Str_Vacio)))
-	
+
 	if isnull(@Gpc_Grupo, @Str_Vacio) = @Str_Vacio begin
 		select @Gpc_Grupo = AdiUni.Adi_NumPer
 		  from CLADICIO as AicionalOuter noholdlock
@@ -481,28 +485,28 @@ end	else if @Tip_Proces = @Pro_GruMin or @Tip_Proces = @Pro_GrClUn begin		/*Agru
 		 where AicionalOuter.Adi_NumPer = @Gpc_Person
 		 group by AdiUni.Adi_NumPer
 	end
-	
+
 	/*Consulta de grupo anterior*/
 	select @Gpc_GrpAnt = Peu_Grupo
 	  from SOUNIPER noholdlock
 	 where Peu_Person = @Gpc_Person
-	 
+
 	if isnull(@Gpc_Grupo, @Str_Vacio) = @Str_Vacio begin
 		select @Gpc_Grupo = @Gpc_GrpAnt
 	end
-	
-	select @Exi_Regist = @Ent_Uno 
+
+	select @Exi_Regist = @Ent_Uno
 	  from SOUNIPER noholdlock
-	 where Peu_Grupo = @Gpc_Grupo 
+	 where Peu_Grupo = @Gpc_Grupo
 
 
 	   and Peu_Person = @Gpc_Person
-	 
+
 	if isnull(@Gpc_GrpAnt, @Str_Vacio) = @Str_Vacio and isnull(@Exi_Regist, @Ent_Cero) = @Ent_Cero begin
-		exec @Status = SOUNIPERALT 
-		@Gpc_Grupo,	@Gpc_Person,	@NumTransac,	@Transaccio,	@Usuario, 
+		exec @Status = SOUNIPERALT
+		@Gpc_Grupo,	@Gpc_Person,	@NumTransac,	@Transaccio,	@Usuario,
 		@FechaSis,	@SucOrigen,		@SucDestino,	@Modulo
-		
+
 		if @Status <> @Ent_Cero begin
 			rollback
 			return 1
@@ -510,7 +514,7 @@ end	else if @Tip_Proces = @Pro_GruMin or @Tip_Proces = @Pro_GrClUn begin		/*Agru
 	end else if  isnull(@Exi_Regist, @Ent_Cero) = @Ent_Cero begin
 		update SOUNIPER set
 			Peu_Grupo = @Gpc_Grupo,
-			
+
 			NumTransac	= @NumTransac,
 			Transaccio	= @Transaccio,
 			Usuario		= @Usuario,
@@ -519,7 +523,7 @@ end	else if @Tip_Proces = @Pro_GruMin or @Tip_Proces = @Pro_GrClUn begin		/*Agru
 			SucDestino	= @SucDestino
 		where Peu_Person = @Gpc_Person
 	end
-	
+
 	/*Salida: Notificación cambio Persona IDE*/
 	select @Gpc_GrpAnt as Gpc_Person, @Gpc_Grupo as Gpc_Grupo
 end
