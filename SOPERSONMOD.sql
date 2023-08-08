@@ -47,6 +47,11 @@ as
 ***************************************************************************/
 /** REFERENCIAS:
 ****************************************************************************
+** Modificó:	Javier Eduardo Ceron Rangel		                    	****
+** Fecha:	    04/08/2023      					                    ****
+** Help:	    TRACL-5498 						                        ****
+** Descripción:	Se hace ajuste para que se guarde bitacora siempre		****
+****************************************************************************
 ** Modificó:	Yuridia Santiago									 	****
 ** Fecha:		23/Sep/2022											   	****
 ** Help: 		1739140											   		****
@@ -655,64 +660,56 @@ if isnull(@Per_NumTra, @Str_Vacio) = @Str_Vacio begin
 			@Per_NumTra	= @NumTransac
 end
 
-select	@Aux_PerNum = isnull(Per_Numero, @Str_Vacio)
+--Se quito condicion para evitar perdida de bitacora
+select	@Bit_NumPer	= Per_Numero,
+		@Bit_Fecha	= Per_Fecha,
+		@Bit_NumTra	= Per_NumTra,
+		@Bit_Tipo	= Per_Tipo,
+		@Bit_NuSeFi	= Per_NuSeFi,
+		@Bit_Titulo	= Per_Titulo,
+		@Bit_Nombre	= Per_Nombre,
+		@Bit_ApePat	= Per_ApePat,
+		@Bit_ApeMat	= Per_ApeMat,
+		@Bit_RazSoc	= Per_RazSoc,
+		@Bit_Comple	= Per_Comple,
+		@Bit_ComOrd	= Per_ComOrd,
+		@Bit_RFC	= Per_RFC,
+		@Bit_CURP	= Per_CURP,
+		@Bit_Calle	= Per_Calle,
+		@Bit_CalNum	= Per_CalNum,
+		@Bit_Coloni	= Per_Coloni,
+		@Bit_Entida	= Per_Entida,
+		@Bit_Locali	= Per_Locali,
+		@Bit_CodPos	= Per_CodPos,
+		@Bit_ApaPos	= Per_ApaPos,
+		@Bit_LadTel	= Per_LadTel,
+		@Bit_Telefo	= Per_Email,
+		@Bit_Email	= Per_Email,
+		@Bit_ComDom	= Per_ComDom,
+		@Bit_EstCiv	= Per_EstCiv,
+		@Bit_Nacion	= Per_Nacion,
+		@Bit_ActEmp	= Per_ActEmp,
+		@Bit_Giro	= Per_Giro,
+		@Bit_Sector	= Per_Sector,
+		@Bit_Activi	= Per_Activi,
+		@Bit_ActINE	= Per_ActINE
 	from SOPERSON noholdlock
-	where	Per_Numero	= @Per_Numero
-		and	Per_NumTra	= @Per_NumTra
-		and	Per_Fecha	= @Per_Fecha
+	where	Per_Numero = @Per_Numero
 
-if @Aux_PerNum = @Str_Vacio begin
-
-	select	@Bit_NumPer	= Per_Numero,
-			@Bit_Fecha	= Per_Fecha,
-			@Bit_NumTra	= Per_NumTra,
-			@Bit_Tipo	= Per_Tipo,
-			@Bit_NuSeFi	= Per_NuSeFi,
-			@Bit_Titulo	= Per_Titulo,
-			@Bit_Nombre	= Per_Nombre,
-			@Bit_ApePat	= Per_ApePat,
-			@Bit_ApeMat	= Per_ApeMat,
-			@Bit_RazSoc	= Per_RazSoc,
-			@Bit_Comple	= Per_Comple,
-			@Bit_ComOrd	= Per_ComOrd,
-			@Bit_RFC	= Per_RFC,
-			@Bit_CURP	= Per_CURP,
-			@Bit_Calle	= Per_Calle,
-			@Bit_CalNum	= Per_CalNum,
-			@Bit_Coloni	= Per_Coloni,
-			@Bit_Entida	= Per_Entida,
-			@Bit_Locali	= Per_Locali,
-			@Bit_CodPos	= Per_CodPos,
-			@Bit_ApaPos	= Per_ApaPos,
-			@Bit_LadTel	= Per_LadTel,
-			@Bit_Telefo	= Per_Email,
-			@Bit_Email	= Per_Email,
-			@Bit_ComDom	= Per_ComDom,
-			@Bit_EstCiv	= Per_EstCiv,
-			@Bit_Nacion	= Per_Nacion,
-			@Bit_ActEmp	= Per_ActEmp,
-			@Bit_Giro	= Per_Giro,
-			@Bit_Sector	= Per_Sector,
-			@Bit_Activi	= Per_Activi,
-			@Bit_ActINE	= Per_ActINE
-		from SOPERSON noholdlock
-		where	Per_Numero = @Per_Numero
-
-	exec @Status = SOBITPERALT
-		@Bit_NumPer,	@Bit_Fecha,		@Bit_NumTra,	@Bit_Tipo,		@Bit_NuSeFi,
-		@Bit_Titulo,	@Bit_Nombre,	@Bit_ApePat,	@Bit_ApeMat,	@Bit_RazSoc,
-		@Bit_Comple,	@Bit_ComOrd,	@Bit_RFC,		@Bit_CURP,		@Bit_Calle,
-		@Bit_CalNum,	@Bit_Coloni,	@Bit_Entida,	@Bit_Locali,	@Bit_CodPos,
-		@Bit_ApaPos,	@Bit_LadTel,	@Bit_Telefo,	@Bit_Email,		@Bit_ComDom,
-		@Bit_EstCiv,	@Bit_Nacion,	@Bit_ActEmp,	@Bit_Giro,		@Bit_Sector,
-		@Bit_Activi,	@Bit_ActINE,	@NumTransac,	@Transaccio,	@Usuario,
-		@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
-	if @Status <> @Ent_Cero begin
-		rollback
-		return @Ent_Uno
-	end
-
+exec @Status = SOBITPERALT
+	@Bit_NumPer,	@Bit_Fecha,		@Bit_NumTra,	@Bit_Tipo,		@Bit_NuSeFi,
+	@Bit_Titulo,	@Bit_Nombre,	@Bit_ApePat,	@Bit_ApeMat,	@Bit_RazSoc,
+	@Bit_Comple,	@Bit_ComOrd,	@Bit_RFC,		@Bit_CURP,		@Bit_Calle,
+	@Bit_CalNum,	@Bit_Coloni,	@Bit_Entida,	@Bit_Locali,	@Bit_CodPos,
+	@Bit_ApaPos,	@Bit_LadTel,	@Bit_Telefo,	@Bit_Email,		@Bit_ComDom,
+	@Bit_EstCiv,	@Bit_Nacion,	@Bit_ActEmp,	@Bit_Giro,		@Bit_Sector,
+	@Bit_Activi,	@Bit_ActINE,	@NumTransac,	@Transaccio,	@Usuario,
+	@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
+if @Status <> @Ent_Cero begin
+	rollback
+	return @Ent_Uno
 end
+
 
 if @Cob_Tipo <> @Per_ApoRea begin
 
