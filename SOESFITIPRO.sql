@@ -20,12 +20,6 @@ as
 /****************************************************************/
 /* DESCRIPCION: Proceso de Estados Financieros Tipo Cuenta		*/
 /****************************************************************
-** Modifica:		Raul Muniz					                **
-** Fecha:			03/08/2023                               	**
-** Descripcion:		Se agregan optimizaciones para evitar 		**
-**					bloqueo de BD			     			    **
-** C.Cambios:		30985	 					 				*/
-/****************************************************************
 ** Modifica:		Jose R. Rodriguez Zenteno                   **
 ** Fecha:			12/05/2023                               	**
 ** Descripcion:		Se modifica proceso G para validacion de	**
@@ -46,7 +40,7 @@ as
 /****************************************************************
 ** Modifica:		Claudia Sandoval                   	        **
 ** Fecha:			30/07/2020                               	**
-** Descripcion:		ValidaciÃ³n cuando no hay segundo Eeff		**
+** Descripcion:		Validación cuando no hay segundo Eeff		**
 ** Help:			1403550 					 				*/
 /****************************************************************
 ** Modifica:		Jose Rodriguez                     	        **
@@ -347,11 +341,10 @@ if @Tip_Proces = @Tip_ProA begin
 				@Eft_EsFin2,	@Mon_Cero,	@Mon_Cero,	@Eft_EsFin3,	@Mon_Cero,
 				@Mon_Cero,		Cue_Indice,	Cue_TipAna, @Bit_No, @Bit_No, @Bit_No,
 				@Bit_No,		@Bit_No,	@Bit_No,	Cue_NivPad
-			from SOESFITI noholdlock
-			right join   #Cuentas
+			from #Cuentas
+			left join SOESFITI noholdlock 
 				 on Eft_TipCue = Cue_TipCue
 				and Eft_EstFin = @Eft_EsFin1
-			where	Eft_EstFin = @Eft_EsFin1
 
 	if @Eft_EsFin1 > @Ent_Cero begin
 		update #CueEEFF set
@@ -582,11 +575,10 @@ end else if @Tip_Proces = @Tip_ProD begin
 				@Eft_EsFin1, @Mon_Cero, @Bit_No, @Mon_Cero, @Mon_Cero, @Mon_Cero, @Ent_Cero, @Ent_Cero, @Ent_Cero,
 				@Eft_EsFin2, @Mon_Cero,	@Bit_No, @Mon_Cero, @Mon_Cero, @Mon_Cero, @Ent_Cero, @Ent_Cero, @Ent_Cero,
 				@Eft_EsFin3, @Mon_Cero,	@Bit_No, @Mon_Cero, @Mon_Cero, @Mon_Cero, @Ent_Cero, @Ent_Cero, @Ent_Cero
-			from SOESFITI noholdlock
-			right join  #CuentasAdi
+			from #CuentasAdi
+			left join SOESFITI noholdlock 
 				 on Eft_TipCue = Cue_TipCue
 				and Eft_EstFin = @Eft_EsFin1
-			where	Eft_EstFin = @Eft_EsFin1
 
 	if @Eft_EsFin1 > @Ent_Cero begin
 		update #EeffAdi set
@@ -793,11 +785,10 @@ end else if @Tip_Proces = @Tip_ProE begin		/* EEFF Gobierno */
 				isnull(Eft_Porcen, @Mon_Cero),	@Eft_EsFin2,	@Mon_Cero,		@Mon_Cero,
 				@Eft_EsFin3,	@Mon_Cero,		@Mon_Cero,		@Eft_EsFin4,	@Mon_Cero,		
 				@Mon_Cero,		Cgo_Indice,		Cgo_NivPad
-			from SOESFITI noholdlock
-			right join  #CuentasGobierno
+			from #CuentasGobierno
+			left join SOESFITI noholdlock 
 				 on Eft_TipCue = Cgo_TipCue
 				and Eft_EstFin = @Eft_EsFin1
-			where	Eft_EstFin = @Eft_EsFin1
 
 	if @Eft_EsFin2 > @Ent_Cero begin
 		update #CuentasEstadosGobierno set
@@ -941,11 +932,10 @@ end	else if @Tip_Proces = @Tip_ProG begin
 				@Eft_EsFin1,	isnull(Eft_Valor, @Mon_Cero),	isnull(Eft_Porcen, @Mon_Cero),
 				@Eft_EsFin2,	@Mon_Cero,		@Mon_Cero,
 				Tot_Indice, Tot_Estilo
-		from SOESFITI noholdlock
-		right join #CuentaReporte
-			on	Eft_TipCue = Tot_NumCue
-			and Eft_EstFin = @Eft_EsFin1
-		where	Eft_EstFin = @Eft_EsFin1
+		from #CuentaReporte
+		left join SOESFITI noholdlock
+		on	Eft_TipCue = Tot_NumCue
+		and Eft_EstFin = @Eft_EsFin1
 	
 	select @Esf_ValDep1 = @Mon_Cero	
 	select @Esf_ValDep1 = isnull(Eft_Valor, @Mon_Cero)
@@ -1108,11 +1098,10 @@ end else if @Tip_Proces = @Tip_ProI begin
 				@Eft_EsFin1,	isnull(Eft_Valor, @Mon_Cero),	isnull(Eft_Porcen, @Mon_Cero),
 				@Eft_EsFin2,	@Mon_Cero,		@Mon_Cero,
 				Tot_Indice, Tot_Estilo
-	from SOESFITI noholdlock
-	right join #CuentaReporteEF
-		on	Eft_TipCue = Tot_NumCue
-		and Eft_EstFin = @Eft_EsFin1
-	where	Eft_EstFin = @Eft_EsFin1
+	from #CuentaReporteEF
+	left join SOESFITI noholdlock
+	on	Eft_TipCue = Tot_NumCue
+	and Eft_EstFin = @Eft_EsFin1
 	
 	update #CuentaValorEF set
 	Eft_Valor2	= Eft_Valor,
