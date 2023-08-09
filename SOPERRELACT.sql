@@ -33,6 +33,11 @@ as
 ****************************************************************************
 **							STORE CONVERTIDO							****
 ****************************************************************************
+** Modificó:	Javier Eduardo Ceron Rangel		                    	****
+** Fecha:	    04/08/2023      					                    ****
+** Help:	    TRACL-5498 						                        ****
+** Descripción:	Se hace ajuste para que se guarde bitacora siempre		****
+****************************************************************************
 ** Modificación:	David Alejandro Cantu Treviño						****
 ** Fecha:			18/Mayo/2015										****
 ** Help:			766265												****
@@ -60,6 +65,40 @@ declare	@Str_Vacio	char(1),				/*	Declaracion de Constantes	*/
 		@Ent_Cero	int,
 		@Act_Datos	char(1),
 		@Ent_Uno	int
+
+/* Declaraciýn de variables para la bitacora se SOPERSON*/
+declare	@Bit_NumPer	char(8),
+		@Bit_Fecha	smalldatetime,
+		@Bit_NumTra	char(10),
+		@Bit_Tipo	char(1),
+		@Bit_NuSeFi	varchar(30),
+		@Bit_Titulo	varchar(10),
+		@Bit_Nombre	varchar(40),
+		@Bit_ApePat	varchar(40),
+		@Bit_ApeMat	varchar(40),
+		@Bit_RazSoc	varchar(150),
+		@Bit_Comple	varchar(150),
+		@Bit_ComOrd	varchar(150),
+		@Bit_RFC	char(15),
+		@Bit_CURP	char(18),
+		@Bit_Calle	char(40),
+		@Bit_CalNum	varchar(10),
+		@Bit_Coloni	varchar(150),
+		@Bit_Entida	char(3),
+		@Bit_Locali	char(8),
+		@Bit_CodPos	char(6),
+		@Bit_ApaPos	char(6),
+		@Bit_LadTel	varchar(8),
+		@Bit_Telefo	char(15),
+		@Bit_Email	varchar(50),
+		@Bit_ComDom	char(1),
+		@Bit_EstCiv	varchar(20),
+		@Bit_Nacion	char(3),
+		@Bit_ActEmp	char(1),
+		@Bit_Giro	char(30),
+		@Bit_Sector	char(3),
+		@Bit_Activi	char(10),
+		@Bit_ActINE	varchar(10)
 
 select	@Str_Vacio	= '',			/*	String Vacio								*/
 		@Str_Espaci	= ' ',			/*	String Espacio								*/
@@ -214,6 +253,57 @@ if (@Per_Tipo = @Per_Moral) begin
 end else begin
 	select	@Per_ComOrd	= ltrim(RTrim(@Per_Nombre)) +' '+ ltrim(RTrim(@Per_ApePat)) + ' ' + ltrim(RTrim(@Per_ApeMat))
 	select	@Per_Comple	= LTrim(RTrim(@Per_ApePat)) + ' ' + LTrim(RTrim(@Per_ApeMat)) + ' ' + LTrim(RTrim(@Per_Nombre))
+end
+
+/* Respaldar SOPERSON y agregarlo en la BITACORA */
+select	@Bit_NumPer	= Per_Numero,
+		@Bit_Fecha	= Per_Fecha,
+		@Bit_NumTra	= Per_NumTra,
+		@Bit_Tipo	= Per_Tipo,
+		@Bit_NuSeFi	= Per_NuSeFi,
+		@Bit_Titulo	= Per_Titulo,
+		@Bit_Nombre	= Per_Nombre,
+		@Bit_ApePat	= Per_ApePat,
+		@Bit_ApeMat	= Per_ApeMat,
+		@Bit_RazSoc	= Per_RazSoc,
+		@Bit_Comple	= Per_Comple,
+		@Bit_ComOrd	= Per_ComOrd,
+		@Bit_RFC	= Per_RFC,
+		@Bit_CURP	= Per_CURP,
+		@Bit_Calle	= Per_Calle,
+		@Bit_CalNum	= Per_CalNum,
+		@Bit_Coloni	= Per_Coloni,
+		@Bit_Entida	= Per_Entida,
+		@Bit_Locali	= Per_Locali,
+		@Bit_CodPos	= Per_CodPos,
+		@Bit_ApaPos	= Per_ApaPos,
+		@Bit_LadTel	= Per_LadTel,
+		@Bit_Telefo	= Per_Email,  
+		@Bit_Email	= Per_Email,
+		@Bit_ComDom	= Per_ComDom,
+		@Bit_EstCiv	= Per_EstCiv,
+		@Bit_Nacion	= Per_Nacion,
+		@Bit_ActEmp	= Per_ActEmp,
+		@Bit_Giro	= Per_Giro,
+		@Bit_Sector	= Per_Sector,
+		@Bit_Activi	= Per_Activi,
+		@Bit_ActINE	= Per_ActINE
+from SOPERSON noholdlock
+where	Per_Numero = @Per_Numero
+
+exec @Status = SOBITPERALT
+	@Bit_NumPer,	@Bit_Fecha,		@Bit_NumTra,	@Bit_Tipo,		@Bit_NuSeFi,
+	@Bit_Titulo,	@Bit_Nombre,	@Bit_ApePat,	@Bit_ApeMat,	@Bit_RazSoc,
+	@Bit_Comple,	@Bit_ComOrd,	@Bit_RFC,		@Bit_CURP,		@Bit_Calle,
+	@Bit_CalNum,	@Bit_Coloni,	@Bit_Entida,	@Bit_Locali,	@Bit_CodPos,
+	@Bit_ApaPos,	@Bit_LadTel,	@Bit_Telefo,	@Bit_Email,		@Bit_ComDom,
+	@Bit_EstCiv,	@Bit_Nacion,	@Bit_ActEmp,	@Bit_Giro,		@Bit_Sector,
+	@Bit_Activi,	@Bit_ActINE,	@NumTransac,	@Transaccio,	@Usuario,
+	@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo	
+
+if @Status <> @Ent_Cero begin
+	select Err_Mensaj = 'Error en ejecución del proceso de BITACORA DE PERSONAS.'
+	return 1
 end
 
 update SOPERSON set
