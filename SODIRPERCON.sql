@@ -154,13 +154,13 @@ if @Tip_ConTip = @Con_Consul begin
 		/* Consulta de Direccion Por Indices sin borrados */
 
 		SELECT @Val_PersonId = (SELECT P.PerPersoID
-			FROM CLCLIENT C
-				INNER JOIN CLADICIO CA ON C.ClClientID = CA.ClClientID
-				INNER JOIN SOPERSON P ON CA.Adi_NumPer = P.Per_Numero
+			FROM CLCLIENT C noholdlock
+				INNER JOIN CLADICIO CA noholdlock ON C.ClClientID = CA.ClClientID
+				INNER JOIN SOPERSON P noholdlock ON CA.Adi_NumPer = P.Per_Numero
 			WHERE C.Cli_Numero = @Cli_Numero)
 
 		SELECT @Val_ClientId = (SELECT C.ClClientID
-		FROM CLCLIENT C
+		FROM CLCLIENT C noholdlock
 		WHERE C.Cli_Numero = @Cli_Numero)
 
 		select PerPersoID, ClClientID, Dip_TipDir, Dip_Calle, Dip_NumExt,

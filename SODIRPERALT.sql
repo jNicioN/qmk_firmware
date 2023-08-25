@@ -89,7 +89,7 @@ end
 /*Carga Manual*/
 IF @Tipo_Registro = @Tip_Registro BEGIN
 	SELECT @Val_Cp = (SELECT Cpc_Numero
-		FROM CLCODPOS
+		FROM CLCODPOS noholdlock
 		WHERE Cpc_CodPos = @Dip_NumCP
 			AND Cpc_Nombre = @Dip_Colonia)
 	IF @Val_Cp = NULL BEGIN
@@ -102,9 +102,9 @@ IF @Tipo_Registro = @Tip_Registro BEGIN
 
 	SELECT @Val_PersonId =
 	(SELECT P.PerPersoID
-		FROM CLCLIENT C
-			INNER JOIN CLADICIO CA ON C.ClClientID = CA.ClClientID
-			INNER JOIN SOPERSON P ON CA.Adi_NumPer = P.Per_Numero
+		FROM CLCLIENT C noholdlock
+			INNER JOIN CLADICIO CA noholdlock  ON C.ClClientID = CA.ClClientID
+			INNER JOIN SOPERSON P noholdlock  ON CA.Adi_NumPer = P.Per_Numero
 		WHERE C.Cli_Numero = @Cli_Numero)
 
 	IF @Val_PersonId = NULL BEGIN
@@ -117,7 +117,7 @@ IF @Tipo_Registro = @Tip_Registro BEGIN
 
 	SELECT @Val_ClientId =
 	(SELECT C.ClClientID
-		FROM CLCLIENT C
+		FROM CLCLIENT C noholdlock
 		WHERE C.Cli_Numero = @Cli_Numero)
 
 	IF @Val_ClientId = NULL BEGIN
