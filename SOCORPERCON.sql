@@ -1,4 +1,4 @@
-create procedure SOCORPERCON (
+CREATE PROCEDURE SOCORPERCON (
 	@PerPersoID		int,
 	@Cop_TipCor		int,
 	@ClClientID		int,
@@ -16,6 +16,11 @@ as
 
 /***************************************************************************
 ** Descripción:	 Consulta de Correos Persona							****
+*****************************************************************************
+** Modificó:	Aldo Ignacio Teoba Sanchez								****
+** Fecha:		14/08/2023												****
+** HelpDesk:	1179955													****
+** Descripción:	Se agrega condición en estatus al buscar por cliente	****
 *****************************************************************************
 ** Modificó:	Joel Barcenas											****
 ** Fecha:		15/02/2020												****
@@ -107,6 +112,7 @@ end else if @Tip_ConTip = @Con_Listas begin	/* Listas */
 		select	PerPersoID, Cop_TipCor, ClClientID, Cop_Correo
 			from SOCORPER noholdlock
 			where	ClClientID	= @ClClientID
+			and Cop_Status  = @Str_A
 	end
 	
 	if @Tip_ConCon = @Por_PerTip begin /* Lista por Persona y Tipo de Correo */
