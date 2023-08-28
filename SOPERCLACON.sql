@@ -21,6 +21,12 @@ as
 ********************************************************************
 ** REFERENCIAS:													****
 ********************************************************************
+**	Modificó:	Rafael Moreno									****
+**  Fecha:		24/08/2023										****
+**  Help:		-----											****
+**	Descripción: Para L1 se agrega Cli_Status y numero de  		****
+**	cliente unico, y buscar por RFC								****
+********************************************************************
 **	Modificó:	Carlos Copto									****
 **  Fecha:		02/09/2021										****
 **  Help:		1478014											****
@@ -148,7 +154,9 @@ create table #CientesPersonas (
 	Cli_Calle	char(40),
 	Cli_CalNum	varchar(10),
 	Cli_Coloni	varchar(150),
-	Cli_ID		int
+	Cli_ID		int,
+	Cli_Status	char(1),
+	Cli_Unico	char(8)
 )
 
 create table #AuxCientesPersonas (
@@ -200,9 +208,11 @@ if @Tip_ConTip = @Str_L begin
 					Per_RFC,		Per_Calle,		Per_Tipo, 		Per_Nombre, 	Per_ApePat,	
 					Per_ApeMat,		Per_RazSoc, 	Adi_FecNac, 	Adi_TipIde,		Adi_NumIde,	
 					Per_NumPer,		Per_CURP,		Cli_TieCla,		Cli_Locali,		Cli_Entida,
-					Cli_Calle,		Cli_CalNum,		Cli_Coloni,		Cli_ID
+					Cli_Calle,		Cli_CalNum,		Cli_Coloni,		Cli_ID,			Cli_Status,
+					Cli_Unico
 				)
-				select		Cli_Numero,
+				select distinct
+							Cli_Numero,
 							Cli_Numero,
 							cast(@Ent_Uno as varchar),
 							isnull(Cli_ComOrd, @Str_Vacio),
@@ -237,11 +247,14 @@ if @Tip_ConTip = @Str_L begin
 							isnull(Cli_Calle, @Str_Vacio),
 							isnull(Cli_CalNum, @Str_Vacio),
 							isnull(Cli_Coloni, @Str_Vacio),
-							clc.ClClientID 
+							clc.ClClientID,
+							clc.Cli_Status,
+							uni.Clu_Grupo
 					from 	#AuxCientesPersonas noholdlock
 							inner join CLCLIENT clc noholdlock on clc.ClClientID = ClientePersonaID
 							left join CLADICIO cla noholdlock on ClientePersonaID = cla.ClClientID 
 							left join CLCONTRA con noholdlock on ClientePersonaNum =  Con_Client
+							left join CLCLIUNI uni noholdlock on ClientePersonaNum = Clu_Client
 					
 					--se crea indice para la tabla
 					create nonclustered index CPNumero on #CientesPersonas ( Per_Numero )
@@ -267,7 +280,103 @@ if @Tip_ConTip = @Str_L begin
 					where	Cli_TieCla = @Str_Vacio
 					
 			end 
+
+		end else if (@Per_RFC != @Str_Vacio) begin	------------- Busqueda por RFC
+
+			--se consulta solo el numero del cliente
+			insert into #AuxCientesPersonas(ClientePersonaID,ClientePersonaNum,FechaSis)
+			select top 50	
+				ClClientID, Cli_Numero, FechaSis
+				from  CLCLIENT noholdlock
+				where	Cli_RFC like @Per_RFC
+				and 	Cli_SucAti = isnull(@Suc_Numero,Cli_SucAti) 
+			
+			--se crean indices de la tabla temporal
+			create nonclustered index ACPID on #AuxCientesPersonas ( ClientePersonaID )
+			create nonclustered index ACPNum on #AuxCientesPersonas ( ClientePersonaNum )
+			
+			--solo si regreso resultados continua con las consultas de cliente
+			select @Conteo = count(*) from #AuxCientesPersonas noholdlock
+			if @Conteo > @Ent_Cero begin  
+	
+				insert into #CientesPersonas(
+					Per_Numero,		Per_NumTra,		Per_Titulo,		Per_ComOrd,		Per_Nacion,	
+					Per_RFC,		Per_Calle,		Per_Tipo, 		Per_Nombre, 	Per_ApePat,	
+					Per_ApeMat,		Per_RazSoc, 	Adi_FecNac, 	Adi_TipIde,		Adi_NumIde,	
+					Per_NumPer,		Per_CURP,		Cli_TieCla,		Cli_Locali,		Cli_Entida,
+					Cli_Calle,		Cli_CalNum,		Cli_Coloni,		Cli_ID,			Cli_Status,
+					Cli_Unico
+				)
+				select distinct
+							Cli_Numero,
+							Cli_Numero,
+							cast(@Ent_Uno as varchar),
+							isnull(Cli_ComOrd, @Str_Vacio),
+							space(@Ent_Tres),
+							isnull(Cli_RFC, @Str_Vacio),
+							@Str_Vacio,
+							case when Cli_Tipo = @Tip_Fisica and Cli_ActEmp = @Sta_Si then
+									@Str_Tres
+								else
+									isnull(Cli_Tipo, @Str_Vacio)
+							end,
+							case when Cli_Tipo = @Tip_Moral then
+									isnull(Con_NomSoc, @Str_Vacio)
+								else
+									isnull(Cli_Nombre, @Str_Vacio)
+							end,
+							isnull(Cli_ApePat, @Str_Vacio),
+							isnull(Cli_ApeMat, @Str_Vacio),
+							isnull(Con_TipSoc, @Str_Vacio),
+							case when Cli_Tipo = @Tip_Moral then
+									isnull(con.Con_FeEsCl, cla.Adi_FecNac)
+								else
+									isnull(cla.Adi_FecNac,@Fec_Vacia)
+							end,
+							isnull(con.Con_TipIde, @Str_Vacio),
+							isnull(con.Con_NumIde, @Str_Vacio),
+							isnull(cla.Adi_NumPer, @Str_Vacio),
+							isnull(Cli_CURP, @Str_Vacio),
+							@Str_Vacio,
+							isnull(Cli_Locali, @Str_Vacio),
+							isnull(Cli_Entida, @Str_Vacio),
+							isnull(Cli_Calle, @Str_Vacio),
+							isnull(Cli_CalNum, @Str_Vacio),
+							isnull(Cli_Coloni, @Str_Vacio),
+							clc.ClClientID,
+							clc.Cli_Status,
+							uni.Clu_Grupo
+					from 	#AuxCientesPersonas noholdlock
+							inner join CLCLIENT clc noholdlock on clc.ClClientID = ClientePersonaID
+							left join CLADICIO cla noholdlock on ClientePersonaID = cla.ClClientID 
+							left join CLCONTRA con noholdlock on ClientePersonaNum =  Con_Client
+							left join CLCLIUNI uni noholdlock on ClientePersonaNum = Clu_Client
 					
+					--se crea indice para la tabla
+					create nonclustered index CPNumero on #CientesPersonas ( Per_Numero )
+					
+					--se actualiza el campo Per_Calle con la direccion completa
+					update #CientesPersonas set  
+						Per_Calle = (CASE when (Cli_Calle <> @Str_Vacio and  Cli_CalNum <> @Str_Vacio and Cli_Coloni <> @Str_Vacio) THEN 
+									rtrim(ltrim(Cli_Calle)) + @Str_Coma + space(@Ent_Uno) + Cli_CalNum + @Str_Coma + space(@Ent_Uno) + Cli_Coloni + @Str_Coma + space(@Ent_Uno) +
+									Loc_Nombre + @Str_Coma + space(@Ent_Uno) + Ent_Nombre ELSE @Sin_Direcc END)
+					from #CientesPersonas noholdlock
+							inner join CLLOCALI noholdlock on Cli_Locali = Loc_Numero
+							inner join CLENTIDA noholdlock on Cli_Entida = Ent_Numero
+					
+					--se actualiza el campo de clasificacion
+					update #CientesPersonas set 
+							Cli_TieCla = @Sta_Si
+					from 	#CientesPersonas noholdlock
+							inner join CLCLACLI noholdlock on  Cli_ID = Clc_Client
+					where	Clc_Clasif = @Per_ClaCom
+					
+					--se borran los que no tengan clasificacion
+					delete from #CientesPersonas
+					where	Cli_TieCla = @Str_Vacio
+
+			end
+
 		end else begin			------------- Busqueda por nombre cliente/persona
 		
 			if char_length(ltrim(rtrim(@Per_Comple))) < @Ent_Ocho begin
@@ -298,9 +407,11 @@ if @Tip_ConTip = @Str_L begin
 					Per_RFC,		Per_Calle,		Per_Tipo, 		Per_Nombre, 	Per_ApePat,	
 					Per_ApeMat,		Per_RazSoc, 	Adi_FecNac, 	Adi_TipIde,		Adi_NumIde,	
 					Per_NumPer,		Per_CURP,		Cli_TieCla,		Cli_Locali,		Cli_Entida,
-					Cli_Calle,		Cli_CalNum,		Cli_Coloni,		Cli_ID
+					Cli_Calle,		Cli_CalNum,		Cli_Coloni,		Cli_ID,			Cli_Status,
+					Cli_Unico
 				)
-				select		Cli_Numero,
+				select distinct
+							Cli_Numero,
 							Cli_Numero,
 							cast(@Ent_Uno as varchar),
 							isnull(Cli_ComOrd, @Str_Vacio),
@@ -335,11 +446,14 @@ if @Tip_ConTip = @Str_L begin
 							isnull(Cli_Calle, @Str_Vacio),
 							isnull(Cli_CalNum, @Str_Vacio),
 							isnull(Cli_Coloni, @Str_Vacio),
-							clc.ClClientID 
+							clc.ClClientID,
+							clc.Cli_Status,
+							uni.Clu_Grupo
 					from 	#AuxCientesPersonas noholdlock
 							inner join CLCLIENT clc noholdlock on clc.ClClientID = ClientePersonaID
 							left join CLADICIO cla noholdlock on ClientePersonaID = cla.ClClientID 
 							left join CLCONTRA con noholdlock on ClientePersonaNum =  Con_Client
+							left join CLCLIUNI uni noholdlock on ClientePersonaNum = Clu_Client
 					
 					--se crea indice para la tabla
 					create nonclustered index CPNumero on #CientesPersonas ( Per_Numero )
@@ -386,7 +500,8 @@ if @Tip_ConTip = @Str_L begin
 					Per_RFC,		Per_Calle,		Per_Tipo, 		Per_Nombre, 	Per_ApePat,	
 					Per_ApeMat,		Per_RazSoc, 	Adi_FecNac, 	Adi_TipIde,		Adi_NumIde,	
 					Per_NumPer,		Per_CURP,		Cli_TieCla,		Cli_Locali,		Cli_Entida,
-					Cli_Calle,		Cli_CalNum,		Cli_Coloni,		Cli_ID
+					Cli_Calle,		Cli_CalNum,		Cli_Coloni,		Cli_ID,			Cli_Status,
+					Cli_Unico
 				)
 				select	
 					Per_Numero,
@@ -420,7 +535,9 @@ if @Tip_ConTip = @Str_L begin
 					isnull(Per_Calle, @Str_Vacio),
 					isnull(Per_CalNum, @Str_Vacio),
 					isnull(Per_Coloni, @Str_Vacio),
-					PerPersoID
+					PerPersoID,
+					@Str_Vacio,
+					@Str_Vacio
 				from #AuxCientesPersonas noholdlock
 					inner join SOPERSON noholdlock on PerPersoID  = ClientePersonaID
 					inner join SOPERADI noholdlock on ClientePersonaNum = Adi_PerNum
@@ -479,7 +596,8 @@ if @Tip_ConTip = @Str_L begin
 					Per_RFC,		Per_Calle,		Per_Tipo, 		Per_Nombre, 	Per_ApePat,	
 					Per_ApeMat,		Per_RazSoc, 	Adi_FecNac, 	Adi_TipIde,		Adi_NumIde,	
 					Per_NumPer,		Per_CURP,		Cli_TieCla,		Cli_Locali,		Cli_Entida,
-					Cli_Calle,		Cli_CalNum,		Cli_Coloni,		Cli_ID
+					Cli_Calle,		Cli_CalNum,		Cli_Coloni,		Cli_ID,			Cli_Status,
+					Cli_Unico
 				)
 				select		Cli_Numero,
 							Cli_Numero,
@@ -516,7 +634,9 @@ if @Tip_ConTip = @Str_L begin
 							isnull(Cli_Calle, @Str_Vacio),
 							isnull(Cli_CalNum, @Str_Vacio),
 							isnull(Cli_Coloni, @Str_Vacio),
-							clc.ClClientID 
+							clc.ClClientID ,
+							@Str_Vacio,
+							@Str_Vacio
 					from 	#AuxCientesPersonas noholdlock
 							inner join CLCLIENT clc noholdlock on clc.ClClientID = ClientePersonaID
 							left join CLADICIO cla noholdlock on ClientePersonaID = cla.ClClientID 
@@ -577,7 +697,8 @@ if @Tip_ConTip = @Str_L begin
 					Per_RFC,		Per_Calle,		Per_Tipo, 		Per_Nombre, 	Per_ApePat,	
 					Per_ApeMat,		Per_RazSoc, 	Adi_FecNac, 	Adi_TipIde,		Adi_NumIde,	
 					Per_NumPer,		Per_CURP,		Cli_TieCla,		Cli_Locali,		Cli_Entida,
-					Cli_Calle,		Cli_CalNum,		Cli_Coloni,		Cli_ID
+					Cli_Calle,		Cli_CalNum,		Cli_Coloni,		Cli_ID,			Cli_Status,
+					Cli_Unico
 				)
 				select		Cli_Numero,
 							Cli_Numero,
@@ -614,7 +735,9 @@ if @Tip_ConTip = @Str_L begin
 							isnull(Cli_Calle, @Str_Vacio),
 							isnull(Cli_CalNum, @Str_Vacio),
 							isnull(Cli_Coloni, @Str_Vacio),
-							clc.ClClientID 
+							clc.ClClientID, 
+							@Str_Vacio,
+							@Str_Vacio
 					from 	#AuxCientesPersonas noholdlock
 							inner join CLCLIENT clc noholdlock on clc.ClClientID = ClientePersonaID
 							left join CLADICIO cla noholdlock on ClientePersonaID = cla.ClClientID 
@@ -666,7 +789,8 @@ if @Tip_ConTip = @Str_L begin
 					Per_RFC,		Per_Calle,		Per_Tipo, 		Per_Nombre, 	Per_ApePat,	
 					Per_ApeMat,		Per_RazSoc, 	Adi_FecNac, 	Adi_TipIde,		Adi_NumIde,	
 					Per_NumPer,		Per_CURP,		Cli_TieCla,		Cli_Locali,		Cli_Entida,
-					Cli_Calle,		Cli_CalNum,		Cli_Coloni,		Cli_ID
+					Cli_Calle,		Cli_CalNum,		Cli_Coloni,		Cli_ID,			Cli_Status,
+					Cli_Unico
 				)
 				select	
 					Per_Numero,
@@ -700,7 +824,9 @@ if @Tip_ConTip = @Str_L begin
 					isnull(Per_Calle, @Str_Vacio),
 					isnull(Per_CalNum, @Str_Vacio),
 					isnull(Per_Coloni, @Str_Vacio),
-					PerPersoID
+					PerPersoID,
+					@Str_Vacio,
+					@Str_Vacio
 				from #AuxCientesPersonas noholdlock
 					inner join SOPERSON noholdlock on PerPersoID  = ClientePersonaID
 					inner join SOPERADI noholdlock on ClientePersonaNum = Adi_PerNum
@@ -753,7 +879,8 @@ if @Tip_ConTip = @Str_L begin
 					Per_RFC,		Per_Calle,		Per_Tipo, 		Per_Nombre, 	Per_ApePat,	
 					Per_ApeMat,		Per_RazSoc, 	Adi_FecNac, 	Adi_TipIde,		Adi_NumIde,	
 					Per_NumPer,		Per_CURP,		Cli_TieCla,		Cli_Locali,		Cli_Entida,
-					Cli_Calle,		Cli_CalNum,		Cli_Coloni,		Cli_ID
+					Cli_Calle,		Cli_CalNum,		Cli_Coloni,		Cli_ID,			Cli_Status,
+					Cli_Unico
 				)
 				select		Cli_Numero,
 							Cli_Numero,
@@ -790,7 +917,9 @@ if @Tip_ConTip = @Str_L begin
 							isnull(Cli_Calle, @Str_Vacio),
 							isnull(Cli_CalNum, @Str_Vacio),
 							isnull(Cli_Coloni, @Str_Vacio),
-							clc.ClClientID 
+							clc.ClClientID, 
+							@Str_Vacio,
+							@Str_Vacio
 					from 	#AuxCientesPersonas noholdlock
 							inner join CLCLIENT clc noholdlock on clc.ClClientID = ClientePersonaID
 							left join CLADICIO cla noholdlock on ClientePersonaID = cla.ClClientID 
@@ -850,7 +979,8 @@ if @Tip_ConTip = @Str_L begin
 					Per_RFC,		Per_Calle,		Per_Tipo, 		Per_Nombre, 	Per_ApePat,	
 					Per_ApeMat,		Per_RazSoc, 	Adi_FecNac, 	Adi_TipIde,		Adi_NumIde,	
 					Per_NumPer,		Per_CURP,		Cli_TieCla,		Cli_Locali,		Cli_Entida,
-					Cli_Calle,		Cli_CalNum,		Cli_Coloni,		Cli_ID
+					Cli_Calle,		Cli_CalNum,		Cli_Coloni,		Cli_ID,			Cli_Status,
+					Cli_Unico
 				)
 				select		Cli_Numero,
 							Cli_Numero,
@@ -887,7 +1017,9 @@ if @Tip_ConTip = @Str_L begin
 							isnull(Cli_Calle, @Str_Vacio),
 							isnull(Cli_CalNum, @Str_Vacio),
 							isnull(Cli_Coloni, @Str_Vacio),
-							clc.ClClientID 
+							clc.ClClientID, 
+							@Str_Vacio,
+							@Str_Vacio
 					from 	#AuxCientesPersonas noholdlock
 							inner join CLCLIENT clc noholdlock on clc.ClClientID = ClientePersonaID
 							left join CLADICIO cla noholdlock on ClientePersonaID = cla.ClClientID 
@@ -938,7 +1070,8 @@ if @Tip_ConTip = @Str_L begin
 					Per_RFC,		Per_Calle,		Per_Tipo, 		Per_Nombre, 	Per_ApePat,	
 					Per_ApeMat,		Per_RazSoc, 	Adi_FecNac, 	Adi_TipIde,		Adi_NumIde,	
 					Per_NumPer,		Per_CURP,		Cli_TieCla,		Cli_Locali,		Cli_Entida,
-					Cli_Calle,		Cli_CalNum,		Cli_Coloni,		Cli_ID
+					Cli_Calle,		Cli_CalNum,		Cli_Coloni,		Cli_ID,			Cli_Status,
+					Cli_Unico
 				)
 				select	
 					Per_Numero,
@@ -972,7 +1105,9 @@ if @Tip_ConTip = @Str_L begin
 					isnull(Per_Calle, @Str_Vacio),
 					isnull(Per_CalNum, @Str_Vacio),
 					isnull(Per_Coloni, @Str_Vacio),
-					PerPersoID
+					PerPersoID,
+					@Str_Vacio,
+					@Str_Vacio
 				from #AuxCientesPersonas noholdlock
 					inner join SOPERSON noholdlock on PerPersoID  = ClientePersonaID
 					inner join SOPERADI noholdlock on ClientePersonaNum = Adi_PerNum
@@ -1000,7 +1135,7 @@ if @Tip_ConTip = @Str_L begin
 			Per_Numero, 	Per_NumTra, 	Per_Titulo, 	Per_ComOrd, 	Per_RFC, 
 			Per_Calle, 		Per_Tipo, 		Per_Nombre, 	Per_ApePat, 	Per_ApeMat, 
 			Per_RazSoc, 	Adi_FecNac, 	Adi_TipIde, 	Adi_NumIde, 	Per_Nacion,
-			Per_NumPer, 	Per_CURP
+			Per_NumPer, 	Per_CURP,		Cli_Status,		Cli_Unico
 	from  #CientesPersonas noholdlock
 			
 	drop table #CientesPersonas
