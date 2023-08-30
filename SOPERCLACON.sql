@@ -1376,6 +1376,10 @@ if @Tip_ConTip = @Str_L begin
 					inner join CLENTIDA noholdlock on Cli_Entida = Ent_Numero
 
 		end
+		
+		--se borran los que no tengan RFC
+		delete from #CientesPersonas 
+			where	Per_RFC = @Str_Vacio
 	end
 	
 	--Si llega a dejar vacio el Per_Calle donde va la direccion se vuelve a actualizar
