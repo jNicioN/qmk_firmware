@@ -1148,7 +1148,6 @@ if @Tip_ConTip = @Str_L begin
 		select	@Suc_Numero = ltrim(rtrim(@Per_Numero))
 		
 		if ISNUMERIC(@Busqueda) = @Ent_Uno begin	-- Busqueda por numero de cliente 
-		
 			if char_length(ltrim(rtrim(@Busqueda))) < @Ent_Ocho begin
 				select	Err_Codigo	= '000001',
 						Err_Mensaj	= 'El número de cliente debe ser de 8 digitos',
@@ -1168,7 +1167,6 @@ if @Tip_ConTip = @Str_L begin
 				and 	Cli_SucAti = isnull(@Suc_Numero,Cli_SucAti)
 
 		end else if (@Per_RFC != @Str_Vacio) begin	-- Busqueda por RFC
-
 			insert into #AuxCientesPersonas(ClientePersonaID,ClientePersonaNum,FechaSis)
 			select top 50	
 				ClClientID, Cli_Numero, FechaSis
@@ -1177,7 +1175,6 @@ if @Tip_ConTip = @Str_L begin
 				and 	Cli_SucAti = isnull(@Suc_Numero,Cli_SucAti) 
 
 		end else begin	-- Busqueda por nombre cliente/persona
-		
 			if char_length(ltrim(rtrim(@Per_Comple))) < @Ent_Ocho begin
 				select	Err_Codigo	= '000001',
 						Err_Mensaj	= 'Se requieren mínimo 8 letras para obtener resultados',
@@ -1197,7 +1194,7 @@ if @Tip_ConTip = @Str_L begin
 		--solo si encontro reultado continua con las consultas
 		select @Conteo = count(*) from #AuxCientesPersonas noholdlock
 		if @Conteo > @Ent_Cero begin
-			
+
 			--se crean indices de la tabla temporal
 			create nonclustered index ACPID on #AuxCientesPersonas ( ClientePersonaID )
 			create nonclustered index ACPNum on #AuxCientesPersonas ( ClientePersonaNum )
@@ -1249,7 +1246,7 @@ if @Tip_ConTip = @Str_L begin
 						clc.ClClientID,
 						clc.Cli_Status,
 						uni.Clu_Grupo,
-						Nac_NivAut
+						isnull(Nac_NivAut, @Ent_Cero)
 				from 	#AuxCientesPersonas noholdlock
 						inner join CLCLIENT clc noholdlock on clc.ClClientID = ClientePersonaID
 						left join CLADICIO cla noholdlock on ClientePersonaID = cla.ClClientID 
@@ -1262,7 +1259,7 @@ if @Tip_ConTip = @Str_L begin
 								else 2
 								end)
 				where 	clc.Cli_Status = @Cli_StaS
-				and 	Nac_NivAut <> @Ent_Ocho
+				and 	isnull(niv.Nac_NivAut, @Ent_Cero) <> @Ent_Ocho
 				
 			--se crea indice para la tabla
 			create nonclustered index CPNumero on #CientesPersonas ( Per_Numero )
