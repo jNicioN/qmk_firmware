@@ -20,6 +20,12 @@ as
 ****************************************************************************
 **	REFERENCIAS:														****
 ****************************************************************************
+** Modifico:	Ezequiel Gonzalez Cobix									****
+** Fecha:		31/08/2023												****
+** Key Jira:	TRAAC-2131 									 			****
+** DescripciÃ³n:Al activar una cuenta, se asigna el mismo estatus
+				que se asigno en SOUSNAEX a SOBITUSU					****
+****************************************************************************
 ** Modifico:	Martin Adonis Lopez										****
 ** Fecha:		30/08/2022												****
 ** Help Desk:	1643006 									 			****
@@ -106,7 +112,7 @@ if @Str_Divisas = @Str_Uno begin
 			insert into SOBITUSU	(Biu_FolUsu,	Biu_Estatu,	Biu_FecEst,	Biu_Usuari,	Biu_Sucurs, 
 									 Biu_Canal,	Biu_DesEst,	NumTransac,	Transaccio,	Usuario,	 
 									 FechaSis,		SucOrigen,	SucDestino)
-				select		Une_Identi,	@Sta_Inacti,	@FechaSis,		@Usuario,	@SucOrigen,
+				select		Une_Identi,	@Sta_Cancel,	@FechaSis,		@Usuario,	@SucOrigen,
 							@Biu_Canal,	@Biu_DesEst,	@NumTransac,	@Transaccio, @Usuario,	
 							@FechaSis,	@SucOrigen,		@SucDestino
 					from SOPERSON noholdlock 
@@ -120,7 +126,7 @@ if @Str_Divisas = @Str_Uno begin
 			insert into SOBITUSU	(Biu_FolUsu,	Biu_Estatu,	Biu_FecEst,	Biu_Usuari,	Biu_Sucurs, 
 									 Biu_Canal,		Biu_DesEst,	NumTransac,	Transaccio,	Usuario,	 
 									 FechaSis,	 SucOrigen,		SucDestino)
-				select	Une_Identi,	@Sta_Inacti,	@FechaSis,	@Usuario,	@SucOrigen,
+				select	Une_Identi,	@Sta_Cancel,	@FechaSis,	@Usuario,	@SucOrigen,
 						@Biu_Canal,	@Biu_DesEst,	@NumTransac,	@Transaccio, @Usuario,	
 						@FechaSis,	@SucOrigen,		@SucDestino
 				from SOUSUEXT noholdlock 
