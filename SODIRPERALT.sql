@@ -50,8 +50,8 @@ as
 ************************************************************/
 
 /*	Declaración de Variables	*/
-declare	@Val_Existe	int,
-		@Val_Cp CHAR(6)
+declare	@Val_Existe	int
+
 /*	Declaración de Constantes	*/
 declare	@Str_Vacio	char(1),
 		@Ent_Cero	int,
@@ -71,6 +71,16 @@ select @Str_Vacio	= '', /* String vacío */
 
 
 
+
+	/* Validaciones */
+if @PerPersoID = @Ent_Cero and @ClClientID = @Ent_Cero begin
+
+select Err_Codigo	= '000001',
+	Err_Mensaj	= 'Error con el parámetro: @PerPersonID o @ClClientID .',
+	Err_Variab	= '@PerPersonID'
+	rollback
+	return @Ent_Uno
+end
 if @Dip_TipDir = @Ent_Cero begin
 	select Err_Codigo	= '000003',
 		Err_Mensaj	= 'Error con el parámetro: @Dip_TipDir.',
@@ -78,35 +88,26 @@ if @Dip_TipDir = @Ent_Cero begin
 	rollback
 	return @Ent_Uno
 end
-	/* Validaciones */
-	if @PerPersoID = @Ent_Cero and @ClClientID = @Ent_Cero begin
-
-		select Err_Codigo	= '000001',
-			Err_Mensaj	= 'Error con el parámetro: @PerPersonID o @ClClientID .',
-			Err_Variab	= '@PerPersonID'
-		rollback
-		return @Ent_Uno
-	end
 	
-	if isnull(@Dip_NumCP, @Str_Vacio) = @Str_Vacio begin
-		select Err_Codigo	= '000007',
-			Err_Mensaj	= 'El parámetro @Dip_NumCP no puede ir vacio.',
+if isnull(@Dip_NumCP, @Str_Vacio) = @Str_Vacio begin
+	select Err_Codigo	= '000007',
+		Err_Mensaj	= 'El parámetro @Dip_NumCP no puede ir vacio.',
+		Err_Variab	= '@Dip_NumCP'
+	rollback
+	return @Ent_Uno
+end else begin
+	select @Val_Existe = @Ent_Cero
+	select @Val_Existe = count(Cpc_Numero)
+	from CLCODPOS noholdlock
+	where	Cpc_Numero	= @Dip_NumCP
+	if @Val_Existe <= @Ent_Cero begin
+		select Err_Codigo	= '000008',
+			Err_Mensaj	= 'El parámetro @Dip_NumCP no es valido.',
 			Err_Variab	= '@Dip_NumCP'
 		rollback
 		return @Ent_Uno
-	end else begin
-		select @Val_Existe = @Ent_Cero
-		select @Val_Existe = count(Cpc_Numero)
-		from CLCODPOS noholdlock
-		where	Cpc_Numero	= @Dip_NumCP
-		if @Val_Existe <= @Ent_Cero begin
-			select Err_Codigo	= '000008',
-				Err_Mensaj	= 'El parámetro @Dip_NumCP no es valido.',
-				Err_Variab	= '@Dip_NumCP'
-			rollback
-			return @Ent_Uno
-		end
 	end
+end
 	/* Alta de Descripción */
 	insert into SODIRPER
 		(
@@ -119,4 +120,7 @@ end
 			@Dip_NumInt, @Dip_NumCP, @Dip_EntCa1, @Dip_EntCa2, @Dip_Refere,
 			@Dip_Status, @NumTransac, @Transaccio, @Usuario, @FechaSis,
 			@SucOrigen, @SucDestino)
-	return @Ent_Uno
+
+if @@nestlevel = @Ent_Uno
+select	Err_Codigo	= '000000',
+    	Err_Mensaj	= 'Registro realizado'
