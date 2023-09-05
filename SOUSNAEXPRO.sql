@@ -101,7 +101,7 @@ select @Fec_Actual = Par_FecAct
 from SOPARAMS noholdlock
 where Par_Sucurs = @SucOrigen
 --activar cambio de divisas
-select @Str_Divisas=Par_Valor from  SOPARGEN where Par_Nombre = 'UsuarioDivisas'
+select @Str_Divisas=Par_Valor from  SOPARGEN noholdlock where Par_Nombre = 'UsuarioDivisas'
 
 /*Fecha de inicio y fin de mes*/
 select @Fec_IniMes = dateadd(dd, 1 - datepart(dd, @Fec_Actual), @Fec_Actual)
@@ -119,9 +119,20 @@ if @Str_Divisas = @Str_Uno begin
 					inner join SOPERADI noholdlock on	Adi_PerNum	= Per_Numero 
 					inner join SOUSNAEX noholdlock on	PerPersoID	= Une_IdeUsu and Une_TabOri	= @Une_TaOrNa
 					where	Per_Comple	= @Une_Nombre 
-					  and   convert(date, Adi_FecNac) = convert(date, @Une_FecNac)
-					  and	(Une_Estatu	= @Sta_Activo or Une_Estatu = @Sta_Inacti)
-			  
+					  and   Adi_FecNac	= @Une_FecNac
+					  and	Une_Estatu	= @Sta_Activo
+				union	  
+				select		Une_Identi,	@Sta_Cancel,	@FechaSis,		@Usuario,	@SucOrigen,
+							@Biu_Canal,	@Biu_DesEst,	@NumTransac,	@Transaccio, @Usuario,	
+							@FechaSis,	@SucOrigen,		@SucDestino
+					from SOPERSON noholdlock 
+					inner join SOPERADI noholdlock on	Adi_PerNum	= Per_Numero 
+					inner join SOUSNAEX noholdlock on	PerPersoID	= Une_IdeUsu and Une_TabOri	= @Une_TaOrNa
+					where	Per_Comple	= @Une_Nombre 
+					  and   Adi_FecNac	= @Une_FecNac
+					  and	Une_Estatu = @Sta_Inacti
+					  
+			
 			  /* se busca en extranjeros el numero de usuario por nombre y fecha de nacimiento*/
 			insert into SOBITUSU	(Biu_FolUsu,	Biu_Estatu,	Biu_FecEst,	Biu_Usuari,	Biu_Sucurs, 
 									 Biu_Canal,		Biu_DesEst,	NumTransac,	Transaccio,	Usuario,	 
@@ -129,11 +140,21 @@ if @Str_Divisas = @Str_Uno begin
 				select	Une_Identi,	@Sta_Cancel,	@FechaSis,	@Usuario,	@SucOrigen,
 						@Biu_Canal,	@Biu_DesEst,	@NumTransac,	@Transaccio, @Usuario,	
 						@FechaSis,	@SucOrigen,		@SucDestino
-				from SOUSUEXT noholdlock 
-				inner join SOUSNAEX noholdlock on	Une_IdeUsu	= Use_IdUsEx and	Une_TabOri =@Une_TaOrEx
-				where	Use_NoCoUs	= @Une_Nombre
-				  and   convert(date, Use_FecNac)	= convert(date, @Une_FecNac)
-				  and	(Une_Estatu	= @Sta_Activo or Une_Estatu = @Sta_Inacti)
+					from SOUSUEXT noholdlock 
+					inner join SOUSNAEX noholdlock on	Une_IdeUsu	= Use_IdUsEx and	Une_TabOri =@Une_TaOrEx
+					where	Use_NoCoUs	= @Une_Nombre
+					  and   Use_FecNac	= @Une_FecNac
+					  and	Une_Estatu	= @Sta_Activo
+				union  
+				select	Une_Identi,	@Sta_Cancel,	@FechaSis,	@Usuario,	@SucOrigen,
+						@Biu_Canal,	@Biu_DesEst,	@NumTransac,	@Transaccio, @Usuario,	
+						@FechaSis,	@SucOrigen,		@SucDestino
+					from SOUSUEXT noholdlock 
+					inner join SOUSNAEX noholdlock on	Une_IdeUsu	= Use_IdUsEx and	Une_TabOri =@Une_TaOrEx
+					where	Use_NoCoUs	= @Une_Nombre
+					  and   Use_FecNac	= @Une_FecNac
+					  and	Une_Estatu	= @Sta_Inacti
+				  
 	  	  
 end else begin
 /*se buscan concidencias en personas */
@@ -147,7 +168,7 @@ end else begin
 			inner join SOPERADI noholdlock on	Adi_PerNum	= Per_Numero 
 			inner join SOUSNAEX noholdlock on	PerPersoID	= Une_IdeUsu and Une_TabOri	= @Une_TaOrNa
 			where	Per_Comple	= @Une_Nombre 
-			  and   convert(date, Adi_FecNac) = convert(date, @Une_FecNac)
+			  and   Adi_FecNac 	= @Une_FecNac
 			  and	Une_Estatu	= @Sta_Activo
 		  
 		  /* se busca en extranjeros el numero de usuario por nombre y fecha de nacimiento*/
@@ -160,7 +181,7 @@ end else begin
 		from SOUSUEXT noholdlock 
 		inner join SOUSNAEX noholdlock on	Une_IdeUsu	= Use_IdUsEx and	Une_TabOri =@Une_TaOrEx
 		where	Use_NoCoUs	= @Une_Nombre
-		  and   convert(date, Use_FecNac)	= convert(date, @Une_FecNac)
+		  and   Use_FecNac	= @Une_FecNac
 		  and	Une_Estatu	= @Sta_Activo
 
 end 
