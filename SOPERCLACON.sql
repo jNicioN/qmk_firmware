@@ -1,4 +1,4 @@
-﻿create procedure SOPERCLACON (
+create procedure SOPERCLACON (
 	@Per_Numero	char(8),
 	@Per_Comple	varchar(181),
 	@Per_Tipo	char(1),
