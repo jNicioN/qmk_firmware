@@ -1,4 +1,4 @@
-create procedure SOPERCLACON (
+﻿create procedure SOPERCLACON (
 	@Per_Numero	char(8),
 	@Per_Comple	varchar(181),
 	@Per_Tipo	char(1),
@@ -1254,9 +1254,9 @@ if @Tip_ConTip = @Str_L begin
 						left join CLCLIUNI uni noholdlock on ClientePersonaNum = uni.Clu_Client
 						left join CLCLIENT clu noholdlock on clu.Cli_Numero = uni.Clu_Grupo
 						left join CLNIAUCL niv noholdlock on Nac_CliUni = clu.ClClientID and Nac_TipPer = (case 
-								when clc.Cli_Tipo = @Str_Uno then 1
-								when clc.Cli_Tipo in (@Str_Dos, @Str_Tres) and clc.Cli_ActEmp = @Sta_Si then 3
-								else 2
+								when clc.Cli_Tipo = @Str_Uno then @Ent_Uno
+								when clc.Cli_Tipo in (@Str_Dos, @Str_Tres) and clc.Cli_ActEmp = @Sta_Si then @Ent_Tres
+								else @Ent_Dos
 								end)
 				where 	clc.Cli_Status = @Cli_StaS
 				and 	isnull(niv.Nac_NivAut, @Ent_Cero) <> @Ent_Ocho
