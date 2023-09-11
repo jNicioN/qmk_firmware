@@ -1,4 +1,4 @@
-create procedure SOPERCLACON (
+﻿create procedure SOPERCLACON (
 	@Per_Numero	char(8),
 	@Per_Comple	varchar(181),
 	@Per_Tipo	char(1),
@@ -23,7 +23,7 @@ as
 ********************************************************************
 **	Modificó:	Rafael Moreno									****
 **  Fecha:		24/08/2023										****
-**  Help:		-----											****
+**  Help:		32674											****
 **	Descripción: Agregar L4, similar a L1, pero debe regresar	****
 **	Cli_Status y numero de cliente unico y nivel de cliente. 	****
 **	buscar por RFC en CLCLIENT y SOPERSON						****
