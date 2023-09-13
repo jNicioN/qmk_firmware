@@ -21,6 +21,12 @@ as
 /*******************************************************************
 ** DESCRIPCION: Consulta de Persona Unica						****
 ********************************************************************
+** Modifico:	Raul Minor										****
+** Fecha:		2026-Agosto-22									****
+** Help:		31965											****
+** Descripcion:	Se modifico consulta LD para dar salida a   	****
+**				Cli_Tipo, Cli_ActEmp					    	****
+********************************************************************
 ** Modifico:	Rogelio Uriel Vergara Covarrubias				****
 ** Fecha:		11/05/2023										****
 ** Help:														****
@@ -1013,19 +1019,23 @@ end else begin
 		create table #tmpPerso05(
 			Per_Person 	char(8) null,
 			Per_Grupo 	char(8) null,
-			Cli_Numero	char(8) null
+			Cli_Numero	char(8) null,
+			Cli_Tipo    char(1) null,
+			Cli_ActEmp  char(1) null
 		)	
 		create nonclustered index #tmpPerso05_Grupo on #tmpPerso05(Per_Grupo)
 		
 		if(@Per_RFC = @Str_Vacio)begin
-			insert into #tmpPerso05
-				select  Per_Numero, Per_Numero, @Str_Vacio
-	        	from SOPERSON P noholdlock
-	        	where P.Per_ComOrd like @Per_Comple		
+			insert into #tmpPerso05 
+					   (Per_Person, Per_Grupo, Cli_Numero, Cli_Tipo,   Cli_ActEmp)
+				select  Per_Numero, Per_Numero,  @Str_Vacio, @Str_Vacio, @Str_Vacio
+					from SOPERSON P noholdlock
+					where P.Per_ComOrd like @Per_Comple		
 		end
 		else begin 
 			insert into #tmpPerso05
-				select  Per_Numero, Per_Numero, @Str_Vacio
+					   (Per_Person, Per_Grupo, Cli_Numero, Cli_Tipo,   Cli_ActEmp)
+				select  Per_Numero, Per_Numero, @Str_Vacio, @Str_Vacio, @Str_Vacio
 	        	from SOPERSON P noholdlock
 	        	where P.Per_RFC = @Per_RFC					
 		end
@@ -1043,14 +1053,19 @@ end else begin
         	where Adi_NumPer = #tmpPerso05.Per_Person
           	and Par_Nombre = @Banco_Actual
 
+        update #tmpPerso05  set
+			Cli_Tipo    = cli.Cli_Tipo,
+			Cli_ActEmp  = cli.Cli_ActEmp
+			from CLCLIENT cli noholdlock  
+			where #tmpPerso05.Cli_Numero = cli.Cli_Numero
           	
         select	P.Per_Numero,	P.Per_Tipo,		P.Per_Benefi,	P.Per_NuSeFi,	P.Per_Titulo,
-			P.Per_Nombre,	P.Per_ApePat,	P.Per_ApeMat,	P.Per_RazSoc,	P.Per_Comple,
-			P.Per_ComOrd,	P.Per_RFC,		P.Per_CURP,		P.FechaSis as 	Per_Fecha,
-			P.Per_Entida,	P.Per_Locali, 	P.Per_ActEmp, per.Cli_Numero as Per_Client
-			from #tmpPerso05 as per
-			inner join SOPERSON P noholdlock on Per_Numero = per.Per_Grupo
-
+				P.Per_Nombre,	P.Per_ApePat,	P.Per_ApeMat,	P.Per_RazSoc,	P.Per_Comple,
+				P.Per_ComOrd,	P.Per_RFC,		P.Per_CURP,		P.FechaSis as 	Per_Fecha,
+				P.Per_Entida,	P.Per_Locali, 	P.Per_ActEmp, 	per.Cli_Numero as Per_Client,
+				Cli_Tipo,		Cli_ActEmp		
+				from #tmpPerso05 as per
+				inner join SOPERSON P noholdlock on Per_Numero = per.Per_Grupo
 		 
 		 drop table #tmpPerso05
 	end

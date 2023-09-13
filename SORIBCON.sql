@@ -16,6 +16,12 @@ as
 /****************************************************************/
 /* DESCRIPCION: Consulta de Reporte de Informacion Basica		*/
 /****************************************************************/
+/** Modifica:		Raul Muniz									*/
+/** Descripcion:	Se modifica C2 para regresar primer RIB		*/
+/**					Base										*/
+/** Fecha:			31/08/2023                               	*/
+/** C.Cambios:		32339					 					*/
+/****************************************************************/
 /** Modifica:		Jose R. Rodriguez Zenteno					*/
 /** Descripcion:	Se modifica C4 para regresar Tipo de Rib	*/
 /** Fecha:			24/02/2021                               	*/
@@ -113,6 +119,7 @@ if @Tip_ConTip	= @Str_C begin /* 'C': Consulta */
 		from SORIB noholdlock
 		where Rib_NumPer = @Rib_NumPer
 		  and Rib_NumSol = @Rib_NumSol
+		order by Rib_Numero
 	end
 	else if @Tip_ConCon = @Str_Tres begin 
 		select

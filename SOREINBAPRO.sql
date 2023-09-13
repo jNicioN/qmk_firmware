@@ -17,6 +17,12 @@ as
 /* DESCRIPCION: Procesamiento de copia de registros de Reporte	*/
 /*				de Informacion Basica							*/
 /****************************************************************/
+/** Modifica:		Raul Muniz									*/
+/** Descripcion:	Se realiza correccion para obtener RIB Base	*/
+/**					principal en caso de tener duplicidad		*/
+/** Fecha:			31/08/2023                               	*/
+/** C.Cambios:		32339					 					*/
+/****************************************************************/
 /** Modifico:		Raul Muniz									*/
 /** Fecha:			21/06/2023									*/
 /** C.Cambios:		29013										*/
@@ -79,12 +85,13 @@ declare @Int_RibBas	int,
 if @Tip_Proces	= @Str_A begin /* 'A': Proceso para realizar la copia de RIB cuando se da de alta un Interviniente por solicitud. */
 
 	select @Int_RibBas = @Ent_Cero 
-	select @Int_RibBas = Rib_Numero 
+	select top 1 @Int_RibBas = Rib_Numero 
 		from SORIB noholdlock 
 		where Rib_NumPer = @Rib_NumPer 
 		  and Rib_NumSol = @Ent_Cero 
 		  and Rib_NumInt = @Ent_Cero
 		  and Rib_FecEla <> @Str_Vacio
+		order by Rib_Numero
 			
 	if @Int_RibBas <> @Ent_Cero  begin
 		
