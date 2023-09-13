@@ -1,10 +1,8 @@
-CREATE procedure SODIRPERCON
-	(
+create procedure SODIRPERCON (
 	@PerPersoID int,
 	@Dip_TipDir	int,
-	@ClClientID	int,
+	@ClClientID	int,	
 	@Tip_Consul	char(2),
-	@Cli_Numero char(8),
 
 	@NumTransac	char(10),
 	@Transaccio	char(3),
@@ -18,11 +16,6 @@ as
 
 /***************************************************************************
 ** Descripción:	 Consulta de Direccion Persona							****
-****************************************************************************
-** Modifico:	Aldo Teoba  											****
-** Fecha:		14-08-2023												****
-** Help:		31604													****
-** Descripcion: se agrega consulta c6									****
 ****************************************************************************
 ** Modifico:	Adriana Gomez											****
 ** Fecha:		06-05-2022												****
@@ -42,13 +35,11 @@ as
 ** Help:		00909908												****
 ****************************************************************************/
 
-/* Declaración de variables */
+										/* Declaración de variables */
 declare	@Tip_ConTip	char(1),
-		@Tip_ConCon	char(1),
-		@Val_PersonId INT,
-		@Val_ClientId INT
+		@Tip_ConCon	char(1)
 
-/* Declaración de constantes */
+										/* Declaración de constantes */
 declare	@Str_Vacio	char(1),
 		@Con_Consul	char(1),
 		@Con_Listas	char(1),
@@ -61,141 +52,105 @@ declare	@Str_Vacio	char(1),
 		@Str_Tres   char(1),
 		@Str_Cuatro char(1),
 		@Str_Cinco  char(1),
-        @Str_Seis   char(1),
 		@Ent_Uno    int,
 		@Ent_Dos    int
 
-/* Asignación de constantes */
-select @Str_Vacio	= '', /* String vacío */
-	@Con_Consul	= 'C', /* Tipo: Consulta */
-	@Con_Listas	= 'L', /* Tipo: Lista */
-	@Tip_Ppal	= '1',
-	@Tip_Adicio	= '0',
-	@Str_A		= 'A',
-	@Str_Uno    = '1', /*String del numero 1*/
-	@Str_Dos    = '2', /*String del numero 2*/
-	@Str_Tres   = '3', /*String del numero 3*/
-	@Str_Cuatro = '4', /*String del numero 4*/
-	@Str_Cinco  = '5', /*String del numero 4*/
-	@Str_Seis   = '6', /*String del numero 6*/
-	@Ent_Uno    =  1, /*Entero del numero 1*/
-	@Ent_Dos    =  2
-/*Entero del numero 2*/
-
-select @Tip_ConTip	= substring(@Tip_Consul, @Ent_Uno, @Ent_Uno),
-	@Tip_ConCon	= substring(@Tip_Consul, @Ent_Dos, @Ent_Uno)
+										/* Asignación de constantes */
+select	@Str_Vacio	= '',				/* String vacío */
+		@Con_Consul	= 'C',				/* Tipo: Consulta */
+		@Con_Listas	= 'L',				/* Tipo: Lista */
+		@Tip_Ppal	= '1',
+		@Tip_Adicio	= '0',
+		@Str_A		= 'A',
+		@Str_Uno    = '1',              /*String del numero 1*/
+		@Str_Dos    = '2',              /*String del numero 2*/
+		@Str_Tres   = '3',              /*String del numero 3*/
+		@Str_Cuatro = '4',              /*String del numero 4*/
+		@Str_Cinco  = '5',              /*String del numero 4*/
+		@Ent_Uno    =  1,               /*Entero del numero 1*/
+		@Ent_Dos    =  2                /*Entero del numero 2*/
+		
+select	@Tip_ConTip	= substring(@Tip_Consul, @Ent_Uno, @Ent_Uno),
+		@Tip_ConCon	= substring(@Tip_Consul, @Ent_Dos, @Ent_Uno)
 
 /* Consulta a Descripcion */
-if @Tip_ConTip = @Con_Consul begin
-	/* Consultas */
+if @Tip_ConTip = @Con_Consul begin		/* Consultas */
 
-	if @Tip_ConCon = @Str_Uno begin
-		/* Consulta por persona */
+	if @Tip_ConCon = @Str_Uno begin	/* Consulta por persona */
 
-		select PerPersoID, ClClientID, Dip_TipDir, Dip_Calle, Dip_NumExt,
-			Dip_NumInt, Dip_NumCP, Dip_EntCa1, Dip_EntCa2, Dip_Refere,
-			Dip_Status
-		from SODIRPER noholdlock
-		where	PerPersoID	= @PerPersoID
-			and Dip_Status = @Str_A
+		select	PerPersoID,	ClClientID,	Dip_TipDir,	Dip_Calle,	Dip_NumExt,
+				Dip_NumInt,	Dip_NumCP,	Dip_EntCa1,	Dip_EntCa2,	Dip_Refere,
+				Dip_Status
+			from SODIRPER noholdlock
+			where	PerPersoID	= @PerPersoID
+			and		Dip_Status = @Str_A
 	end
+	
+	if @Tip_ConCon = @Str_Dos begin	/* Consulta por cliente  */
 
-	if @Tip_ConCon = @Str_Dos begin
-		/* Consulta por cliente  */
-
-		select PerPersoID, ClClientID, Dip_TipDir, Dip_Calle, Dip_NumExt,
-			Dip_NumInt, Dip_NumCP, Dip_EntCa1, Dip_EntCa2, Dip_Refere,
-			Dip_Status
-		from SODIRPER noholdlock
-		where	ClClientID	= @ClClientID
-			and Dip_Status = @Str_A
+		select	PerPersoID,	ClClientID,	Dip_TipDir,	Dip_Calle,	Dip_NumExt,
+				Dip_NumInt,	Dip_NumCP,	Dip_EntCa1,	Dip_EntCa2,	Dip_Refere,
+				Dip_Status
+			from SODIRPER noholdlock
+			where	ClClientID	= @ClClientID
+			and 	Dip_Status = @Str_A
 	end
+	
+	if @Tip_ConCon = @Str_Tres begin	/* Consulta de Direccion Por Indices */
 
-	if @Tip_ConCon = @Str_Tres begin
-		/* Consulta de Direccion Por Indices */
-
-		select PerPersoID, ClClientID, Dip_TipDir, Dip_Calle, Dip_NumExt,
-			Dip_NumInt, Dip_NumCP, Dip_EntCa1, Dip_EntCa2, Dip_Refere,
-			Dip_Status
-		from SODIRPER noholdlock
+		select	PerPersoID,	ClClientID,	Dip_TipDir,	Dip_Calle,	Dip_NumExt,
+				Dip_NumInt,	Dip_NumCP,	Dip_EntCa1,	Dip_EntCa2,	Dip_Refere,
+				Dip_Status
+			from SODIRPER noholdlock
 			inner join SOCATIDI noholdlock on  Ctd_Numero  = Dip_TipDir
-		where 	PerPersoID		= @PerPersoID
-			and ClClientID  	= @ClClientID
-			and Dip_TipDir 		= @Dip_TipDir
-
+			where 	PerPersoID		= @PerPersoID 
+			and		ClClientID  	= @ClClientID 
+			and		Dip_TipDir 		= @Dip_TipDir 
+					 
 	end
+	
+	if @Tip_ConCon = @Str_Cuatro begin	/* Consulta de Direccion Por Indices */
 
-	if @Tip_ConCon = @Str_Cuatro begin
-		/* Consulta de Direccion Por Indices */
-
-		select PerPersoID, ClClientID, Dip_TipDir, Dip_Calle, Dip_NumExt,
-			Dip_NumInt, Dip_NumCP, Dip_EntCa1, Dip_EntCa2, Dip_Refere,
-			Dip_Status
-		from SODIRPER noholdlock
+		select	PerPersoID,	ClClientID,	Dip_TipDir,	Dip_Calle,	Dip_NumExt,
+				Dip_NumInt,	Dip_NumCP,	Dip_EntCa1,	Dip_EntCa2,	Dip_Refere,
+				Dip_Status
+			from SODIRPER noholdlock
 			inner join SOCATIDI noholdlock on  Ctd_Numero  = Dip_TipDir
-				and ClClientID  	= @ClClientID
-				and Dip_TipDir 		= @Dip_TipDir
-
+			and		ClClientID  	= @ClClientID 
+			and		Dip_TipDir 		= @Dip_TipDir 
+					 
 	end
+	
+	if @Tip_ConCon = @Str_Cinco begin	/* Consulta de Direccion Por Indices */
 
-	if @Tip_ConCon = @Str_Cinco begin
-		/* Consulta de Direccion Por Indices */
-
-		select PerPersoID, ClClientID, Dip_TipDir, Dip_Calle, Dip_NumExt,
-			Dip_NumInt, Dip_NumCP, Dip_EntCa1, Dip_EntCa2, Dip_Refere,
-			Dip_Status
-		from SODIRPER noholdlock
+		select	PerPersoID,	ClClientID,	Dip_TipDir,	Dip_Calle,	Dip_NumExt,
+				Dip_NumInt,	Dip_NumCP,	Dip_EntCa1,	Dip_EntCa2,	Dip_Refere,
+				Dip_Status
+			from SODIRPER noholdlock
 			inner join SOCATIDI noholdlock on  Ctd_Numero  = Dip_TipDir
-		where 	PerPersoID		= @PerPersoID
-			and Dip_TipDir 		= @Dip_TipDir
-
+			where 	PerPersoID		= @PerPersoID 
+			and		Dip_TipDir 		= @Dip_TipDir 
+					 
 	end
-	if @Tip_ConCon = @Str_Seis begin
-		/* Consulta de Direccion Por Indices sin borrados */
 
-		SELECT @Val_PersonId = (SELECT P.PerPersoID
-			FROM CLCLIENT C noholdlock
-				INNER JOIN CLADICIO CA noholdlock ON C.ClClientID = CA.ClClientID
-				INNER JOIN SOPERSON P noholdlock ON CA.Adi_NumPer = P.Per_Numero
-			WHERE C.Cli_Numero = @Cli_Numero)
+end else if @Tip_ConTip = @Con_Listas begin	/* Listas */
 
-		SELECT @Val_ClientId = (SELECT C.ClClientID
-		FROM CLCLIENT C noholdlock
-		WHERE C.Cli_Numero = @Cli_Numero)
-
-		select PerPersoID, ClClientID, Dip_TipDir, Dip_Calle, Dip_NumExt,
-			Dip_NumInt, Dip_NumCP, Dip_EntCa1, Dip_EntCa2, Dip_Refere,
-			Dip_Status
-		from SODIRPER noholdlock
+	if @Tip_ConCon = @Str_Uno begin	/* Lista por llave principal */
+		select	PerPersoID,	ClClientID,	Dip_TipDir,	Dip_Calle,	Dip_NumExt,
+				Dip_NumInt,	Dip_NumCP,	Dip_EntCa1,	Dip_EntCa2,	Dip_Refere,
+				Dip_Status
+			from SODIRPER noholdlock
+			 where	Dip_Status = @Str_A
+	end
+	if @Tip_ConCon = @Str_Dos begin	/* Lista de direcciones adicionales por llave principal */
+		select	PerPersoID,	ClClientID,	Dip_TipDir,	Dip_Calle,	Dip_NumExt,
+				Dip_NumInt,	Dip_NumCP,	Dip_EntCa1,	Dip_EntCa2,	Dip_Refere,
+				Dip_Status
+			from SODIRPER noholdlock 
 			inner join SOCATIDI noholdlock on  Ctd_Numero  = Dip_TipDir
-		where 	PerPersoID		= @Val_PersonId
-			and ClClientID  	= @Val_ClientId
-			and Dip_TipDir 		= @Dip_TipDir
-			and Dip_Status      = @Str_A
-
-	end
-
-end else if @Tip_ConTip = @Con_Listas begin
-	/* Listas */
-
-	if @Tip_ConCon = @Str_Uno begin
-		/* Lista por llave principal */
-		select PerPersoID, ClClientID, Dip_TipDir, Dip_Calle, Dip_NumExt,
-			Dip_NumInt, Dip_NumCP, Dip_EntCa1, Dip_EntCa2, Dip_Refere,
-			Dip_Status
-		from SODIRPER noholdlock
-		where	Dip_Status = @Str_A
-	end
-	if @Tip_ConCon = @Str_Dos begin
-		/* Lista de direcciones adicionales por llave principal */
-		select PerPersoID, ClClientID, Dip_TipDir, Dip_Calle, Dip_NumExt,
-			Dip_NumInt, Dip_NumCP, Dip_EntCa1, Dip_EntCa2, Dip_Refere,
-			Dip_Status
-		from SODIRPER noholdlock
-			inner join SOCATIDI noholdlock on  Ctd_Numero  = Dip_TipDir
-		where   PerPersoID	= @PerPersoID
-			and Ctd_Principal = @Tip_Adicio
-			and Dip_Status = @Str_A
+			where   PerPersoID	= @PerPersoID 
+			  and	Ctd_Principal = @Tip_Adicio		
+			  and	Dip_Status = @Str_A
 	end
 
 end
