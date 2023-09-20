@@ -222,6 +222,14 @@ declare	@Mon_Cero	smallint,				/*	Declaración de Constantes	*/
 		@Str_SieCer char(7),
 		@Str_Porcen	char(1),
 		@Sta_Proces	char(1)
+		
+select 	@NumTransac	= @NumTransac, 
+		@Transaccio	= @Transaccio,  
+		@Usuario	= @Usuario, 
+		@FechaSis	= @FechaSis, 
+		@SucOrigen	= @SucOrigen,
+		@SucDestino	= @SucDestino,
+		@Modulo		= @Modulo		
 
 /*	Asignación de Constantes	*/
 select	@Mon_Cero	= 0.00,			/*	Moneda Cero																	*/
@@ -439,6 +447,8 @@ while @Ren_Consec <= @Amo_Plazo begin
 		@Longitud	= @Ent_Tres
 
 	insert into #Rentas
+		(Ren_Consec,	Ren_Numero,		Ren_Capita,		Ren_Intere,		Ren_TtCaIn,
+		Ren_IvaInt,		Ren_IvaFac,		Ren_IvaRen, 	Ren_Total)
 		values(	@Ren_Consec,	@Ren_Numero,	@Mon_Cero,	@Mon_Cero,	@Mon_Cero,
 				@Mon_Cero,		@Mon_Cero,		@Mon_Cero,	@Mon_Cero)
 
