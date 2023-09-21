@@ -37,11 +37,13 @@ as
 ****************************************************************************
 ** REFERENCIAS:															****
 ****************************************************************************
-** Modificó:	Herman Sanchez Santiago									****
+** Modificó:	Herman Sanchez Santiago/Joel Moctezuma Guerrero			****
 ** Fecha:		13/Septiembre/2023										****
 ** Help:		TCELA-13684												****
 ** Descripción: Se agrega regla para considerar un arrendamiento como 	****
-**				PUCA con base al cobro de interes en ABCOTIZA  			****
+**				PUCA con base al cobro de interes en ABCOTIZA. Se agrega****
+**				validacion para considerar la unidad de negocio de la 	****
+**				cotizacion @Amo_UniNeg 									****
 ****************************************************************************
 ** Modifico:	Joel Moctezuma Guerrero									****
 ** Fecha:		07/Julio/2023											****
@@ -314,8 +316,10 @@ select	@Tip_ArPuCa	= @Cad_No
 /* Determinar si cobra intereses la cotizacion */
 select @Cot_IntRea = @Ent_Cero
 
-select @Cot_IntRea = Cot_IntRea
+select	@Cot_IntRea = Cot_IntRea,
+		@Amo_UniNeg	= Coa_UniNeg
 	from ABCOTIZA noholdlock
+	inner join ABCOTADI noholdlock on Coa_Numero = Cot_Numero
 	where Cot_Numero = @Num_Cotiza
 	
 select @Cot_IntRea = isnull(@Cot_IntRea,@Ent_Cero)
@@ -534,7 +538,7 @@ if @Amo_MonCer = @Cad_No begin
 		end
 	end
 	
-	if @Tip_ArPuCa	= @Cad_Si and @Arr_TiPuCa in (@Arr_PurCap, @Arr_Puro) begin
+	if @Tip_ArPuCa	= @Cad_Si and @Arr_TiPuCa in (@Arr_PurCap, @Arr_Puro) and @Amo_UniNeg = @Uni_B2B begin
 		select @Mon_InAPag = @Amo_RenMen
 	end
 	
