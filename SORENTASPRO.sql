@@ -1,4 +1,4 @@
-﻿create procedure SORENTASPRO (
+create procedure SORENTASPRO (
 	@Amo_MonFin	double precision,	-- Monto a Financiar
 	@Amo_IVAFac	smallmoney,			-- Porcentaje de I.V.A. de Factura
 	@Amo_OpcCom	double precision,	-- opción de Compra
@@ -36,6 +36,14 @@ as
 **				de ArrendaRegio**										****
 ****************************************************************************
 ** REFERENCIAS:															****
+****************************************************************************
+** Modificó:	Herman Sanchez Santiago/Joel Moctezuma Guerrero			****
+** Fecha:		13/Septiembre/2023										****
+** Help:		TCELA-13684												****
+** Descripción: Se agrega regla para considerar un arrendamiento como 	****
+**				PUCA con base al cobro de interes en ABCOTIZA. Se agrega****
+**				validacion para considerar la unidad de negocio de la 	****
+**				cotizacion @Amo_UniNeg 									****
 ****************************************************************************
 ** Modifico:	Joel Moctezuma Guerrero									****
 ** Fecha:		07/Julio/2023											****
@@ -160,9 +168,8 @@ declare	@Ren_ResCap	double precision,		/*Resultado capital*/
 		@Opc_ComIVA money,					/* Monto de la Opcion de Compra + IVA */
 		@Tip_ArPuCa	char(1),				/* Arrendamiento Puro Capitalizable S/N */
 		@Arr_TiPuCa	char(1),				/* Arrendamiento: Tipo Puro Capitalizable - 4 */
-		@Lic_Linea	char(12),				/*	Linea de Credito Asignada a la Cotizacion */
 		@Eva_ArrPuc	char(1),				/*	Evaluar Arrendamiento Puro */
-		@Arr_PurVig	int						/*	Total de Arrendamientos Puros Vigentes de la Linea de Credito */
+		@Cot_IntRea smallmoney				/* Interes Total de la Cotizacion */
 
 declare	@Mon_Cero	smallint,				/*	Declaración de Constantes	*/
 		@Mon_Uno	smallint,
@@ -217,6 +224,14 @@ declare	@Mon_Cero	smallint,				/*	Declaración de Constantes	*/
 		@Str_SieCer char(7),
 		@Str_Porcen	char(1),
 		@Sta_Proces	char(1)
+		
+select 	@NumTransac	= @NumTransac, 
+		@Transaccio	= @Transaccio,  
+		@Usuario	= @Usuario, 
+		@FechaSis	= @FechaSis, 
+		@SucOrigen	= @SucOrigen,
+		@SucDestino	= @SucDestino,
+		@Modulo		= @Modulo		
 
 /*	Asignación de Constantes	*/
 select	@Mon_Cero	= 0.00,			/*	Moneda Cero																	*/
@@ -295,37 +310,37 @@ select	@Par_DiBaCr	= Par_DiBaCr,
 	from SOPARAMS noholdlock
 	where	Par_Sucurs	= @SucOrigen
 	
+/* Determinar si se Migra a PUCA */	
 select	@Tip_ArPuCa	= @Cad_No
 
-if @Amo_TipArr <> @Arr_PurCap begin
-	select	@Eva_ArrPuc = @Cad_Si
+/* Determinar si cobra intereses la cotizacion */
+select @Cot_IntRea = @Ent_Cero
+
+select	@Cot_IntRea = Cot_IntRea,
+		@Amo_UniNeg	= Coa_UniNeg
+	from ABCOTIZA noholdlock
+	inner join ABCOTADI noholdlock on Coa_Numero = Cot_Numero
+	where Cot_Numero = @Num_Cotiza
 	
-	if @Amo_TipArr = @Arr_Puro begin
-		select	@Lic_Linea = Lic_Linea
-			from ABTMPLIC noholdlock
-			where Lic_NumTra = @NumTransac
-			
-		select	@Lic_Linea = isnull(@Lic_Linea, @Str_Vacio)
-		
-		if @Lic_Linea = @Str_Vacio begin
-			select	@Eva_ArrPuc = @Cad_Si
-		end else begin
-			select	@Arr_PurVig = count(Cre_Numero)
-				from ABCREDIT noholdlock
-				where Cre_Linea = @Lic_Linea
-				  and Cre_Status = @Sta_Proces
-				  
-			select	@Arr_PurVig	= isnull(@Arr_PurVig, @Ent_Cero)
-			
-			if @Arr_PurVig = @Ent_Cero begin
-				select	@Eva_ArrPuc = @Cad_Si
-			end else begin
-				select	@Eva_ArrPuc = @Cad_No
-			end
-		
-		end
+select @Cot_IntRea = isnull(@Cot_IntRea,@Ent_Cero)
+
+if @Amo_TipArr = @Arr_PurCap begin
+	if @Cot_IntRea = @Ent_Cero begin
+		--El contrato no cobra intereses
+		select	@Tip_ArPuCa	= @Cad_No
+	end else begin
+		--El contrato cobra intereses
+		select	@Tip_ArPuCa	= @Cad_Si
 	end
-	
+end else begin
+	if @Cot_IntRea = @Ent_Cero begin
+		--El contrato no cobra intereses
+		select	@Eva_ArrPuc = @Cad_No
+	end else begin
+		--El contrato cobra intereses
+		select	@Eva_ArrPuc	= @Cad_Si
+	end
+
 	if @Eva_ArrPuc = @Cad_Si begin
 		exec @Status = ABARPUCAPRO
 			@Num_Cotiza,	@Tip_ArPuCa output,	@NumTransac,	@Transaccio,	@Usuario,
@@ -335,7 +350,8 @@ if @Amo_TipArr <> @Arr_PurCap begin
 			return 1
 		end
 	end 
-end 
+
+end
 
 select	@Arr_TiPuCa = @Amo_TipArr
 
@@ -435,6 +451,8 @@ while @Ren_Consec <= @Amo_Plazo begin
 		@Longitud	= @Ent_Tres
 
 	insert into #Rentas
+		(Ren_Consec,	Ren_Numero,		Ren_Capita,		Ren_Intere,		Ren_TtCaIn,
+		Ren_IvaInt,		Ren_IvaFac,		Ren_IvaRen, 	Ren_Total)
 		values(	@Ren_Consec,	@Ren_Numero,	@Mon_Cero,	@Mon_Cero,	@Mon_Cero,
 				@Mon_Cero,		@Mon_Cero,		@Mon_Cero,	@Mon_Cero)
 
@@ -520,7 +538,7 @@ if @Amo_MonCer = @Cad_No begin
 		end
 	end
 	
-	if @Tip_ArPuCa	= @Cad_Si and @Arr_TiPuCa in (@Arr_PurCap, @Arr_Puro) begin
+	if @Tip_ArPuCa	= @Cad_Si and @Arr_TiPuCa in (@Arr_PurCap, @Arr_Puro) and @Amo_UniNeg = @Uni_B2B begin
 		select @Mon_InAPag = @Amo_RenMen
 	end
 	
