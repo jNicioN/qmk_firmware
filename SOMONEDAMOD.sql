@@ -49,6 +49,12 @@ Actualiza SOHISMON si @MON_VALOR o @MON_FECHA son diferentes a MON_VALOR o MON_F
 /*****************************************************************************/
 /** REFERENCIAS: 
 ****************************************************************************
+** Modifico:	Luis Enrique Ramirez Ortiz								****
+** Fecha:		30/05/2023												****
+** Help:	   	TCELTO-4797												****
+** Descripcion:	Se habilita la capacidad de modificar una moneda con  	****
+** 				tipo de cambio 0.00										****
+****************************************************************************
 ** Modificó:		Gustavo Cruz					****
 ** Fecha:		09/Abril/2013								****
 ** Help:			538421									****
@@ -260,14 +266,14 @@ if (@Mon_Descri = @Str_Vacio) begin
 	rollback
 	return 1
 end
-if (@Mon_EfeCom <= @Flo_Cero) begin
+if (@Mon_EfeCom < @Flo_Cero) begin
 	select	Err_Codigo	= '000006', 
 			Err_Mensaj	= 'Efectivo Compra incorrecto', 
 			Err_Variab	= 'Mon_EfeCom'
 	rollback
 	return 1
 end
-if (@Mon_EfeVen <= @Flo_Cero) begin
+if (@Mon_EfeVen < @Flo_Cero) begin
 	select	Err_Codigo	= '000007', 
 			Err_Mensaj	= 'Efectivo Venta incorrecto', 
 			Err_Variab	= 'Mon_EfeVen'
@@ -275,14 +281,14 @@ if (@Mon_EfeVen <= @Flo_Cero) begin
 	return 1
 	
 end
-if (@Mon_DocCom <= @Flo_Cero) begin
+if (@Mon_DocCom < @Flo_Cero) begin
 	select	Err_Codigo	= '000008', 
 			Err_Mensaj	= 'Documento Compra incorrecto', 
 			Err_Variab	= 'Mon_DocCom'
 	rollback
 	return 1
 end
-if (@Mon_DocVen <= @Flo_Cero) begin
+if (@Mon_DocVen < @Flo_Cero) begin
 	select	Err_Codigo	= '000009', 
 			Err_Mensaj	= 'Documento Venta incorrecto', 
 			Err_Variab	= 'Mon_DocVen'
