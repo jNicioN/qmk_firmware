@@ -39,12 +39,11 @@ select  @Ent_Cero	=  0,			/*	Entero Cero	    */
 
 
 select @Ope_Encont = count(*)
-    from SOOPPAMO noholdlock
-    where Opm_MonBas = @Opm_MonBas
-      and Opm_MonCot = @Opm_MonCot
+    from SOOPEPAR noholdlock
+    where Opp_Numero = @Opm_OpePar
 if isnull(@Ope_Encont, @Ent_Cero) = @Ent_Cero begin
     select 	Err_Codigo = '000003', 
-			Err_Mensaj = 'El Operador de Paridad de la Moneda no Existe',
+			Err_Mensaj = 'El Operador de Paridad no Existe',
 			Err_Foco   = 'Opm_OpePar'
 	rollback 
 	return 1
