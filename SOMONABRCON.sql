@@ -43,7 +43,7 @@ if @Tip_ConTip = @Str_C begin				/* 'C':  Consulta */
 	    	    Mon_Abrevi,	Mon_DesCor,	Mon_CtaEfe,	Mon_CtaBM,	Mon_CtaSBC,	
 	    	    Mon_CtaRem,	Mon_CieCom,	Mon_CieVen,	Mon_SpoCom,	Mon_SpoVen,	
 	    	    Mon_EqBaMa,	Mon_OpeCam, Mon_CieDia,	Mon_FixVal,	Mon_DesLeg,
-	    	    Mon_Tipo,	Mon_ForMet, Mon_AbrISO
+	    	    Mon_Tipo,	Mon_ForMet, Mon_AbrISO, SoMonedaID
             from SOMONEDA noholdlock
 	        where	Mon_AbrISO = @Mon_AbrISO
     end    
