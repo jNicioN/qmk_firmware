@@ -16,6 +16,8 @@ as
 ****************************************************************************
 **** Consulta moneda por la abreviacion             					****
 ****************************************************************************
+** REFERENCIAS:                       									****
+****************************************************************************
 ** Creo: 		Shaila Palafox                  				        ****
 ** Fecha: 		05/10/2023										        ****
 ** Helpdesk:    TCELTO-4796								                ****	
@@ -26,12 +28,25 @@ declare	@Tip_ConTip	char(1),
 		@Tip_ConCon	char(1)
 
 /* Declaracion de constantes */
-declare @Str_C char(1), 
-        @Str_Uno char(1)
+declare @Str_C 		char(1), 
+        @Str_Uno 	char(1),
+		@Str_Vacio 	char(1),
+		@Fec_Vacia 	smalldatetime
 
 /* Asignacion de valores a constantes */
-select @Str_C = 'C',
-       @Str_Uno = '1'
+select 	@Str_C 		= 'C',
+       	@Str_Uno 	= '1',
+	   	@Str_Vacio 	= '',
+	   	@Fec_Vacia 	= '1900-01-01'
+
+--Iniciacializamos las variables
+select	@NumTransac = isnull(@NumTransac, @Str_Vacio),
+		@Transaccio = isnull(@Transaccio, @Str_Vacio),
+		@Usuario = isnull(@Usuario, @Str_Vacio),
+		@FechaSis = isnull(@FechaSis, @Fec_Vacia),
+		@SucOrigen = isnull(@SucOrigen, @Str_Vacio),
+		@SucDestino = isnull(@SucDestino, @Str_Vacio),
+		@Modulo = isnull(@Modulo, @Str_Vacio)
 
 select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
 		@Tip_ConCon	= substring(@Tip_Consul, 2, 1)

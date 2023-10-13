@@ -29,9 +29,13 @@ declare @Mon_BasEnc int,            /* Declaración de Variables */
         @Ope_Encont int
 
 
-declare	@Ent_Cero   int         	/* Declaración de Constantes */
+declare	@Ent_Cero   int,         	/* Declaración de Constantes */
+		@Str_Vacio 	char(1)
 
-select  @Ent_Cero	=  0 			/*	Entero Cero	    */
+select  @Ent_Cero	=  0, 			/*	Entero Cero	    */
+		@Str_Vacio 	= ''
+
+select	@Modulo	= isnull(@Modulo, @Str_Vacio)
 
 
 select @Mon_BasEnc = count(*)

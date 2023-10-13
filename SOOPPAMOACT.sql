@@ -32,11 +32,16 @@ declare @Mon_BasEnc int,            /* Declaración de Variables */
 
 
 declare	@Ent_Cero   int,         	/* Declaración de Constantes */
-		@Act_Operad char(1)
+		@Act_Operad char(1),
+		@Str_Vacio 	char(1)
 
 select  @Ent_Cero	=  0,			/*	Entero Cero	    */
-		@Act_Operad = 'O'
+		@Act_Operad = 'O',
+		@Str_Vacio 	= ''
 
+--Iniciacializamos las variables
+select	@Opm_Numero = isnull(@Opm_Numero, @Ent_Cero),
+		@Modulo 	= isnull(@Modulo, @Str_Vacio)
 
 select @Ope_Encont = count(*)
     from SOOPEPAR noholdlock

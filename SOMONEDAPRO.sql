@@ -47,19 +47,34 @@ as
 /******************************************************************	
 *** Descripcion: Procesos de Monedas							***
 *******************************************************************
+** REFERENCIAS:                       							***
+*******************************************************************
 ** Creo: 		Luis Enrique Ramirez Ortiz						***
 ** Fecha: 		30/05/2023										***
 ** Helpdesk: 	TCELTO-4797										***	
 ******************************************************************/
 
 --Declaracion de Constantes
-declare @Tip_AltIso char(1)
+declare @Tip_AltIso char(1),
+		@Int_Cero  	int,
+		@Str_Vacio 	char(1),
+		@Flo_Cero	float
 
 --Asignacion de Constantes
-select @Tip_AltIso = 'I'
+select 	@Tip_AltIso = 'I',
+		@Int_Cero  	= 0,
+		@Str_Vacio 	= '',
+		@Flo_Cero 	= 0
 
 --Declaracion de variables
 declare @Status int
+
+--Iniciacializamos las variables
+select	@SoMonedaID = isnull(@SoMonedaID, @Int_Cero),
+		@Mon_CodISO = isnull(@Mon_CodISO, @Str_Vacio),
+		@Mon_OpeCam = isnull(@Mon_OpeCam, @Str_Vacio),
+		@Mon_RevBal = isnull(@Mon_RevBal, @Flo_Cero),
+		@Mon_NivRie = isnull(@Mon_NivRie, @Int_Cero)
 
 if @Tip_Proces = @Tip_AltIso begin
 	exec @Status = SOMONEDAALT
@@ -87,5 +102,4 @@ if @Tip_Proces = @Tip_AltIso begin
 		rollback
 		return 1
 	end 
-	
 end

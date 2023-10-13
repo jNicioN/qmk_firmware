@@ -54,7 +54,7 @@ if @Tip_Proces = @Pro_Operad begin
                 return 1
         end	
 	end else begin
-		execute SOOPPAMOACT
+		exec @Status = SOOPPAMOACT
 			@Opm_Numero,	@Opm_MonBas,	@Opm_MonCot,	@Opm_OpePar,	@Pro_Operad,
 			@NumTransac, 	@Transaccio, 	@Usuario, 		@FechaSis, 		@SucOrigen,
 			@SucDestino, 	@Modulo

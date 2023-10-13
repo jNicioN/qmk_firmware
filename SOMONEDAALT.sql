@@ -360,15 +360,24 @@ if @Mon_DesLeg = @Str_Vacio
 	
 select	@SoMonedaID	= convert(int, @Mon_Numero) 
 	
-insert into SOMONEDA values (
-	@SoMonedaID,	@Mon_Numero,	@Mon_Descri,	@Mon_Simbol,	@Mon_Tipo,
-	@Mon_EqBaMa,	@Mon_Fecha,		@Mon_EfeCom,	@Mon_EfeVen,	@Mon_DocCom,
-	@Mon_DocVen,	@Mon_FixCom,	@Mon_FixVen,	@Mon_Abrevi,	@Str_Vacio,
-	@Str_Vacio,		@Mon_DesCor,	@Mon_DesLeg,	@Mon_CtaEfe, 	@Mon_CtaBM,		
-	@Mon_CtaSBC,	@Mon_CtaRem,	@Mon_CieCom,	@Mon_CieVen,	@Mon_SpoCom,	
-	@Mon_SpoVen,	@Mon_CieDia,	@No_OpeCam,		@Mon_FixVal,	@Mon_ForMet,	
-    @DPr_Cero,		@Ent_Uno,       @NumTransac,	@Transaccio,	@Usuario,			
-	@FechaSis,	    @SucOrigen,		@SucDestino) 	
+insert into SOMONEDA (
+	SoMonedaID,	 	Mon_Numero,		Mon_Descri,		Mon_Simbol,		Mon_Tipo,
+	Mon_EqBaMa,	 	Mon_Fecha,		Mon_EfeCom,		Mon_EfeVen,		Mon_DocCom,
+	Mon_DocVen,	 	Mon_FixCom,		Mon_FixVen,		Mon_Abrevi,		Mon_AbrISO,
+	Mon_CodISO ,	Mon_DesCor,		Mon_DesLeg,		Mon_CtaEfe, 	Mon_CtaBM,		
+	Mon_CtaSBC,	 	Mon_CtaRem,		Mon_CieCom,		Mon_CieVen,		Mon_SpoCom,	
+	Mon_SpoVen,	 	Mon_CieDia,		Mon_OpeCam ,	Mon_FixVal,		Mon_ForMet,	
+    Mon_RevBal ,	Mon_NivRie ,    NumTransac,		Transaccio,		Usuario,			
+	FechaSis,	    SucOrigen,		SucDestino) 
+	values (
+		@SoMonedaID,	@Mon_Numero,	@Mon_Descri,	@Mon_Simbol,	@Mon_Tipo,
+		@Mon_EqBaMa,	@Mon_Fecha,		@Mon_EfeCom,	@Mon_EfeVen,	@Mon_DocCom,
+		@Mon_DocVen,	@Mon_FixCom,	@Mon_FixVen,	@Mon_Abrevi,	@Str_Vacio,
+		@Str_Vacio,		@Mon_DesCor,	@Mon_DesLeg,	@Mon_CtaEfe, 	@Mon_CtaBM,		
+		@Mon_CtaSBC,	@Mon_CtaRem,	@Mon_CieCom,	@Mon_CieVen,	@Mon_SpoCom,	
+		@Mon_SpoVen,	@Mon_CieDia,	@No_OpeCam,		@Mon_FixVal,	@Mon_ForMet,	
+    	@DPr_Cero,		@Ent_Uno,       @NumTransac,	@Transaccio,	@Usuario,			
+		@FechaSis,	    @SucOrigen,		@SucDestino) 	
 
 /* Alta en el Historico */ 
 exec @Status = SOHISMONALT

@@ -34,13 +34,30 @@ declare	@Ent_Uno    int,         	/* Declaración de Constantes */
 		@Ent_Dos    int,
 		@Str_L		char(1),
 		@Str_Uno	char(1),
-		@Str_Dos	char(1)
+		@Str_Dos	char(1),
+		@Str_Vacio 	char(1),
+		@Fec_Vacia 	smalldatetime,
+		@Ent_Cero    int
 
 select  @Ent_Uno	=  1,			/*	Entero Cero	    */
 		@Ent_Dos	=  2,
 		@Str_L		= 'L',
 		@Str_Uno	= '1',
-		@Str_Dos	= '2'
+		@Str_Dos	= '2',
+		@Str_Vacio 	= '',
+	   	@Fec_Vacia 	= '1900-01-01',
+		@Ent_Cero	=  0
+
+--Iniciacializamos las variables
+select	@Opm_Numero = isnull(@Opm_Numero, @Ent_Cero),
+		@Opm_MonCot = isnull(@Opm_MonCot, @Ent_Cero),
+		@NumTransac = isnull(@NumTransac, @Str_Vacio),
+		@Transaccio = isnull(@Transaccio, @Str_Vacio),
+		@Usuario 	= isnull(@Usuario, @Str_Vacio),
+		@FechaSis	= isnull(@FechaSis, @Fec_Vacia),
+		@SucOrigen 	= isnull(@SucOrigen, @Str_Vacio),
+		@SucDestino = isnull(@SucDestino, @Str_Vacio),
+		@Modulo 	= isnull(@Modulo, @Str_Vacio)
 		
 select	@Tip_ConTip	= substring(@Tip_Consul, @Ent_Uno, @Ent_Uno),
 		@Tip_ConCon	= substring(@Tip_Consul, @Ent_Dos, @Ent_Uno) 
