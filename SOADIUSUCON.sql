@@ -26,6 +26,14 @@ as
 **								de usuarios																						****
 ***************************************************************************/
 
+set @NumTransac = @NumTransac
+set @Transaccio = @Transaccio
+set @Usuario = @Usuario
+set @FechaSis	= @FechaSis
+set @SucOrigen = @SucOrigen
+set @SucDestino	= @SucDestino
+set @Modulo	= @Modulo
+
 declare	@Tip_ConTip	char(1),		/* Declaracion de Variables */
 		@Tip_ConCon	char(1)
 

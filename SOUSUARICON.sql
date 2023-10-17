@@ -458,7 +458,7 @@ if @Tip_ConTip = @Tra_TipCon begin					/* 'C':  Consulta */
 		from
 			SOUSUARI Usu noholdlock
 		where
-			Usu_Clave		like '%'+@Usu_Clave
+			Usu_Clave = @Usu_Clave
 	end
 end else begin					/* 'L':  Lista */
 	select	@Usu_Nombre = ltrim(rtrim(@Usu_Nombre)) + @Str_Porcen
