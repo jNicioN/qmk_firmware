@@ -17,10 +17,15 @@ as
 /****************************************************************************/
 /* DESCRIPCION: ** Consulta de usuarios ** 									*/
 /****************************************************************************/
-/** REFERENCIAS: 
+/** REFERENCIAS:
 ****************************************************************************
 ** Si se Compila este store en ProducciÃ³n, hay que volverle a 			****
 ** dar acceso al usuario BLOQUEAR										****
+****************************************************************************
+** Modifico:		Raúl Apolonio del Angel Karr														****
+** Fecha:			12 de Octubre del 2023																		****
+** Id Jira:			TCELIDC-710																							****
+** Descripcion:		Se agrega consulta CG para PIC contratos							****
 ****************************************************************************
 ** Modifico:		Francisco Minajas									****
 ** Fecha:			09/06/2022											****
@@ -252,7 +257,8 @@ declare	@Str_Vacio	char(1),		/* DeclaraciÃ³n de Constantes */
         @Str_C		char(1),
         @Str_D		char(1),
 		@Str_E		char(1),
-		@Str_F		char(1)
+		@Str_F		char(1),
+		@Str_G		char(1)
 
 /* AsignaciÃ³n de Constantes */
 select	@Str_Vacio	= '',			/* String VacÃ­o												*/
@@ -281,7 +287,8 @@ select	@Str_Vacio	= '',			/* String VacÃ­o												*/
         @Str_C		= 'C',			/* String para consulta C									*/
         @Str_D		= 'D',			/* String para consulta D									*/
 		@Str_E		= 'E',			/* String para consulta E									*/
-		@Str_F		= 'F'			/* String para consulta F									*/
+		@Str_F		= 'F',			/* String para consulta F									*/
+		@Str_G		= 'G'
 
 
 select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
@@ -405,7 +412,7 @@ if @Tip_ConTip = @Tra_TipCon begin					/* 'C':  Consulta */
 		select	SaPerfilID,	Usu_Perfil
 			from SOUSUARI Usu noholdlock
 			where	Usu_Numero	= @Usu_Numero
-		
+
 	end else if @Tip_ConCon = @Str_D begin		/* Consulta de Usuarios con Perfiles PYME (CrÃ©dito Negocios) */
 
 		select	Usu.Usu_Numero,	Usu.Usu_Clave,	Usu.Usu_Status,	Usu.Usu_StaSes,	Usu.Usu_FeAcPa,
@@ -435,7 +442,7 @@ if @Tip_ConTip = @Tra_TipCon begin					/* 'C':  Consulta */
 		  and	(	Usu.Usu_Numero	= @Usu_Numero
 		   or		Usu.Usu_Clave	= @Usu_Clave	)
 		  and	Per_Modulo		= @Mod_EmpCon
-	
+
 	end else if @Tip_ConCon = @Str_F begin		/* Consulta de Clave de Entrada */
 
 		select	Usu_Numero,	Usu_Nombre,	Usu_Clave,	Usu_Autori,		Usu_Nivel,
@@ -445,14 +452,19 @@ if @Tip_ConTip = @Tra_TipCon begin					/* 'C':  Consulta */
 				 SAPERFIL Per noholdlock
 			where	Usu.SaPerfilID	= Per.SaPerfilID
 			  and	Usu_Clave		like '%'+@Usu_Clave
-	end 
-	
-
+	end else if @Tip_ConCon = @Str_G begin
+		select
+			Usu_Numero,	Usu_Nombre,	Usu_Clave, Usu_Activo, SoUsuariID
+		from
+			SOUSUARI Usu noholdlock
+		where
+			Usu_Clave = @Usu_Clave
+	end
 end else begin					/* 'L':  Lista */
 	select	@Usu_Nombre = ltrim(rtrim(@Usu_Nombre)) + @Str_Porcen
 
 	if @Tip_ConCon = @Str_Uno begin				/* Lista General */
-		select	Usu_Numero,	Usu_Nombre,	Usu_Clave,	Usu_EMail 
+		select	Usu_Numero,	Usu_Nombre,	Usu_Clave,	Usu_EMail
 			from SOUSUARI noholdlock
 			where	Usu_Nombre	like @Usu_Nombre
 			order by Usu_Nombre
@@ -467,11 +479,11 @@ end else begin					/* 'L':  Lista */
 	if @Tip_ConCon = @Str_Tres begin		/* Lista de usuarios con perfil relacionado a factoraje */
 		select	Usu_Numero,	Usu_Nombre,	Usu_Clave,	Usu_Perfil,	Usu_Activo
 			from SOUSUARI Usu noholdlock inner join
-				 BEFAPEBA Per noholdlock 
+				 BEFAPEBA Per noholdlock
 			  on Per.Fpa_NuPeBr = Usu_Perfil
 			order by Usu_Numero
 	end
-	
+
 	if @Tip_ConCon = @Str_Cuatro begin				/* Lista General mas campos de perfil */
 		select	usu.Usu_Numero,	usu.Usu_Nombre,	usu.Usu_Clave,	usu.Usu_EMail,	per.Per_Descri
 			from SOUSUARI usu noholdlock
@@ -479,24 +491,24 @@ end else begin					/* 'L':  Lista */
 			where	Usu_Nombre	like @Usu_Nombre
 			order by Usu_Nombre
 	end
-	
+
 	if @Tip_ConCon = @Str_Cinco begin				/* Lista General mas campos de perfil */
 		select	usu.Usu_Numero,	usu.Usu_Nombre,	usu.Usu_Clave,	usu.Usu_EMail,	per.Per_Descri
 			from SOUSUARI usu noholdlock
 			inner join SAPERFIL per	noholdlock on (usu.Usu_Perfil = per.Per_Numero)
 			where	Usu_Numero	= @Usu_Numero
-			
+
 	end
-	
+
 	if @Tip_ConCon = @Str_Seis begin				/* Lista General mas campo de activo */
-		select	Usu_Numero,	Usu_Nombre,	Usu_Clave,	Usu_EMail, Usu_Activo 
+		select	Usu_Numero,	Usu_Nombre,	Usu_Clave,	Usu_EMail, Usu_Activo
 			from SOUSUARI noholdlock
 			where	Usu_Nombre	like @Usu_Nombre
 			order by Usu_Nombre
 	end
-	
+
 	if @Tip_ConCon = @Str_Siete begin				/* Lista General mas campo de activo */
-		select	Usu_Numero,	Usu_Nombre,	Usu_Clave,	Usu_EMail, Usu_Activo 
+		select	Usu_Numero,	Usu_Nombre,	Usu_Clave,	Usu_EMail, Usu_Activo
 			from SOUSUARI noholdlock
 			where	Usu_Clave	like @Usu_Clave
 	end
