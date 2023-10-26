@@ -1,0 +1,80 @@
+create procedure SOOPPAMOACT (
+	@Opm_Numero	int,
+    @Opm_MonBas int,
+    @Opm_MonCot int,
+    @Opm_OpePar int,
+	@Tip_Actual char(1),
+
+    @NumTransac	char(10),
+	@Transaccio	char(3),
+	@Usuario	char(6),
+	@FechaSis	smalldatetime,
+	@SucOrigen	char(3),
+	@SucDestino	char(3),
+	@Modulo		char(2)
+) 
+
+as
+
+/*******************************************************************
+** Descripcion : Actualización de Operacion par de Moneda          *
+********************************************************************
+** REFERENCIAS:                       
+********************************************************************
+** Creó:          Shaila Palafox          						   *
+** Fecha:         25/05/2023									   *
+** Help Desk: 	  TCELTO-4796                                      *
+********************************************************************/
+
+declare @Mon_BasEnc int,            /* Declaración de Variables */
+        @Mon_CotEnc int,
+        @Ope_Encont int
+
+
+declare	@Ent_Cero   int,         	/* Declaración de Constantes */
+		@Act_Operad char(1),
+		@Str_Vacio 	char(1)
+
+select  @Ent_Cero	=  0,			/*	Entero Cero	    */
+		@Act_Operad = 'O',
+		@Str_Vacio 	= ''
+
+--Iniciacializamos las variables
+select	@Opm_Numero = isnull(@Opm_Numero, @Ent_Cero),
+		@Modulo 	= isnull(@Modulo, @Str_Vacio)
+
+select @Ope_Encont = count(*)
+    from SOOPEPAR noholdlock
+    where Opp_Numero = @Opm_OpePar
+if isnull(@Ope_Encont, @Ent_Cero) = @Ent_Cero begin
+    select 	Err_Codigo = '000003', 
+			Err_Mensaj = 'El Operador de Paridad no Existe',
+			Err_Foco   = 'Opm_OpePar'
+	rollback 
+	return 1
+end 
+
+if @Tip_Actual = @Act_Operad begin
+	 update SOOPPAMO set
+	    Opm_OpePar = @Opm_OpePar,
+	    NumTransac = @NumTransac,
+	    Transaccio = @Transaccio,
+	    Usuario = @Usuario,
+	    FechaSis = @FechaSis,
+	    SucOrigen = @SucOrigen,
+	    SucDestino = @SucDestino
+        where Opm_MonBas = @Opm_MonBas
+		  and Opm_MonCot = @Opm_MonCot
+end
+
+
+
+if @@error != @Ent_Cero begin
+	select	Err_Codigo	= '000005',
+			Err_Mensaj	= 'Ocurrió un error inesperado, por favor vuelva a intentar.'
+	rollback
+	return 1
+end
+
+select	Err_Codigo	= '000000',
+        Err_Mensaj	= 'Operación actualizada exitosamente'
