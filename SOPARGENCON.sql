@@ -50,6 +50,7 @@ declare @Par_EndPoi char(10), /* Declaración de variables Ec TDC*/
 select	@Tip_ConInd	= 'C',		/* Tipo Consulta Individual*/
 		@Tip_ConUno	= '1',		/* Tipo Consulta Uno */
 		@Tip_ConDos	= '2',		/* Tipo Consulta Dos */
+		@Tip_ConTres 	= '3',		/* Tipo Consulta Tres */
 		@Ent_Uno	= 1,		/* Entero Uno */
 		@Ent_Dos	= 2,		/* Entero Dos */
 		@Ent_Tres	= 3,		/* Entero Tres */
