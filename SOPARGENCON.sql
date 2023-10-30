@@ -37,6 +37,7 @@ declare	@Tip_ConTip	char(1),	/* Declaración de variables */
 declare	@Tip_ConInd	char(1),	/* Declaración de constantes */
 		@Tip_ConUno	char(1),
 		@Tip_ConDos	char(1),
+		@Tip_ConTres char(1),
 		@Ent_Uno	int,
 		@Ent_Dos	int,
 		@Ent_Tres	int
