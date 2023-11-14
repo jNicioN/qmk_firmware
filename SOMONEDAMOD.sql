@@ -48,6 +48,12 @@ Actualiza SOHISMON si @MON_VALOR o @MON_FECHA son diferentes a MON_VALOR o MON_F
 /* DESCRIPCION: ***Modificacion de una moneda*** */
 /*****************************************************************************/
 /** REFERENCIAS: 
+***************************************************************************
+** Modifico:	Shaila Palafox											****
+** Fecha:		14/11/2023												****
+** Help:	   	TCELTO-6348												****
+** Descripcion:	Se agrega validación para saber si el valor de   		****
+** 				Mon_CieDia (Cierre Dolares) esta dentro de los limites	****
 ****************************************************************************
 ** Modifico:	Luis Enrique Ramirez Ortiz								****
 ** Fecha:		30/05/2023												****
@@ -184,7 +190,9 @@ declare	@Status		int,				/* Declaración de Variables */
 		@Num_Punto  int,
 		@Ant_EfeCom float,
 		@Ant_EfeVen float,
-		@Ant_SpoVen float
+		@Ant_SpoVen float,
+		@Mon_OpeCam char(1),
+		@SoMonedaID	int
 
 declare	@Cue_Compan	char(3),			/* Declaración de Constantes */
 		@Str_Vacio	char(1),
@@ -198,7 +206,10 @@ declare	@Cue_Compan	char(3),			/* Declaración de Constantes */
 		@Tip_ActCam	char(1),
 		@Tip_ActMet	char(1),
 		@Mon_Cero	money,
-		@Mon_CorCer	smallmoney
+		@Mon_CorCer	smallmoney,
+		@Si_OpeCam	char(1),
+		@Tic_CieDol	int,
+		@Pro_CieDol	char(1)
 
 /* Asignación de Constantes */
 select	@Cue_Compan	= '001',			/* Compañía contable BANREGIO */
@@ -213,7 +224,10 @@ select	@Cue_Compan	= '001',			/* Compañía contable BANREGIO */
 		@Tip_ActCam	= 'C',				/* Tipo de actualización de cambios */
 		@Tip_ActMet	= 'M',				/* Tipo de actualización por cambio de valor de metal */
 		@Mon_Cero	= $0.00,			/* Campo money en ceros */
-		@Mon_CorCer	= $0.00				/* Campo smallmoney en ceros */
+		@Mon_CorCer	= $0.00,			/* Campo smallmoney en ceros */
+		@Si_OpeCam	= 'S',				/* Opera Cambios */
+		@Tic_CieDol = 2,				/* Tipo de Cambio de Cierre a Dolares*/
+		@Pro_CieDol = 'D'				/* Proceso Validacion de Cierre a Dolares*/
 
 select	@FechaSis	= getdate()
 
@@ -251,7 +265,8 @@ end
 
 select	@Ant_EfeCom = Mon_EfeCom,
 		@Ant_EfeVen	= Mon_EfeVen,
-		@Ant_SpoVen	= Mon_SpoVen
+		@Ant_SpoVen	= Mon_SpoVen,
+		@Mon_OpeCam = Mon_OpeCam
 	from SOMONEDA noholdlock
 	where	Mon_Numero	= @Mon_Numero
 
@@ -415,6 +430,23 @@ if (@Mon_FixVal < @Flo_Cero) and (@Mon_Tipo <> @Tip_Metal)  begin
 	rollback
 	return 1	
 	
+end
+
+if (@Mon_Numero <> @Mon_Dolar and @Mon_OpeCam = @Si_OpeCam) begin
+	select	@SoMonedaID	= convert(int, @Mon_Numero)
+
+	exec @Status = SOLITICAPRO
+		@SoMonedaID, @Tic_CieDol, @Ent_CorCer, @Ent_CorCer, @Mon_CieDia,
+		@Pro_CieDol, @NumTransac, @Transaccio, @Usuario, @FechaSis,
+		@SucOrigen, @SucDestino, @Modulo
+
+	if @Status <> 0 begin
+		select	Err_Codigo	= '000024', 
+			Err_Mensaj	= 'El valor capturado de Cierre a dólares no está dentro de los límites', 
+			Err_Variab	= 'Mon_CieDia'
+		rollback
+		return 1
+	end
 end
 	
 if @Mon_DesLeg = @Str_Vacio
