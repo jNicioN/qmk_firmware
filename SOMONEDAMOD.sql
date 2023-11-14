@@ -442,7 +442,7 @@ if (@Mon_Numero <> @Mon_Dolar and @Mon_OpeCam = @Si_OpeCam) begin
 
 	if @Status <> 0 begin
 		select	Err_Codigo	= '000024', 
-			Err_Mensaj	= 'El valor capturado de Cierre a dólares no está dentro de los límites', 
+			Err_Mensaj	= 'El Cierre a dólares no está dentro de los límites', 
 			Err_Variab	= 'Mon_CieDia'
 		rollback
 		return 1
