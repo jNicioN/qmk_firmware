@@ -34,16 +34,13 @@ if not exists ( select	Tas_Numero
 					from SOTASAS noholdlock
 					where	Tas_Numero	= @Tas_Numero) begin
 	select	Err_Codigo	= '000001',
-			Err_Mensaj	= 'La Tasa No Existe',
-			Err_Variab	= 'Tas_Numero'
-	rollback
+			Err_Mensaj	= 'La Tasa No Existe'
 	return 1
 end 
 
 if  @Tas_StaAct != @Sta_Activa and @Tas_StaAct != @Sta_Inacti begin
 	select	Err_Codigo	= '000002',
 			Err_Mensaj	= 'Estatus no valido'
-	rollback
 	return 1
 end
 
