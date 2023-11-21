@@ -1,14 +1,13 @@
 create procedure SOTASASPRO (
     @Tas_Numero char(2),
-    @Tas_Descri varchar(80), 
-    @Tas_StaAct char(1),
+    @Tas_Descri varchar(80),
     @Tas_Abrevi varchar(10),
     @Tas_Valor double precision, 
     @Tas_Valor2 double precision, 
     @Tas_Fecha  smalldatetime,
     @Tas_Moneda char(2),
-    @Tas_Extemp char(1),
-    @Tas_SelPar char(1),
+    @Tas_SelPar char(1), 
+    @Tas_StaAct char(1),
     @Tip_Proces char(1),
     
     @NumTransac char(10),
@@ -56,8 +55,8 @@ if @Tip_Proces	= @Pro_Alta begin
     begin transaction
         /*Se ejecuta el alta de la tasa */
         exec  @Status = SOTASASALT @Tas_Numero, @Tas_Descri, @Tas_Abrevi, @Tas_Valor,  @Tas_Fecha,
-                                @Tas_Moneda, @Tas_SelPar, @NumTransac, @Transaccio, @Usuario,
-                                @FechaSis,   @SucOrigen,  @SucDestino, @Modulo
+                                   @Tas_Moneda, @Tas_SelPar, @NumTransac, @Transaccio, @Usuario,
+                                   @FechaSis,   @SucOrigen,  @SucDestino, @Modulo
 
         if @Status <> @Ent_Cero begin
                 select	Err_Codigo	= '000001',
@@ -70,7 +69,7 @@ if @Tip_Proces	= @Pro_Alta begin
         /*Si el estatus de la tasa es inactiva se ejecuta la actualizacion del estatus*/
         if @Tas_StaAct <> @Sta_Activa begin
             exec  @Status = SOTASASACT @Tas_Numero, @Tas_StaAct, @NumTransac, @Transaccio, @Usuario,
-                                    @FechaSis,   @SucOrigen,  @SucDestino, @Modulo
+                                       @FechaSis,   @SucOrigen,  @SucDestino
 
             if @Status <> @Ent_Cero begin
                     rollback
@@ -80,17 +79,27 @@ if @Tip_Proces	= @Pro_Alta begin
     commit
 end else if @Tip_Proces = @Pro_Modifi begin
 
-    /*Se ejecuta el alta de la tasa */
-    exec  @Status = SOTASASMOD @Tas_Numero, @Tas_Descri, @Tas_Abrevi, @Tas_Valor,  @Tas_Valor2, 
-                               @Tas_Fecha,  @Tas_Moneda, @Tas_SelPar, @NumTransac, @Transaccio,
-                               @Usuario,    @FechaSis,   @SucOrigen,  @SucDestino, @Modulo
+    begin transaction
 
-    if @Status <> @Ent_Cero begin
-			select	Err_Codigo	= '000002',
-				    Err_Mensaj	= 'Error en proceso de modificacion'
+        /*Se ejecuta la modificacion de las tasas */
+        exec  @Status = SOTASASMOD @Tas_Numero, @Tas_Descri, @Tas_Abrevi, @Tas_Valor,  @Tas_Valor2, 
+                                   @Tas_Fecha,  @Tas_Moneda, @Tas_SelPar, @NumTransac, @Transaccio,
+                                   @Usuario,    @FechaSis,   @SucOrigen,  @SucDestino, @Modulo
 
-			rollback
-			return @Ent_Uno
-	end
+        if @Status <> @Ent_Cero begin
+                select	Err_Codigo	= '000002',
+                        Err_Mensaj	= 'Error en proceso de modificacion'
 
+                rollback
+                return @Ent_Uno
+        end
+        /*Se ejecuta la actualizacion del estatus */
+        exec  @Status = SOTASASACT @Tas_Numero, @Tas_StaAct, @NumTransac, @Transaccio, @Usuario,
+                                   @FechaSis,   @SucOrigen,  @SucDestino
+
+                if @Status <> @Ent_Cero begin
+                        rollback
+                        return @Ent_Uno
+                end
+    commit
 end

@@ -7,8 +7,7 @@ create procedure SOTASASACT(
     @Usuario char(6),
     @FechaSis smalldatetime,
     @SucOrigen char(3),
-    @SucDestino char(3),
-    @Modulo char(2)
+    @SucDestino char(3)
 ) as 
 
 /*
