@@ -27,7 +27,7 @@ as
 ********************************************************************/
 
 declare @Mon_Encont int,            /* Declaración de Variables */
-        @Tip_Encont int,
+        @Tip_Encont int
 
 declare	@Ent_Cero   int,         	/* Declaración de Constantes */
         @Num_Cero   numeric,
