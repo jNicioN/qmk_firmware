@@ -266,7 +266,8 @@ end
 select	@Ant_EfeCom = Mon_EfeCom,
 		@Ant_EfeVen	= Mon_EfeVen,
 		@Ant_SpoVen	= Mon_SpoVen,
-		@Mon_OpeCam = Mon_OpeCam
+		@Mon_OpeCam = Mon_OpeCam,
+		@SoMonedaID = SoMonedaID
 	from SOMONEDA noholdlock
 	where	Mon_Numero	= @Mon_Numero
 
@@ -433,8 +434,6 @@ if (@Mon_FixVal < @Flo_Cero) and (@Mon_Tipo <> @Tip_Metal)  begin
 end
 
 if (@Mon_Numero <> @Mon_Dolar and @Mon_OpeCam = @Si_OpeCam) begin
-	select	@SoMonedaID	= convert(int, @Mon_Numero)
-
 	exec @Status = SOLITICAPRO
 		@SoMonedaID, @Tic_CieDol, @Ent_CorCer, @Ent_CorCer, @Mon_CieDia,
 		@Pro_CieDol, @NumTransac, @Transaccio, @Usuario, @FechaSis,
