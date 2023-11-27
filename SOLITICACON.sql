@@ -50,7 +50,7 @@ select	@Tip_ConTip	= substring(@Tip_Consul, @Ent_Uno, @Ent_Uno),
 if @Tip_ConTip = @Str_C begin						/*Consulta*/
 	if @Tip_ConCon = @Str_Uno begin					/*Consulta por Moneda y Tipo de cambio*/
 		select Ltc_TipCam, Ltc_Moneda, Ltc_LimInf, Ltc_LimSup
-			from SOLITICA
+			from SOLITICA noholdlock
 			where Ltc_TipCam = @Ltc_TipCam
 			  and Ltc_Moneda = @Ltc_Moneda
 			  and Ltc_Activo = @Ent_Uno
@@ -58,7 +58,7 @@ if @Tip_ConTip = @Str_C begin						/*Consulta*/
 end else if @Tip_ConTip = @Str_L begin				/*Consulta por Lista*/
 	if @Tip_ConCon = @Str_Uno begin					/*Consulta por Tipo de Cambio*/
 		select Ltc_TipCam, Ltc_Moneda, Ltc_LimInf, Ltc_LimSup
-			from SOLITICA
+			from SOLITICA noholdlock
 			where Ltc_TipCam = @Ltc_TipCam
 			  and Ltc_Activo = @Ent_Uno
 	end
