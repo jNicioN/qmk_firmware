@@ -269,6 +269,32 @@ end else begin			/* Cliente:  Visual Basic */
 				where	Tas_Numero	= @Tas_Numero
 				  and	Tas_Fecha	= @Tas_Fecha
 				  and	Tas_StaAct	= @Sta_Activa
+		end else if @Tip_ConCon = '9' begin		/* Consulta Sin Importar Si Es Sel. Parcial y si esta o no activa*/
+			select	Tas_Numero,	Tas_Descri,	Tas_Abrevi,	Tas_Valor,	Tas_Fecha,
+					Tas_Moneda, Tas_StaAct
+				from SOTASAS noholdlock
+				where	Tas_Numero	= @Tas_Numero
+			select @Fec_Tasa  = convert(date, dateadd(dd, -datepart(dd, getdate()), getdate()))
+			exec SOANTFECHAB @Fec_Tasa output, @Ent_Cero, @Tas_NoSePa, @Tas_NoSePa
+			/* Consulta la Tasa Histórica del corte del mes anterior */
+			select @Hit_Valor2 = Hit_Valor2
+				from SOHISTAS noholdlock
+				where  Hit_Tasa = @Tas_Numero
+					and Hit_Fecha = @Fec_Tasa
+			if isnull(@Hit_Valor2, @Flo_Cero) = @Flo_Cero begin
+				select @Fec_Tasa = max (Hit_Fecha)
+					from SOHISTAS noholdlock
+					where Hit_Tasa = @Tas_Numero
+						and  Hit_Valor2 != @Flo_Cero
+						
+				select Hit_Valor2
+					from SOHISTAS noholdlock
+					where Hit_Tasa = @Tas_Numero
+						and Hit_Fecha = @Fec_Tasa
+			end
+			else begin
+				select @Hit_Valor2 Hit_Valor2
+			end
 		end
 	end else begin					/* 'L':  Lista */
 		select	@Tas_Descri	= ltrim(rtrim(@Tas_Descri)) + @Str_Porcen
@@ -348,6 +374,15 @@ end else begin			/* Cliente:  Visual Basic */
 				  and	Tas_Numero	= Clt_Numero
 				  and	Tas_StaAct	= @Sta_Activa
 				  and 	Clt_Clasif	= @Str_TasCla
+				order by Tas_Numero
+
+		end else if @Tip_ConCon = '9' begin			/* Lista Sin Importar Si Es Sel. Parcial y esta o no activa */
+			select  Tas_Numero,	Tas_Descri, Tas_Abrevi,	Mon_Descri,	Tas_Valor,
+					Tas_Moneda, Tas_Fecha, Tas_StaAct
+				from SOTASAS  noholdlock,
+					 SOMONEDA noholdlock
+				where	Tas_Moneda	= Mon_Numero
+				  and	Tas_Descri	like @Tas_Descri
 				order by Tas_Numero
 		end
 	end
