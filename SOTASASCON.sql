@@ -23,7 +23,7 @@ as
 ****************************************************************************
 ** Modificó:	Gerardo Santos											****
 ** Fecha:		29/11/2023												****
-** Help:																****
+** Help:		TCELTO-6430												****
 ** Descripción:	Se crean las consultas C9 y L9.							****
 ****************************************************************************
 ** Modificó:	Jonathan Balderas Gauna									****
