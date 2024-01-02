@@ -23,24 +23,28 @@ create procedure SOTASASACT(
 
 /* Declaracion de constantes */
 declare @Sta_Activa	char(1), 
-        @Sta_Inacti char(1)
+        @Sta_Inacti char(1),
+        @Ent_Uno	int
 
 /* Asignacion de valores a constantes */
-select 	@Sta_Activa 	= 'S',
-       	@Sta_Inacti 	= 'N'
+select 	@Sta_Activa 	= 'S',  /* Estatus: Activa   */
+       	@Sta_Inacti 	= 'N',  /* Estatus: Inactiva */
+        @Ent_Uno	    = 1		/* Numero: Uno       */
 
 if not exists ( select	Tas_Numero
 					from SOTASAS noholdlock
 					where	Tas_Numero	= @Tas_Numero) begin
 	select	Err_Codigo	= '000001',
 			Err_Mensaj	= 'La Tasa No Existe'
-	return 1
+    rollback
+	return @Ent_Uno
 end 
 
 if  @Tas_StaAct != @Sta_Activa and @Tas_StaAct != @Sta_Inacti begin
 	select	Err_Codigo	= '000002',
 			Err_Mensaj	= 'Estatus no valido'
-	return 1
+    rollback
+	return @Ent_Uno
 end
 
 
