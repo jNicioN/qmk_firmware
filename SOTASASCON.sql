@@ -129,7 +129,8 @@ declare	@Str_Vacio	char(1),				/* DeclaraciÃÂ³n de Constantes */
 		@Sta_Activa	char(1),
 		@Str_Porcen	char(1),
 		@Str_TasCla	char(1),
-		@Flo_Cero   float
+		@Flo_Cero   float,
+		@Str_Nueve	char(1)
 		
 /* Asignacion de Constantes */
 select	@Str_Vacio	= '',					/* String Vacio */
@@ -140,7 +141,8 @@ select	@Str_Vacio	= '',					/* String Vacio */
 		@Sta_Activa	= 'S',					/* Status activa */
 		@Str_Porcen	= '%',
 		@Str_TasCla = 'C', 					/*Captacion*/
-		@Flo_Cero   = 0.00
+		@Flo_Cero   = 0.00,
+		@Str_Nueve	= '9'
 
 /* Inicializacion de variables */
 select  @NumTransac = isnull(@NumTransac,@Str_Vacio),
@@ -291,7 +293,7 @@ end else begin			/* Cliente:  Visual Basic */
 				where	Tas_Numero	= @Tas_Numero
 				  and	Tas_Fecha	= @Tas_Fecha
 				  and	Tas_StaAct	= @Sta_Activa
-		end else if @Tip_ConCon = '9' begin		/* Consulta Sin Importar Si Es Sel. Parcial y si esta o no activa*/
+		end else if @Tip_ConCon = @Str_Nueve begin		/* Consulta Sin Importar Si Es Sel. Parcial y si esta o no activa*/
 			select	Tas_Numero,	Tas_Descri,	Tas_Abrevi,	Tas_Valor,	Tas_Fecha,
 					Tas_Moneda, Tas_StaAct
 				from SOTASAS noholdlock
@@ -403,7 +405,7 @@ end else begin			/* Cliente:  Visual Basic */
 				  and 	Clt_Clasif	= @Str_TasCla
 				order by Tas_Numero
 
-		end else if @Tip_ConCon = '9' begin			/* Lista Sin Importar Si Es Sel. Parcial y esta o no activa */
+		end else if @Tip_ConCon = @Str_Nueve begin			/* Lista Sin Importar Si Es Sel. Parcial y esta o no activa */
 			select  Tas_Numero,	Tas_Descri, Tas_Abrevi,	Mon_Descri,	Tas_Valor,
 					Tas_Moneda, Tas_Fecha, Tas_StaAct
 				from SOTASAS  noholdlock,
