@@ -4,10 +4,11 @@ create procedure SOTASASACT(
     
     @NumTransac char(10),
     @Transaccio char(3),
-    @Usuario char(6),
-    @FechaSis smalldatetime,
-    @SucOrigen char(3),
-    @SucDestino char(3)
+    @Usuario 	char(6),
+    @FechaSis 	smalldatetime,
+    @SucOrigen 	char(3),
+    @SucDestino char(3),
+	@Modulo 	char(2)
 ) as 
 
 /*
@@ -24,12 +25,17 @@ create procedure SOTASASACT(
 /* Declaracion de constantes */
 declare @Sta_Activa	char(1), 
         @Sta_Inacti char(1),
-        @Ent_Uno	int
+        @Ent_Uno	int,
+        @Str_Vacio	char(1)
 
 /* Asignacion de valores a constantes */
 select 	@Sta_Activa 	= 'S',  /* Estatus: Activa   */
        	@Sta_Inacti 	= 'N',  /* Estatus: Inactiva */
-        @Ent_Uno	    = 1		/* Numero: Uno       */
+        @Ent_Uno	    =  1,	/* Numero: Uno       */
+        @Str_Vacio		= ''	/* String Vacio 	 */
+
+/* Inicialización de variables */
+select @Modulo = isnull(@Modulo,@Str_Vacio)
 
 if not exists ( select	Tas_Numero
 					from SOTASAS noholdlock

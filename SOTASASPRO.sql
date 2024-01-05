@@ -69,7 +69,7 @@ if @Tip_Proces	= @Pro_Alta begin
         /*Si el estatus de la tasa es inactiva se ejecuta la actualizacion del estatus*/
         if @Tas_StaAct <> @Sta_Activa begin
             exec  @Status = SOTASASACT @Tas_Numero, @Tas_StaAct, @NumTransac, @Transaccio, @Usuario,
-                                       @FechaSis,   @SucOrigen,  @SucDestino
+                                       @FechaSis,   @SucOrigen,  @SucDestino, @Modulo
 
             if @Status <> @Ent_Cero begin
                     rollback
@@ -95,7 +95,7 @@ end else if @Tip_Proces = @Pro_Modifi begin
         end
         /*Se ejecuta la actualizacion del estatus */
         exec  @Status = SOTASASACT @Tas_Numero, @Tas_StaAct, @NumTransac, @Transaccio, @Usuario,
-                                   @FechaSis,   @SucOrigen,  @SucDestino
+                                   @FechaSis,   @SucOrigen,  @SucDestino, @Modulo
 
                 if @Status <> @Ent_Cero begin
                         rollback

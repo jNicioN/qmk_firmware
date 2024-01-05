@@ -118,12 +118,14 @@ declare	@Tip_ConTip	char(1),				/* DeclaraciÃÂ³n de Variables */
 		@Tip_ConCon	char(1),
 		@Fot_Numero	char(3),
 		@Fec_Tasa   smalldatetime,
-		@Hit_Valor2 float
+		@Hit_Valor2 float,
+		@Status		int				/* Campo de retorno */
 
 declare	@Str_Vacio	char(1),				/* DeclaraciÃÂ³n de Constantes */
 		@Tas_NoSePa	char(1),
 		@Fec_Vacia	smalldatetime,
 		@Ent_Cero	int,
+		@Ent_Uno	int,
 		@Sta_Activa	char(1),
 		@Str_Porcen	char(1),
 		@Str_TasCla	char(1),
@@ -134,10 +136,20 @@ select	@Str_Vacio	= '',					/* String Vacio */
 		@Tas_NoSePa	= 'N',
 		@Fec_Vacia	= '1900-01-01',			/* Fecha Vacia */
 		@Ent_Cero	= 0,
+		@Ent_Uno	= 1,
 		@Sta_Activa	= 'S',					/* Status activa */
 		@Str_Porcen	= '%',
 		@Str_TasCla = 'C', 					/*Captacion*/
 		@Flo_Cero   = 0.00
+
+/* Inicializacion de variables */
+select  @NumTransac = isnull(@NumTransac,@Str_Vacio),
+		@Transaccio = isnull(@Transaccio,@Str_Vacio),
+		@Usuario 	= isnull(@Usuario,@Str_Vacio),
+		@FechaSis 	= isnull(@FechaSis,@Str_Vacio),
+		@SucOrigen 	= isnull(@SucOrigen,@Str_Vacio),
+		@SucDestino = isnull(@SucDestino,@Str_Vacio),
+		@Modulo 	= isnull(@Modulo,@Str_Vacio)
 								
 if @Tip_Consul = @Str_Vacio begin	/* Cliente:  FoxPro */
 	if (@Tas_Descri = @Str_Vacio) and (@Tas_Numero = @Str_Vacio)
@@ -238,7 +250,12 @@ end else begin			/* Cliente:  Visual Basic */
 				where	Tas_Numero	= @Tas_Numero
 				  and	Tas_StaAct	= @Sta_Activa
 			select @Fec_Tasa  = convert(date, dateadd(dd, -datepart(dd, getdate()), getdate()))
-			exec SOANTFECHAB @Fec_Tasa output, @Ent_Cero, @Tas_NoSePa, @Tas_NoSePa
+			exec @Status = SOANTFECHAB
+				@Fec_Tasa output, @Ent_Cero, @Tas_NoSePa, @Tas_NoSePa
+			if @Status <> @Ent_Cero begin
+				rollback
+				return @Ent_Uno
+			end
 			/* Consulta la Tasa Histórica del corte del mes anterior */
 			select @Hit_Valor2 = Hit_Valor2
 				from SOHISTAS noholdlock
@@ -280,7 +297,12 @@ end else begin			/* Cliente:  Visual Basic */
 				from SOTASAS noholdlock
 				where	Tas_Numero	= @Tas_Numero
 			select @Fec_Tasa  = convert(date, dateadd(dd, -datepart(dd, getdate()), getdate()))
-			exec SOANTFECHAB @Fec_Tasa output, @Ent_Cero, @Tas_NoSePa, @Tas_NoSePa
+			exec @Status = SOANTFECHAB
+				@Fec_Tasa output, @Ent_Cero, @Tas_NoSePa, @Tas_NoSePa
+			if @Status <> @Ent_Cero begin
+				rollback
+				return @Ent_Uno
+			end
 			/* Consulta la Tasa Histórica del corte del mes anterior */
 			select @Hit_Valor2 = Hit_Valor2
 				from SOHISTAS noholdlock
