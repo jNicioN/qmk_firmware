@@ -21,6 +21,11 @@ as
 **************************************************************************/
 /* REFERENCIAS: 									
 ****************************************************************************
+** Modificó:	Gerardo Santos											****
+** Fecha:		29/11/2023												****
+** Help:		TCELTO-6430												****
+** Descripción:	Se crean las consultas C9 y L9.							****
+****************************************************************************
 ** Modificó:	Jonathan Balderas Gauna									****
 ** Fecha:		23/Marzo/2016											****
 ** Help:		849927													****
@@ -113,26 +118,40 @@ declare	@Tip_ConTip	char(1),				/* DeclaraciÃÂ³n de Variables */
 		@Tip_ConCon	char(1),
 		@Fot_Numero	char(3),
 		@Fec_Tasa   smalldatetime,
-		@Hit_Valor2 float
+		@Hit_Valor2 float,
+		@Status		int				/* Campo de retorno */
 
 declare	@Str_Vacio	char(1),				/* DeclaraciÃÂ³n de Constantes */
 		@Tas_NoSePa	char(1),
 		@Fec_Vacia	smalldatetime,
 		@Ent_Cero	int,
+		@Ent_Uno	int,
 		@Sta_Activa	char(1),
 		@Str_Porcen	char(1),
 		@Str_TasCla	char(1),
-		@Flo_Cero   float
+		@Flo_Cero   float,
+		@Str_Nueve	char(1)
 		
 /* Asignacion de Constantes */
 select	@Str_Vacio	= '',					/* String Vacio */
 		@Tas_NoSePa	= 'N',
 		@Fec_Vacia	= '1900-01-01',			/* Fecha Vacia */
 		@Ent_Cero	= 0,
+		@Ent_Uno	= 1,
 		@Sta_Activa	= 'S',					/* Status activa */
 		@Str_Porcen	= '%',
 		@Str_TasCla = 'C', 					/*Captacion*/
-		@Flo_Cero   = 0.00
+		@Flo_Cero   = 0.00,
+		@Str_Nueve	= '9'
+
+/* Inicializacion de variables */
+select  @NumTransac = isnull(@NumTransac,@Str_Vacio),
+		@Transaccio = isnull(@Transaccio,@Str_Vacio),
+		@Usuario 	= isnull(@Usuario,@Str_Vacio),
+		@FechaSis 	= isnull(@FechaSis,@Str_Vacio),
+		@SucOrigen 	= isnull(@SucOrigen,@Str_Vacio),
+		@SucDestino = isnull(@SucDestino,@Str_Vacio),
+		@Modulo 	= isnull(@Modulo,@Str_Vacio)
 								
 if @Tip_Consul = @Str_Vacio begin	/* Cliente:  FoxPro */
 	if (@Tas_Descri = @Str_Vacio) and (@Tas_Numero = @Str_Vacio)
@@ -233,7 +252,12 @@ end else begin			/* Cliente:  Visual Basic */
 				where	Tas_Numero	= @Tas_Numero
 				  and	Tas_StaAct	= @Sta_Activa
 			select @Fec_Tasa  = convert(date, dateadd(dd, -datepart(dd, getdate()), getdate()))
-			exec SOANTFECHAB @Fec_Tasa output, @Ent_Cero, @Tas_NoSePa, @Tas_NoSePa
+			exec @Status = SOANTFECHAB
+				@Fec_Tasa output, @Ent_Cero, @Tas_NoSePa, @Tas_NoSePa
+			if @Status <> @Ent_Cero begin
+				rollback
+				return @Ent_Uno
+			end
 			/* Consulta la Tasa Histórica del corte del mes anterior */
 			select @Hit_Valor2 = Hit_Valor2
 				from SOHISTAS noholdlock
@@ -269,6 +293,37 @@ end else begin			/* Cliente:  Visual Basic */
 				where	Tas_Numero	= @Tas_Numero
 				  and	Tas_Fecha	= @Tas_Fecha
 				  and	Tas_StaAct	= @Sta_Activa
+		end else if @Tip_ConCon = @Str_Nueve begin		/* Consulta Sin Importar Si Es Sel. Parcial y si esta o no activa*/
+			select	Tas_Numero,	Tas_Descri,	Tas_Abrevi,	Tas_Valor,	Tas_Fecha,
+					Tas_Moneda, Tas_StaAct
+				from SOTASAS noholdlock
+				where	Tas_Numero	= @Tas_Numero
+			select @Fec_Tasa  = convert(date, dateadd(dd, -datepart(dd, getdate()), getdate()))
+			exec @Status = SOANTFECHAB
+				@Fec_Tasa output, @Ent_Cero, @Tas_NoSePa, @Tas_NoSePa
+			if @Status <> @Ent_Cero begin
+				rollback
+				return @Ent_Uno
+			end
+			/* Consulta la Tasa Histórica del corte del mes anterior */
+			select @Hit_Valor2 = Hit_Valor2
+				from SOHISTAS noholdlock
+				where  Hit_Tasa = @Tas_Numero
+					and Hit_Fecha = @Fec_Tasa
+			if isnull(@Hit_Valor2, @Flo_Cero) = @Flo_Cero begin
+				select @Fec_Tasa = max (Hit_Fecha)
+					from SOHISTAS noholdlock
+					where Hit_Tasa = @Tas_Numero
+						and  Hit_Valor2 != @Flo_Cero
+						
+				select Hit_Valor2
+					from SOHISTAS noholdlock
+					where Hit_Tasa = @Tas_Numero
+						and Hit_Fecha = @Fec_Tasa
+			end
+			else begin
+				select @Hit_Valor2 Hit_Valor2
+			end
 		end
 	end else begin					/* 'L':  Lista */
 		select	@Tas_Descri	= ltrim(rtrim(@Tas_Descri)) + @Str_Porcen
@@ -348,6 +403,15 @@ end else begin			/* Cliente:  Visual Basic */
 				  and	Tas_Numero	= Clt_Numero
 				  and	Tas_StaAct	= @Sta_Activa
 				  and 	Clt_Clasif	= @Str_TasCla
+				order by Tas_Numero
+
+		end else if @Tip_ConCon = @Str_Nueve begin			/* Lista Sin Importar Si Es Sel. Parcial y esta o no activa */
+			select  Tas_Numero,	Tas_Descri, Tas_Abrevi,	Mon_Descri,	Tas_Valor,
+					Tas_Moneda, Tas_Fecha, Tas_StaAct
+				from SOTASAS  noholdlock,
+					 SOMONEDA noholdlock
+				where	Tas_Moneda	= Mon_Numero
+				  and	Tas_Descri	like @Tas_Descri
 				order by Tas_Numero
 		end
 	end
