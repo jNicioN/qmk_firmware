@@ -17,6 +17,12 @@ create procedure SOANTECOCON (
 ** DESCRIPCION: Consulta de registros de analitica terreno concepto	**
 **********************************************************************
 ** Modifico:		Raul Muniz										**
+** Fecha:			09/01/2024                               		**
+** C.Cambios:		36743											**
+** Descripcion:		Ajuste en consulta L3 para regresar tipo de		**
+**					cuenta del estado financiero					**
+**********************************************************************
+** Modifico:		Raul Muniz										**
 ** Fecha:			21/04/2023                               		**
 ** C.Cambios:		26559											**
 ** Descripcion:		Ajuste en consulta L3 para validar si bien está	**
@@ -124,9 +130,9 @@ end else begin
 			from #ListadoRangos efn
 			order by efn.Esf_Anio desc
    
-		select 	atc.Atc_Numero,	atc.Atc_AnaTer,	atc.Atc_BieInm,	atc.Atc_EstAna, 
-				atc.NumTransac,	atc.Transaccio,	atc.Usuario,	atc.FechaSis, 
-				atc.SucOrigen,	atc.SucDestino 
+		select 	atc.Atc_Numero,	atc.Atc_AnaTer,	atc.Atc_BieInm,	atc.Atc_EstAna,
+				Eft_TipCue,		atc.NumTransac,	atc.Transaccio,	atc.Usuario,
+				atc.FechaSis,	atc.SucOrigen,	atc.SucDestino 
 			from SOANTECO atc noholdlock
 			inner join SOANATER noholdlock
 				on Atc_AnaTer = Ant_Numero
