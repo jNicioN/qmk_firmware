@@ -131,8 +131,8 @@ end else begin
 			order by efn.Esf_Anio desc
    
 		select 	atc.Atc_Numero,	atc.Atc_AnaTer,	atc.Atc_BieInm,	atc.Atc_EstAna,
-				Eft_TipCue,		atc.NumTransac,	atc.Transaccio,	atc.Usuario,
-				atc.FechaSis,	atc.SucOrigen,	atc.SucDestino 
+				Eft_EstFin,		Eft_TipCue,		atc.NumTransac,	atc.Transaccio,
+				atc.Usuario,	atc.FechaSis,	atc.SucOrigen,	atc.SucDestino 
 			from SOANTECO atc noholdlock
 			inner join SOANATER noholdlock
 				on Atc_AnaTer = Ant_Numero
