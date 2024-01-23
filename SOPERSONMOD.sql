@@ -5,10 +5,10 @@ create procedure SOPERSONMOD (
 	@Per_Tipo	char(1) output,
 	@Per_NuSeFi	varchar(30),
 	@Per_Titulo	varchar(10),
-	@Per_Nombre	varchar(40),
-	@Per_ApePat	varchar(40),
-	@Per_ApeMat	varchar(40),
-	@Per_RazSoc	varchar(180),
+	@Per_Nombre	varchar(84),
+	@Per_ApePat	varchar(84),
+	@Per_ApeMat	varchar(84),
+	@Per_RazSoc	varchar(254),
 	@Per_RFC	varchar(15),
 	@Per_CURP	char(18),
 	@Per_Calle	char(40),
@@ -46,6 +46,13 @@ as
 ** DESCRIPCION: **Modificación de Apoderados** 							****
 ***************************************************************************/
 /** REFERENCIAS:
+****************************************************************************
+** Modificó:	Carlos Copto										 	****
+** Fecha:		10/01/2024											   	****
+** Help: 		36841 											   		****
+** Descripcion:	Se aumenta el tamaño de los campos de nombre			****
+**				Cli_Nombre,Cli_ApePat,Cli_ApeMat,Cli_RazSoc,Cli_Comple 	****
+**				y Cli_ComOrd 											****
 ****************************************************************************
 ** Modificó:	Javier Eduardo Ceron Rangel		                    	****
 ** Fecha:	    04/08/2023      					                    ****
@@ -157,8 +164,8 @@ as
 ** Fecha:		18/Jun/1998												****
 ***************************************************************************/
 
-declare	@Per_Comple	varchar(180),	/*	Declaracion de Variables	*/
-		@Per_ComOrd	varchar(180),
+declare	@Per_Comple	varchar(254),	/*	Declaracion de Variables	*/
+		@Per_ComOrd	varchar(254),
 		@Act_Numero	char(10),
 		@Act_Status	char(1),
 		@Status		int,
@@ -171,12 +178,12 @@ declare	@Per_Comple	varchar(180),	/*	Declaracion de Variables	*/
 		@Bit_Tipo	char(1),
 		@Bit_NuSeFi	varchar(30),
 		@Bit_Titulo	varchar(10),
-		@Bit_Nombre	varchar(40),
-		@Bit_ApePat	varchar(40),
-		@Bit_ApeMat	varchar(40),
-		@Bit_RazSoc	varchar(180),
-		@Bit_Comple	varchar(180),
-		@Bit_ComOrd	varchar(180),
+		@Bit_Nombre	varchar(84),
+		@Bit_ApePat	varchar(84),
+		@Bit_ApeMat	varchar(84),
+		@Bit_RazSoc	varchar(254),
+		@Bit_Comple	varchar(254),
+		@Bit_ComOrd	varchar(254),
 		@Bit_RFC	char(15),
 		@Bit_CURP	char(18),
 		@Bit_Calle	char(40),
@@ -212,7 +219,7 @@ declare	@Per_Comple	varchar(180),	/*	Declaracion de Variables	*/
 		@Aux_Entida char(3),		
 		@Aux_Nacion char(3),		
 		@Aux_CodPos char(6),
-		@Aux_PerNum char(8)			
+		@Aux_PerNum char(8)
 
 declare	@Str_Vacio	char(1),		/*	Declaracion de Constantes	*/
 		@Str_Espaci	char(1),
@@ -245,7 +252,8 @@ declare	@Str_Vacio	char(1),		/*	Declaracion de Constantes	*/
 		@Pan_DatCon	char(2),
 		@Pan_Promot	char(2),
 		@Pan_PerCli	char(2),
-		@Pan_ActFin	char(2)
+		@Pan_ActFin	char(2),
+		@Ent_180	int
 
 select	@Str_Vacio	= '',				-- String Vacio
 		@Str_Espaci	= ' ',				-- String Espacio
@@ -278,7 +286,8 @@ select	@Str_Vacio	= '',				-- String Vacio
 		@Pan_DatCon	= '02',				-- Pantalla Sibamex3: Datos de Contacto
 		@Pan_Promot	= '03',				-- Pantalla Sibamex3: Promotores
 		@Pan_PerCli	= '04',				-- Pantalla Sibamex3: Perfilamiento
-		@Pan_ActFin	= '05'				-- Pantalla Sibamex3: Actividad Financiera
+		@Pan_ActFin	= '05',				-- Pantalla Sibamex3: Actividad Financiera
+		@Ent_180	= 180				-- Entero 180
 
 if @Modulo = @Mod_AplOnl begin
 
@@ -661,7 +670,8 @@ if isnull(@Per_NumTra, @Str_Vacio) = @Str_Vacio begin
 end
 
 --Se quito condicion para evitar perdida de bitacora
-select	@Bit_NumPer	= Per_Numero,
+select	@PerPersoID = PerPersoID,
+		@Bit_NumPer	= Per_Numero,
 		@Bit_Fecha	= Per_Fecha,
 		@Bit_NumTra	= Per_NumTra,
 		@Bit_Tipo	= Per_Tipo,
@@ -778,6 +788,21 @@ end else begin
 		where	Per_Numero	= @Per_Numero
 
 end
+
+--Si el nombre de la persona excede 180 caracteres se manda a modificar en la tabla de nombres largos
+if char_length(@Per_Comple) > @Ent_180 or char_length(@Per_RazSoc) > @Ent_180  begin
+
+	exec @Status = SONOMLARMOD
+		@PerPersoID,	@Per_Nombre,	@Per_ApePat,	@Per_ApeMat,	@Per_RazSoc,
+	    @Per_Comple,	@Per_ComOrd,	@NumTransac,	@Transaccio,	@Usuario,			
+	    @FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
+	if @Status <> @Ent_Cero begin
+		rollback
+		return @Ent_Uno
+	end
+
+end
+
 
 if @@nestlevel = @Ent_Uno
 	select	Err_Codigo	= '000000',

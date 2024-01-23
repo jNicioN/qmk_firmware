@@ -5,10 +5,10 @@ create procedure SOPERSONALT(
 	@Per_Tipo	char(1),
 	@Per_NuSeFi	varchar(30),
 	@Per_Titulo	varchar(10),
-	@Per_Nombre	varchar(40),
-	@Per_ApePat	varchar(40),
-	@Per_ApeMat	varchar(40),
-	@Per_RazSoc	varchar(180),	
+	@Per_Nombre	varchar(84),
+	@Per_ApePat	varchar(84),
+	@Per_ApeMat	varchar(84),
+	@Per_RazSoc	varchar(254),	
 	@Per_RFC	varchar(15),
 	@Per_CURP	varchar(18),
 	@Per_Calle	varchar(40),
@@ -48,6 +48,13 @@ as
 /***************************************************************************/
 /** REFERENCIAS:														   */
 /****************************************************************************
+** Modificó:	Carlos Copto										 	****
+** Fecha:		10/01/2024											   	****
+** Help: 		36841 											   		****
+** Descripcion:	Se aumenta el tamaño de los campos de nombre			****
+**				Cli_Nombre,Cli_ApePat,Cli_ApeMat,Cli_RazSoc,Cli_Comple 	****
+**				y Cli_ComOrd 											****
+****************************************************************************
 ** Modificó:	Yuridia Santiago									 	****
 ** Fecha:		23/Sep/2022											   	****
 ** Help: 		1739140											   		****
@@ -189,8 +196,8 @@ as
 ****************************************************************************/
 
 /*	Declaracion de Variables	*/
-declare	@Per_Comple	varchar(180),	/* Nombre Completo */
-		@Per_ComOrd	varchar(180),	/* Nombre Completo Ordenado */
+declare	@Per_Comple	varchar(254),	/* Nombre Completo */
+		@Per_ComOrd	varchar(254),	/* Nombre Completo Ordenado */
 		@Act_Numero	char(10),		/* Numero Actividad */
 		@Act_Status	char(1),		/* Estatus Actividad */
 		@Status		int,			/* Estatus */
@@ -245,7 +252,8 @@ declare	@Fec_Vacia	smalldatetime,
 		@Sta_Inacti	char(1),
 		@Loc_Pais 	char(3),
 		@Mod_AplOnl char(2),
-		@Tip_PerNum char(1)
+		@Tip_PerNum char(1),
+		@Ent_180	int
 
 
 select	@Fec_Vacia	= '1900-01-01',	/*	Fecha Vacía*/
@@ -279,7 +287,8 @@ select	@Fec_Vacia	= '1900-01-01',	/*	Fecha Vacía*/
 	 	@Mod_FabCon = 'FB',			/* Modulo de Fabrica de Crédito al Consumo */
 	 	@Sta_Inacti	= 'I',			/* Status Inactivo para validar localidad y entidad */
 		@Mod_AplOnl	= 'OL',			/* Modulo de Aplicaciones Online*/		
-		@Tip_PerNum = 'F'			/*  Tipo proceso para actualizar el numero de folio*/
+		@Tip_PerNum = 'F',			/*  Tipo proceso para actualizar el numero de folio*/
+		@Ent_180 	= 180			/* Numero 180*/
 
 if @Modulo in (@Mod_AplOnl) begin
 
@@ -653,6 +662,18 @@ select	@Per_Numero	= right('00000000' + ltrim(rtrim(convert(char, @PerPersoID)))
 if @Per_Numero = @Str_Vacio begin
 		rollback
 		return @Ent_Uno
+end
+
+--Si el nombre completo excede los 180 caracteres se guarda en la tabla de nombres largos
+if char_length(@Per_Comple) > @Ent_180 or char_length(@Per_RazSoc) > @Ent_180 begin
+	exec @Status = SONOMLARALT 
+		@PerPersoID,	@Per_Nombre,	@Per_ApePat,	@Per_ApeMat,	@Per_RazSoc,
+	    @Per_Comple,	@Per_ComOrd,	@NumTransac,	@Transaccio,	@Usuario,			
+	    @FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
+	if @Status <> @Ent_Cero begin
+		rollback
+		return @Ent_Uno
+	end
 end
 
 exec @Status = SOPERSONPRO		
