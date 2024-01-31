@@ -1,13 +1,13 @@
-﻿create procedure SOPERUNIACT (
+create procedure SOPERUNIACT (
 	@Per_Numero	char(8),
 	@Per_Fecha	smalldatetime,
 	@Per_NumTra	char(10),
 	@Per_Tipo	char(1),
-	@Per_Nombre	varchar(40),
+	@Per_Nombre	varchar(84),
 
-	@Per_ApePat	varchar(40),
-	@Per_ApeMat	varchar(40),
-	@Per_RazSoc	varchar(180),
+	@Per_ApePat	varchar(84),
+	@Per_ApeMat	varchar(84),
+	@Per_RazSoc	varchar(254),
 	@Per_RFC	varchar(15),
 	@Per_CURP	varchar(18),
 
@@ -51,6 +51,13 @@ as
 *** DESCRIPCION: Actualiza Datos de Persona Unificada			  **
 ********************************************************************
 *** REFERENCIAS: 												  **
+********************************************************************
+** Modificó:	Carlos Copto									****
+** Fecha:		10/01/2024										****
+** Help: 		36841 											****
+** Descripcion:	Se aumenta el tamaño de los campos de nombre	****
+**				se agrega validacion si el nombre excede 180	****
+**				caracteres se guarda en la tabla de nombres largos**
 ********************************************************************
 ** Modifico:	Erika Báez										****
 ** Fecha:		26/Junio/2019									****
@@ -96,8 +103,8 @@ as
 ** Fecha:		18/Mar/15										****
 ** Help:		0744849											****
 *******************************************************************/
-declare	@Per_Comple	varchar(180),	/*	Declaracion de Variables	*/
-		@Per_ComOrd	varchar(180),	/* Persona nombre Ordenado*/
+declare	@Per_Comple	varchar(254),	/*	Declaracion de Variables	*/
+		@Per_ComOrd	varchar(254),	/* Persona nombre Ordenado*/
 		@Per_ActINE	char(6),		/* Persona Actividad según INEGI */
 		@Per_Titulo varchar(10),	/* Persona titulo */
 		@Status		int,			/* Status */
@@ -109,9 +116,9 @@ declare	@Per_Comple	varchar(180),	/*	Declaracion de Variables	*/
 		@Bit_Nombre	varchar(40),	/* Bitacora Nombre */
 		@Bit_ApePat	varchar(40),	/* Bitacora apellido paterno */
 		@Bit_ApeMat	varchar(40),	/* Bitacora Apellido Materno */
-		@Bit_RazSoc	varchar(180),	/* Bitacora Razon social */
-		@Bit_Comple	varchar(180),	/* Bitacora nombre completo */
-		@Bit_ComOrd	varchar(180),	/* Bitacora nombre ordenado */
+		@Bit_RazSoc	varchar(254),	/* Bitacora Razon social */
+		@Bit_Comple	varchar(254),	/* Bitacora nombre completo */
+		@Bit_ComOrd	varchar(254),	/* Bitacora nombre ordenado */
 		@Bit_RFC	char(15),		/* Bitacora RFC */
 		@Bit_CURP	char(18),		/* Bitacora CURP */
 		@Bit_Calle	char(40),		/* Bitacora Calle */
@@ -129,6 +136,7 @@ declare	@Per_Comple	varchar(180),	/*	Declaracion de Variables	*/
 		@Bit_Nacion	char(3),		/* Bitacora nacionalidad */
 		@Bit_ActEmp	char(1),		/* Bitacora Actividad Empresarial */
 		@Bit_Giro	char(30),		/* Bitacora giro */
+
 		@Bit_Sector	char(3),		/* Bitacora sector */
 		@Bit_Activi	char(10),		/* Bitacora actividad */
 		@Bit_ActINE	varchar(10),	/* Bitacora Actividad según INEGI */	
@@ -171,7 +179,8 @@ declare	@Per_Comple	varchar(180),	/*	Declaracion de Variables	*/
 		@Bit_FeVeId	smalldatetime,	/* Bitacora Fecha de vencimiento de la identificacion */
 		@Bit_NuIdFi	varchar(20),	/* Bitacora Numero de Identificacion Fiscal */
 		@Bit_EntPri char(40), 		/* Bitacora Entre Calle Primera */
-		@Bit_EntSeg char(40)		/* Bitacora Entre Calle Segunda */
+		@Bit_EntSeg char(40),		/* Bitacora Entre Calle Segunda */
+		@PerPersoID int
 
 declare	@Str_Vacio	char(1),	/*	Declaracion de Constantes	*/
 		@Per_Moral	char(1),	/* Persona Moral */
@@ -185,7 +194,9 @@ declare	@Str_Vacio	char(1),	/*	Declaracion de Constantes	*/
 		@Act_PerSb3 char(1),		/* Actualizacion persona SB3 */
 		@Act_GenPer char(1),		/* Actualizacion para generacion de persona */
 		@Str_Vacio1 char(1),		/* Cadena vacia con un espacio */
-		@Act_TarAdi	char(1)			/*Actualizacion tarjetas adicionales*/
+		@Act_TarAdi	char(1),		/*Actualizacion tarjetas adicionales*/
+		@Ent_Uno	int,
+		@Ent_180	int
 
 select	@Str_Vacio	= '',			/* String Vacio	*/
 		@Per_Moral	= '1',			/* Persona Moral */
@@ -199,7 +210,9 @@ select	@Str_Vacio	= '',			/* String Vacio	*/
 		@Act_PerSb3 = 'D',			/*Actualizacion persona SB3*/
 		@Act_GenPer = 'G',			/*Actualizacion para generacion de persona */
 		@Str_Vacio1 = ' ',			/*String vacio*/
-		@Act_TarAdi	= 'H'			/*Actualizacion tarjetas adicionales*/
+		@Act_TarAdi	= 'H',			/*Actualizacion tarjetas adicionales*/
+		@Ent_Uno	= 1,
+		@Ent_180	= 180
 
 if not exists (	select	Per_Numero
 					from SOPERSON noholdlock
@@ -208,38 +221,39 @@ if not exists (	select	Per_Numero
 			Err_Mensaj	= 'La persona no existe',
 			Err_Variab	= 'Per_RazSoc'
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if (@Per_Tipo = @Per_Moral) and (@Per_RazSoc = @Str_Vacio) begin
 	select	Err_Codigo	= '000001',
 			Err_Mensaj	= 'Proporcione la Razon social'
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if (@Per_Tipo like @Str_23) and (@Per_Nombre = @Str_Vacio) begin
 	select	Err_Codigo	= '000002',
 			Err_Mensaj	= 'Proporcione el Nombre'
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if (@Per_Tipo like @Str_23) and (@Per_ApePat = @Str_Vacio) begin
 	select	Err_Codigo	= '000003',
 			Err_Mensaj	= 'Proporcione el Apellido paterno'
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Per_Tipo = @Per_Moral and @Per_RFC = @Str_Vacio begin
 	select	Err_Codigo	= '000004',
 			Err_Mensaj	= 'Proporcione el RFC'
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
-select	@Per_Titulo = Per_Titulo
+select	@Per_Titulo = Per_Titulo,
+		@PerPersoID = PerPersoID
 	from SOPERSON noholdlock
 	where	Per_Numero	= @Per_Numero
 	  and	Per_NumTra	= @Per_NumTra
@@ -250,7 +264,7 @@ if (@NumTransac =  @Str_Vacio or isnull(@NumTransac, @Str_Vacio) = @Str_Vacio) b
 		@NumTransac output,	@SucOrigen
 	if @Status <> 0 begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 end
 
@@ -263,7 +277,8 @@ if not exists (	select	Per_Numero
 					  and	Per_NumTra	= @Per_NumTra
 					  and	Per_Fecha	= @Per_Fecha ) begin
 
-	select	@Bit_Fecha	= Per_Fecha,
+	select	@PerPersoID = PerPersoID,
+			@Bit_Fecha	= Per_Fecha,
 			@Bit_NumTra	= Per_NumTra,
 			@Bit_Tipo	= Per_Tipo,
 			@Bit_NuSeFi	= Per_NuSeFi,
@@ -311,7 +326,7 @@ if not exists (	select	Per_Numero
 		@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 
 	select	@Bit_Fecha	= Adi_Fecha,
@@ -375,7 +390,7 @@ if not exists (	select	Per_Numero
 
 		if @Status <> 0 begin
 			rollback
-			return 1
+			return @Ent_Uno
 		end
 end
 
@@ -398,6 +413,7 @@ select	@Per_ActINE	= isnull(@Per_ActINE, @Str_Vacio)
 
 /* Datos Personales */
 if @Tip_Actual = @Act_PerIW begin
+
 	update SOPERSON set
 		Per_Fecha	= @Per_Fecha,
 		Per_NumTra	= @Per_NumTra,
@@ -434,7 +450,21 @@ if @Tip_Actual = @Act_PerIW begin
 		SucDestino	= @SucDestino
 	where	Per_Numero	= @Per_Numero
 
-/* Datos Adicionales */
+	--Si el nombre de la persona excede 180 caracteres se manda a modificar en la tabla de nombres largos
+	if char_length(@Per_Comple) > @Ent_180 or char_length(@Per_RazSoc) > @Ent_180  begin
+
+		exec @Status = SONOMLARMOD
+			@PerPersoID,	@Per_Nombre,	@Per_ApePat,	@Per_ApeMat,	@Per_RazSoc,
+		    @Per_Comple,	@Per_ComOrd,	@NumTransac,	@Transaccio,	@Usuario,			
+		    @FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
+		if @Status <> @Ent_Cero begin
+			rollback
+			return @Ent_Uno
+		end
+
+	end
+
+	/* Datos Adicionales */
 	update SOPERADI set
 		Adi_Fecha	= @Per_Fecha,
 		Adi_NumTra	= @Per_NumTra,
@@ -450,9 +480,9 @@ if @Tip_Actual = @Act_PerIW begin
 	where	Adi_PerNum	= @Per_Numero
 end
 
-
 /* Datos Personales */
 if @Tip_Actual = @Act_PerNEC begin
+
 	update SOPERSON set
 		Per_Fecha	= @Per_Fecha,
 		Per_NumTra	= @Per_NumTra,
@@ -482,7 +512,7 @@ if @Tip_Actual = @Act_PerNEC begin
 		SucDestino	= @SucDestino
 	where	Per_Numero	= @Per_Numero
 
-/* Datos Adicionales */
+	/* Datos Adicionales */
 	update SOPERADI set
 		Adi_Fecha	= @Per_Fecha,
 		Adi_NumTra	= @Per_NumTra,
@@ -497,9 +527,8 @@ if @Tip_Actual = @Act_PerNEC begin
 		SucOrigen	= @SucOrigen,
 		SucDestino	= @SucDestino
 	where	Adi_PerNum	= @Per_Numero
+
 end
-
-
 /* Datos Personales */
 if @Tip_Actual = @Act_PerCRM begin
 
@@ -543,7 +572,21 @@ if @Tip_Actual = @Act_PerCRM begin
 		SucDestino	= @SucDestino
 	where	Per_Numero	= @Per_Numero
 
-/* Datos Adicionales */
+	--Si el nombre de la persona excede 180 caracteres se manda a modificar en la tabla de nombres largos
+	if char_length(@Per_Comple) > @Ent_180 or char_length(@Per_RazSoc) > @Ent_180  begin
+
+		exec @Status = SONOMLARMOD
+			@PerPersoID,	@Per_Nombre,	@Per_ApePat,	@Per_ApeMat,	@Per_RazSoc,
+		    @Per_Comple,	@Per_ComOrd,	@NumTransac,	@Transaccio,	@Usuario,			
+		    @FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
+		if @Status <> @Ent_Cero begin
+			rollback
+			return @Ent_Uno
+		end
+
+	end
+
+	/* Datos Adicionales */
 	update SOPERADI set
 		Adi_Fecha	= @Per_Fecha,
 		Adi_NumTra	= @Per_NumTra,
@@ -592,7 +635,7 @@ if @Tip_Actual = @Act_PerSb3 begin
 		SucDestino	= @SucDestino
 	where	Per_Numero	= @Per_Numero
 
-/* Datos Adicionales */
+	/* Datos Adicionales */
 	update SOPERADI set
 		Adi_Fecha	= @Per_Fecha,
 		Adi_NumTra	= @Per_NumTra,
@@ -614,6 +657,7 @@ if @Tip_Actual = @Act_PerSb3 begin
 end
 
 if @Tip_Actual = @Act_GenPer begin
+
 	select 
 		@Per_Fecha = @FechaSis,
 		@Per_NumTra = @NumTransac
@@ -638,13 +682,16 @@ if @Tip_Actual = @Act_GenPer begin
 		NumTransac	= @NumTransac,
 		Transaccio	= @Transaccio,
 		Usuario		= @Usuario,
+
 		FechaSis	= @FechaSis,
 		SucOrigen	= @SucOrigen,
 		SucDestino	= @SucDestino
 	where	Adi_PerNum	= @Per_Numero
+
 end
 
 if @Tip_Actual	= @Act_TarAdi begin 
+
 	update SOPERSON set 
 		Per_RFC		= @Per_RFC, 
 		Per_CURP	= @Per_CURP,
@@ -667,6 +714,7 @@ if @Tip_Actual	= @Act_TarAdi begin
 		SucOrigen	= @SucOrigen,
 		SucDestino	= @SucDestino
 	where	Adi_PerNum	= @Per_Numero
+
 end
 
 select	Err_Codigo	= '000000',
@@ -674,3 +722,4 @@ select	Err_Codigo	= '000000',
 		Per_Numero	= @Per_Numero,
 		Per_Fecha	= @Per_Fecha,
 		Per_NumTra	= @Per_NumTra
+		

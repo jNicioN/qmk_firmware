@@ -51,8 +51,8 @@ as
 ** Fecha:		10/01/2024											   	****
 ** Help: 		36841 											   		****
 ** Descripcion:	Se aumenta el tamaño de los campos de nombre			****
-**				Cli_Nombre,Cli_ApePat,Cli_ApeMat,Cli_RazSoc,Cli_Comple 	****
-**				y Cli_ComOrd 											****
+**				se agrega validacion si el nombre excede los 180 		****
+**				caracteres se registra en la tabla de nombres largos	****
 ****************************************************************************
 ** Modificó:	Javier Eduardo Ceron Rangel		                    	****
 ** Fecha:	    04/08/2023      					                    ****
@@ -720,7 +720,6 @@ if @Status <> @Ent_Cero begin
 	return @Ent_Uno
 end
 
-
 if @Cob_Tipo <> @Per_ApoRea begin
 
 	update SOPERSON set
@@ -802,7 +801,6 @@ if char_length(@Per_Comple) > @Ent_180 or char_length(@Per_RazSoc) > @Ent_180  b
 	end
 
 end
-
 
 if @@nestlevel = @Ent_Uno
 	select	Err_Codigo	= '000000',

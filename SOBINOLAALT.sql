@@ -42,7 +42,7 @@ select 	@Str_Vacio = '',			--string vacio
 		@Ent_Uno	= 1				-- Entero : 1
 
 
-insert into CLBINOLA values (
+insert into SOBINOLA values (
 	@Bnl_Person,	@Bnl_Nombre,	@Bnl_ApePat,	@Bnl_ApeMat,	@Bnl_RazSoc,
     @Bnl_Comple,	@Bnl_ComOrd,	@NumTransac,	@Transaccio,	@Usuario,			
     @FechaSis,		@SucOrigen,		@SucDestino

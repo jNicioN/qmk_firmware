@@ -18,7 +18,7 @@ create procedure SONOMLARMOD (
 as
 
 /*******************************************************************
-** DESCRIPCION:  ** Modificacion de clientes con nombre largo 	****
+** DESCRIPCION:  ** Modificacion de personas con nombre largo 	****
 ********************************************************************
 ** REFERENCIAS:													****
 ********************************************************************
