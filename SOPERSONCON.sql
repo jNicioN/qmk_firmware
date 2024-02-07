@@ -877,21 +877,23 @@ if @Tip_ConTip = @Str_LetraC begin
 
 	end else if @Tip_ConCon = @Str_LetraH begin --Consulta de personas con nombre largo
 
-		select	Per_Numero,	Per_Tipo,	Per_Benefi,	Per_NuSeFi,	Per_Titulo,
-				Per_Nombre,	Per_ApePat,	Per_ApeMat,	Per_RazSoc,	Per_Comple,
-				Per_ComOrd,	Per_RFC,	Per_CURP,	Per_Calle,	Per_CalNum,
-				Per_Coloni,	Per_Entida,	Per_Locali,	Per_CodPos,	Per_ApaPos,
-				Per_LadTel,	Per_Telefo,	Per_EstCiv,	Per_Email,	Per_ComDom,
-				Per_Nacion,	Per_ActEmp,	Per_Giro,	Per_Sector,	Per_Activi,
-				Per_ActINE,	Adi_LugNac,	Adi_Sexo,	Adi_FecNac,	Adi_RegMat,
-				Adi_VivCas,	Adi_TieRes,	Adi_Fax,	Adi_NumDep,	Adi_Puesto,
-				Adi_Ocupac,	Adi_AntLab,	Adi_LugTra,	Adi_TelTra,	Adi_CalTra,
-				Adi_NuCaTr,	Adi_CalTra,	Adi_ColTra,	Adi_Locali,	Adi_CPTra,
-				Adi_FecCon,	Adi_CaNuIn,	Adi_NacExt,	Adi_NuIdFi,	Adi_TipIde,
-				Adi_NumIde,	Adi_FeExId,	Adi_EntPri,	Adi_EntSeg,	PerPersoID
+		select	PerPersoID, Per_Numero,	Per_Tipo,	Per_Benefi,	Per_NuSeFi,	
+				Per_Titulo, Per_Nombre,	Per_ApePat,	Per_ApeMat,	Per_RazSoc,	
+				Per_Comple, Per_ComOrd,	Nol_Nombre,	Nol_ApePat,	Nol_ApeMat, 
+				Nol_RazSoc,	Nol_Comple,	Nol_ComOrd,	Per_RFC,	Per_CURP,	
+				Per_Calle,	Per_CalNum, Per_Coloni,	Per_Entida,	Per_Locali,	
+				Per_CodPos,	Per_ApaPos, Per_LadTel,	Per_Telefo,	Per_EstCiv,	
+				Per_Email, 	Per_ComDom, Per_Nacion,	Per_ActEmp,	Per_Giro,	
+				Per_Sector,	Per_Activi, Per_ActINE,	Adi_LugNac,	Adi_Sexo,	
+				Adi_FecNac,	Adi_RegMat, Adi_VivCas,	Adi_TieRes,	Adi_Fax,	
+				Adi_NumDep,	Adi_Puesto, Adi_Ocupac,	Adi_AntLab,	Adi_LugTra,	
+				Adi_TelTra,	Adi_CalTra, Adi_NuCaTr,	Adi_CalTra,	Adi_ColTra,	
+				Adi_Locali,	Adi_CPTra, 	Adi_FecCon,	Adi_CaNuIn,	Adi_NacExt,	
+				Adi_NuIdFi,	Adi_TipIde, Adi_NumIde,	Adi_FeExId,	Adi_EntPri,
+				Adi_EntSeg
 			from SOPERSON noholdlock 
 			inner join SOPERADI noholdlock on Per_Numero = Adi_PerNum
-			inner join SONOMLAR noholdlock on Nol_Person = PerPersoID
+			left outer join SONOMLAR noholdlock on Nol_Person = PerPersoID
 			where	Per_Numero	=  @Per_Numero
 
 	end
