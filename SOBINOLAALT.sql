@@ -29,18 +29,10 @@ as
 *******************************************************************/
 
 --declaracion de variables
-declare	@Existe	 int
 
 --Declaracion de Constantes
-declare	@Str_Vacio	char(1),
-		@Ent_Cero	int,
-		@Ent_Uno	int
 
 --Asignacion de constantes
-select 	@Str_Vacio = '',			--string vacio
-		@Ent_Cero	= 0,			-- Entero : 0
-		@Ent_Uno	= 1				-- Entero : 1
-
 
 insert into SOBINOLA values (
 	@Bnl_Person,	@Bnl_Nombre,	@Bnl_ApePat,	@Bnl_ApeMat,	@Bnl_RazSoc,
