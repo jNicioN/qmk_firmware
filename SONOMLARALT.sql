@@ -42,7 +42,11 @@ select 	@Str_Vacio = '',			--string vacio
 		@Ent_Cero	= 0,			-- Entero : 0
 		@Ent_Uno	= 1				-- Entero : 1
 
-insert into SONOMLAR values (
+insert into SONOMLAR (
+	Nol_Person,	Nol_Nombre,	Nol_ApePat,	Nol_ApeMat,	Nol_RazSoc,
+    Nol_Comple,	Nol_ComOrd,	NumTransac,	Transaccio,	Usuario,			
+    FechaSis,	SucOrigen,	SucDestino
+)values (
 	@Nol_Person,	@Nol_Nombre,	@Nol_ApePat,	@Nol_ApeMat,	@Nol_RazSoc,
     @Nol_Comple,	@Nol_ComOrd,	@NumTransac,	@Transaccio,	@Usuario,			
     @FechaSis,		@SucOrigen,		@SucDestino

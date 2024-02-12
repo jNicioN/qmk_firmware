@@ -58,7 +58,7 @@ if @Tip_ConTip = @Str_LetraC begin		--CONSULTA
 		select 	Nol_Consec,	Nol_Person,	Nol_Nombre,	Nol_ApePat,	Nol_ApeMat,
 			    Nol_RazSoc,	Nol_Comple,	Nol_ComOrd,	NumTransac,	Transaccio 
 			    Usuario,  	FechaSis,   SucOrigen, 	SucDestino
-			from SONOMLAR 
+			from SONOMLAR noholdlock
 			where Nol_Person = @PerPersoID
 			order by Nol_Consec desc
 

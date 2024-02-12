@@ -77,7 +77,8 @@ end
 --se valida si ya existe registro con ese id de cliente
 select @Existe = @Ent_Cero
 select @Existe = @Ent_Uno
-from SONOMLAR where Nol_Person = @Nol_Person
+from SONOMLAR noholdlock
+where Nol_Person = @Nol_Person
 
 --si no existe registro se inserta
 if @Existe = @Ent_Cero begin

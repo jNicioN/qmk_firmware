@@ -34,7 +34,11 @@ as
 
 --Asignacion de constantes
 
-insert into SOBINOLA values (
+insert into SOBINOLA (
+    Bnl_Person,    Bnl_Nombre,    Bnl_ApePat,    Bnl_ApeMat,    Bnl_RazSoc,
+    Bnl_Comple,    Bnl_ComOrd,    NumTransac,    Transaccio,    Usuario,           
+    FechaSis,      SucOrigen,     SucDestino
+) values (
 	@Bnl_Person,	@Bnl_Nombre,	@Bnl_ApePat,	@Bnl_ApeMat,	@Bnl_RazSoc,
     @Bnl_Comple,	@Bnl_ComOrd,	@NumTransac,	@Transaccio,	@Usuario,			
     @FechaSis,		@SucOrigen,		@SucDestino
