@@ -56,7 +56,7 @@ insert into SONOMLAR (
 exec @Status = SOBINOLAALT
 	@Nol_Person,	@Nol_Nombre,	@Nol_ApePat,	@Nol_ApeMat,	@Nol_RazSoc,
     @Nol_Comple,	@Nol_ComOrd,	@NumTransac,	@Transaccio,	@Usuario,			
-    @FechaSis,		@SucOrigen,		@SucDestino
+    @FechaSis,		@SucOrigen,		@SucDestino, 	@Modulo
 
 if @Status <> @Ent_Cero begin
 	rollback
