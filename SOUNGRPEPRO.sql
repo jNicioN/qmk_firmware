@@ -1,9 +1,9 @@
-﻿create procedure SOUNGRPEPRO (
+create procedure SOUNGRPEPRO (
 	@Gpc_Person char(8),
 	@Gpc_Grupo  char(8),
-	@Gpc_Nombre varchar(40),
-	@Gpc_ApePat varchar(40),
-	@Gpc_ApeMat varchar(40),
+	@Gpc_Nombre varchar(84),
+	@Gpc_ApePat varchar(84),
+	@Gpc_ApeMat varchar(84),
 	@Gpc_FecNac datetime,
 	@Gpc_Sexo	char(1),
 	@Gpc_EntNac char(2),
@@ -19,14 +19,19 @@
 	@SucDestino	char(3),
 	@Modulo		char(2)
 )
-
-
 as
 
 /***************************************************************************
 ** DESCRIPCION: ** Proceso de unificación de grupos de Persona			****
 ****************************************************************************
 ** REFERENCIAS: 														****
+****************************************************************************
+** Modificó:	Carlos Copto										 	****
+** Fecha:		11/03/2024											   	****
+** Help: 		38996 											   		****
+** Descripcion:	Se aumenta el tamaño de los campos de nombre			****
+**				se agrega validacion si el nombre excede los 180 		****
+**				caracteres se registra en la tabla de nombres largos	****
 ****************************************************************************
 ** Modifico:	Erik Ruben Cordero Moreno								****
 ** Fecha:		04/Agosto/2023											****
@@ -89,8 +94,8 @@ as
 declare	@Status		int,					/*Estatus de Procedimiento*/
 		@Peu_Person char(8),				/*Persona*/
 		@Gpc_GrpAnt	char(8),				/*Grupo Anterior*/
-		@Gpc_Comple varchar(120),			/*Nombre Completo*/
-		@Gpc_ComOrd varchar(120),			/*Nombre Completo Ordenado*/
+		@Gpc_Comple varchar(254),			/*Nombre Completo*/
+		@Gpc_ComOrd varchar(254),			/*Nombre Completo Ordenado*/
 		@Gpc_PrClUn char(8),				/*Persona del Cliente Único*/
 		@Per_Entida char(3),				/*Entidad*/
 		@Pro_Datos	char(1),				/*Proceso de actualización de Datos*/
@@ -103,18 +108,19 @@ declare	@Status		int,					/*Estatus de Procedimiento*/
 		@Bit_Tipo	char(1),				/* Bitacora tipo */
 		@Bit_NuSeFi	varchar(30),			/* Bitacora Numero de serie de la Firma Electronica Avanzada */
 		@Bit_Titulo	varchar(10),			/* Bitacora titulo */
-		@Bit_Nombre	varchar(40),			/* Bitacora Nombre */
-		@Bit_ApePat	varchar(40),			/* Bitacora apellido paterno */
-		@Bit_ApeMat	varchar(40),			/* Bitacora Apellido Materno */
-		@Bit_RazSoc	varchar(180),			/* Bitacora Razon social */
-		@Bit_Comple	varchar(180),			/* Bitacora nombre completo */
-		@Bit_ComOrd	varchar(180),			/* Bitacora nombre ordenado */
+		@Bit_Nombre	varchar(84),			/* Bitacora Nombre */
+		@Bit_ApePat	varchar(84),			/* Bitacora apellido paterno */
+		@Bit_ApeMat	varchar(84),			/* Bitacora Apellido Materno */
+		@Bit_RazSoc	varchar(254),			/* Bitacora Razon social */
+		@Bit_Comple	varchar(254),			/* Bitacora nombre completo */
+		@Bit_ComOrd	varchar(254),			/* Bitacora nombre ordenado */
 		@Bit_RFC	char(15),				/* Bitacora RFC */
 		@Bit_CURP	char(18),				/* Bitacora CURP */
 		@Bit_Calle	char(40),				/* Bitacora Calle */
 		@Bit_CalNum	varchar(10),			/* Bitacora Calle numero */
 		@Bit_Coloni	varchar(150),			/* Bitacora Colonia */
 		@Bit_Entida	char(3),				/* Bitacora Identidad */
+
 		@Bit_Locali	char(8),				/* Bitacora Localidad */
 		@Bit_CodPos	char(6),				/* Bitacora Codigo Postal */
 		@Bit_ApaPos	char(6),				/* Bitacora Apartado Postal */
@@ -173,8 +179,8 @@ declare	@Status		int,					/*Estatus de Procedimiento*/
 		@Str_Punto	char(1),				/* String para punto para apellidos vacios */
 		@Adi_NacExt	char(1),				/* Nacional */
 		@Per_Nacion char(3),				/* Pais de Nacimiento */
-		@Ent_Status	int					/* Status */
-
+		@Ent_Status	int,					/* Status */
+		@PerPersoID	int
 
 /* Declaracion de Constantes */
 declare	@Ent_Uno	int,					/*Entero: Uno*/
@@ -184,7 +190,8 @@ declare	@Ent_Uno	int,					/*Entero: Uno*/
 		@Str_NacMex	char(1),				/*String nacionalidad mexicana*/
 		@Str_NacExt char(1),				/*String nacionalidad extranjera*/
 		@Str_EntExt char(2),				/*String Entidad en el extranjero*/
-		@Str_PaiMex char(3)					/*String pais mexico*/
+		@Str_PaiMex char(3),				/*String pais mexico*/
+		@Ent_180	int
 
 
 select	@Ent_Uno	= 1,
@@ -199,9 +206,11 @@ select	@Ent_Uno	= 1,
 		@Str_NacMex = 'N',
 		@Str_NacExt = 'E',
 		@Str_EntExt = 'NE',
-		@Str_PaiMex = '001'
+		@Str_PaiMex = '001',
+		@Ent_180	= 180
 
 if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
+
 	select @Gpc_Nombre	= isnull(ltrim(rtrim(@Gpc_Nombre)), @Str_Vacio)
 	select @Gpc_ApePat	= isnull(ltrim(rtrim(@Gpc_ApePat)), @Str_Punto)
 	select @Gpc_ApeMat	= isnull(ltrim(rtrim(@Gpc_ApeMat)), @Str_Punto)
@@ -211,8 +220,8 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 	select @Gpc_RFC		= isnull(ltrim(rtrim(@Gpc_RFC)), @Str_Vacio)
 	select @Gpc_CURP	= isnull(ltrim(rtrim(@Gpc_CURP)), @Str_Vacio)
 
-
-	select	@Bit_PerNum = Per_Numero,
+	select	@PerPersoID = PerPersoID,
+			@Bit_PerNum = Per_Numero,
 			@Bit_Fecha	= Per_Fecha,
 			@Bit_NumTra	= Per_NumTra,
 			@Bit_Tipo	= Per_Tipo,
@@ -248,6 +257,7 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 		where	Per_Numero = @Gpc_Person
 
 	if isnull(@Bit_PerNum, @Str_Vacio) <> @Str_Vacio begin
+
 		exec @Status = SOBITPERALT
 			@Gpc_Person,	@Bit_Fecha,		@Bit_NumTra,	@Bit_Tipo,		@Bit_NuSeFi,
 			@Bit_Titulo,	@Bit_Nombre,	@Bit_ApePat,	@Bit_ApeMat,	@Bit_RazSoc,
@@ -257,11 +267,12 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 			@Bit_EstCiv,	@Bit_Nacion,	@Bit_ActEmp,	@Bit_Giro,		@Bit_Sector,
 			@Bit_Activi,	@Bit_ActINE,	@NumTransac,	@Transaccio,	@Usuario,
 			@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
+
 		if @Status <> @Ent_Cero begin
 			rollback
-
-			return 1
+			return @Ent_Uno
 		end
+
 	end
 
 	select @Bit_PerNum = @Str_Vacio
@@ -314,8 +325,8 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 		where	Adi_PerNum	= @Gpc_Person
 
 	if isnull(@Bit_PerNum, @Str_Vacio) <> @Str_Vacio begin
-		exec @Status =	SOBIPEADALT
 
+		exec @Status =	SOBIPEADALT
 			@Gpc_Person,	@Bit_Fecha,		@Bit_NumTra,	@Bit_LugNac,	@Bit_Sexo,
 			@Bit_FecNac,	@Bit_RegMat,	@Bit_VivCas,	@Bit_TieRes,	@Bit_Fax,
 			@Bit_NumDep,    @Bit_Puesto,	@Bit_Ocupac,	@Bit_AntLab,	@Bit_LugTra,
@@ -328,12 +339,13 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 			@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino,
 			@Modulo
 
-
 		if @Status <> @Ent_Cero begin
 			rollback
-			return 1
+			return @Ent_Uno
 		end
+
 	end else begin
+
 		exec @Status = SOPERADIALT @Gpc_Person, @Str_Vacio,  @Str_Vacio, @Str_Vacio, @Gpc_Sexo,
 						 @Gpc_FecNac, @Str_Vacio, @Str_Vacio, @Ent_Cero, @Str_Vacio,
 						 @Ent_Cero, @Str_Vacio, @Str_Vacio, @Ent_Cero, @Str_Vacio,
@@ -348,14 +360,16 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 
 		if @Status <> @Ent_Cero begin
 			rollback
-			return 1
+			return @Ent_Uno
 		end
+
 	end
 
-	select	@Gpc_Comple = @Gpc_ApePat + ' ' + @Gpc_ApeMat + ' ' + @Gpc_Nombre,
-			@Gpc_ComOrd = @Gpc_Nombre + ' ' + @Gpc_ApePat + ' ' + @Gpc_ApeMat
+	select	@Gpc_Comple = LTrim(RTrim(@Gpc_ApePat)) + ' ' + LTrim(RTrim(@Gpc_ApeMat)) + ' ' + LTrim(RTrim(@Gpc_Nombre)),
+			@Gpc_ComOrd = LTrim(RTrim(@Gpc_Nombre)) + ' ' + LTrim(RTrim(@Gpc_ApePat)) + ' ' + LTrim(RTrim(@Gpc_ApeMat))
 
 	if @Gpc_EntNac = @Str_EntExt begin
+
 		-- Se otorga la misma entidad en caso de ser capturado anteriormente
 		select @Per_Nacion = isnull(Per_Nacion, @Str_Vacio),
 			   @Per_Entida = isnull(Per_Entida , @Str_Vacio)
@@ -363,7 +377,6 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 		 where Per_Numero = @Gpc_Person
 
 		select @Adi_NacExt = @Str_NacExt
-
 
 		if @Per_Nacion = @Str_Vacio begin
 			select @Per_Nacion = isnull(DaP_PaiNac , @Str_Vacio)
@@ -376,7 +389,9 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 			  from SOPEDACO noholdlock
 			 where DaP_Person = @Gpc_Person
 		end
+
 	end else begin
+
 		select @Per_Entida = Ent_Numero
 		  from CLENTIDA noholdlock
 		 where Ent_Abrevi = @Gpc_EntNac
@@ -404,6 +419,20 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 		SucDestino	= @SucDestino
 	where Per_Numero = @Gpc_Person
 
+	--Si el nombre de la persona excede 180 caracteres se manda a modificar en la tabla de nombres largos
+	if char_length(@Gpc_Comple) > @Ent_180  begin
+
+		exec @Status = SONOMLARMOD
+			@PerPersoID,	@Gpc_Nombre,	@Gpc_ApePat,	@Gpc_ApeMat,	@Bit_RazSoc,
+		    @Gpc_Comple,	@Gpc_ComOrd,	@NumTransac,	@Transaccio,	@Usuario,			
+		    @FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
+		if @Status <> @Ent_Cero begin
+			rollback
+			return @Ent_Uno
+		end
+
+	end
+
 	update SOPERADI set
 		Adi_FecNac	= @Gpc_FecNac,
 		Adi_Sexo	= @Gpc_Sexo,
@@ -430,6 +459,7 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 	 where DaP_Person = @Gpc_Person
 
 end	else if @Tip_Proces = @Pro_DesAgr begin		/*Desagrupacion de Registros*/
+
 	/*Consulta de la persona del Cliente Unico ligada a la persona consultada*/
 	select @Gpc_PrClUn = AdiUni.Adi_NumPer
 	  from CLADICIO as AicionalOuter noholdlock
@@ -460,6 +490,7 @@ end	else if @Tip_Proces = @Pro_DesAgr begin		/*Desagrupacion de Registros*/
 	select @Gpc_GrpAnt as Gpc_Person, @Gpc_Grupo as Gpc_Grupo
 
 end	else if @Tip_Proces = @Pro_GruMin or @Tip_Proces = @Pro_GrClUn begin		/*Agrupacion de Registros*/
+
 	if @Tip_Proces = @Pro_GrClUn begin
 		/*Consulta de la persona del Cliente Unico ligada a la persona consultada*/
 		select @Gpc_PrClUn = Adi_NumPer
@@ -509,7 +540,7 @@ end	else if @Tip_Proces = @Pro_GruMin or @Tip_Proces = @Pro_GrClUn begin		/*Agru
 
 		if @Status <> @Ent_Cero begin
 			rollback
-			return 1
+			return @Ent_Uno
 		end
 	end else if  isnull(@Exi_Regist, @Ent_Cero) = @Ent_Cero begin
 		update SOUNIPER set
@@ -527,4 +558,3 @@ end	else if @Tip_Proces = @Pro_GruMin or @Tip_Proces = @Pro_GrClUn begin		/*Agru
 	/*Salida: Notificación cambio Persona IDE*/
 	select @Gpc_GrpAnt as Gpc_Person, @Gpc_Grupo as Gpc_Grupo
 end
-

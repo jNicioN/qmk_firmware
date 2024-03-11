@@ -1,13 +1,14 @@
 create procedure SOPERRELACT (
 	@Per_Numero	char(8),
 	@Per_Tipo	char(1),
-	@Per_Nombre	varchar(40),
-	@Per_ApePat	varchar(40),
-	@Per_ApeMat	varchar(40),
-	@Per_RazSoc	varchar(180),
+	@Per_Nombre	varchar(84),
+	@Per_ApePat	varchar(84),
+	@Per_ApeMat	varchar(84),
+	@Per_RazSoc	varchar(254),
 	@Per_RFC	char(15),
 	@Per_Calle	char(40),
 	@Per_CalNum	varchar(10),
+
 	@Per_Coloni	varchar(150),
 	@Per_Entida	char(3),
 	@Per_Locali	char(8),
@@ -33,6 +34,13 @@ as
 ****************************************************************************
 **							STORE CONVERTIDO							****
 ****************************************************************************
+** Modificó:	Carlos Copto										 	****
+** Fecha:		11/03/2024											   	****
+** Help: 		38996 											   		****
+** Descripcion:	Se aumenta el tamaño de los campos de nombre			****
+**				se agrega validacion si el nombre excede los 180 		****
+**				caracteres se registra en la tabla de nombres largos	****
+****************************************************************************
 ** Modificó:	Javier Eduardo Ceron Rangel		                    	****
 ** Fecha:	    04/08/2023      					                    ****
 ** Help:	    TRACL-5498 						                        ****
@@ -51,12 +59,13 @@ as
 ****************************************************************************
 */
 
-declare	@Per_Comple	varchar(180),			/*	Declaracion de Variables	*/
-		@Per_ComOrd	varchar(180),
+declare	@Per_Comple	varchar(254),			/*	Declaracion de Variables	*/
+		@Per_ComOrd	varchar(254),
 		@Status		int,
 		@Per_Existe	char(8),
 		@Cli_Numero	char(8),
-		@Loc_Pais	char(3)
+		@Loc_Pais	char(3),
+		@PerPersoID int
 
 declare	@Str_Vacio	char(1),				/*	Declaracion de Constantes	*/
 		@Str_Espaci	char(1),
@@ -64,7 +73,8 @@ declare	@Str_Vacio	char(1),				/*	Declaracion de Constantes	*/
 		@Per_Fisica	char(1),
 		@Ent_Cero	int,
 		@Act_Datos	char(1),
-		@Ent_Uno	int
+		@Ent_Uno	int,
+		@Ent_180	int
 
 /* Declaraciýn de variables para la bitacora se SOPERSON*/
 declare	@Bit_NumPer	char(8),
@@ -73,12 +83,12 @@ declare	@Bit_NumPer	char(8),
 		@Bit_Tipo	char(1),
 		@Bit_NuSeFi	varchar(30),
 		@Bit_Titulo	varchar(10),
-		@Bit_Nombre	varchar(40),
-		@Bit_ApePat	varchar(40),
-		@Bit_ApeMat	varchar(40),
-		@Bit_RazSoc	varchar(150),
-		@Bit_Comple	varchar(150),
-		@Bit_ComOrd	varchar(150),
+		@Bit_Nombre	varchar(84),
+		@Bit_ApePat	varchar(84),
+		@Bit_ApeMat	varchar(84),
+		@Bit_RazSoc	varchar(254),
+		@Bit_Comple	varchar(254),
+		@Bit_ComOrd	varchar(254),
 		@Bit_RFC	char(15),
 		@Bit_CURP	char(18),
 		@Bit_Calle	char(40),
@@ -106,14 +116,15 @@ select	@Str_Vacio	= '',			/*	String Vacio								*/
 		@Per_Fisica	= '2',			/*	Persona Fisica								*/
 		@Ent_Cero	= 0,			/*	Entero en Cero								*/
 		@Act_Datos	= 'D',			/*	Tipo de Actualización: Datos de la Persona	*/
-		@Ent_Uno	= 1				/*	Entero: Uno									*/
+		@Ent_Uno	= 1,			/*	Entero: Uno									*/
+		@Ent_180	= 180			/*	Entero: 180									*/
 
 if (@Per_Tipo <> @Per_Moral) and (@Per_Tipo <> @Per_Fisica) begin
 	select	Err_Codigo	= '000001',
 			Err_Mensaj	= 'Tipo de persona incorrecto',
 			Err_Variab	= 'Per_Tipo'
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if (@Per_Tipo = @Per_Moral) and (@Per_RazSoc = @Str_Vacio) begin
@@ -121,7 +132,7 @@ if (@Per_Tipo = @Per_Moral) and (@Per_RazSoc = @Str_Vacio) begin
 			Err_Mensaj	= 'Razon social incorrecta',
 			Err_Variab	= 'Per_RazSoc'
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if (@Per_Tipo = @Per_Fisica) and (@Per_Nombre = @Str_Vacio) begin
@@ -129,21 +140,21 @@ if (@Per_Tipo = @Per_Fisica) and (@Per_Nombre = @Str_Vacio) begin
 			Err_Mensaj	= 'Nombre incorrecto',
 			Err_Variab	= 'Per_Nombre'
 	rollback
-	return 1
+	return @Ent_Uno
 end
 if (@Per_Tipo = @Per_Fisica) and (@Per_ApePat = @Str_Vacio) begin
 	select	Err_Codigo	= '000004',
 			Err_Mensaj	= 'Apellido paterno incorrecto',
 			Err_Variab	= 'Per_ApePat'
 	rollback
-	return 1
+	return @Ent_Uno
 end
 if (@Per_Tipo = @Per_Fisica) and (@Per_ApeMat = @Str_Vacio) begin
 	select	Err_Codigo	= '000005',
 			Err_Mensaj	= 'Apellido materno incorrecto',
 			Err_Variab	= 'Per_ApeMat'
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 select @Loc_Pais = Loc_Pais
@@ -156,7 +167,7 @@ if isNull(@Loc_Pais,@Str_Vacio) = @Str_Vacio begin
 			Err_Mensaj	= 'La ciudad no existe' + @Per_Locali,
 			Err_Variab	= 'Per_Locali'
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if not exists (select Ent_Numero
@@ -167,7 +178,7 @@ if not exists (select Ent_Numero
 			Err_Mensaj	= 'El estado no existe',
 			Err_Variab	= 'Per_Locali'
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if 	@Per_RFC = @Str_Vacio begin
@@ -175,7 +186,7 @@ if 	@Per_RFC = @Str_Vacio begin
 			Err_Mensaj 	= 'Proporcione el R.F.C.',
 			Err_Variab 	= 'Per_RFC'
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 select	@Per_Existe	= Per_Numero
@@ -190,7 +201,7 @@ if @Per_Existe <> @Str_Vacio begin
 			Err_Mensaj	= 'La persona ' + @Per_Existe + ' ya tiene este RFC.',
 			Err_Variab	= 'Per_RFC'
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 exec @Status = CLVALRFCPRO	/* Valida RFC */
@@ -202,7 +213,7 @@ if @Status <> @Ent_Cero begin
 			Err_Mensaj 	= 'R.F.C. incorrecto',
 			Err_Variab 	= 'Per_RFC'
 	rollback	
-	return 1	
+	return @Ent_Uno
 end
 
 if @Per_Calle = @Str_Vacio begin
@@ -210,14 +221,14 @@ if @Per_Calle = @Str_Vacio begin
 			Err_Mensaj	= 'Proporcione la calle',
 			Err_Variab	= 'Per_Calle'
 	rollback
-	return 1
+	return @Ent_Uno
 end
 if @Per_CalNum = @Str_Vacio begin
 	select	Err_Codigo	= '000012',
 			Err_Mensaj	= 'Proporcione el numero',
 			Err_Variab	= 'Per_CalNum'
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Per_CodPos = @Str_Vacio or 
@@ -230,7 +241,7 @@ if @Per_CodPos = @Str_Vacio or
 			Err_Mensaj	= 'Código Postal Incorrecto',
 			Err_Variab	= 'Per_CodPos'
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 select	@Cli_Numero	= Cli_Numero
@@ -244,7 +255,7 @@ if @Cli_Numero <> @Str_Vacio begin
 			Err_Mensaj 	= 'La persona es un Cliente, sus datos no podrán ser actualizados.',
 			Err_Variab 	= 'Per_RFC'
 	rollback	
-	return 1
+	return @Ent_Uno
 end
 
 if (@Per_Tipo = @Per_Moral) begin
@@ -256,8 +267,10 @@ end else begin
 end
 
 /* Respaldar SOPERSON y agregarlo en la BITACORA */
-select	@Bit_NumPer	= Per_Numero,
+select	@PerPersoID = PerPersoID,
+		@Bit_NumPer	= Per_Numero,
 		@Bit_Fecha	= Per_Fecha,
+
 		@Bit_NumTra	= Per_NumTra,
 		@Bit_Tipo	= Per_Tipo,
 		@Bit_NuSeFi	= Per_NuSeFi,
@@ -303,7 +316,7 @@ exec @Status = SOBITPERALT
 
 if @Status <> @Ent_Cero begin
 	select Err_Mensaj = 'Error en ejecución del proceso de BITACORA DE PERSONAS.'
-	return 1
+	return @Ent_Uno
 end
 
 update SOPERSON set
@@ -333,7 +346,22 @@ update SOPERSON set
 	SucDestino	= @SucDestino
 	where	Per_Numero	= @Per_Numero
 
+--Si el nombre completo o razon social excede los 180 caracteres se modifica en la tabla de nombres largos
+if char_length(@Per_Comple) > @Ent_180 or char_length(@Per_RazSoc) > @Ent_180  begin
+
+	exec @Status = SONOMLARMOD
+		@PerPersoID,	@Per_Nombre,	@Per_ApePat,	@Per_ApeMat,	@Per_RazSoc,
+    	@Per_Comple,	@Per_ComOrd,	@NumTransac,	@Transaccio,	@Usuario,			
+    	@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
+	if @Status <> @Ent_Cero begin
+		rollback
+		return @Ent_Uno
+	end
+
+end
+
 if @@nestlevel = @Ent_Uno begin
 	select	Err_Codigo	= '000000',
 			Err_Mensaj	= 'Registro modificado'
 end
+

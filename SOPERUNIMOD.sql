@@ -5,10 +5,10 @@ create procedure SOPERUNIMOD (
 	@Per_Tipo	char(1),
 	@Per_NuSeFi	varchar(30),
 	@Per_Titulo	varchar(10),
-	@Per_Nombre	varchar(40),
-	@Per_ApePat	varchar(40),
-	@Per_ApeMat	varchar(40),
-	@Per_RazSoc	varchar(180),	
+	@Per_Nombre	varchar(84),
+	@Per_ApePat	varchar(84),
+	@Per_ApeMat	varchar(84),
+	@Per_RazSoc	varchar(254),	
 	@Per_RFC	varchar(15),
 	@Per_CURP	varchar(18),
 	@Per_Benefi	char(1),
@@ -68,6 +68,7 @@ create procedure SOPERUNIMOD (
 	@Adi_OtrIde	varchar(50),
 	@Adi_NumIde	varchar(30),
 	@Adi_FeExId	smalldatetime,
+
 	@Adi_FeVeId	smalldatetime,
 	@Adi_NuIdFi	varchar(20),
 	@Adi_EntPri varchar(40), 
@@ -88,7 +89,14 @@ as
 /***************************************************************************/
 /** REFERENCIAS: 												  
 ****************************************************************************
-** Modifico:		Armando Alexis Sepúlveda Cruz							****
+** Modificó:	Carlos Copto										 	****
+** Fecha:		11/03/2024											   	****
+** Help: 		38996 											   		****
+** Descripcion:	Se aumenta el tamaño de los campos de nombre			****
+**				se agrega validacion si el nombre excede los 180 		****
+**				caracteres se registra en la tabla de nombres largos	****
+****************************************************************************
+** Modifico:		Armando Alexis Sepúlveda Cruz						****
 ** Fecha:		26/Junio/2017											****
 ** Help:		991811													****
 ** Descripcion: Se elimina la concatenación de Per_Titulo en 			****
@@ -104,8 +112,8 @@ as
 ** Help:		388789	Nuevo Procedimiento								****
 **Descripcion:	Modificacion de Personas Unicas							****
 ****************************************************************************/
-declare	@Per_Comple	varchar(180),	/*	Declaracion de Variables	*/
-		@Per_ComOrd	varchar(180),
+declare	@Per_Comple	varchar(254),	/*	Declaracion de Variables	*/
+		@Per_ComOrd	varchar(254),
 		@Per_ActINE	char(6),
 		@Act_Numero	char(10),
 		@Act_Status	char(1),
@@ -116,12 +124,12 @@ declare	@Per_Comple	varchar(180),	/*	Declaracion de Variables	*/
 		@Tel_Comple	varchar(11),
 		@Bit_NuSeFi	varchar(30),
 		@Bit_Titulo	varchar(10),
-		@Bit_Nombre	varchar(40),
-		@Bit_ApePat	varchar(40),
-		@Bit_ApeMat	varchar(40),
-		@Bit_RazSoc	varchar(180),
-		@Bit_Comple	varchar(180),
-		@Bit_ComOrd	varchar(180),
+		@Bit_Nombre	varchar(84),
+		@Bit_ApePat	varchar(84),
+		@Bit_ApeMat	varchar(84),
+		@Bit_RazSoc	varchar(254),
+		@Bit_Comple	varchar(254),
+		@Bit_ComOrd	varchar(254),
 		@Bit_RFC	char(15),
 		@Bit_CURP	char(18),
 		@Bit_Calle	char(40),
@@ -154,6 +162,7 @@ declare	@Per_Comple	varchar(180),	/*	Declaracion de Variables	*/
 		@Bit_Ocupac	varchar(50),
 		@Bit_AntLab	int,
 		@Bit_LugTra	varchar(50),
+
 		@Bit_TelTra	varchar(20),
 		@Bit_CalTra	varchar(20),
 		@Bit_NuCaTr	varchar(30),
@@ -181,7 +190,8 @@ declare	@Per_Comple	varchar(180),	/*	Declaracion de Variables	*/
 		@Bit_FeVeId	smalldatetime,
 		@Bit_NuIdFi	varchar(20),
 		@Bit_EntPri char(40), 
-		@Bit_EntSeg char(40)
+		@Bit_EntSeg char(40),
+		@NumPer		char(8)
 
 declare	@Str_Vacio	char(1),		/*	Declaracion de Constantes	*/
 		@Str_Espaci	char(1),
@@ -203,7 +213,8 @@ declare	@Str_Vacio	char(1),		/*	Declaracion de Constantes	*/
 		@RFC_PMExtr	char(12),
 		@Tip_Titula char(1),
 		@Str_No123	char(6),
-		@Str_23		char(4)
+		@Str_23		char(4),
+		@Ent_180	int
 
 select	@Str_Vacio	= '',			/* String Vacio	*/
 		@Str_Espaci	= ' ',			/* String Espacio */
@@ -225,7 +236,8 @@ select	@Str_Vacio	= '',			/* String Vacio	*/
 		@Tip_Hered	= 'H',			/* Tipo herederos legales */
 		@RFC_PMExtr	= 'EXT990101NI9', /* Rfc para Persona MOral Extranjera */	
 		@Str_No123	= '[^123]',
-	 	@Str_23		= '[23]'
+	 	@Str_23		= '[23]',
+	 	@Ent_180	= 180
 
 if (@NumTransac =  @Str_Vacio or isnull(@NumTransac, @Str_Vacio) = @Str_Vacio)  begin
 	/***** Genera el @NumTransac *****/
@@ -233,48 +245,53 @@ if (@NumTransac =  @Str_Vacio or isnull(@NumTransac, @Str_Vacio) = @Str_Vacio)  
 		@NumTransac output,	@SucOrigen
 	if @Status <> 0 begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 end
 
 select	@Per_NumTra	= @NumTransac
 
-if not exists (	select	Per_Numero
-					from SOPERSON noholdlock
-					where	Per_Numero	= @Per_Numero ) begin
+select	@PerPersoID	= PerPersoID,
+		@NumPer		= Per_Numero
+	from SOPERSON noholdlock
+	where	Per_Numero	= @Per_Numero
+
+select	@NumPer	= isnull(@NumPer, @Str_Vacio)
+
+if @NumPer = @Str_Vacio begin
 	select	Err_Codigo	= '000001',
 			Err_Mensaj	= 'La persona no existe',
-			Err_Variab	= 'Per_RazSoc'
+			Err_Variab	= 'Per_Numero'
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if (@Per_Tipo = @Per_Moral) and (@Per_RazSoc = @Str_Vacio) begin
 	select	Err_Codigo	= '000001',
 			Err_Mensaj	= 'Proporcione la Razon social'
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if (@Per_Tipo like @Str_23) and (@Per_Nombre = @Str_Vacio) begin
 	select	Err_Codigo	= '000002',
 			Err_Mensaj	= 'Proporcione el Nombre'
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if (@Per_Tipo like @Str_23) and (@Per_ApePat = @Str_Vacio) begin
 	select	Err_Codigo	= '000003',
 			Err_Mensaj	= 'Proporcione el Apellido paterno'
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Per_Tipo = @Per_Moral and @Per_RFC = @Str_Vacio begin
 	select	Err_Codigo	= '000004',
 			Err_Mensaj	= 'Proporcione el RFC'
 	rollback
-	return 1
+	return @Ent_Uno
 end
 
 if @Per_Tipo = @Per_Moral begin
@@ -343,7 +360,7 @@ if not exists (	select	Per_Numero
 		@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
-		return 1
+		return @Ent_Uno
 	end
 
 	select	@Per_Numero	= Adi_PerNum,
@@ -408,7 +425,7 @@ if not exists (	select	Per_Numero
 
 		if @Status <> 0 begin
 			rollback
-			return 1
+			return @Ent_Uno
 		end
 end
 
@@ -458,6 +475,7 @@ update SOPERSON set
 	Per_Activi	= @Per_Activi,
 	Per_ActINE	= @Per_ActINE,
 
+
 	NumTransac	= @NumTransac,
 	Transaccio	= @Transaccio,
 	Usuario		= @Usuario,
@@ -465,6 +483,20 @@ update SOPERSON set
 	SucOrigen	= @SucOrigen,
 	SucDestino	= @SucDestino
 	where	Per_Numero	= @Per_Numero
+
+	--Si el nombre de la persona excede 180 caracteres se manda a modificar en la tabla de nombres largos
+	if char_length(@Per_Comple) > @Ent_180 or char_length(@Per_RazSoc) > @Ent_180  begin
+
+		exec @Status = SONOMLARMOD
+			@PerPersoID,	@Per_Nombre,	@Per_ApePat,	@Per_ApeMat,	@Per_RazSoc,
+		    @Per_Comple,	@Per_ComOrd,	@NumTransac,	@Transaccio,	@Usuario,			
+		    @FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
+		if @Status <> @Ent_Cero begin
+			rollback
+			return @Ent_Uno
+		end
+
+	end
 
 	/* Datos Adicionales */
 	update SOPERADI set
@@ -504,6 +536,7 @@ update SOPERSON set
 		Adi_PaiExt	= @Adi_PaiExt,
 		Adi_CoPoEx	= @Adi_CoPoEx,
 		Adi_TelExt	= @Adi_TelExt,
+
 		Adi_TipIde	= @Adi_TipIde,
 		Adi_OtrIde	= @Adi_OtrIde,
 		Adi_NumIde	= @Adi_NumIde,
@@ -525,3 +558,4 @@ select	Err_Codigo	= '000000',
 		Per_Numero	= @Per_Numero,
 		Per_Fecha	= @Per_Fecha,
 		Per_NumTra	= @Per_NumTra
+
