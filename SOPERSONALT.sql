@@ -1,4 +1,4 @@
-﻿create procedure SOPERSONALT(
+create procedure SOPERSONALT(
 	@Per_Numero	char(8) output,
 	@Per_Fecha	smalldatetime output,
 	@Per_NumTra	char(10) output,
@@ -50,7 +50,7 @@ as
 /****************************************************************************
 ** Modificó:	Carlos Copto										 	****
 ** Fecha:		11/03/2024											   	****
-** Help: 		38996											   		****
+** Help: 		38996 											   		****
 ** Descripcion:	Se aumenta el tamaño de los campos de nombre			****
 **				Cli_Nombre,Cli_ApePat,Cli_ApeMat,Cli_RazSoc,Cli_Comple 	****
 **				y Cli_ComOrd 											****

@@ -22,7 +22,7 @@ as
 ********************************************************************
 ** Modificó:	Carlos Copto									****
 ** Fecha:		11/03/2024									   	****
-** Help: 		38996 									 	    ****
+** Help: 		38996 											****
 ** Descripcion:	Se aumenta el tamanio del parametro de entrada 	****
 **				Per_Comple y se cre nueva consulta CH para 		****
 **				personas con nombre largo						****
