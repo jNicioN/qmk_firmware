@@ -21,6 +21,14 @@ create procedure SOESTFINCON (
 /*******************************************************************
 ** DESCRIPCION: Consulta de registros de estados financieros      **
 ********************************************************************
+** Modifica:		Hector Flores				                  **
+** Fecha:			15/03/2024                               	  **
+** Descripcion:		Se modifica consulta L3 para agregar al       **
+** 					al ordenaminento que tome en cuenta           **
+**					la columna Esf_MesFin		 				  **
+** Jira: 			TCELEM-7843	 					 			  **
+** C.Cambios:		39300										  **
+********************************************************************
 ** Modifica:		Raul Muniz					                  **
 ** Fecha:			25/11/2022                               	  **
 ** Descripcion:		Se modifica consulta L3 para regresar fecha   **
@@ -659,7 +667,7 @@ end else begin
 		where Esf_PerNum = @Esf_PerNum
 		  and Esf_Solici = @Esf_Solici
 		  and Esf_Status = @Ent_Uno
-		order by Esf_Anio desc
+		order by Esf_Anio desc, Esf_MesFin desc
 	end else if @Tip_ConCon = @Str_Cuatro begin		/* L4 obtiene todos los estados financieros de la persona*/
 		select
 			Esf_Numero,		Esf_TipFor,		Esf_Anio,		Esf_MesIni,		Esf_MesFin,
