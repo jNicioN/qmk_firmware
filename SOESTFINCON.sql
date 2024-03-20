@@ -608,7 +608,22 @@ end else begin
      from SOESTFIN efn noholdlock
 	 where efn.Esf_PerNum = @Esf_PerNum
 		and efn.Esf_Solici = @Ent_Solici
-		and (efn.Esf_Numero IN (select efi.Efi_Numero from #ListaEstados efi) or @Esf_Filtro = @Str_Vacio)
+		and efn.Esf_Numero IN (select efi.Efi_Numero from #ListaEstados efi) 
+		and Esf_Status = @Ent_Uno
+	UNION ALL
+	select
+		efn.Esf_Numero,    		efn.Esf_TipFor,    efn.Esf_Anio,    	efn.Esf_MesIni,    	efn.Esf_MesFin,
+		efn.Esf_TiEsFi,    		efn.Esf_ExpCif,    efn.Esf_Moneda,    	efn.Esf_PerNum,     efn.Esf_Solici,      
+		efn.Esf_EsEsFi,    	    efn.Esf_ValInp,    efn.Esf_AplIca,    	efn.Esf_Icap,       efn.Esf_CapNet,      
+		efn.Esf_AcSuRi,    	    efn.Esf_TipSol,    efn.Esf_TipLiq,    	efn.Esf_TipEfi,     Esf_Rango = convert(int, Esf_MesFin) - convert(int, Esf_MesIni) + @Ent_Uno,
+		Esf_Mayor = @Ent_Cero,	Esf_Filtro = @Esf_Filtro, 				efn.Esf_NomCon,	    efn.Esf_NuCePr,
+		efn.Esf_DesDic,         efn.NumTransac,	   efn.Transaccio,      efn.Usuario,    	efn.FechaSis,      
+		efn.SucOrigen,          efn.SucDestino
+	 into #ListadoRangos
+     from SOESTFIN efn noholdlock
+	 where efn.Esf_PerNum = @Esf_PerNum
+		and efn.Esf_Solici = @Ent_Solici
+		and @Esf_Filtro = @Str_Vacio
 		and Esf_Status = @Ent_Uno
 	 order by efn.Esf_Anio desc
 
@@ -678,7 +693,18 @@ end else begin
 			Usuario,		FechaSis,		SucOrigen,      SucDestino 
 		from SOESTFIN noholdlock   
 		where Esf_PerNum = @Esf_PerNum
-		  and (Esf_Solici = @Esf_Solici or @Esf_Solici = @Ent_Cero)
+		  and Esf_Solici = @Esf_Solici 
+		UNION ALL
+		select
+			Esf_Numero,		Esf_TipFor,		Esf_Anio,		Esf_MesIni,		Esf_MesFin,
+			Esf_TiEsFi,		Esf_ExpCif,		Esf_Moneda,		Esf_PerNum,		Esf_Solici,     
+			Esf_EsEsFi,		Esf_ValInp,		Esf_AplIca,		Esf_Icap,		Esf_CapNet,     
+			Esf_AcSuRi,		Esf_TipSol,		Esf_TipLiq,		Esf_TipEfi,		Esf_Status,     
+			Esf_NomCon,	    Esf_NuCePr,     Esf_DesDic,     NumTransac,		Transaccio,		
+			Usuario,		FechaSis,		SucOrigen,      SucDestino 
+		from SOESTFIN noholdlock   
+		where Esf_PerNum = @Esf_PerNum
+		  and @Esf_Solici = @Ent_Cero
 		order by Esf_Anio desc
 	end else if @Tip_ConCon = @Str_Cinco begin		/* L5 obtiene los Estados Financieros de Razones F. para formato Gobierno (2 Internos, 2 Presupuestados) */
 		create table #ListadoRazones (Efi_Numero int)
@@ -713,7 +739,21 @@ end else begin
      from SOESTFIN efn noholdlock
 	 where efn.Esf_PerNum = @Esf_PerNum
 		and efn.Esf_Solici = @Esf_Solici
-		and (efn.Esf_Numero IN (select efi.Efi_Numero from #ListadoRazones efi) or @Esf_Filtro = @Str_Vacio)
+		and efn.Esf_Numero IN (select efi.Efi_Numero from #ListadoRazones efi)
+		and Esf_Status = @Ent_Uno
+	UNION ALL
+	select
+		efn.Esf_Numero,    		efn.Esf_TipFor,    efn.Esf_Anio,    	efn.Esf_MesIni,    	efn.Esf_MesFin,
+		efn.Esf_TiEsFi,    		efn.Esf_ExpCif,    efn.Esf_Moneda,    	efn.Esf_PerNum,     efn.Esf_Solici,      
+		efn.Esf_EsEsFi,         efn.Esf_ValInp,    efn.Esf_AplIca,    	efn.Esf_Icap,       efn.Esf_CapNet,      
+		efn.Esf_AcSuRi,         efn.Esf_TipSol,    efn.Esf_TipLiq,    	efn.Esf_TipEfi,     Esf_Rango = convert(int, Esf_MesFin) - convert(int, Esf_MesIni) + @Ent_Uno,
+		Esf_Mayor = @Ent_Cero,	efn.Esf_NomCon,	   efn.Esf_NuCePr,      efn.Esf_DesDic,     efn.NumTransac,	   
+		efn.Transaccio,         efn.Usuario,       efn.FechaSis,        efn.SucOrigen,      efn.SucDestino
+	 into #RazonesRangos
+     from SOESTFIN efn noholdlock
+	 where efn.Esf_PerNum = @Esf_PerNum
+		and efn.Esf_Solici = @Esf_Solici
+		and @Esf_Filtro = @Str_Vacio
 		and Esf_Status = @Ent_Uno
 	 order by efn.Esf_Anio desc
 
