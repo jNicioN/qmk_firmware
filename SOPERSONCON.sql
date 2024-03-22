@@ -20,6 +20,13 @@ as
 ********************************************************************
 ** REFERENCIAS:													****
 ********************************************************************
+** Modificó:	Carlos Copto									****
+** Fecha:		11/03/2024									   	****
+** Help: 		38996 											****
+** Descripcion:	Se aumenta el tamanio del parametro de entrada 	****
+**				Per_Comple y se cre nueva consulta CH para 		****
+**				personas con nombre largo						****
+********************************************************************
 **	Modifico:		Ricardo de la Fuente Segovia				****
 **  Fecha:			03/04/2023									****
 **  Help:			TCELTO-4381									****
@@ -365,7 +372,6 @@ declare	@Str_Vacio	char(1),
 		@Tip_Fisica	char(1),
 		@Per_Fisica	varchar(10),
 		@Per_Moral	varchar(10),
-		@Str_Tres	char(1),
 		@Per_RFCSH	varchar(15),
 		@Tip_FisAE	char(1),
 		@Msj_MasInf	varchar(41),
@@ -379,7 +385,23 @@ declare	@Str_Vacio	char(1),
 		@Str_CuaCer	char(4),
 		@Cla_Banreg	int,
 		@Cue_HeyBiz	char(2),
-		@Cue_CashBa	char(2)
+		@Cue_CashBa	char(2),
+		@Str_Uno	char(1),
+		@Str_Dos	char(1),
+		@Str_Tres	char(1),
+		@Str_Cuatro	char(1),
+		@Str_Cinco	char(1),
+		@Str_Seis	char(1),
+		@Str_Siete	char(1),
+		@Str_Ocho	char(1),
+		@Str_Nueve	char(1),
+		@Str_LetraA	char(1),
+		@Str_LetraB	char(1),
+		@Str_LetraC	char(1),
+		@Str_LetraD	char(1),
+		@Str_LetraF	char(1),
+		@Str_LetraG	char(1),
+		@Str_LetraH	char(1)
 
 /* Asignacion de Constantes */
 select	@Str_Vacio	= '',			-- String Vacio
@@ -402,10 +424,9 @@ select	@Str_Vacio	= '',			-- String Vacio
 		@Coi_Parcia	= 'P',
 		@Tip_Moral	= '1',			-- Tipo de Persona Moral
 		@Tip_Fisica	= '2',			-- Tipo de Persona Fisica
-		@Tip_FisAE = '3',			-- Tipo de Persona Fisica con Act. Emp.
+		@Tip_FisAE  = '3',			-- Tipo de Persona Fisica con Act. Emp.
 		@Per_Fisica	= 'FISICA',
 		@Per_Moral	= 'MORAL',
-		@Str_Tres	= '3',
 		@Msj_MasInf	= 'Capture más información para la busqueda',
 		@Sin_Direcc = 'Sin Direcci&oacuten',
 		@Sta_Termin	= 'T',			-- Status de Terminado
@@ -417,14 +438,30 @@ select	@Str_Vacio	= '',			-- String Vacio
 		@Str_CuaCer	= '0000',		/* String: cuatro ceros */
 		@Cla_Banreg = 2,			/* Clasificacion: Banregio */
 		@Cue_HeyBiz = '47',			/* Tipo de Cuenta: Cashback */
-		@Cue_CashBa = '31'			/* Tipo de Cuenta: Cashback */
+		@Cue_CashBa = '31',			/* Tipo de Cuenta: Cashback */
+		@Str_Uno 	= '1',			/* Cadena uno */
+		@Str_Dos 	= '2',			/* Cadena dos */
+		@Str_Tres 	= '3',			/* Cadena tres */
+		@Str_Cuatro = '4',			/* Cadena cuatro */
+		@Str_Cinco 	= '5',			/* Cadena cinco */
+		@Str_Seis 	= '6',			/* Cadena seis */
+		@Str_Siete 	= '7',			/* Cadena siete */
+		@Str_Ocho 	= '8',			/* Cadena Ocho */
+		@Str_Nueve 	= '9',			/* Cadena Nueve */
+		@Str_LetraA = 'A',			/* Cadena letra A */
+		@Str_LetraB = 'B',			/* Cadena letra B */
+		@Str_LetraC = 'C',			/* Cadena letra C */	
+		@Str_LetraD = 'D',			/* Cadena letra D */
+		@Str_LetraF = 'F',			/* Cadena letra F */
+		@Str_LetraG = 'G',			/* Cadena letra G */		
+		@Str_LetraH = 'H'			/* Cadena letra H */
 		
 select	@Busqueda	= @Per_Comple
 select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
 		@Tip_ConCon	= substring(@Tip_Consul, 2, 1)
 
-if @Tip_ConTip = 'C' begin
-	if @Tip_ConCon	= '1' begin
+if @Tip_ConTip = @Str_LetraC begin
+	if @Tip_ConCon	= @Str_Uno begin
 		select	Per_Numero,	Per_Tipo,	Per_Benefi,	Per_NuSeFi,	Per_Titulo,
 				Per_Nombre,	Per_ApePat,	Per_ApeMat,	Per_RazSoc,	Per_Comple,
 				Per_ComOrd,	Per_RFC,	Per_CURP,	Per_Calle,	Per_CalNum,
@@ -442,7 +479,7 @@ if @Tip_ConTip = 'C' begin
 			where	Per_Numero	=  @Per_Numero
 			 and	Per_Numero	*= Adi_PerNum
 	end
-	if @Tip_ConCon	= '2' begin
+	if @Tip_ConCon	= @Str_Dos begin
 		select	Per_Numero,	Per_Tipo,	Per_Titulo,	Per_Nombre,	Per_ApePat,
 				Per_ApeMat,	Per_RazSoc,	Per_Comple,	Per_ComOrd,	Per_RFC,
 				Per_CURP,	Per_Calle,	Per_CalNum,	Per_Coloni,	Per_Entida,
@@ -453,7 +490,7 @@ if @Tip_ConTip = 'C' begin
 			where	Per_Numero	= @Per_Numero
 			  and	Per_Tipo	= @Per_Tipo
 	end
-	if @Tip_ConCon	= '3' begin
+	if @Tip_ConCon	= @Str_Tres begin
 		select	Per_Numero,	Per_Tipo,	Per_Titulo,	Per_Nombre,	Per_ApePat,
 				Per_ApeMat,	Per_RazSoc,	Per_Comple,	Per_ComOrd,	Per_RFC,
 				Per_CURP,	Per_Calle,	Per_CalNum,	Per_Coloni,	Per_Entida,
@@ -463,7 +500,7 @@ if @Tip_ConTip = 'C' begin
 			from SOPERSON noholdlock
 			where	Per_Tipo	= @Per_Tipo
 	end
-	if @Tip_ConCon	= '4' begin			/* Consulta De Ejecutivo en Base A Su RFC	*/
+	if @Tip_ConCon	= @Str_Cuatro begin			/* Consulta De Ejecutivo en Base A Su RFC	*/
 		select	Per_Existe	= @Sta_Si,
 				Eje_Existe	= @Sta_No,
 				Per_Numero,	Per_Tipo,	Per_Titulo,	Per_Nombre,	Per_ApePat,
@@ -500,7 +537,7 @@ if @Tip_ConTip = 'C' begin
 
 		drop table #Person
 	end
-	if @Tip_ConCon = '5' begin				/*	Consulta De Ejecutivos De Arrendadora	*/
+	if @Tip_ConCon = @Str_Cinco begin				/*	Consulta De Ejecutivos De Arrendadora	*/
 		select	Per_Existe	= @Sta_Si,
 				Eje_Existe	= @Sta_Si,
 				Per_Numero,	Per_Tipo,	Per_Titulo,	Per_Nombre,	Per_ApePat,
@@ -515,7 +552,7 @@ if @Tip_ConTip = 'C' begin
 			  and	Eje_Numero	= @Per_Numero
 			  and	len(rtrim(ltrim(Per_Numero)))	= @Ent_Ocho
 	end
-	if @Tip_ConCon = '6' begin	/*	Consulta persona por RFC*/
+	if @Tip_ConCon = @Str_Seis begin	/*	Consulta persona por RFC*/
 		select	Per_Nombre,	Per_ApePat,	Per_ApeMat,	Per_RFC,	Per_Calle,
 				Per_CalNum,	Per_Coloni,	Per_Locali,	Per_CodPos,	Per_Telefo,
 				Per_EstCiv,	Per_Nacion,	Per_ActEmp,	Per_Activi,
@@ -525,7 +562,7 @@ if @Tip_ConTip = 'C' begin
 			where	Per_Numero	*= Adi_PerNum
 			  and	Per_RFC		= @Per_RFC
 	end
-	if @Tip_ConCon = '7' begin	/*	Consulta persona Toda la inf por RFC*/
+	if @Tip_ConCon = @Str_Siete begin	/*	Consulta persona Toda la inf por RFC*/
 		select	Per_Numero,	Per_Tipo,	Per_Benefi,	Per_NuSeFi,	Per_Titulo,
 				Per_Nombre,	Per_ApePat,	Per_ApeMat,	Per_RazSoc,	Per_Comple,
 				Per_ComOrd,	Per_RFC,	Per_CURP,	Per_Calle,	Per_CalNum,
@@ -568,7 +605,7 @@ if @Tip_ConTip = 'C' begin
 
 		drop table #Soperson
 	end
-	if @Tip_ConCon	= '8' begin /* C8 Consulta con Informacion de adicional */
+	if @Tip_ConCon	= @Str_Ocho begin /* C8 Consulta con Informacion de adicional */
 		select	Per_Numero,	Per_Fecha,	Per_NumTra,	Per_Tipo,	Per_Sector,
 				Per_Nombre,	Per_ApePat,	Per_ApeMat,	Per_RazSoc,	Per_Comple,
 				Per_ComOrd,	Per_RFC,	Per_CURP,	Per_Calle,	Per_CalNum,
@@ -689,7 +726,7 @@ if @Tip_ConTip = 'C' begin
 
 		drop table #InformacionPer, #InformacionAdi
 	end
-	if @Tip_ConCon	= '9' begin
+	if @Tip_ConCon	= @Str_Nueve begin
 		select	Per_Numero,	Per_Tipo,	Per_Benefi,	Per_NuSeFi,	Per_Titulo,
 				Per_Nombre,	Per_ApePat,	Per_ApeMat,	Per_RazSoc,	Per_Comple,
 				Per_ComOrd,	Per_RFC,	Per_CURP,	Per_Calle,	Per_CalNum,
@@ -710,7 +747,7 @@ if @Tip_ConTip = 'C' begin
 			where	Per_Numero	=  @Per_Numero
 			 and	Per_Numero	*= Adi_PerNum
 			 and	Per_Numero	*= DaP_Person 
-	end else if @Tip_ConCon	= 'A' begin   /* Consulta Móvil por RFC **/
+	end else if @Tip_ConCon	= @Str_LetraA begin   /* Consulta Móvil por RFC **/
 		create table #PersonasRFC (
 			Per_Numero	char(8)
 		)
@@ -744,7 +781,7 @@ if @Tip_ConTip = 'C' begin
 		 inner join SOPERSON noholdlock on Peu_Grupo = Per_Numero
 
 		drop table #PersonasRFC, #MovilPersonaRFC
-	end else if @Tip_ConCon	= 'B' begin   /* Consulta Móvil por Nombre Completo**/
+	end else if @Tip_ConCon	= @Str_LetraB begin   /* Consulta Móvil por Nombre Completo**/
 		select @Per_Comple = @Per_Comple + @Str_Porcen -- El porcentaje se debe poner antes de usarse en la consulta para que sea rapido
 		
 		select distinct top 100 Peu_Grupo Per_Numero, Per_Comple, Per_ComOrd, Per_RFC, Per_CURP,
@@ -754,7 +791,7 @@ if @Tip_ConTip = 'C' begin
 		 where Per_Comple like @Per_Comple
 		 order by Peu_Grupo
 
-	end else if @Tip_ConCon = 'C' begin /*Consulta por persona registrada en internacional para tercero autorizado*/
+	end else if @Tip_ConCon = @Str_LetraC begin /*Consulta por persona registrada en internacional para tercero autorizado*/
 		 select	sp.Per_Numero,	sp.Per_Tipo,	sp.Per_Benefi,	sp.Per_NuSeFi,	sp.Per_Titulo,
 				sp.Per_Nombre,	sp.Per_ApePat,	sp.Per_ApeMat,	sp.Per_RazSoc,	sp.Per_Comple,
 				sp.Per_ComOrd,	sp.Per_RFC,		sp.Per_CURP
@@ -762,7 +799,7 @@ if @Tip_ConTip = 'C' begin
 			inner join ITPETEAU pe noholdlock on sp.PerPersoID = pe.Pta_PerId 
 			where Per_Tipo in (@Tip_Fisica,@Tip_FisAE)
 			  and Per_RFC = @Per_RFC
-	end else if @Tip_ConCon = 'D' begin /*Consulta para personas que no existen en lIsta negra de Tercero autorizado*/
+	end else if @Tip_ConCon = @Str_LetraD begin /*Consulta para personas que no existen en lIsta negra de Tercero autorizado*/
 				select	sp.Per_Numero,	sp.Per_Tipo,	sp.Per_Benefi,	sp.Per_NuSeFi,	sp.Per_Titulo,
 						sp.Per_Nombre,	sp.Per_ApePat,	sp.Per_ApeMat,	sp.Per_RazSoc,	sp.Per_Comple,
 						sp.Per_ComOrd,	sp.Per_RFC,		sp.Per_CURP,	sp.PerPersoID
@@ -770,7 +807,7 @@ if @Tip_ConTip = 'C' begin
 				where Per_Tipo	in (@Tip_Fisica,@Tip_FisAE)
 				  and Per_RFC	= @Per_RFC	
 				order by  PerPersoID desc
-	end else if @Tip_ConCon = 'F' begin /*Consulta para obtener a todas las personas con el mismo RFC*/
+	end else if @Tip_ConCon = @Str_LetraF begin /*Consulta para obtener a todas las personas con el mismo RFC*/
 		select @Per_RFC	= Per_RFC
 		from SOPERSON noholdlock
 		where Per_Numero = @Per_Numero
@@ -789,10 +826,10 @@ if @Tip_ConTip = 'C' begin
 			where Per_Tipo in (@Tip_Fisica,@Tip_FisAE)
 			and Per_RFC = @Per_RFC	
 		end 
-	end else if @Tip_ConCon = 'G' begin /*Consulta para personas que no existen en lIsta negra de Tercero autorizado*/
+	end else if @Tip_ConCon = @Str_LetraG begin /*Consulta para personas que no existen en lIsta negra de Tercero autorizado*/
 	
 		if @Per_RFC = @Str_Vacio begin
-			select ''
+			select @Str_Vacio
 			return 0
 		end
 		
@@ -837,11 +874,34 @@ if @Tip_ConTip = 'C' begin
 		
 		drop table #PersonasBloqueadas
 		drop table #RFCBloqueados
+
+	end else if @Tip_ConCon = @Str_LetraH begin --Consulta de personas con nombre largo
+
+		select	PerPersoID, Per_Numero,	Per_Tipo,	Per_Benefi,	Per_NuSeFi,	
+				Per_Titulo, Per_Nombre,	Per_ApePat,	Per_ApeMat,	Per_RazSoc,	
+				Per_Comple, Per_ComOrd,	Nol_Nombre,	Nol_ApePat,	Nol_ApeMat, 
+				Nol_RazSoc,	Nol_Comple,	Nol_ComOrd,	Per_RFC,	Per_CURP,	
+				Per_Calle,	Per_CalNum, Per_Coloni,	Per_Entida,	Per_Locali,	
+				Per_CodPos,	Per_ApaPos, Per_LadTel,	Per_Telefo,	Per_EstCiv,	
+				Per_Email, 	Per_ComDom, Per_Nacion,	Per_ActEmp,	Per_Giro,	
+				Per_Sector,	Per_Activi, Per_ActINE,	Adi_LugNac,	Adi_Sexo,	
+				Adi_FecNac,	Adi_RegMat, Adi_VivCas,	Adi_TieRes,	Adi_Fax,	
+				Adi_NumDep,	Adi_Puesto, Adi_Ocupac,	Adi_AntLab,	Adi_LugTra,	
+				Adi_TelTra,	Adi_CalTra, Adi_NuCaTr,	Adi_CalTra,	Adi_ColTra,	
+				Adi_Locali,	Adi_CPTra, 	Adi_FecCon,	Adi_CaNuIn,	Adi_NacExt,	
+				Adi_NuIdFi,	Adi_TipIde, Adi_NumIde,	Adi_FeExId,	Adi_EntPri,
+				Adi_EntSeg
+			from SOPERSON noholdlock 
+			inner join SOPERADI noholdlock on Per_Numero = Adi_PerNum
+			left outer join SONOMLAR noholdlock on Nol_Person = PerPersoID
+			where	Per_Numero	=  @Per_Numero
+
 	end
+
 end else begin
 	select	@Per_Comple	= ltrim(rtrim(@Per_Comple)) + @Str_Porcen
 
-	if @Tip_ConCon = '1' begin
+	if @Tip_ConCon = @Str_Uno begin
 
 		if char_length(ltrim(rtrim(@Per_Comple))) < @Ent_Cinco begin
 				select	Err_Codigo	= '000001',
@@ -855,7 +915,7 @@ end else begin
 			where	Per_Comple	like @Per_Comple
 	end
 
-	if @Tip_ConCon = '2' begin
+	if @Tip_ConCon = @Str_Dos begin
 
 		if char_length(ltrim(rtrim(@Per_Comple))) < @Ent_Cinco begin
 				select	Err_Codigo	= '000001',
@@ -871,7 +931,7 @@ end else begin
 
 	end
 
-	if @Tip_ConCon = '3' begin		/*	Lista de Ejecutivos de ArrendaRegio para contrato */
+	if @Tip_ConCon = @Str_Tres begin		/*	Lista de Ejecutivos de ArrendaRegio para contrato */
 
 		if char_length(ltrim(rtrim(@Per_Comple))) < @Ent_Cinco begin
 			select	Err_Codigo	= '000001',
@@ -887,7 +947,7 @@ end else begin
 			  and	Per_Comple	like @Per_Comple
 			  and	len(rtrim(ltrim(Per_Numero)))	= @Ent_Ocho
 	end
-	if @Tip_ConCon = '4' begin
+	if @Tip_ConCon = @Str_Cuatro begin
 		if @Per_Comple = @Str_Vacio begin
 			select	Err_Codigo	= '000001',
 					Err_Mensaj	= @Msj_MasInf,
@@ -915,7 +975,7 @@ end else begin
 		end
 	end
 
-	if @Tip_ConCon = '5' begin
+	if @Tip_ConCon = @Str_Cinco begin
 
 		if char_length(ltrim(rtrim(@Per_Comple))) < @Ent_Cinco begin
 				select	Err_Codigo	= '000001',
@@ -959,7 +1019,7 @@ end else begin
 			  and	Per_Comple	like @Per_Comple
 
 	end
-	if @Tip_ConCon = '6' begin /* L6 - Busqueda por Nombre y/o RFC */
+	if @Tip_ConCon = @Str_Seis begin /* L6 - Busqueda por Nombre y/o RFC */
 		create table #Personas (
 			Per_Numero	char(8),
 			Per_Comple	varchar(180),
@@ -1054,7 +1114,7 @@ end else begin
 
 		drop table #Personas
 	end
-	if @Tip_ConCon = '7' begin /* L7 - Valida existencias por Per_RFC y Per_Comple
+	if @Tip_ConCon = @Str_Siete begin /* L7 - Valida existencias por Per_RFC y Per_Comple
 								Donde T: Es Totalmente (RFC Completo) compatible con otra persona
 									  P: Es Parcialmente (RFC Parcial) compatible */
 		create table #PersonasExis (
@@ -1115,7 +1175,7 @@ end else begin
 		drop table #PersonasExis 
 	end
 	
-	if @Tip_ConCon = '9' begin /* L9 - Busqueda y/o RFC que incluye el numero de cliente */
+	if @Tip_ConCon = @Str_Nueve begin /* L9 - Busqueda y/o RFC que incluye el numero de cliente */
 	
 		/* Creamos la tabla temporal */
 		create table #PersonasRfc (
@@ -1226,7 +1286,7 @@ end else begin
 			order by Per_Comple
 			
 		drop table #PersonasRfc
-	end	else if @Tip_ConCon	= @Str_A begin
+	end	else if @Tip_ConCon	= @Str_LetraA begin
 		
 		select	@Rfc_Like	= @Per_RFC	+ @Str_Porcen
 		
