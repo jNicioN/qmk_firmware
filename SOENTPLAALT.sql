@@ -12,14 +12,14 @@ create procedure SOENTPLAALT (
 as
 
 /***************************************************************************
-** DESCRIPCION: Alta relación entidad - plaza							****
+** DESCRIPCION: Alta plaza entidad										****
 ****************************************************************************
 ****************************************************************************
 **	REFERENCIAS:														****
 ****************************************************************************
 ** Creó:		Adrian Said Dawn R.    									****
 ** Fecha:		27/Marzo/2024											****
-** Help:		TCELCV-000000											****
+** Help:		TCELCV-24448											****
 ***************************************************************************/
 
 										/* Declaración de variables */
@@ -58,7 +58,7 @@ if isnull(@Enp_Plaza, @Str_Vacio) = @Str_Vacio begin
 	return @Ent_Uno
 end
 
-insert into SOENTPLA 
+insert into SOENTPLA
 	(Enp_Entida,	Enp_Plaza,		NumTransac,		Transaccio,		Usuario,		
 	FechaSis,		SucOrigen, 		SucDestino)
 values 
