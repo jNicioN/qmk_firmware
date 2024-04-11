@@ -1,6 +1,6 @@
 create procedure SOENTPLAALT (
-	@Enp_Entida	int,			/* CLENTIDA:ClEntidaID: Identificador de entidad */
-	@Enp_Plaza 	int,			/* SOPLAZAS:SoPlazaID: Identificador de plaza */
+	@Enp_Entida	char(3),			/* CLENTIDA:ClEntidaID: Identificador de entidad */
+	@Enp_Plaza 	char(3),			/* SOPLAZAS:SoPlazaID: Identificador de plaza */
 
 	@NumTransac	char(10),
 	@Transaccio	char(3),
@@ -12,7 +12,7 @@ create procedure SOENTPLAALT (
 as
 
 /***************************************************************************
-** DESCRIPCION: Alta plaza entidad										****
+** DESCRIPCION: Alta relación entidad - plaza							****
 ****************************************************************************
 ****************************************************************************
 **	REFERENCIAS:														****
@@ -34,11 +34,11 @@ select	@Str_Vacio	= '',				/* String vacío */
 		@Ent_Cero	= 0,				/* Entero en cero */
 		@Ent_Uno	= 1					/* Entero en uno */
 
-select @Enp_Entida = ClEntidaID 
+select @Enp_Entida = Ent_Numero 
 	from CLENTIDA noholdlock
-	where ClEntidaID = @Enp_Entida
+	where Ent_Numero = @Enp_Entida
 
-if isnull(@Enp_Entida, @Ent_Cero) = @Ent_Cero begin
+if isnull(@Enp_Entida, @Str_Vacio) = @Str_Vacio begin
 	select	Err_Codigo	= '000001',
 			Err_Mensaj	= 'No se encontró la entidad.',
 			Err_Variab	= 'Enp_Entida'
@@ -46,11 +46,11 @@ if isnull(@Enp_Entida, @Ent_Cero) = @Ent_Cero begin
 	return @Ent_Uno
 end
 
-select @Enp_Plaza = SoPlazaID 
+select @Enp_Plaza = Pla_Numero 
 	from SOPLAZAS noholdlock
-	where SoPlazaID = @Enp_Plaza
+	where Pla_Numero = @Enp_Plaza
 
-if isnull(@Enp_Plaza, @Ent_Cero) = @Ent_Cero begin
+if isnull(@Enp_Plaza, @Str_Vacio) = @Str_Vacio begin
 	select	Err_Codigo	= '000002',
 			Err_Mensaj	= 'No se encontró la plaza.',
 			Err_Variab	= 'Enp_Plaza'
