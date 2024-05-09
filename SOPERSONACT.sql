@@ -38,6 +38,12 @@ create procedure SOPERSONACT (
 	@SucDestino	char(3),
 	@Modulo char(2))
 as
+/**************************************************************************
+** Modifico:	Alberto Pineda											****
+** Fecha:		24/04/2024												****
+** Descripcion:	Mandamos a llamar al SP CLCURCLIVAL para validar que    ****
+				la CURP proporcionada sea valida						****
+** Help:		TRACL-8294												***/
 /***************************************************************************
 ** Modificó:	Yuridia Santiago									 	****
 ** Fecha:		23/Sep/2022											   	****
@@ -353,6 +359,20 @@ if @Tip_Proces = @Tip_ActCot begin
 		where	Per_Numero	= @Per_Numero
 end
 
+/***************************************************************/	
+/*       VALIDAR QUE LA CURP PROPORCIONADA SEA VALIDA          */
+/***************************************************************/	
+exec @Status = CLCURCLIVAL
+	@Per_CURP,  '', '', 1,	@NumTransac, 	
+	@Transaccio,	@Usuario,   	@FechaSis,  	@SucOrigen, 	@SucDestino,	
+	@Modulo
+	 
+if @Status <> @Ent_Cero begin
+	rollback
+	return @Ent_Uno
+end	
+
+/***************************************************************/
 exec @Status = SOPERSONMOD
 		@Per_Numero,		@FechaSis,		@NumTransac,	@Per_Tipo,		@Per_NuSeFi,
 		@Per_Titulo,		@Per_Nombre,	@Per_ApePat,	@Per_ApeMat,	@Per_RazSoc,

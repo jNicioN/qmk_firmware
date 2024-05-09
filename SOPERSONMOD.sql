@@ -46,6 +46,12 @@ as
 ** DESCRIPCION: **Modificación de Apoderados** 							****
 ***************************************************************************/
 /** REFERENCIAS:
+ ****************************************************************************
+** Modifico:	Alberto Pineda											****
+** Fecha:		24/04/2024												****
+** Descripcion:	Mandamos a llamar al SP CLCURCLIVAL para validar que    ****
+				la CURP proporcionada sea valida						****
+** Help:		TRACL-8294												****
 ****************************************************************************
 ** Modificó:	Carlos Copto										 	****
 ** Fecha:		11/03/2024											   	****
@@ -214,7 +220,7 @@ declare	@Per_Comple	varchar(254),	/*	Declaracion de Variables	*/
 		@Cli_Sucurs	char(3),
 		@Cli_Numero	char(8),
 		@Aux_Sector char (3),
-		@Aux_ActINE	varchar(10),	
+		@Aux_ActINE	varchar(10),
 		@Aux_Locali	char(8),		
 		@Aux_Entida char(3),		
 		@Aux_Nacion char(3),		
@@ -705,6 +711,21 @@ select	@PerPersoID = PerPersoID,
 		@Bit_ActINE	= Per_ActINE
 	from SOPERSON noholdlock
 	where	Per_Numero = @Per_Numero
+
+/***************************************************************/	
+/*       VALIDAR QUE LA CURP PROPORCIONADA SEA VALIDA          */
+/***************************************************************/
+exec @Status = CLCURCLIVAL
+	@Per_CURP,  '' , '', 1,	@NumTransac, 	
+	@Transaccio,	@Usuario,   	@FechaSis,  	@SucOrigen, 	@SucDestino,	
+	@Modulo
+	 
+if @Status <> @Ent_Cero begin
+	rollback
+	return @Ent_Uno
+end	
+
+/***************************************************************/
 
 exec @Status = SOBITPERALT
 	@Bit_NumPer,	@Bit_Fecha,		@Bit_NumTra,	@Bit_Tipo,		@Bit_NuSeFi,

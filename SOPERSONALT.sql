@@ -48,6 +48,12 @@ as
 /***************************************************************************/
 /** REFERENCIAS:														   */
 /****************************************************************************
+** Modifico:	Alberto Pineda											****
+** Fecha:		24/04/2024												****
+** Descripcion:	Mandamos a llamar al SP CLCURCLIVAL para validar que    ****
+				la CURP proporcionada sea valida						****
+** Help:		TRACL-8294												***/
+/****************************************************************************
 ** Modificó:	Carlos Copto										 	****
 ** Fecha:		11/03/2024											   	****
 ** Help: 		38996 											   		****
@@ -635,6 +641,22 @@ if isnull(@Per_NumTra, @Str_Vacio) = @Str_Vacio begin
 	select	@Per_Fecha	= @FechaSis,
 			@Per_NumTra	= @NumTransac
 end
+
+/***************************************************************/	
+/*       VALIDAR QUE LA CURP PROPORCIONADA SEA VALIDA          */
+/***************************************************************/	
+
+exec @Status = CLCURCLIVAL
+	@Per_CURP,  '', '', 1,	@NumTransac, 	
+	@Transaccio,	@Usuario,   	@FechaSis,  	@SucOrigen, 	@SucDestino,	
+	@Modulo
+	 
+if @Status <> @Ent_Cero begin
+	rollback
+	return @Ent_Uno
+end	
+
+/***************************************************************/
 
 insert into SOPERSON (
 	Per_Numero, Per_Fecha,  Per_NumTra, Per_Tipo,   Per_Benefi,
