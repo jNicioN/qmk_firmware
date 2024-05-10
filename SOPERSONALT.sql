@@ -710,9 +710,14 @@ exec @Status = SOPERSONPRO
 		return @Ent_Uno
 	end
 	
-exec SOUNIPERPRO
+exec @Status =  SOUNIPERPRO
 	@Per_Numero,	@NumTransac,	@Transaccio,	@Usuario,	@FechaSis,
 	@SucOrigen,		@SucDestino,	@Modulo
+
+	if @Status <> @Ent_Cero begin
+		rollback
+		return @Ent_Uno
+	end
 
 select	@Act_ActPre	= @Ent_Cero	
 select	@Act_ActPre	= isnull(Apc_ActPre, @Ent_Cero)
