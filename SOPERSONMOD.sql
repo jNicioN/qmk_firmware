@@ -715,16 +715,17 @@ select	@PerPersoID = PerPersoID,
 /***************************************************************/	
 /*       VALIDAR QUE LA CURP PROPORCIONADA SEA VALIDA          */
 /***************************************************************/
-exec @Status = CLCURCLIVAL
-	@Per_CURP,  '' , '', 1,	@NumTransac, 	
-	@Transaccio,	@Usuario,   	@FechaSis,  	@SucOrigen, 	@SucDestino,	
-	@Modulo
-	 
-if @Status <> @Ent_Cero begin
-	rollback
-	return @Ent_Uno
-end	
-
+if(@Per_Tipo <> @Per_Moral) begin	
+	exec @Status = CLCURCLIVAL
+		@Per_CURP,  '' , '', 1,	@NumTransac, 	
+		@Transaccio,	@Usuario,   	@FechaSis,  	@SucOrigen, 	@SucDestino,	
+		@Modulo
+		
+	if @Status <> @Ent_Cero begin
+		rollback
+		return @Ent_Uno
+	end	
+end
 /***************************************************************/
 
 exec @Status = SOBITPERALT
