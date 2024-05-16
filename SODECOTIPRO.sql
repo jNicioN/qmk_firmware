@@ -16,6 +16,11 @@ as
 ****************************************************************************
 ** REFERENCIAS:															****
 ****************************************************************************
+** Modificó: 	Jayro Flores					    					****
+** Fecha: 		15/Mayo/2024											****
+** Help: 		TCELCV-24065											****
+** Descripcion: Se elimina table scan hacia la tabla CHCUENTA 		    ****
+****************************************************************************
 **	Modificó:	Fatima Sanchez											****
 **  Fecha:		30/04/2021												****
 **  Help:		1286068													****
@@ -899,7 +904,50 @@ begin
 		--Obtener los elementos de cada Nivel para cada Cuenta
 		--Obtener las Configuraciones Base y con Vigencia en cada Nivel
 		--Configuraciones del Tipo de Movimiento de todas las Cuentas en todos los Niveles
+---NUEVA VERSION
+		create table #chciecue(
+			Cue_Numero 	char(12),
+			Cue_Tipo 	char(2),
+			Cue_Moneda	char(2),
+			Prp_Produc	int,
+			Prp_PerFis	char(1),
+			Prp_TipMov	int,
+			Prp_TiMoCa	char(6)
+		)
+		create index #chciecue on #chciecue (Cue_Numero)
+ 		insert into #chciecue (Cue_Numero, Cue_Tipo,	Cue_Moneda, Prp_Produc, Prp_PerFis,
+							Prp_TipMov, Prp_TiMoCa)
+		select	Cue_Numero, Cue_Tipo,	Cue_Moneda, Prp_Produc, Prp_PerFis,
+				Prp_TipMov, Prp_TiMoCa
+		from CHCIECUE noholdlock
+		inner join SOTMPPRP noholdlock
+				on	Prp_NumTra	=	@NumTransac
+				and Prp_TipCue	=	Cue_Tipo
+				and Prp_Moneda	=	Cue_Moneda
+				and Prp_NuPeCl	=	Cue_CliTip		--- Condición por Personalidad Fiscal del Cliente
+				and Prp_ActEmp	=	Cue_ActEmp		--- Condición por Personalidad Fiscal del Cliente
+				and Prp_TiMoCa	=	@Pro_TipMov		--- Filtrado por Tipo de Movimiento
+		where	Cue_Status = @Sta_Activo
 
+		insert into SOTMPCUL(
+			Cul_Cuenta, Cul_TipCue, Cul_Moneda, Cul_Produc, Cul_PerFis,
+			Cul_TipMov, Cul_CoTiMo, Cul_TiMoCa,	Cul_NivEnt,	Cul_Vigenc, 
+			Cul_Priori)			
+		select Cue_Numero, Cue_Tipo,	Cue_Moneda, Prp_Produc, Prp_PerFis,
+				Prp_TipMov, Cuc_CoTiMo, Prp_TiMoCa, Ctm_NivEnt,	Ctm_Vigenc,	
+				Ppt_Priori
+		from #chciecue noholdlock
+		inner join SOTMPCUC noholdlock				-- Configuraciones de todas las Cuentas en todos los Niveles.
+				on Cuc_Cuenta	=	Cue_Numero
+		inner join SOCOTIMO noholdlock
+				on Ctm_Numero 	=	Cuc_CoTiMo
+		inner join SOPRPETI	noholdlock			--Obtener Prioridad de Nivel del Tipo de Movimiento en el Producto/PersonalidadFiscal
+				on Ppt_PrTiMo	=	Prp_TipMov
+				and Ppt_NivEnt	=	Ctm_NivEnt
+				and Ppt_Activo	=	@Bit_Si
+
+		drop table  #chciecue
+/*
 		insert into SOTMPCUL
 			(
 				Cul_Cuenta, Cul_TipCue, Cul_Moneda, Cul_Produc, Cul_PerFis,
@@ -928,6 +976,7 @@ begin
 					and Ppt_NivEnt	=	Ctm_NivEnt
 					and Ppt_Activo	=	@Bit_Si
 			where	Cue_Status = @Sta_Activo
+*/
 		--En caso de error hacer rollback
 		if @@error <> 0
 		begin
