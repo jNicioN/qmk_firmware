@@ -644,8 +644,9 @@ end
 
 /***************************************************************/	
 /*       VALIDAR QUE LA CURP PROPORCIONADA SEA VALIDA          */
-/***************************************************************/	
-if(@Per_Tipo <> @Per_Moral) begin
+/***************************************************************/
+--Validamos que tenga algo en la CURP
+if(@Per_CURP <> @Str_Vacio) begin
 	exec @Status = CLCURCLIVAL
 		@Per_CURP,  '', '', 1,	@NumTransac, 	
 		@Transaccio,	@Usuario,   	@FechaSis,  	@SucOrigen, 	@SucDestino,	

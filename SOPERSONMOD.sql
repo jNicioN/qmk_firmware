@@ -225,7 +225,9 @@ declare	@Per_Comple	varchar(254),	/*	Declaracion de Variables	*/
 		@Aux_Entida char(3),		
 		@Aux_Nacion char(3),		
 		@Aux_CodPos char(6),
-		@Aux_PerNum char(8)
+		@Aux_PerNum char(8),
+		@Aux_Adi_NumPer char (10) /*Ayudara para validar en la busqueda si la persona es cliente*/
+
 
 declare	@Str_Vacio	char(1),		/*	Declaracion de Constantes	*/
 		@Str_Espaci	char(1),
@@ -715,7 +717,12 @@ select	@PerPersoID = PerPersoID,
 /***************************************************************/	
 /*       VALIDAR QUE LA CURP PROPORCIONADA SEA VALIDA          */
 /***************************************************************/
-if(@Per_Tipo <> @Per_Moral) begin	
+--si el numero de persona esta relacionado con cliente 
+select @Aux_Adi_NumPer= Adi_NumPer 
+from CLADICIO noholdlock
+where Adi_NumPer = @Per_Numero
+
+if(@Per_Tipo <> @Per_Moral and @Aux_Adi_NumPer <> @Str_Vacio) begin 
 	exec @Status = CLCURCLIVAL
 		@Per_CURP,  '' , '', 1,	@NumTransac, 	
 		@Transaccio,	@Usuario,   	@FechaSis,  	@SucOrigen, 	@SucDestino,	
