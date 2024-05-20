@@ -17,7 +17,7 @@ as
 ** REFERENCIAS:															****
 ****************************************************************************
 ** Modificó: 	Jayro Flores					    					****
-** Fecha: 		15/Mayo/2024											****
+** Fecha: 		25/Mayo/2024											****
 ** Help: 		TCELCV-24065											****
 ** Descripcion: Se elimina table scan hacia la tabla CHCUENTA 		    ****
 ****************************************************************************
@@ -929,7 +929,7 @@ begin
             inner join SOPRPETI noholdlock            --Obtener Prioridad de Nivel del Tipo de Movimiento en el Producto/PersonalidadFiscal
 			on	Ppt_PrTiMo	= Prp_TipMov
 			and Ppt_NivEnt	= Ctm_NivEnt
-			and	Ppt_Activo	= @Sta_Activo
+			and	Ppt_Activo	= @Bit_Si
             where    Cue_Status	= @Sta_Activo
 
 		--En caso de error hacer rollback
