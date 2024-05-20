@@ -916,7 +916,7 @@ begin
                     Ppt_Priori
             from CHCIECUE noholdlock
             inner join SOTMPCUC noholdlock                -- Configuraciones de todas las Cuentas en todos los Niveles.
-			on Cuc_Cuenta	= Cue_Numero
+			on 	Cuc_Cuenta	= Cue_Numero
             inner join SOTMPPRP noholdlock
 			on	Prp_NumTra	= @NumTransac
 			and Prp_TipCue	= Cue_Tipo
@@ -927,16 +927,16 @@ begin
             inner join SOCOTIMO noholdlock
 			on Ctm_Numero	= Cuc_CoTiMo
             inner join SOPRPETI noholdlock            --Obtener Prioridad de Nivel del Tipo de Movimiento en el Producto/PersonalidadFiscal
-			on Ppt_PrTiMo	= Prp_TipMov
+			on	Ppt_PrTiMo	= Prp_TipMov
 			and Ppt_NivEnt	= Ctm_NivEnt
-			and Ppt_Activo	= @Sta_Activo
+			and	Ppt_Activo	= @Sta_Activo
             where    Cue_Status	= @Sta_Activo
 
 		--En caso de error hacer rollback
 		if @@error <> 0
 		begin
 			rollback transaction
-			return 1ß
+			return 1
 		end
 		
 		insert into #ConfiguracionProd(	Cop_Cuenta,	Cop_TipMov,	Cop_NivEnt,	Cop_Vigenc,	Cop_Produc,
