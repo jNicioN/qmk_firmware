@@ -988,7 +988,7 @@ begin
 		--Eliminar las Configuraciones de Cuentas que hayan obtenido el Tipo de Movimiento como Beneficio en Modalidades.
 		update SOTMPCCN
 			set Ccn_Activo = @Bit_No
-			from SOTMPCCN CCN
+			from SOTMPCCN CCN noholdlock
 			inner join CHTMPCMO noholdlock
 					on Cmo_Cuenta = CCN.Ccn_Cuenta
 					and Cmo_TipMov = convert(int, CCN.Ccn_TipMov)
@@ -1014,8 +1014,8 @@ begin
 		--Cuando se tienen Configuraciones Terminales, las Configuraciones de "menor" prioridad no son tomadas en cuenta.
 		update SOTMPCCN
 			set Ccn_Activo = @Bit_No
-			from SOTMPCCN CcnE
-			inner join SOTMPCCN CcnA
+			from SOTMPCCN CcnE noholdlock
+			inner join SOTMPCCN CcnA noholdlock
 					on CcnA.Ccn_TipMov = CcnE.Ccn_TipMov
 					and CcnA.Ccn_Cuenta = CcnE.Ccn_Cuenta
 					and CcnA.Ccn_NivEnt = CcnE.Ccn_NivEnt
@@ -1036,8 +1036,8 @@ begin
 		--Las Configuraciones con Vigencia tienen mayor prioridad que las Configuraciones sin Vigencia.
 		update SOTMPCCN
 			set Ccn_Activo = @Bit_No
-			from SOTMPCCN CcnE
-			inner join SOTMPCCN CcnA
+			from SOTMPCCN CcnE noholdlock
+			inner join SOTMPCCN CcnA noholdlock
 					on CcnA.Ccn_TipMov = CcnE.Ccn_TipMov
 					and CcnA.Ccn_Cuenta = CcnE.Ccn_Cuenta
 					and CcnA.Ccn_NivEnt = CcnE.Ccn_NivEnt
@@ -1074,8 +1074,8 @@ begin
 		
 		update SOTMPCCN
 			set Ccn_Activo = @Bit_No
-			from SOTMPCCN
-			inner join SOTMPCTA
+			from SOTMPCCN noholdlock
+			inner join SOTMPCTA noholdlock
 					on Cta_Cuenta = Ccn_Cuenta
 					and Cta_Priori < Ccn_Priori
 			where	Ccn_TipMov = @Pro_TipMov
@@ -1110,8 +1110,8 @@ begin
 				
 		update SOTMPCCN
 			set Ccn_Activo = @Bit_No
-			from SOTMPCCN
-			inner join SOTMPCTA
+			from SOTMPCCN noholdlock
+			inner join SOTMPCTA noholdlock
 					on Cta_Cuenta = Ccn_Cuenta
 					and Cta_Priori > Ccn_Priori
 			where	Ccn_TipMov = @Pro_TipMov
@@ -1151,8 +1151,8 @@ begin
 				
 		update SOTMPCCN
 			set Ccn_Activo = @Bit_No
-			from SOTMPCCN
-			inner join SOTMPCTA
+			from SOTMPCCN noholdlock
+			inner join SOTMPCTA noholdlock
 					on Cta_Cuenta = Ccn_Cuenta
 					and Cta_Priori <> Ccn_TiMoAs
 			where	Ccn_TipMov = @Pro_TipMov
