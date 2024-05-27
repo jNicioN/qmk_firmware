@@ -13,10 +13,15 @@ as
 
 /*****************************************************************************/
 /** REFERENCIAS: 
-****************************************************************************
-** Modificó:	Edgar Oziel 										****
-** Fecha:		23/Agosto/2022										****
-** Help Desk:	1640569													****
+**************************************************************************/
+/** Modifico:	Brandon Garcia	                   						**/
+/** Fecha:		29/Abril/2024					                        **/
+/** helpdesk:	TCELES-29665											**/
+/** cambio:		Se actualiza validacion de Cierre de Pasivos en Dolares	**/
+/*************************************************************************
+** Modificó:	Edgar Oziel 														****
+** Fecha:		23/Agosto/2022														****
+** Help Desk:	1640569																****
 ** Descripción: Se valida si necesita cierre de pasivos para aperturar sucursal		****
 ****************************************************************************/
 
@@ -27,7 +32,8 @@ declare @Par_FecAct	smalldatetime,		/*	Declaracion de Variables	*/
 		@Cen_Numero	char(3),
 		@Suc_StaCre	char(1),
 		@Suc_CiCrCe	char(1),
-		@Par_NecCie char(1)
+		@Par_NecCie char(1),
+		@Cie_Pasivo	char(1)
 
 		
 		
@@ -41,21 +47,24 @@ declare	@Sta_CiCeCr	char(1),			/*	Declaracion de Constantes	*/
 		@Dia_Habil	char(1),
 		@Suc_OpeCon	char(3),
 		@Par_VaCiPa char(19),
-		@Str_Si     char(1)
+		@Str_Si     char(1),
+		@Str_Vacio	char(1)
+		
 		
 	
 /*	Asignacion de Constantes	*/
 select	@Sta_CiCeCr	= 'C',				/*	Status: Cierre de Creditos Centralizado */
 		@Sta_Proces	= 'N',				/*	Status: Proceso							*/
 		@Ent_Cero	= 0,				/*	Entero Cero								*/
-		@Sta_Finali	= 'A',				/*	Status: Fianlizado camara de compensaciÃƒÂ³n */
+		@Sta_Finali	= 'A',				/*	Status: Fianlizado camara de compensaciÃÂ³n */
 		@Sta_Si		= 'S',				/*	Status: Si								*/
 		@Sta_No		= 'N',				/*	Status: No								*/
 		@Dia_Inhabi	= 'I',				/*	Dia Inhabil								*/
 		@Dia_Habil	= 'H',				/*	Dia Habil								*/
 		@Suc_OpeCon	= '799',				/*	Sucursal de Operaciones/Contabilidad	*/
 		@Par_VaCiPa	= 'ValidaCierrePasivos',       /*	Valida CIerre Pasivos	*/
-		@Str_Si     = '1'             
+		@Str_Si     = '1',
+		@Str_Vacio	= ''             
 
 select	@Cen_Numero = Cen_Numero
 	from SOSUCURS noholdlock,
@@ -66,7 +75,7 @@ select	@Cen_Numero = Cen_Numero
 	  and	Pla_CenPro	= Cen_Numero
 
 select	@Sucursal = @SucOrigen + '%'
-select	@Error = null
+select	@Error = @Str_Vacio
 
 select	@Par_FecAct = Par_FecAct
 	from SOPARAMS noholdlock
@@ -123,16 +132,25 @@ end
 if @Par_NecCie = @Str_Si begin
 	/* Pasivos en Dolares */
 	/* ------------------ */
-	if	@SucOrigen = @Suc_OpeCon and (select	Cie_Pasivo
-										from ESCIERRE noholdlock )	= @Sta_No begin
-		select	@Error = 'Imposible realizar Apertura, No se ha hecho el cierre de Pasivos en Dolares'
-		if @@nestlevel = 1 begin
-			select 	Err_Codigo = '000004',
-					Err_Mensaj = @Error, 
-					Err_Variab = 'Suc_Numero'
+	if	@SucOrigen = @Suc_OpeCon and @Suc_UltDia = @Dia_Habil begin 
+		
+		select	@Cie_Pasivo = Cie_Pasivo 
+		  from	ESCIERRE noholdlock 
+		
+		select	@Cie_Pasivo = isnull(@Cie_Pasivo,@Sta_No)
+		
+		if @Cie_Pasivo = @Sta_No begin
+		
+			select	@Error = 'Imposible realizar Apertura, No se ha hecho el cierre de Pasivos en Dolares'
+			if @@nestlevel = 1 begin
+				select 	Err_Codigo = '000004',
+						Err_Mensaj = @Error, 
+						Err_Variab = 'Suc_Numero'
+			end
+			
+			return 1
+			
 		end
-	
-		return 1
 	end
 end 
 
@@ -149,7 +167,7 @@ if (select count(Suc_Numero)
 	return 1
 
 end else begin
-	select	@Error = null
+	select	@Error = @Str_Vacio
 
 	if @@nestlevel = 1 begin
 		select 	Err_Codigo	= '000000',
