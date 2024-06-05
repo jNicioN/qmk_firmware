@@ -20,7 +20,7 @@ as
 ********************************************************************
 ** Modificó:	Carlos Copto									****
 ** Fecha:		28/05/2024									   	****
-** Help: 		38996 											****
+** Help: 		41724 											****
 ** Descripcion:	Se crea SP para consulta de historico de 		****
 				personas por rango de Fecha 					****
 *******************************************************************/
@@ -35,21 +35,21 @@ declare	@Str_Vacio	char(1),
 select	@Str_Vacio	= '',			-- String Vacio
 		@Ent_Uno	= 1				-- Entero : 1
 
-if @Bit_FecIni = isnull(@Bit_FecIni, @Str_Vacio) begin
+if isnull(@Bit_FecIni, @Str_Vacio) = @Str_Vacio begin
 	select	Err_Codigo	= '000001',
 			Err_Mensaj	= 'Ingrese una fecha de inicio'
 	rollback
 	return @Ent_Uno
 end
 
-if @Bit_FecFin = isnull(@Bit_FecFin, @Str_Vacio) begin
+if isnull(@Bit_FecFin, @Str_Vacio) = @Str_Vacio begin
 	select	Err_Codigo	= '000002',
 			Err_Mensaj	= 'Ingrese una fecha de fin'
 	rollback
 	return @Ent_Uno
 end
 
-select  Bit_Consec, Bit_NumPer,	Bit_Fecha,	Bit_NumTra,	Bit_Tipo,		
+select  Bit_Consec, Bit_NumPer,	Bit_Fecha,	Bit_NumTra,	Bit_TipPer,		
 		Bit_NuSeFi, Bit_Titulo,	Bit_Nombre,	Bit_ApePat,	Bit_ApeMat,	
 		Bit_RazSoc,	Bit_Comple,	Bit_ComOrd,	Bit_RFC,	Bit_CURP,		
 		Bit_Calle, 	Bit_CalNum,	Bit_Coloni,	Bit_Entida,	Bit_Locali,	
