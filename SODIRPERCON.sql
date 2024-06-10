@@ -17,6 +17,12 @@ as
 /***************************************************************************
 ** Descripción:	 Consulta de Direccion Persona							****
 ****************************************************************************
+** Modifico:	Alberto Pineda Carbajal									****
+** Fecha:		28-05-2024												****
+** Help:		1621179													****
+** Descripcion: Modificación en tipo de consulta C5, se agrega el 		****
+** 				parametro de ClClientID en la consulta					****	
+****************************************************************************
 ** Modifico:	Adriana Gomez											****
 ** Fecha:		06-05-2022												****
 ** Help:		1621179													****
@@ -129,7 +135,8 @@ if @Tip_ConTip = @Con_Consul begin		/* Consultas */
 			from SODIRPER noholdlock
 			inner join SOCATIDI noholdlock on  Ctd_Numero  = Dip_TipDir
 			where 	PerPersoID		= @PerPersoID 
-			and		Dip_TipDir 		= @Dip_TipDir 
+			and		Dip_TipDir 		= @Dip_TipDir
+			and		ClClientID  	= @ClClientID  
 					 
 	end
 
