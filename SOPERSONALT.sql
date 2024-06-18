@@ -48,6 +48,12 @@ as
 /***************************************************************************/
 /** REFERENCIAS:														   */
 /****************************************************************************
+** Modifico:	Alberto Pineda											****
+** Fecha:		24/04/2024												****
+** Descripcion:	Mandamos a llamar al SP CLCURCLIVAL para validar que    ****
+				la CURP proporcionada sea valida						****
+** Help:		TRACL-8294												***/
+/****************************************************************************
 ** Modificó:	Carlos Copto										 	****
 ** Fecha:		11/03/2024											   	****
 ** Help: 		38996 											   		****
@@ -217,7 +223,8 @@ declare	@Per_Comple	varchar(254),	/* Nombre Completo */
 		@Aux_Entida char(3),		/* Entidad */
 		@Aux_Nacion char(3),		/* Nacionalidad */
 		@Aux_CodPos char(6),		/* Codigo Postal */
-		@Aux_PerNum char(8)			/* Numero persona */
+		@Aux_PerNum char(8),		/* Numero persona */
+		@Aux_CLPAGECL int			/* Bandera para validar CURP*/
 
 /*	Declaracion de Constantes	*/
 declare	@Fec_Vacia	smalldatetime,
@@ -253,7 +260,8 @@ declare	@Fec_Vacia	smalldatetime,
 		@Loc_Pais 	char(3),
 		@Mod_AplOnl char(2),
 		@Tip_PerNum char(1),
-		@Ent_180	int
+		@Ent_180	int,
+		@Validacion_CURP varchar(14)
 
 
 select	@Fec_Vacia	= '1900-01-01',	/*	Fecha Vacía*/
@@ -288,7 +296,8 @@ select	@Fec_Vacia	= '1900-01-01',	/*	Fecha Vacía*/
 	 	@Sta_Inacti	= 'I',			/* Status Inactivo para validar localidad y entidad */
 		@Mod_AplOnl	= 'OL',			/* Modulo de Aplicaciones Online*/		
 		@Tip_PerNum = 'F',			/*  Tipo proceso para actualizar el numero de folio*/
-		@Ent_180 	= 180			/* Numero 180*/
+		@Ent_180 	= 180,			/* Numero 180*/
+		@Validacion_CURP = 'ValidacionCURP'
 
 if @Modulo in (@Mod_AplOnl) begin
 
@@ -636,6 +645,33 @@ if isnull(@Per_NumTra, @Str_Vacio) = @Str_Vacio begin
 			@Per_NumTra	= @NumTransac
 end
 
+
+/***************************************************************/	
+/*       VALIDAR QUE LA CURP PROPORCIONADA SEA VALIDA          */
+/***************************************************************/
+
+/*Buscar en CLPAGECL*/
+select @Aux_CLPAGECL = convert(int, Pgc_Valor)
+    from CLPAGECL noholdlock 
+    where Pgc_Nombre = @Validacion_CURP
+
+/*Validar si la Validacion de CURP esta activa*/
+if(@Aux_CLPAGECL= @Ent_Uno)begin
+	--Validamos que tenga algo en la CURP
+	if(@Per_CURP <> @Str_Vacio) begin
+		exec @Status = CLCURCLIVAL
+			@Per_CURP,  '', '', 1,	@NumTransac, 	
+			@Transaccio,	@Usuario,   	@FechaSis,  	@SucOrigen, 	@SucDestino,	
+			@Modulo
+			
+		if @Status <> @Ent_Cero begin
+			rollback
+			return @Ent_Uno
+		end	
+	end
+end
+/***************************************************************/
+
 insert into SOPERSON (
 	Per_Numero, Per_Fecha,  Per_NumTra, Per_Tipo,   Per_Benefi,
 	Per_NuSeFi, Per_Titulo, Per_Nombre, Per_ApePat, Per_ApeMat,
@@ -688,9 +724,14 @@ exec @Status = SOPERSONPRO
 		return @Ent_Uno
 	end
 	
-exec SOUNIPERPRO
+exec @Status =  SOUNIPERPRO
 	@Per_Numero,	@NumTransac,	@Transaccio,	@Usuario,	@FechaSis,
 	@SucOrigen,		@SucDestino,	@Modulo
+
+	if @Status <> @Ent_Cero begin
+		rollback
+		return @Ent_Uno
+	end
 
 select	@Act_ActPre	= @Ent_Cero	
 select	@Act_ActPre	= isnull(Apc_ActPre, @Ent_Cero)
