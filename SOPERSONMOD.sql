@@ -46,6 +46,12 @@ as
 ** DESCRIPCION: **Modificación de Apoderados** 							****
 ***************************************************************************/
 /** REFERENCIAS:
+ ****************************************************************************
+** Modifico:	Alberto Pineda											****
+** Fecha:		24/04/2024												****
+** Descripcion:	Mandamos a llamar al SP CLCURCLIVAL para validar que    ****
+				la CURP proporcionada sea valida						****
+** Help:		TRACL-8294												****
 ****************************************************************************
 ** Modificó:	Carlos Copto										 	****
 ** Fecha:		11/03/2024											   	****
@@ -214,12 +220,14 @@ declare	@Per_Comple	varchar(254),	/*	Declaracion de Variables	*/
 		@Cli_Sucurs	char(3),
 		@Cli_Numero	char(8),
 		@Aux_Sector char (3),
-		@Aux_ActINE	varchar(10),	
+		@Aux_ActINE	varchar(10),
 		@Aux_Locali	char(8),		
 		@Aux_Entida char(3),		
 		@Aux_Nacion char(3),		
 		@Aux_CodPos char(6),
-		@Aux_PerNum char(8)
+		@Aux_PerNum char(8),
+		@Aux_Adi_NumPer char (10) /*Ayudara para validar en la busqueda si la persona es cliente*/
+
 
 declare	@Str_Vacio	char(1),		/*	Declaracion de Constantes	*/
 		@Str_Espaci	char(1),
@@ -705,6 +713,27 @@ select	@PerPersoID = PerPersoID,
 		@Bit_ActINE	= Per_ActINE
 	from SOPERSON noholdlock
 	where	Per_Numero = @Per_Numero
+
+/***************************************************************/	
+/*       VALIDAR QUE LA CURP PROPORCIONADA SEA VALIDA          */
+/***************************************************************/
+--si el numero de persona esta relacionado con cliente 
+select @Aux_Adi_NumPer= Adi_NumPer 
+from CLADICIO noholdlock
+where Adi_NumPer = @Per_Numero
+
+if(@Per_Tipo <> @Per_Moral and @Aux_Adi_NumPer <> @Str_Vacio) begin 
+	exec @Status = CLCURCLIVAL
+		@Per_CURP,  '' , '', 1,	@NumTransac, 	
+		@Transaccio,	@Usuario,   	@FechaSis,  	@SucOrigen, 	@SucDestino,	
+		@Modulo
+		
+	if @Status <> @Ent_Cero begin
+		rollback
+		return @Ent_Uno
+	end	
+end
+/***************************************************************/
 
 exec @Status = SOBITPERALT
 	@Bit_NumPer,	@Bit_Fecha,		@Bit_NumTra,	@Bit_Tipo,		@Bit_NuSeFi,
