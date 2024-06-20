@@ -62,7 +62,16 @@ declare	@Ent_Uno	int
 --Asignacion de Constantes
 select	@Ent_Uno	= 1			-- Entero : 1
 
-insert into SOHISBIP values (
+insert into SOHISBIP(
+	Bit_NumPer,	Bit_Fecha,	Bit_NumTra,	Bit_TipPer,	Bit_NuSeFi, 
+	Bit_Titulo,	Bit_Nombre,	Bit_ApePat,	Bit_ApeMat,	Bit_RazSoc,	
+	Bit_Comple,	Bit_ComOrd,	Bit_RFC,	Bit_CURP,	Bit_Calle, 	
+	Bit_CalNum,	Bit_Coloni,	Bit_Entida,	Bit_Locali, Bit_CodPos, 
+	Bit_ApaPos,	Bit_LadTel,	Bit_Telefo,	Bit_Email, 	Bit_ComDom, 
+	Bit_EstCiv,	Bit_Nacion,	Bit_ActEmp,	Bit_Giro,	Bit_Sector, 
+	Bit_Activi,	Bit_ActINE,	NumTransac,	Transaccio,	Usuario, 	
+	FechaSis,	SucOrigen,	SucDestino)
+values (
 	@Bit_NumPer,	@Bit_Fecha,		@Bit_NumTra,	@Bit_Tipo,		@Bit_NuSeFi,
 	@Bit_Titulo,	@Bit_Nombre,	@Bit_ApePat,	@Bit_ApeMat,	@Bit_RazSoc,
 	@Bit_Comple,	@Bit_ComOrd,	@Bit_RFC,		@Bit_CURP,		@Bit_Calle,
