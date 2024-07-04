@@ -48,6 +48,12 @@ as
 /***************************************************************************/
 /** REFERENCIAS:														   */
 /****************************************************************************
+** Modifico:	Javier Ceron											****
+** Fecha:		03/07/2024												****
+** Descripcion:	Se agrega validacion de tamaño de nombre para guardar 	****
+				en CLNOMLAR												****
+** Help:		TRACL-9032												****
+****************************************************************************
 ** Modifico:	Alberto Pineda											****
 ** Fecha:		24/04/2024												****
 ** Descripcion:	Mandamos a llamar al SP CLCURCLIVAL para validar que    ****
@@ -230,6 +236,7 @@ declare	@Per_Comple	varchar(254),	/* Nombre Completo */
 declare	@Fec_Vacia	smalldatetime,
         @Str_Vacio	char(1),		
 		@Str_Espaci	char(1),
+		@Str_DobEsp char(2),
 		@Per_Moral	char(1),
 		@Per_Fisica	char(1),
 		@Sta_ActIna	char(1),
@@ -261,12 +268,14 @@ declare	@Fec_Vacia	smalldatetime,
 		@Mod_AplOnl char(2),
 		@Tip_PerNum char(1),
 		@Ent_180	int,
+		@Ent_40		int,
 		@Validacion_CURP varchar(14)
 
 
 select	@Fec_Vacia	= '1900-01-01',	/*	Fecha Vacía*/
 		@Str_Vacio	= '',			/*	String Vacio	*/
 		@Str_Espaci	= ' ',			/*	String Espacio	*/
+		@Str_DobEsp	= '  ',			/*	String Doble Espacio	*/
 		@Per_Moral	= '1',			/* Persona Moral */
 		@Per_Fisica	= '2',			/* Persona Fisica */
 		@Sta_ActIna = 'I',			/* Status de actividad inactiva */
@@ -297,6 +306,7 @@ select	@Fec_Vacia	= '1900-01-01',	/*	Fecha Vacía*/
 		@Mod_AplOnl	= 'OL',			/* Modulo de Aplicaciones Online*/		
 		@Tip_PerNum = 'F',			/*  Tipo proceso para actualizar el numero de folio*/
 		@Ent_180 	= 180,			/* Numero 180*/
+		@Ent_40 	= 40,			/* Numero 40*/
 		@Validacion_CURP = 'ValidacionCURP'
 
 if @Modulo in (@Mod_AplOnl) begin
@@ -627,11 +637,22 @@ if (@Modulo not in (@Ban_Electr, @Ban_NueBan)) and (@Tip_Proces = @Tip_CueChe an
 end
 
 if (@Per_Tipo = @Per_Moral) begin
-	select	@Per_Comple	= LTrim(RTrim(@Per_RazSoc))
-	select	@Per_ComOrd	= LTrim(RTrim(@Per_RazSoc))
+	select  @Per_RazSoc = str_replace(@Per_RazSoc, @Str_DobEsp, @Str_Espaci),
+		   	@Per_RazSoc = UPPER(LTrim(RTrim(@Per_RazSoc)))
+	select	@Per_Comple	= @Per_RazSoc
+	select	@Per_ComOrd	= @Per_RazSoc
 end else begin
-	select	@Per_Comple	= LTrim(RTrim(@Per_ApePat)) + ' ' + LTrim(RTrim(@Per_ApeMat)) + ' ' + LTrim(RTrim(@Per_Nombre))
-	select	@Per_ComOrd	= LTrim(RTrim(@Per_Nombre)) + ' ' + LTrim(RTrim(@Per_ApePat)) + ' ' + LTrim(RTrim(@Per_ApeMat))
+	--Sanitizamos Nombre y apellidos
+	select @Per_ApePat = str_replace(@Per_ApePat, @Str_DobEsp, @Str_Espaci),
+		   @Per_ApeMat = str_replace(@Per_ApeMat, @Str_DobEsp, @Str_Espaci),
+		   @Per_Nombre = str_replace(@Per_Nombre, @Str_DobEsp, @Str_Espaci),
+
+			@Per_ApePat = UPPER(LTrim(RTrim(@Per_ApePat))),
+			@Per_ApeMat = UPPER(LTrim(RTrim(@Per_ApeMat))),
+			@Per_Nombre = UPPER(LTrim(RTrim(@Per_Nombre)))
+
+	select	@Per_Comple	= @Per_ApePat + @Str_Espaci + @Per_ApeMat + @Str_Espaci + @Per_Nombre
+	select	@Per_ComOrd	= @Per_Nombre + @Str_Espaci + @Per_ApePat + @Str_Espaci + @Per_ApeMat
 end
 
 if @Cob_Tipo = @Tip_Benefi begin
@@ -698,6 +719,18 @@ select	@Per_Numero	= right('00000000' + ltrim(rtrim(convert(char, @PerPersoID)))
 if @Per_Numero = @Str_Vacio begin
 		rollback
 		return @Ent_Uno
+end
+
+--Si el nombre o apellidos excede los 40 caracteres se guarda en la tabla de nombres largos
+if char_length(@Per_Nombre) > @Ent_40 or char_length(@Per_ApePat) > @Ent_40  or char_length(@Per_ApeMat) > @Ent_40 begin
+	exec @Status = SONOMLARALT 
+		@PerPersoID,	@Per_Nombre,	@Per_ApePat,	@Per_ApeMat,	@Per_RazSoc,
+	    @Per_Comple,	@Per_ComOrd,	@NumTransac,	@Transaccio,	@Usuario,			
+	    @FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
+	if @Status <> @Ent_Cero begin
+		rollback
+		return @Ent_Uno
+	end
 end
 
 --Si el nombre completo excede los 180 caracteres se guarda en la tabla de nombres largos
