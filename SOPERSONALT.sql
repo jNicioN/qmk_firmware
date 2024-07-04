@@ -637,17 +637,17 @@ if (@Modulo not in (@Ban_Electr, @Ban_NueBan)) and (@Tip_Proces = @Tip_CueChe an
 end
 
 if (@Per_Tipo = @Per_Moral) begin
-	select  @Per_RazSoc = str_replace(@Per_RazSoc, @Str_DobEsp, @Str_Espaci),
-		   	@Per_RazSoc = UPPER(LTrim(RTrim(@Per_RazSoc)))
+	select  @Per_RazSoc = str_replace(@Per_RazSoc, @Str_DobEsp, @Str_Espaci)
+	select  @Per_RazSoc = UPPER(LTrim(RTrim(@Per_RazSoc)))
 	select	@Per_Comple	= @Per_RazSoc
 	select	@Per_ComOrd	= @Per_RazSoc
 end else begin
 	--Sanitizamos Nombre y apellidos
 	select @Per_ApePat = str_replace(@Per_ApePat, @Str_DobEsp, @Str_Espaci),
 		   @Per_ApeMat = str_replace(@Per_ApeMat, @Str_DobEsp, @Str_Espaci),
-		   @Per_Nombre = str_replace(@Per_Nombre, @Str_DobEsp, @Str_Espaci),
+		   @Per_Nombre = str_replace(@Per_Nombre, @Str_DobEsp, @Str_Espaci)
 
-			@Per_ApePat = UPPER(LTrim(RTrim(@Per_ApePat))),
+	select  @Per_ApePat = UPPER(LTrim(RTrim(@Per_ApePat))),
 			@Per_ApeMat = UPPER(LTrim(RTrim(@Per_ApeMat))),
 			@Per_Nombre = UPPER(LTrim(RTrim(@Per_Nombre)))
 

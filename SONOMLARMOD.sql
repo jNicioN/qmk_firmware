@@ -50,14 +50,6 @@ if isnull(@Nol_Person, @Ent_Cero) = @Ent_Cero begin
 	return @Ent_Uno
 end
 
-if isnull(@Nol_RazSoc, @Str_Vacio) = @Str_Vacio begin
-	select	Err_Codigo	= '000002',
-			Err_Mensaj	= 'La Razon Social no puede estar vacia',
-			Err_Variab	= 'Nol_RazSoc'
-	rollback
-	return @Ent_Uno
-end
-
 if isnull(@Nol_Comple, @Str_Vacio) = @Str_Vacio begin
 	select	Err_Codigo	= '000003',
 			Err_Mensaj	= 'El nombre completo no puede estar vacio',
