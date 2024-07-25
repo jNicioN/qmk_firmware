@@ -22,15 +22,8 @@ as
 *******************************************************************/
 
 --Declaracion de Variables
-declare @conteo			int,
-		@Fec_Actual		smalldatetime,
+declare @Fec_Actual		smalldatetime,
 		@Fec_Depura		smalldatetime
-
---Declaracion de Constantes
-declare	@Ent_Uno	int
-
---Asignacion de Constantes
-select	@Ent_Uno	= 1			-- Entero : 1
 
 --se obtiene la fecha actual
 select @Fec_Actual = getdate()
