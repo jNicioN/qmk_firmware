@@ -339,7 +339,7 @@ end else if @Une_TabCon = '0' begin   /* Consultas propias a SOUSNAEX */
 			)
 			
 			insert into #UsuariosCompraVenta (Usu_Id, Usu_Nombre)
-			select	Une_Identi,	Per_ComOrd
+			select	top 50 Une_Identi,	Per_Comple
 			  from	SOPERSON noholdlock
 			 inner join	SOUSNAEX noholdlock on Une_IdeUsu = PerPersoID
 			 where	Une_Estatu = @Str_Status
@@ -347,7 +347,7 @@ end else if @Une_TabCon = '0' begin   /* Consultas propias a SOUSNAEX */
 			   and	Une_TabOri = @Tab_UsuNac
 			
 			insert into #UsuariosCompraVenta (Usu_Id, Usu_Nombre)
-			select	Une_Identi,	Use_NoCoUs
+			select	top 50 Une_Identi,	Use_NoCoUs
 			  from	SOUSUEXT noholdlock
 			 inner join	SOUSNAEX noholdlock on Une_IdeUsu = Use_IdUsEx
 			 where	Une_Estatu = @Str_Status
