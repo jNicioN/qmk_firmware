@@ -343,7 +343,7 @@ end else if @Une_TabCon = '0' begin   /* Consultas propias a SOUSNAEX */
 			  from	SOPERSON noholdlock
 			 inner join	SOUSNAEX noholdlock on Une_IdeUsu = PerPersoID
 			 where	Une_Estatu = @Str_Status
-			   and	Per_ComOrd like @Use_NoCoUs + @Str_Porcen
+			   and	Per_Comple like @Use_NoCoUs + @Str_Porcen
 			   and	Une_TabOri = @Tab_UsuNac
 			
 			insert into #UsuariosCompraVenta (Usu_Id, Usu_Nombre)
