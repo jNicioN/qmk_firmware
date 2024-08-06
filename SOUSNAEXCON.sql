@@ -34,6 +34,11 @@ as
 *********************************************************************************
 ** Referencias: 															  	*
 *********************************************************************************
+** ** Modifico:	Brandon Garcia												 ****
+** Fecha:		20/06/2024													 ****
+** Jira:	    TCELES-29955								 				 ****
+** Descripción:	Se crea consulta LF											 ****
+*********************************************************************************
 * ** Modifico:	Francisco Minajas											 ****
 ** Fecha:		20/06/2023													 ****
 ** Jira:	    TRAAC-1542									 				 ****
@@ -96,6 +101,7 @@ declare	@Str_LetraI char(1),
 		@Str_LetraT char(1),
 		@Str_LetraM char(1),
 		@Str_LetraE char(1),
+		@Str_LetraF	char(1),
 		@Str_TipC 	char(1),
 		@Str_TipL 	char(1),
 		@Str_Vacio 	char(1),
@@ -116,6 +122,7 @@ select	@Str_LetraI = 'I',		/* String I: ID de relacion */
 		@Str_LetraT = 'T',		/* String T: Tabla Origen */
 		@Str_LetraE = 'E',		/* String E: Estatus	*/
 		@Str_LetraM = 'M',		/* String M: Usuario Migrado */
+		@Str_LetraF = 'F',		/* String F: Nombre Usuario */
 		@Str_TipC 	= 'C',		/* Tipo Consulta */
 		@Str_Status = 'A',		/* Estatus activo */
 		@Str_TipL 	= 'L',		/* Tipo Lista */
@@ -325,6 +332,32 @@ end else if @Une_TabCon = '0' begin   /* Consultas propias a SOUSNAEX */
 					Une_Estatu, Une_FecReg, Une_FecEst
 			from 	SOUSNAEX noholdlock
 			where	Une_Estatu = @Une_Estatu	
+		 end else if @Tip_ConCon = @Str_LetraF begin
+		 	create table #UsuariosCompraVenta (
+				Usu_Id int,
+				Usu_Nombre varchar(150)
+			)
+			
+			insert into #UsuariosCompraVenta (Usu_Id, Usu_Nombre)
+			select	top 50 Une_Identi,	Per_Comple
+			  from	SOPERSON noholdlock
+			 inner join	SOUSNAEX noholdlock on Une_IdeUsu = PerPersoID
+			 where	Une_Estatu = @Str_Status
+			   and	Per_Comple like @Use_NoCoUs + @Str_Porcen
+			   and	Une_TabOri = @Tab_UsuNac
+			
+			insert into #UsuariosCompraVenta (Usu_Id, Usu_Nombre)
+			select	top 50 Une_Identi,	Use_NoCoUs
+			  from	SOUSUEXT noholdlock
+			 inner join	SOUSNAEX noholdlock on Une_IdeUsu = Use_IdUsEx
+			 where	Une_Estatu = @Str_Status
+			   and	Use_NoCoUs like @Use_NoCoUs + @Str_Porcen
+			   and	Une_TabOri = @Tab_UsuExt
+			
+			select	Usu_Id, Usu_Nombre 
+			  from	#UsuariosCompraVenta order by Usu_Nombre asc
+			  
+			drop table #UsuariosCompraVenta
 		 end
 	end
 	
