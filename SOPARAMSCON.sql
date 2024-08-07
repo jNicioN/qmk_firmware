@@ -17,6 +17,12 @@ as
 ****************************************************************************
 ** REFERENCIAS: 														****
 ****************************************************************************
+*** Modificó:	Gerardo Santos					 						****
+** Fecha:		02/Agosto/20124											****
+** Help Desk:	TCELTO-8668												****
+** Descripcion: Se crea consulta para obtener el grupo de Tipo Cambio	****
+** 				diferenciado											****
+****************************************************************************
 ** Modificó:		Ricardo Rivas 						****
 ** Fecha:		12/Julio/2019								****
 ** Help Desk:	00726428									****
@@ -103,7 +109,8 @@ declare	@Str_Vacio	char(1),
 		@Str_Uno	char(1),
 		@Str_Dos	char(1),
 		@Str_Tres	char(1),
-		@Str_Cuatro	char(1)
+		@Str_Cuatro	char(1),
+		@Str_Cinco	char(1)
 										/* Asignación de constantes */
 select	@Str_Vacio	= '',				/* String: Vacío */
 		@Fec_LetH	= 'H',
@@ -113,7 +120,8 @@ select	@Str_Vacio	= '',				/* String: Vacío */
 		@Str_Uno	= '1',				/* String: Uno */
 		@Str_Dos	= '2',				/* String: Dos */
 		@Str_Tres	= '3',				/* String: Tres */
-		@Str_Cuatro	= '4'				/* String: Cuatro */
+		@Str_Cuatro	= '4',				/* String: Cuatro */
+		@Str_Cinco  = '5'				/* String: Cinco */
 
 select	@Par_TiCaDi	= @Par_Sucurs
 select	@Dia_Actual = getdate()
@@ -189,6 +197,11 @@ end else begin
 				SOSUCURS noholdlock
 			where	Par_Sucurs	= Suc_Numero
 			  and	Par_Sucurs	= @Par_Sucurs
+		end
+		if @Tip_ConCon = @Str_Cinco begin /* Consulta para Tc Difereniado Next */
+			select	Par_Sucurs, Par_IVA, Par_DiBaCr, Par_FecAct, Par_TiCaDi
+				from SOPARAMS noholdlock
+				where	Par_Sucurs	= @Par_Sucurs
 		end
 	end
 end
