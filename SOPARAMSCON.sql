@@ -198,7 +198,7 @@ end else begin
 			where	Par_Sucurs	= Suc_Numero
 			  and	Par_Sucurs	= @Par_Sucurs
 		end
-		if @Tip_ConCon = @Str_Cinco begin /* Consulta para Tc Difereniado Next */
+		if @Tip_ConCon = @Str_Cinco begin /* Consulta para Tc Diferenciado Next */
 			select	Par_Sucurs, Par_IVA, Par_DiBaCr, Par_FecAct, Par_TiCaDi
 				from SOPARAMS noholdlock
 				where	Par_Sucurs	= @Par_Sucurs
