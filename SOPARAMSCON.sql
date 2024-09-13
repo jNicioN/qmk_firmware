@@ -18,7 +18,7 @@ as
 ** REFERENCIAS: 														****
 ****************************************************************************
 *** Modificó:	Gerardo Santos					 						****
-** Fecha:		02/Agosto/20124											****
+** Fecha:		02/Agosto/2024											****
 ** Help Desk:	TCELTO-8668												****
 ** Descripcion: Se crea consulta para obtener el grupo de Tipo Cambio	****
 ** 				diferenciado											****
