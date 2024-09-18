@@ -37,6 +37,13 @@ as
 ****************************************************************************
 ** REFERENCIAS:															****
 ****************************************************************************
+*** Modifico:	Edwin Silva 											****
+** Fecha:		14 de Agosto 2024										****
+** Key jira:		TCELA-16175 										****
+** Descripción:   Centralizacion de reglas de negocio   				**** 
+**					para determinar	un	 								****
+**					arrendamiento PUCA									****
+****************************************************************************
 ** Modificó:	Herman Sanchez Santiago/Joel Moctezuma Guerrero			****
 ** Fecha:		13/Septiembre/2023										****
 ** Help:		TCELA-13684												****
@@ -169,7 +176,10 @@ declare	@Ren_ResCap	double precision,		/*Resultado capital*/
 		@Tip_ArPuCa	char(1),				/* Arrendamiento Puro Capitalizable S/N */
 		@Arr_TiPuCa	char(1),				/* Arrendamiento: Tipo Puro Capitalizable - 4 */
 		@Eva_ArrPuc	char(1),				/*	Evaluar Arrendamiento Puro */
-		@Cot_IntRea smallmoney				/* Interes Total de la Cotizacion */
+		@Cot_IntRea smallmoney,				/* Interes Total de la Cotizacion */
+		@Lin_Numero char(12),			/* Numero de Linea a validar*/
+		@Men_Valida char(70),			/* Mensaje de validacion */
+		@Ban_Restri char(1)				/* Bandera de restriccion */ 
 
 declare	@Mon_Cero	smallint,				/*	Declaración de Constantes	*/
 		@Mon_Uno	smallint,
@@ -223,7 +233,8 @@ declare	@Mon_Cero	smallint,				/*	Declaración de Constantes	*/
 		@Cob_SiIVA	char(1),
 		@Str_SieCer char(7),
 		@Str_Porcen	char(1),
-		@Sta_Proces	char(1)
+		@Sta_Proces	char(1),
+		@Pro_Cotiza char(1)
 		
 select 	@NumTransac	= @NumTransac, 
 		@Transaccio	= @Transaccio,  
@@ -286,8 +297,9 @@ select	@Mon_Cero	= 0.00,			/*	Moneda Cero																	*/
 		@Cob_SiIVA	= 'S',			/*	Si cobro de IVA																*/																					 
 		@Str_SieCer	= '0000000',	/*	Cadena 7 ceros																*/
 		@Str_Porcen	= '%',			/*	Caracter Porcentaje															*/
-		@Sta_Proces	= 'N'			/*	Estatus: En Proceso															*/
-
+		@Sta_Proces	= 'N',			/*	Estatus: En Proceso															*/
+		@Pro_Cotiza = '1'			/*	Tipo de proceso por cotizacion												*/
+		
 select @Amo_TipRen = isnull(@Amo_TipRen,@Str_Vacio)
 		
 create table #Rentas (
@@ -343,8 +355,9 @@ end else begin
 
 	if @Eva_ArrPuc = @Cad_Si begin
 		exec @Status = ABARPUCAPRO
-			@Num_Cotiza,	@Tip_ArPuCa output,	@NumTransac,	@Transaccio,	@Usuario,
-			@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
+			@Num_Cotiza,	@Lin_Numero,		@Tip_ArPuCa output,	 	@Men_Valida output,	 	@Ban_Restri output,
+			@Pro_Cotiza,	@NumTransac,		@Transaccio,			@Usuario, 				@FechaSis,		
+			@SucOrigen,		@SucDestino,		@Modulo
 		if @Status <> 0 begin
 			rollback
 			return 1
