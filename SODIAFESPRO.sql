@@ -19,6 +19,19 @@ as
 /* REFERENCIAS:
 ****************************************************************************
 ****************************************************************************
+** Modificó:	Julio Cesar Diaz Lopez	 								****
+** Fecha:		20/Sep/2024												****
+** Help:		TCELTO-9552												****
+** Descripcion:	Se actualiza los plazos y fecha de liquidacion de Call	****
+**				Money (TECALMON) y Subastas (TESUBAST) del modulo de	****
+**				tesoreria al dia siguiente habil si dia festivo es igual****
+****************************************************************************
+** Modificó:	Julio Cesar Diaz Lopez	 								****
+** Fecha:		06/Sep/2024												****
+** Help:		TCELTO-9303												****
+** Descripcion:	Se actualiza la fecha apertura de Tesoreria (TEPARAMS)	****
+**				al dia siguiente habil si el dia festivo es igual.		****
+****************************************************************************
 ** Modificó:	Juan Jose Sandoval Marin								****
 ** Fecha:		07/Ene/2021												****
 ** Help:		1381544													****
@@ -45,7 +58,9 @@ declare	@Status		int,
 		@Fec_Sistem	smalldatetime,
 		@Fec_IniPro	datetime,
 		@Fec_SiDiHa	smalldatetime,
-		@Dfe_DiaFes	smalldatetime
+		@Dfe_DiaFes	smalldatetime,
+		@Par_Fecha 	smalldatetime,
+		@Par_FecApe smalldatetime
 
 -- Declaración de Constantes
 declare	@Ent_Cero	int,
@@ -157,6 +172,12 @@ declare	@Ent_Cero	int,
 		@Tip_Resp43	char(3),
 		@Tip_BEFADO char(3),
 		@Tip_SODIFE	char(3),
+		@Tip_Resp44	char(3),
+		@Tip_TEPARA	char(3),
+		@Tip_Resp45	char(3),
+		@Tip_TECAMO	char(3),
+		@Tip_Resp46	char(3),
+		@Tip_TESUBA	char(3),
 		
 		@Des_SODIFE	varchar(33),
 		@Tab_SODIFE	char(8),
@@ -275,6 +296,14 @@ declare	@Ent_Cero	int,
 		@Cam_DocDoc	char(10),
 		@Cam_DocCon	char(10),
 		@Cam_DocNum	char(10),
+		@Cam_PaFeAp	char(10),
+		@Cam_ParFec	char(10),
+		@Cam_CamNum	char(10),
+		@Cam_CamPla	char(10),
+		@Cam_CaFeLi	char(10),
+		@Cam_SubNum	char(10),
+		@Cam_SubPla	char(10),
+		@Cam_SuFeLi	char(10),
 		
 		@Tab_FAFACT	char(8),
 		@Tab_FADOCU	char(8),
@@ -314,6 +343,9 @@ declare	@Ent_Cero	int,
 		@Tab_SGSEGT	char(8),
 		@Tab_SGDOSE	char(8),
 		@Tab_BEFADO	char(8),
+		@Tab_TEPARA	char(8),
+		@Tab_TECAMO	char(8),
+		@Tab_TESUBA	char(8),
 		@Ent_CieOch	smallint
 
 -- Asignación de Constantes
@@ -426,7 +458,13 @@ select	@Ent_Cero	= 0,				-- Entero Cero
 		@Tip_Resp42	= '082',			-- Respaldo SGDOSETE
 		@Tip_SGDOSE	= '083',			-- Actualización SGDOSETE	
 		@Tip_Resp43	= '084',			-- Respaldo BEFADOCU
-		@Tip_BEFADO	= '085',			-- Actualización BEFADOCU		
+		@Tip_BEFADO	= '085',			-- Actualización BEFADOCU	
+		@Tip_Resp44	= '086',			-- Respaldo TEPARMS
+		@Tip_TEPARA	= '087',			-- Actualización TEPARMS
+		@Tip_Resp45	= '088',			-- Respaldo TECALMON
+		@Tip_TECAMO	= '089',			-- Actualización TECALMON
+		@Tip_Resp46	= '090',			-- Respaldo TESUBAST
+		@Tip_TESUBA	= '091',			-- Actualización TESUBAST
 		
 		@Tab_CHREME	= 'CHREMESA',
 		@Tab_ABAMOR	= 'ABAMORTI',
@@ -470,6 +508,9 @@ select	@Ent_Cero	= 0,				-- Entero Cero
 		@Tab_SGSEGT	= 'SGSEGTEL',
 		@Tab_SGDOSE	= 'SGDOSETE',
 		@Tab_BEFADO	= 'BEFADOCU',
+		@Tab_TEPARA	= 'TEPARAMS',
+		@Tab_TECAMO	= 'TECALMON',
+		@Tab_TESUBA	= 'TESUBAST',
 		@Tab_SODIFE	= 'SODIAFES',
 		
 		@Cam_FePaFi	= 'Rem_FePaFi',
@@ -581,6 +622,14 @@ select	@Ent_Cero	= 0,				-- Entero Cero
 		@Cam_DocDoc	= 'Doc_Docume',
 		@Cam_DocCon = 'Doc_Contra',
 		@Cam_DocNum	= 'Doc_Numero',
+		@Cam_PaFeAp = 'Par_FecApe',
+		@Cam_ParFec = 'Par_Fecha',
+		@Cam_CamNum = 'Cam_Numero',
+		@Cam_CamPla = 'Cam_Plazo',
+		@Cam_CaFeLi = 'Cam_FecLiq',
+		@Cam_SubNum = 'Sub_Numero',
+		@Cam_SubPla = 'Sub_Plazo',
+		@Cam_SuFeLi = 'Sub_FecLiq',
 		@Ent_CieOch = 108
 
 select	@Fec_IniPro	= getdate(),
@@ -4408,6 +4457,238 @@ if @Var_Contin = @Sta_Si begin
 
 	exec @Status = SOBIDIFEALT
 		@Tip_BEFADO,	@Pro_Descri,	@Pro_Tiempo,	@Dfe_Fecha,		@Fec_IniPro,
+		@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,	
+		@SucDestino,	@Modulo
+	if @Status <> @Ent_Cero begin
+		rollback
+		return @Ent_Uno
+	end
+	
+	commit
+end
+
+select  @Par_FecApe = Par_FecApe,
+		@Par_Fecha  = Par_Fecha
+  from TEPARAMS noholdlock
+
+/** Proceso solo se ejecuta si fecha apertura de tesoreria se esta registrando como dia festivo **/
+if datediff(dd, @Par_FecApe, @Dfe_Fecha) = 0 begin 
+	/** Respaldamos de TEPARAMS **/
+	exec @Status = SOBIDIFECON
+		@Tip_Resp44,	@Dfe_Fecha,		@Var_Contin output,	@NumTransac,	@Transaccio,
+		@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
+	if @Status <> @Ent_Cero begin
+		rollback
+		return @Ent_Uno
+	end
+
+	if @Var_Contin = @Sta_Si begin	
+		begin transaction
+		select	@Pro_Descri	= @Des_Respal + @Str_Espaci + @Tab_TEPARA,
+				@Fec_IniPro	= getdate()
+
+		-- Respaldo
+		insert into SOREDIFE
+		select	@Tab_TEPARA, 	@Cam_PaFeAp,	Par_FecApe,		@Cam_ParFec,	Par_Fecha,
+				@Cam_PaFeAp,	Par_FecApe, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
+				@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
+		from TEPARAMS noholdlock
+
+		select	@Pro_Tiempo	= convert(int, datediff(ss, @Fec_IniPro, getdate()))
+
+		exec @Status = SOBIDIFEALT
+			@Tip_Resp44,	@Pro_Descri,	@Pro_Tiempo,	@Dfe_Fecha,		@Fec_IniPro,
+			@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,	
+			@SucDestino,	@Modulo
+		if @Status <> @Ent_Cero begin
+			rollback
+			return @Ent_Uno
+		end
+		commit
+	end
+
+	/** Actualización de TEPARAMS **/
+	exec @Status = SOBIDIFECON
+		@Tip_TEPARA,	@Dfe_Fecha,		@Var_Contin output,	@NumTransac,	@Transaccio,
+		@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
+	if @Status <> @Ent_Cero begin
+		rollback
+		return @Ent_Uno
+	end
+
+	if @Var_Contin = @Sta_Si begin	
+		begin transaction
+		select	@Pro_Descri	= @Des_Actual + @Str_Espaci + @Tab_TEPARA,
+				@Fec_IniPro	= getdate()
+
+		-- Actualizamos
+		Update TEPARAMS set
+			Par_FecApe	= @Fec_SiDiHa,
+			
+			NumTransac	= @NumTransac,
+			Transaccio	= @Transaccio,
+			Usuario		= @Usuario,
+			FechaSis	= @FechaSis,
+			SucOrigen	= @SucOrigen,
+			SucDestino	= @SucDestino
+
+		select	@Pro_Tiempo	= convert(int, datediff(ss, @Fec_IniPro, getdate()))
+
+		exec @Status = SOBIDIFEALT
+			@Tip_TEPARA,	@Pro_Descri,	@Pro_Tiempo,	@Dfe_Fecha,		@Fec_IniPro,
+			@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,	
+			@SucDestino,	@Modulo
+		if @Status <> @Ent_Cero begin
+			rollback
+			return @Ent_Uno
+		end
+		
+		commit
+	end
+end
+
+/** Respaldamos de TECALMON **/
+exec @Status = SOBIDIFECON
+	@Tip_Resp45,	@Dfe_Fecha,		@Var_Contin output,	@NumTransac,	@Transaccio,
+	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
+if @Status <> @Ent_Cero begin
+	rollback
+	return @Ent_Uno
+end
+
+if @Var_Contin = @Sta_Si begin	
+	begin transaction
+	select	@Pro_Descri	= @Des_Respal + @Str_Espaci + @Tab_TECAMO,
+			@Fec_IniPro	= getdate()
+
+	-- Respaldo
+	insert into SOREDIFE
+	select	@Tab_TECAMO, 	@Cam_CamNum,	Cam_Numero,		@Cam_CamPla,	convert(varchar, Cam_Plazo),
+			@Cam_CaFeLi,	Cam_FecLiq, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
+			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
+	from TECALMON noholdlock
+	where Cam_FecLiq = @Dfe_Fecha
+
+	select	@Pro_Tiempo	= convert(int, datediff(ss, @Fec_IniPro, getdate()))
+
+	exec @Status = SOBIDIFEALT
+		@Tip_Resp45,	@Pro_Descri,	@Pro_Tiempo,	@Dfe_Fecha,		@Fec_IniPro,
+		@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,	
+		@SucDestino,	@Modulo
+	if @Status <> @Ent_Cero begin
+		rollback
+		return @Ent_Uno
+	end
+	commit
+end
+
+/** Actualización de TECALMON **/
+exec @Status = SOBIDIFECON
+	@Tip_TECAMO,	@Dfe_Fecha,		@Var_Contin output,	@NumTransac,	@Transaccio,
+	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
+if @Status <> @Ent_Cero begin
+	rollback
+	return @Ent_Uno
+end
+
+if @Var_Contin = @Sta_Si begin	
+	begin transaction
+	select	@Pro_Descri	= @Des_Actual + @Str_Espaci + @Tab_TECAMO,
+			@Fec_IniPro	= getdate()
+
+	-- Actualizamos
+	Update TECALMON set
+		Cam_FecLiq	= @Fec_SiDiHa,
+		Cam_Plazo 	= convert(int, datediff(dd, Cam_FecIni, @Fec_SiDiHa)),
+		
+		NumTransac	= @NumTransac,
+		Transaccio	= @Transaccio,
+		Usuario		= @Usuario,
+		FechaSis	= @FechaSis,
+		SucOrigen	= @SucOrigen,
+		SucDestino	= @SucDestino
+	where Cam_FecLiq = @Dfe_Fecha
+
+	select	@Pro_Tiempo	= convert(int, datediff(ss, @Fec_IniPro, getdate()))
+
+	exec @Status = SOBIDIFEALT
+		@Tip_TECAMO,	@Pro_Descri,	@Pro_Tiempo,	@Dfe_Fecha,		@Fec_IniPro,
+		@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,	
+		@SucDestino,	@Modulo
+	if @Status <> @Ent_Cero begin
+		rollback
+		return @Ent_Uno
+	end
+	
+	commit
+end
+
+/** Respaldamos de TESUBAST **/
+exec @Status = SOBIDIFECON
+	@Tip_Resp46,	@Dfe_Fecha,		@Var_Contin output,	@NumTransac,	@Transaccio,
+	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
+if @Status <> @Ent_Cero begin
+	rollback
+	return @Ent_Uno
+end
+
+if @Var_Contin = @Sta_Si begin	
+	begin transaction
+	select	@Pro_Descri	= @Des_Respal + @Str_Espaci + @Tab_TESUBA,
+			@Fec_IniPro	= getdate()
+
+	-- Respaldo
+	insert into SOREDIFE
+	select	@Tab_TESUBA, 	@Cam_SubNum,	convert(varchar, Sub_Numero),	@Cam_SubPla,	convert(varchar, Sub_Plazo),
+			@Cam_SuFeLi,	Sub_FecLiq, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
+			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
+	from TESUBAST noholdlock
+	where Sub_FecLiq = @Dfe_Fecha
+
+	select	@Pro_Tiempo	= convert(int, datediff(ss, @Fec_IniPro, getdate()))
+
+	exec @Status = SOBIDIFEALT
+		@Tip_Resp46,	@Pro_Descri,	@Pro_Tiempo,	@Dfe_Fecha,		@Fec_IniPro,
+		@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,	
+		@SucDestino,	@Modulo
+	if @Status <> @Ent_Cero begin
+		rollback
+		return @Ent_Uno
+	end
+	commit
+end
+
+/** Actualización de TESUBAST **/
+exec @Status = SOBIDIFECON
+	@Tip_TESUBA,	@Dfe_Fecha,		@Var_Contin output,	@NumTransac,	@Transaccio,
+	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
+if @Status <> @Ent_Cero begin
+	rollback
+	return @Ent_Uno
+end
+
+if @Var_Contin = @Sta_Si begin	
+	begin transaction
+	select	@Pro_Descri	= @Des_Actual + @Str_Espaci + @Tab_TESUBA,
+			@Fec_IniPro	= getdate()
+
+	-- Actualizamos
+	Update TESUBAST set
+		Sub_FecLiq	= @Fec_SiDiHa,
+		Sub_Plazo 	= convert(int, datediff(dd, Sub_FecIni, @Fec_SiDiHa)),
+		
+		NumTransac	= @NumTransac,
+		Transaccio	= @Transaccio,
+		Usuario		= @Usuario,
+		FechaSis	= @FechaSis,
+		SucOrigen	= @SucOrigen,
+		SucDestino	= @SucDestino
+	where Sub_FecLiq = @Dfe_Fecha
+
+	select	@Pro_Tiempo	= convert(int, datediff(ss, @Fec_IniPro, getdate()))
+
+	exec @Status = SOBIDIFEALT
+		@Tip_TESUBA,	@Pro_Descri,	@Pro_Tiempo,	@Dfe_Fecha,		@Fec_IniPro,
 		@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,	
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
