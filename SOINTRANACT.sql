@@ -1,7 +1,7 @@
 create procedure SOINTRANACT (
    @Int_Clave	char(15),
-   @Int_Passw 	varchar(345),
-   @Int_NewPas	varchar(345),
+   @Int_Passw 	char(345),
+   @Int_NewPas	char(345),
    @Tip_Actual	char(1),    
    @Int_DirIP 	char(15),  
    @NumTransac 	char(10),
