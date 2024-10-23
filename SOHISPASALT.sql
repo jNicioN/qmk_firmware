@@ -1,6 +1,6 @@
 create procedure SOHISPASALT (
 	@Hip_Usuari	char(8),
-	@Hip_PassWo	char(345),		
+	@Hip_PassWo	varchar(345),		
 
 	@NumTransac	char(10),
 	@Transaccio	char(3),

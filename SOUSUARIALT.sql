@@ -2,7 +2,7 @@ create procedure SOUSUARIALT(
 	@Usu_Numero	char(6),
 	@Usu_Nombre	varchar(50),
 	@Usu_Clave	char(15),
-	@Usu_PassWo	char(345),
+	@Usu_PassWo	varchar(345),
 	@Usu_Nivel	char(2),
 	@Usu_Autori	char(15),
 	@Usu_EMail	varchar(50),
