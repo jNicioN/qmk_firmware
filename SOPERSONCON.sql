@@ -456,6 +456,79 @@ select	@Str_Vacio	= '',			-- String Vacio
 		@Str_LetraG = 'G',			/* Cadena letra G */		
 		@Str_LetraH = 'H'			/* Cadena letra H */
 		
+		
+create table #Soperson(
+	Per_Numero	char(8),	
+	Per_Tipo 	char(1),	
+	Per_Benefi	char(1),	
+	Per_NuSeFi	varchar(30),	
+	Per_Titulo 	varchar(10),
+	Per_Nombre 	varchar(40),	
+	Per_ApePat 	varchar(40),	
+	Per_ApeMat 	varchar(40),	
+	Per_RazSoc 	varchar(180),
+	Per_Comple 	varchar(180),
+	Per_ComOrd 	varchar(180),
+	Per_RFC 	varchar(15),
+	Per_CURP 	char(18),
+	Per_Calle 	char(40),
+	Per_CalNum 	varchar(10),
+	Per_Coloni 	varchar(150),
+	Per_Entida 	char(3),
+	Per_Locali 	char(8),
+	Per_CodPos 	char(6),
+	Per_ApaPos 	char(6),
+	Per_LadTel 	varchar(8),
+	Per_Telefo 	char(15),
+	Per_Email 	varchar(50),
+	Per_ComDom 	char(1),
+	Per_EstCiv 	varchar(20),
+	Per_Nacion 	char(3),
+	Per_ActEmp 	char(1),
+	Per_Giro 	char(30),
+	Per_Sector 	char(3),
+	Per_Activi 	char(10),
+	Per_ActINE 	varchar(10),
+	Adi_LugNac 	varchar(50),
+	Adi_Sexo 	char(1),
+	Adi_FecNac 	smalldatetime,
+	Adi_Fax 	varchar(20),
+	Adi_Puesto 	varchar(50),
+	Adi_Ocupac 	varchar(50),
+	Adi_LugTra 	varchar(50),
+	Adi_TelTra  varchar(20),
+	Adi_CalTra 	varchar(40),
+	Adi_NuCaTr 	varchar(30),
+	Adi_ColTra 	varchar(50),
+	Adi_Locali 	char(8),
+	Adi_CPTra 	varchar(50),
+	Adi_NacExt 	char(1),
+	Adi_DocEst 	char(3),
+	Adi_FeExDo 	smalldatetime,
+	Adi_CalInm 	char(1),
+	Adi_CalExt 	varchar(40),
+	Adi_CaNuEx 	varchar(10),
+	Adi_ColExt 	varchar(150),
+	Adi_LocExt 	varchar(40),
+	Adi_EntExt 	varchar(40),
+	Adi_PaiExt 	char(3),
+	Adi_CoPoEx 	char(6),
+	Adi_TipIde 	char(1),
+	Adi_OtrIde 	varchar(50),
+	Adi_NumIde 	varchar(30),
+	Adi_FeExId 	smalldatetime,
+	Adi_FeVeId 	smalldatetime,
+	Adi_NuIdFi 	varchar(20),
+	Adi_TieRes 	int,
+	Adi_NumDep 	int,
+	Adi_AntLab 	int,
+	Adi_FecCon 	smalldatetime,
+	Adi_CaNuIn 	varchar(10),
+	Adi_EntPri 	varchar(40),
+	Adi_EntSeg 	varchar(40),
+	PerPersoID 	int
+)
+		
 select	@Busqueda	= @Per_Comple
 select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
 		@Tip_ConCon	= substring(@Tip_Consul, 2, 1)
@@ -557,12 +630,25 @@ if @Tip_ConTip = @Str_LetraC begin
 				Per_CalNum,	Per_Coloni,	Per_Locali,	Per_CodPos,	Per_Telefo,
 				Per_EstCiv,	Per_Nacion,	Per_ActEmp,	Per_Activi,
 				Per_FecNac	= Adi_FecNac
-			from SOPERSON noholdlock ,
-				  SOPERADI noholdlock
-			where	Per_Numero	*= Adi_PerNum
-			  and	Per_RFC		= @Per_RFC
+			from SOPERSON noholdlock
+			left join SOPERADI noholdlock on Per_Numero	= Adi_PerNum
+			where	Per_RFC		= @Per_RFC
 	end
 	if @Tip_ConCon = @Str_Siete begin	/*	Consulta persona Toda la inf por RFC*/
+		insert into #Soperson(Per_Numero,	Per_Tipo,	Per_Benefi,	Per_NuSeFi,	Per_Titulo,
+				Per_Nombre,	Per_ApePat,	Per_ApeMat,	Per_RazSoc,	Per_Comple,
+				Per_ComOrd,	Per_RFC,	Per_CURP,	Per_Calle,	Per_CalNum,
+				Per_Coloni,	Per_Entida,	Per_Locali,	Per_CodPos,	Per_ApaPos,
+				Per_LadTel,	Per_Telefo,	Per_Email,	Per_ComDom,	Per_EstCiv,
+				Per_Nacion,	Per_ActEmp,	Per_Giro,	Per_Sector,	Per_Activi,
+				Per_ActINE,	Adi_LugNac,	Adi_Sexo,	Adi_FecNac,	Adi_Fax,
+				Adi_Puesto,	Adi_Ocupac,	Adi_LugTra,	Adi_TelTra,	Adi_CalTra,
+				Adi_NuCaTr,	Adi_ColTra,	Adi_Locali,	Adi_CPTra,	Adi_NacExt,
+				Adi_DocEst,	Adi_FeExDo,	Adi_CalInm,	Adi_CalExt,	Adi_CaNuEx,
+				Adi_ColExt,	Adi_LocExt,	Adi_EntExt,	Adi_PaiExt,	Adi_CoPoEx,
+				Adi_TipIde,	Adi_OtrIde,	Adi_NumIde,	Adi_FeExId,	Adi_FeVeId,
+				Adi_NuIdFi,	Adi_TieRes,	Adi_NumDep,	Adi_AntLab,	Adi_FecCon,
+				Adi_CaNuIn,	Adi_EntPri,	Adi_EntSeg, PerPersoID)
 		select	Per_Numero,	Per_Tipo,	Per_Benefi,	Per_NuSeFi,	Per_Titulo,
 				Per_Nombre,	Per_ApePat,	Per_ApeMat,	Per_RazSoc,	Per_Comple,
 				Per_ComOrd,	Per_RFC,	Per_CURP,	Per_Calle,	Per_CalNum,
@@ -577,11 +663,9 @@ if @Tip_ConTip = @Str_LetraC begin
 				Adi_TipIde,	Adi_OtrIde,	Adi_NumIde,	Adi_FeExId,	Adi_FeVeId,
 				Adi_NuIdFi,	Adi_TieRes,	Adi_NumDep,	Adi_AntLab,	Adi_FecCon,
 				Adi_CaNuIn,	Adi_EntPri,	Adi_EntSeg, PerPersoID 
-			into #Soperson
-			from SOPERSON noholdlock,
-				 SOPERADI noholdlock
-			where	Per_Numero	*= Adi_PerNum
-			  and	Per_RFC		= @Per_RFC
+			from SOPERSON noholdlock
+			left join SOPERADI noholdlock on Per_Numero	= Adi_PerNum
+			where	Per_RFC		= @Per_RFC
 
 		select	Per_Numero,	Per_Tipo,	Per_Benefi,	Per_NuSeFi,	Per_Titulo,
 				Per_Nombre,	Per_ApePat,	Per_ApeMat,	Per_RazSoc,	Per_Comple,
