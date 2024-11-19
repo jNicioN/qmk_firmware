@@ -19,6 +19,11 @@ as
 /* REFERENCIAS:
 ****************************************************************************
 ****************************************************************************
+** Modificó:	Manuel Can Tamay        								****
+** Fecha:		25/Sep/2024												****
+** Help:		TCELA2-575												****
+** Descripcion:	Se agrega tabla ABPRCOAM          				    	****
+****************************************************************************
 ** Modificó:	Julio Cesar Diaz Lopez	 								****
 ** Fecha:		20/Sep/2024												****
 ** Help:		TCELTO-9552												****
@@ -178,6 +183,8 @@ declare	@Ent_Cero	int,
 		@Tip_TECAMO	char(3),
 		@Tip_Resp46	char(3),
 		@Tip_TESUBA	char(3),
+		@Tip_Resp47	char(3),
+		@Tip_ABPRCO char(3),
 		
 		@Des_SODIFE	varchar(33),
 		@Tab_SODIFE	char(8),
@@ -304,6 +311,9 @@ declare	@Ent_Cero	int,
 		@Cam_SubNum	char(10),
 		@Cam_SubPla	char(10),
 		@Cam_SuFeLi	char(10),
+		@Cam_PrFeDe char(10),
+        @Cam_ProCon char(10),
+        @Cam_ProAmor char(10),
 		
 		@Tab_FAFACT	char(8),
 		@Tab_FADOCU	char(8),
@@ -346,6 +356,7 @@ declare	@Ent_Cero	int,
 		@Tab_TEPARA	char(8),
 		@Tab_TECAMO	char(8),
 		@Tab_TESUBA	char(8),
+		@Tab_ABPRCO char(8),
 		@Ent_CieOch	smallint
 
 -- Asignación de Constantes
@@ -465,6 +476,8 @@ select	@Ent_Cero	= 0,				-- Entero Cero
 		@Tip_TECAMO	= '089',			-- Actualización TECALMON
 		@Tip_Resp46	= '090',			-- Respaldo TESUBAST
 		@Tip_TESUBA	= '091',			-- Actualización TESUBAST
+		@Tip_Resp47	= '092',			-- Respaldo ABPRCOAM
+		@Tip_ABPRCO	= '093',			-- Actualización ABPRCOAM			
 		
 		@Tab_CHREME	= 'CHREMESA',
 		@Tab_ABAMOR	= 'ABAMORTI',
@@ -511,6 +524,7 @@ select	@Ent_Cero	= 0,				-- Entero Cero
 		@Tab_TEPARA	= 'TEPARAMS',
 		@Tab_TECAMO	= 'TECALMON',
 		@Tab_TESUBA	= 'TESUBAST',
+		@Tab_ABPRCO	= 'ABPRCOAM',
 		@Tab_SODIFE	= 'SODIAFES',
 		
 		@Cam_FePaFi	= 'Rem_FePaFi',
@@ -630,6 +644,9 @@ select	@Ent_Cero	= 0,				-- Entero Cero
 		@Cam_SubNum = 'Sub_Numero',
 		@Cam_SubPla = 'Sub_Plazo',
 		@Cam_SuFeLi = 'Sub_FecLiq',
+		@Cam_PrFeDe = 'Pro_FePrDe',
+        @Cam_ProCon = 'Pro_Consec',
+        @Cam_ProAmor = 'Pro_Amorti',
 		@Ent_CieOch = 108
 
 select	@Fec_IniPro	= getdate(),
@@ -4698,3 +4715,79 @@ if @Var_Contin = @Sta_Si begin
 	
 	commit
 end
+
+/** Respaldamos de ABPRCOAM **/
+exec @Status = SOBIDIFECON
+	@Tip_Resp47,	@Dfe_Fecha,		@Var_Contin output,	@NumTransac,	@Transaccio,
+	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
+if @Status <> @Ent_Cero begin
+	rollback
+	return @Ent_Uno
+end
+
+if @Var_Contin = @Sta_Si begin	
+	begin transaction
+	select	@Pro_Descri	= @Des_Respal + @Str_Espaci + @Tab_ABPRCO,
+			@Fec_IniPro	= getdate()
+
+	-- Respaldo
+	insert into SOREDIFE
+	select	@Tab_ABPRCO, 	@Cam_ProCon,	convert(varchar,Pro_Consec),	@Cam_ProAmor,	Pro_Amorti,
+			@Cam_PrFeDe,	Pro_FePrDe, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
+			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
+	from ABPRCOAM noholdlock
+	where Pro_FePrDe = @Dfe_Fecha
+	  and Pro_Status = @Sta_N
+
+	select	@Pro_Tiempo	= convert(int, datediff(ss, @Fec_IniPro, getdate()))
+
+	exec @Status = SOBIDIFEALT
+		@Tip_Resp47,	@Pro_Descri,	@Pro_Tiempo,	@Dfe_Fecha,		@Fec_IniPro,
+		@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,	
+		@SucDestino,	@Modulo
+	if @Status <> @Ent_Cero begin
+		rollback
+		return @Ent_Uno
+	end
+	commit
+end
+
+/** Actualización de ABPRCOAM **/
+exec @Status = SOBIDIFECON
+	@Tip_ABPRCO,	@Dfe_Fecha,		@Var_Contin output,	@NumTransac,	@Transaccio,
+	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
+if @Status <> @Ent_Cero begin
+	rollback
+	return @Ent_Uno
+end
+
+if @Var_Contin = @Sta_Si begin 
+	begin transaction
+	select	@Pro_Descri	= @Des_Actual + @Str_Espaci + @Tab_ABPRCO,
+			@Fec_IniPro	= getdate()
+
+	-- Actualizamos
+	Update ABPRCOAM set
+		Pro_FePrDe	= @Fec_SiDiHa,
+		
+		NumTransac	= @NumTransac,
+		Transaccio	= @Transaccio,
+		Usuario		= @Usuario,
+		FechaSis	= @FechaSis,
+		SucOrigen	= @SucOrigen,
+		SucDestino	= @SucDestino
+	where Pro_FePrDe = @Dfe_Fecha
+	  and Pro_Status = @Sta_N
+
+	select	@Pro_Tiempo	= convert(int, datediff(ss, @Fec_IniPro, getdate()))
+
+	exec @Status = SOBIDIFEALT
+		@Tip_ABPRCO,	@Pro_Descri,	@Pro_Tiempo,	@Dfe_Fecha,		@Fec_IniPro,
+		@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,	
+		@SucDestino,	@Modulo
+	if @Status <> @Ent_Cero begin
+		rollback
+		return @Ent_Uno
+	end
+	commit
+end 
