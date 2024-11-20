@@ -687,10 +687,12 @@ if @Tip_ConTip = @Str_LetraC begin
 				Adi_NuIdFi,	Adi_TieRes,	Adi_NumDep,	Adi_AntLab,	Adi_FecCon,
 				Adi_CaNuIn, PerPersoID
 			from #Soperson
+			where Per_RFC = @Per_RFC
 			order by  PerPersoID desc
 
 		select	Per_Numero,	Adi_EntPri,	Adi_EntSeg
 			from #Soperson
+		where Per_RFC = @Per_RFC
 
 		drop table #Soperson
 	end
