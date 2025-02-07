@@ -25,10 +25,20 @@ create procedure SOUSUARIMOD	(
     @Modulo		char(2))
 
     as
-
+/***************************************************************************
+ DESCRIPCION: ** Correccion tamaño de contrasenya para cifrado HSM **	****
+****************************************************************************
+ REFERENCIAS:
+ ****************************************************************************
+** Modificó:	Enrique Santamaria Diaz									****
+** Fecha:		07/02/2025 										    	****
+** Help: 		CENEAR-15399											****
+** Descripcion:	Cambio en tipo de dato de password para soporte     	****
+** de cifrado HSM.                                                      ****
+***************************************************************************/
 declare	@Usr 		char(6),		/* Declaracion de Variables */
 		@Clave		char(15),
-		@Password	varchar(345),		/* Contraseña con 32 caracteres Encriptados por RACAL */
+		@Password	varchar(345),		/* Contraseña con 345 caracteres Encriptados por HSM */
 		@Usu_FeAcPa	smalldatetime,
 		@Status 	int,
 		@Rol_CamPas	int
