@@ -1,6 +1,6 @@
 create procedure SOHISPASALT (
 	@Hip_Usuari	char(8),
-	@Hip_PassWo	char(32),		/* Contraseña con 32 caracteres Encriptados por RACAL */
+	@Hip_PassWo	varchar(345),		
 
 	@NumTransac	char(10),
 	@Transaccio	char(3),
