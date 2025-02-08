@@ -1,7 +1,7 @@
 create procedure SOUSUARIACT (
 	@Usu_Numero	char(6),
 	@Usu_Clave	char(15),
-	@Usu_PassWo	char(32),			/*	Contraseña con 32 caracteres Encriptados por RACAL 				*/
+	@Usu_PassWo	varchar(345),			
 	@Usu_FeAcPa	smalldatetime,
 	@Usu_IPSesi	char(15),
 	@Tip_Actual	char(1),			/*  P. Cambio de Password, 
