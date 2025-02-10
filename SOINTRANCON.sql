@@ -1,6 +1,6 @@
 create procedure SOINTRANCON (
   	@Int_Clave	char(15),
-  	@Int_Passw	char(32),
+  	@Int_Passw	varchar(345),
  	@Int_DirIP	char(15),
  	
    	@NumTransac		char(10),
