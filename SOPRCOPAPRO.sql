@@ -1,5 +1,5 @@
 create procedure SOPRCOPAPRO (
-    @PCo_Texto varchar(255),
+    @PCo_Texto varchar(100),
     @PCo_Result char(1) output,
 
    	@NumTransac	char(10),
@@ -23,7 +23,7 @@ as
 begin
 
 /* Declaración de variables */
-    declare @Val_Subcad varchar(255),        -- Subcadena sin nombres comunes ni prefijos
+    declare @Val_Subcad varchar(100),        -- Subcadena sin nombres comunes ni prefijos
             @Val_Palabr varchar(50)
 
 /* Declaración de constantes */

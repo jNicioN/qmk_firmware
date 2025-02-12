@@ -1,6 +1,6 @@
 create procedure SOAJPACOPRO(
-    @APa_PalCom varchar(255),
-    @APa_PalRes varchar(255) output,
+    @APa_PalCom varchar(100),
+    @APa_PalRes varchar(100) output,
     
     @NumTransac	char(10),
 	@Transaccio	char(3),

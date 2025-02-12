@@ -1,6 +1,6 @@
 create procedure SONORPALPRO (
-	@Nor_Texto varchar(255), 
-	@Nor_Result varchar(255) output,
+	@Nor_Texto varchar(100), 
+	@Nor_Result varchar(100) output,
 
 	@NumTransac	char(10),
 	@Transaccio	char(3),

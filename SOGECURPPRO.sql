@@ -1,7 +1,7 @@
 create or replace procedure SOGECURPPRO (
-	@Gen_Nombre	varchar(40),
-	@Gen_ApePat varchar(40),
-	@Gen_ApeMat varchar(40),
+	@Gen_Nombre	varchar(100),
+	@Gen_ApePat varchar(100),
+	@Gen_ApeMat varchar(100),
 	@Gen_Sexo 	varchar(1),
 	@Gen_EntNac varchar(2),
 	@Gen_FecNac date,
