@@ -1,4 +1,4 @@
-create or replace procedure SOGECURPPRO (
+create procedure SOGECURPPRO (
 	@Gen_Nombre	varchar(100),
 	@Gen_ApePat varchar(100),
 	@Gen_ApeMat varchar(100),
@@ -42,16 +42,16 @@ begin
 			@Val_ApPaNo	varchar(255),	-- Apellido Paterno Normalizado
 			@Val_ApMaNo varchar(255),	-- Apellido Materno Normalizado
 			@Val_EsVali bit,			-- Es valido
-			@Val_Estatu int,			-- Estatus
 			@Val_Caract char(1),		-- Caracter
 			@Val_Result varchar(40),	-- Resultado
 			@Val_NomSig varchar(50),	-- Nombre Significativo
 			@Val_Iterad int,			-- Iterador
 			@Val_ConPat char(1),		-- Consonante Apellido Paterno
 			@Val_ConMat char(1),		-- Consonante Apellido Materno
-			@Val_ConNom char(1)			-- Consonante Nombres
+			@Val_ConNom char(1),		-- Consonante Nombres
+			@Status int					-- Estatus
 
-	create table #Tab_Nombre (Cam_Nombre varchar(50))
+	create table #Tab_Nombre (Cam_Identi int,Cam_Nombre varchar(50))
 
 /* Declaración de constantes */
 	declare	@Val_Hombre varchar(1),
@@ -197,7 +197,8 @@ begin
 	end
 			
 	-- Validar estado
-	exec SOESTVALPRO 	@Gen_EntNac,	@Val_EsVali output,	@NumTransac,	@Transaccio,	@Usuario, 
+	set @Status = @Ent_Cero
+	exec @Status = SOESTVALPRO 	@Gen_EntNac,	@Val_EsVali output,	@NumTransac,	@Transaccio,	@Usuario, 
 						@FechaSis,	 	@SucOrigen, 		@SucDestino, 	@Modulo
 						
 	if @Val_EsVali = @Ent_Cero begin
@@ -206,47 +207,55 @@ begin
 	end
 
 	-- Normalizar y ajustar nombres
-	exec SONORPALPRO 	
+	set @Status = @Ent_Cero
+	exec @Status = SONORPALPRO 	
 		@Gen_Nombre,	@Val_NomNor output, @NumTransac,	@Transaccio,	@Usuario,	
 		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 						
-	exec SONORPALPRO	
+	set @Status = @Ent_Cero
+	exec @Status = SONORPALPRO	
 		@Gen_ApePat,	@Val_ApPaNo output,	@NumTransac,	@Transaccio,	@Usuario,	
 		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 						
-	exec SONORPALPRO	
+	set @Status = @Ent_Cero
+	exec @Status = SONORPALPRO	
 		@Gen_ApeMat,	@Val_ApMaNo output, @NumTransac,	@Transaccio,	@Usuario,	
 		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 
 	-- Eliminar palabras compuestas
-	exec SOAJPACOPRO
+	set @Status = @Ent_Cero
+	exec @Status = SOAJPACOPRO
 		@Val_NomNor,	@Val_NomNor output,	@NumTransac,	@Transaccio,	@Usuario,	
 		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 		
-	exec SOAJPACOPRO
+	set @Status = @Ent_Cero
+	exec @Status = SOAJPACOPRO
 		@Val_ApPaNo,	@Val_ApPaNo output,	@NumTransac,	@Transaccio,	@Usuario,	
 		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 		
-	exec SOAJPACOPRO	
+	set @Status = @Ent_Cero
+	exec @Status = SOAJPACOPRO	
 		@Val_ApMaNo,	@Val_ApMaNo output,	@NumTransac,	@Transaccio,	@Usuario,	
 		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 
 -- Obtener la inicial del primer nombre
 	set @Val_Result = @Val_NomNor
+	set @Val_Iterad = @Ent_Uno
 
     -- Dividir el nombre en palabras y almacenarlas en la tabla @nombres
     while charindex(@Str_Espaci, @Val_Result) > @Ent_Cero
     begin
-        insert into #Tab_Nombre(Cam_Nombre)
-        values (left(@Val_Result, charindex(@Str_Espaci, @Val_Result) - @Ent_Uno))
+        insert into #Tab_Nombre(Cam_Identi,Cam_Nombre)
+        values (@Val_Iterad, left(@Val_Result, charindex(@Str_Espaci, @Val_Result) - @Ent_Uno))
         set @Val_Result = ltrim(substring(@Val_Result, charindex(@Str_Espaci, @Val_Result) + @Ent_Uno, len(@Val_Result)))
+        set @Val_Iterad = @Val_Iterad + @Ent_Uno
     end
     -- insertar la última palabra
-    insert into #Tab_Nombre (Cam_Nombre)
-    values (@Val_Result)
+    insert into #Tab_Nombre (Cam_Identi,Cam_Nombre)
+    values (@Val_Iterad,@Val_Result)
     
     -- Seleccionar el primer nombre y compararlo con el listado de nombres comunes, si es comun seleccionar el segundo nombre
-    select top 1 @Val_NomSig = Cam_Nombre from #Tab_Nombre
+    select top 1 @Val_NomSig = Cam_Nombre from #Tab_Nombre order by Cam_Identi
     if @Val_NomSig in(select Cam_NomCom from #Tab_Comune) begin
     	select top 2 @Val_NomSig = Cam_Nombre from #Tab_Nombre
     end
@@ -317,15 +326,18 @@ begin
 
 	-- Extraer la primera consonante de los apellidos y el nombre
 	-- Extrae la primer consonante en palabras
-	exec SOPRCOPAPRO 
+	set @Status = @Ent_Cero
+	exec @Status = SOPRCOPAPRO 
 		@Val_ApPaNo,	@Val_ConPat output,	@NumTransac,	@Transaccio,	@Usuario,	
 		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 		
-	exec SOPRCOPAPRO 
+	set @Status = @Ent_Cero
+	exec @Status = SOPRCOPAPRO 
 		@Val_ApMaNo, 	@Val_ConMat output,	@NumTransac,	@Transaccio,	@Usuario,	
 		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 		
-	exec SOPRCOPAPRO 
+	set @Status = @Ent_Cero
+	exec @Status = SOPRCOPAPRO 
 		@Val_NomNor,	@Val_ConNom output,	@NumTransac,	@Transaccio,	@Usuario,
 		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 
@@ -354,12 +366,12 @@ begin
 	set @Val_CURPBa = @Val_CURPBa + @Gen_Homoni
 		
 	-- Generar el dígito verificador
-	set @Val_Estatu = @Ent_Cero
-	exec @Val_Estatu = SODVCURPPRO 
+	set @Status = @Ent_Cero
+	exec @Status = SODVCURPPRO 
 		@Val_CURPBa,	@Val_DigVer output,	@NumTransac,	@Transaccio,	@Usuario,	
 		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
 
-   	if @Val_Estatu <> @Ent_Cero begin
+   	if @Status <> @Ent_Cero begin
 		select @Gen_CURP = @Val_CURPBa
 		return @Ent_Uno -- Devolvemos el código de error
     end else begin

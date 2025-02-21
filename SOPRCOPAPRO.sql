@@ -68,6 +68,8 @@ begin
         else
             break
     end
+    
+    drop table #Tab_PalCom
 
     -- La cadena restante después de eliminar nombres comunes
     select	@Val_Subcad = substring(@PCo_Texto, @Ent_Dos, len(@PCo_Texto) - @Ent_Uno),  -- Extraemos la cadena desde el segundo carácter

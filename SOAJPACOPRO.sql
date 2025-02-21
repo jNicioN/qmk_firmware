@@ -81,6 +81,8 @@ begin
         set @APa_PalRes = ltrim(rtrim(str_replace(@Str_Espaci + @APa_PalRes + @Str_Espaci, @Str_Espaci +@Val_PalCom + @Str_Espaci, @Str_Espaci)))
         set @Val_Iterad = @Val_Iterad + @Ent_Uno
     end
+    
+    drop table #Tab_PalCom
 
     -- Eliminar espacios dobles resultantes
     while charindex(@Str_EspDou, @APa_PalRes) > @Ent_Cero begin
