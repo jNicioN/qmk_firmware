@@ -1,4 +1,4 @@
-create or replace procedure SODIAFESPRO (
+create procedure SODIAFESPRO (
 	@Dfe_Fecha	smalldatetime,
 	@Dfe_Coment	varchar(255),
 	
