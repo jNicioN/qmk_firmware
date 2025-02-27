@@ -4823,6 +4823,9 @@ if @Var_Contin = @Sta_Si begin
 
 	-- Respaldo
 	insert into SOREDIFE
+		(Rdf_NomTab, Rdf_NoClPr, Rdf_VaClPr, Rdf_NoClSe, Rdf_VaClSe,
+		Rdf_NoCaMo, Rdf_FecOri, Rdf_FecMod, NumTransac, Transaccio,
+		Usuario,    FechaSis,   SucOrigen,  SucDestino)
 	select	@Tab_AUREMA, 	@Cam_ReaCon,	Rea_Contra,		@Cam_FecRen,	convert(varchar,Rea_FecRen),
 			@Cam_FecRen,	Rea_FecRen, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
