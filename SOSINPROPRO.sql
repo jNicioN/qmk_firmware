@@ -17,8 +17,14 @@ as
 ****************************************************************************
 ** Elaboró: 		Alan Santamaria                           			****
 ** Fecha:		    06/10/2021									        ****
-** Help:			 1574028         									        ****
+** Help:			 1574028         								    ****
 ** Descripción:	    Procedimiento padre de Sincronizacion.              ****
+****************************************************************************
+** Elaboró: 		Marco Eduardo Bustos de la Rsoa            			****
+** Fecha:		    03/03/2025									        ****
+** Help:			TCELNC-21562       								    ****
+** Descripción:	    Cambio en el rollback                               ****
+
 ****************************************************************************/
 
 											/* Declaración de variables  */
@@ -69,12 +75,12 @@ exec @Status = SOTMPPROPRO @NumTransac, @Transaccio,    @Usuario,   @FechaSis,
 
 if @Status <> 0 begin
     rollback
-    exec SOPROBITALT  @Act_Fecha,   @Ent_Uno,     @Str_Produc,    @Bit_Error,       
+    exec @Status = SOPROBITALT  @Act_Fecha,   @Ent_Uno,     @Str_Produc,    @Bit_Error,       
                       @NumTransac,  @Transaccio,    @Usuario,       @FechaSis,
                       @SucOrigen,   @SucDestino,    @Modulo    
     return 1
 end else begin
-    exec SOPROBITALT  @Act_Fecha,  @Ent_Uno,    @Str_Produc,  @Bit_Exito,       
+    exec @Status = SOPROBITALT  @Act_Fecha,  @Ent_Uno,    @Str_Produc,  @Bit_Exito,       
                       @NumTransac, @Transaccio,   @Usuario,     @FechaSis,
                       @SucOrigen,  @SucDestino,   @Modulo
 end
@@ -85,12 +91,12 @@ exec @Status = SOTMPPTCPRO @NumTransac, @Transaccio,    @Usuario,   @FechaSis,
 
 if @Status <> 0 begin
     rollback
-    exec SOPROBITALT  @Act_Fecha,   @Ent_Dos,     @Str_PrTiCu,    @Bit_Error,       
+    exec @Status = SOPROBITALT  @Act_Fecha,   @Ent_Dos,     @Str_PrTiCu,    @Bit_Error,       
                       @NumTransac,  @Transaccio,    @Usuario,       @FechaSis,
                       @SucOrigen,   @SucDestino,    @Modulo
     return 1
 end else begin
-    exec SOPROBITALT  @Act_Fecha,  @Ent_Dos,  @Str_PrTiCu,  @Bit_Exito,       
+    exec @Status = SOPROBITALT  @Act_Fecha,  @Ent_Dos,  @Str_PrTiCu,  @Bit_Exito,       
                       @NumTransac, @Transaccio, @Usuario,     @FechaSis,
                       @SucOrigen,  @SucDestino, @Modulo
 end
@@ -101,12 +107,12 @@ exec @Status = SOTMPPPFPRO @NumTransac, @Transaccio,    @Usuario,   @FechaSis,
 
 if @Status <> 0 begin
     rollback
-    exec SOPROBITALT  @Act_Fecha,   @Ent_Tres,     @Str_PrPrFi,    @Bit_Error,       
+    exec @Status = SOPROBITALT  @Act_Fecha,   @Ent_Tres,     @Str_PrPrFi,    @Bit_Error,       
                       @NumTransac,  @Transaccio,    @Usuario,       @FechaSis,
                       @SucOrigen,   @SucDestino,    @Modulo
     return 1
 end else begin
-    exec SOPROBITALT  @Act_Fecha,   @Ent_Tres,     @Str_PrPrFi,    @Bit_Exito,       
+    exec @Status = SOPROBITALT  @Act_Fecha,   @Ent_Tres,     @Str_PrPrFi,    @Bit_Exito,       
                       @NumTransac,  @Transaccio,    @Usuario,       @FechaSis,
                       @SucOrigen,   @SucDestino,    @Modulo
 end
@@ -117,12 +123,12 @@ exec @Status = SOTMPCLPPRO @NumTransac, @Transaccio,    @Usuario,   @FechaSis,
 
 if @Status <> 0 begin
     rollback
-    exec SOPROBITALT  @Act_Fecha,   @Ent_Cuatro,     @Str_PrClPr,    @Bit_Error,       
+    exec @Status = SOPROBITALT  @Act_Fecha,   @Ent_Cuatro,     @Str_PrClPr,    @Bit_Error,       
                       @NumTransac,  @Transaccio,    @Usuario,       @FechaSis,
                       @SucOrigen,   @SucDestino,    @Modulo
     return 1
 end else begin
-    exec SOPROBITALT  @Act_Fecha,   @Ent_Cuatro,     @Str_PrClPr,    @Bit_Exito,       
+    exec @Status = SOPROBITALT  @Act_Fecha,   @Ent_Cuatro,     @Str_PrClPr,    @Bit_Exito,       
                       @NumTransac,  @Transaccio,    @Usuario,       @FechaSis,
                       @SucOrigen,   @SucDestino,    @Modulo
 end
@@ -133,12 +139,12 @@ exec @Status = SOTMPPCCPRO @NumTransac, @Transaccio,    @Usuario,   @FechaSis,
 
 if @Status <> 0 begin
     rollback
-    exec SOPROBITALT  @Act_Fecha,   @Ent_Cinco,     @Str_PrCrCc,    @Bit_Error,       
+    exec @Status = SOPROBITALT  @Act_Fecha,   @Ent_Cinco,     @Str_PrCrCc,    @Bit_Error,       
                       @NumTransac,  @Transaccio,    @Usuario,       @FechaSis,
                       @SucOrigen,   @SucDestino,    @Modulo
     return 1
 end else begin
-    exec SOPROBITALT  @Act_Fecha,   @Ent_Cinco,     @Str_PrCrCc,    @Bit_Exito,       
+    exec @Status = SOPROBITALT  @Act_Fecha,   @Ent_Cinco,     @Str_PrCrCc,    @Bit_Exito,       
                       @NumTransac,  @Transaccio,    @Usuario,       @FechaSis,
                       @SucOrigen,   @SucDestino,    @Modulo
 end
@@ -149,12 +155,12 @@ exec @Status = SOTMPPCOPRO @NumTransac, @Transaccio,    @Usuario,   @FechaSis,
 
 if @Status <> 0 begin
     rollback
-    exec SOPROBITALT  @Act_Fecha,   @Ent_Seis,     @Str_PrCrCo,    @Bit_Error,       
+    exec @Status = SOPROBITALT  @Act_Fecha,   @Ent_Seis,     @Str_PrCrCo,    @Bit_Error,       
                       @NumTransac,  @Transaccio,    @Usuario,       @FechaSis,
                       @SucOrigen,   @SucDestino,    @Modulo
     return 1
 end else begin
-    exec SOPROBITALT  @Act_Fecha,   @Ent_Seis,     @Str_PrCrCo,    @Bit_Exito,       
+    exec @Status = SOPROBITALT  @Act_Fecha,   @Ent_Seis,     @Str_PrCrCo,    @Bit_Exito,       
                       @NumTransac,  @Transaccio,    @Usuario,       @FechaSis,
                       @SucOrigen,   @SucDestino,    @Modulo
 end
@@ -165,12 +171,12 @@ exec @Status = SOTMPPTAPRO @NumTransac, @Transaccio,    @Usuario,   @FechaSis,
 
 if @Status <> 0 begin
     rollback
-    exec SOPROBITALT  @Act_Fecha,   @Ent_Siete,     @Str_PrTarj,    @Bit_Error,       
+    exec @Status = SOPROBITALT  @Act_Fecha,   @Ent_Siete,     @Str_PrTarj,    @Bit_Error,       
                       @NumTransac,  @Transaccio,    @Usuario,       @FechaSis,
                       @SucOrigen,   @SucDestino,    @Modulo
     return 1
 end else begin
-    exec SOPROBITALT  @Act_Fecha,   @Ent_Siete,     @Str_PrTarj,    @Bit_Exito,       
+    exec @Status = SOPROBITALT  @Act_Fecha,   @Ent_Siete,     @Str_PrTarj,    @Bit_Exito,       
                       @NumTransac,  @Transaccio,    @Usuario,       @FechaSis,
                       @SucOrigen,   @SucDestino,    @Modulo
 end
