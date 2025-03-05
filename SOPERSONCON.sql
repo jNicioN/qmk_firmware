@@ -20,6 +20,12 @@ as
 ********************************************************************
 ** REFERENCIAS:													****
 ********************************************************************
+** Modificó:	Angel Encalada									****
+** Fecha:		05/04/2025									   	****
+** Help: 		TCELNC-23481									****
+** Descripcion:	Se modifica la consulta C6 para devolver campos ****
+**				campos de soperadi								****
+********************************************************************
 ** Modificó:	Francisco Euan									****
 ** Fecha:		14/11/2024									   	****
 ** Help: 		TCELNC-21872									****
@@ -561,7 +567,10 @@ if @Tip_ConTip = @Str_LetraC begin
 		select	Per_Nombre,	Per_ApePat,	Per_ApeMat,	Per_RFC,	Per_Calle,
 				Per_CalNum,	Per_Coloni,	Per_Locali,	Per_CodPos,	Per_Telefo,
 				Per_EstCiv,	Per_Nacion,	Per_ActEmp,	Per_Activi,
-				Per_FecNac	= Adi_FecNac
+				Per_FecNac	= Adi_FecNac,
+				PerPersoID, Per_Tipo, 	Adi_Sexo,	Per_CURP,	Per_Comple,
+				Per_Entida, Per_LadTel, Adi_FecCon, Per_ActINE, Adi_FecCon,
+				Per_RazSoc, Per_Numero 
 			from SOPERSON noholdlock
 			left join SOPERADI noholdlock on Per_Numero	= Adi_PerNum
 			where	Per_RFC		= @Per_RFC

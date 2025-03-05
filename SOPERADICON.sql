@@ -16,33 +16,38 @@ as
 ****************************************************************************
 ** 				STORE CONVERTIDO						****
 ****************************************************************************
-** Modificó:		Marcelo Bautista								****
-** Fecha:		12/Febrero/2016							****
-** Descripción:	Se agrega campo Adi_TelExt a consulta C2	****
-** Help:			801121										****
+** Modificó:		Angel Encalada										****
+** Fecha:		05/marzo/2025											****
+** Descripción:	Se agrega campo Adi_PerNum a consulta C1				****
+** Help:			TCELNC-23481										****
 ****************************************************************************
-** Modificó:		Karina ChavarrÝa Tovar						****
-** Fecha:		01/Octubre/2008							****
-** Descripción:	Agregar campos Adi_EntPri y Adi_EntSeg		****
-** Help:			100187										****
+** Modificó:		Marcelo Bautista									****
+** Fecha:		12/Febrero/2016											****
+** Descripción:	Se agrega campo Adi_TelExt a consulta C2				****
+** Help:			801121												****
 ****************************************************************************
-** 				STORE CONVERTIDO						****
-** Fecha:		16/Agosto/2007								****
-** Convirtió:		Karina ChavarrÝa Tovar						****
+** Modificó:		Karina ChavarrÝa Tovar								****
+** Fecha:		01/Octubre/2008											****
+** Descripción:	Agregar campos Adi_EntPri y Adi_EntSeg					****
+** Help:			100187												****
 ****************************************************************************
-** Modificó:		Juan Mario Galindo de Leon					****
-** Fecha:		05/Julio/07		  							****
-** Descripción:	Agregar campos Adi_Reside y Adi_OtDoEs	****
-** Help:			7100										****
+** 				STORE CONVERTIDO										****
+** Fecha:		16/Agosto/2007											****
+** Convirtió:		Karina ChavarrÝa Tovar								****
 ****************************************************************************
-** Modificó:		Lucina Gonzalez Trejo						****
-** Fecha:		12/Marzo/07								****
-** Descripción:	Agregar  C2									****
-** Help:			3666										****
+** Modificó:		Juan Mario Galindo de Leon							****
+** Fecha:		05/Julio/07		  										****
+** Descripción:	Agregar campos Adi_Reside y Adi_OtDoEs					****
+** Help:			7100												****
 ****************************************************************************
-** Creó:			Rsalinas									****
-** Fecha:		06/Ene/06									****
-** Help:		       Fabirca de Creditos Comercial				****
+** Modificó:		Lucina Gonzalez Trejo								****
+** Fecha:		12/Marzo/07												****
+** Descripción:	Agregar  C2												****
+** Help:			3666												****
+****************************************************************************
+** Creó:			Rsalinas											****
+** Fecha:		06/Ene/06												****
+** Help:		       Fabirca de Creditos Comercial					****
 ****************************************************************************
 */
 
@@ -60,7 +65,7 @@ if @Tip_ConTip = 'C' begin					/* 'C':  Consulta */
 				Adi_TieRes,	Adi_Fax,    Adi_NumDep, Adi_Puesto, Adi_Ocupac,
 				Adi_AntLab,	Adi_LugTra,	Adi_TelTra, Adi_CalTra,	Adi_NuCaTr,	
 				Adi_CalTra,	Adi_ColTra,	Adi_Locali,	Adi_CPTra,  Adi_FecCon,
-				Adi_CaNuIn
+				Adi_CaNuIn, Adi_PerNum 
 			from SOPERADI noholdlock
 			where 	Adi_PerNum = @Adi_PerNum		
 	end	
