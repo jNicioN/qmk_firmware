@@ -84,7 +84,12 @@ as
 /* DESCRIPCION: Alta de Personas Unicas (por sistemas externos)	  */
 /******************************************************************/
 /** REFERENCIAS: 
-*********************************************************************
+********************************************************************
+** Modificó:	Francisco Euan          						****
+** Fecha:		14/Marzo/2025							        ****
+** Help:		TCELNC-23684								    ****
+** Descripción:	Comprobación de valores para Adi_Sexo           ****
+********************************************************************
 ** Modifico:	Raul Muniz										****
 ** Fecha:		06/Octubre/2021									****
 ** Help:		1504301											****
@@ -171,7 +176,9 @@ declare	@Str_Vacio	char(1),		/*	Declaracion de Constantes	*/
 		@Fec_Vacia	smalldatetime,
 		@Tip_PerNum char(1),
 		@Ent_180	int,
-		@Ent_40		int
+		@Ent_40		int,
+		@Tip_Hombre char(1),
+        @Tip_Mujer  char(1)
 
 /*Asignacion de constantes*/
 select	@Str_Vacio	= '',			/* String Vacio	*/
@@ -196,7 +203,9 @@ select	@Str_Vacio	= '',			/* String Vacio	*/
 		@Usu_Prueba	= '009999',		/*Usuario Pruebas*/
 		@Tip_PerNum = 'F',			/*  Tipo proceso para actualizar el numero de folio*/
 		@Ent_180 	= 180,			/* Numero 180*/
-		@Ent_40 	= 40			/* Numero 40*/
+		@Ent_40 	= 40,			/* Numero 40*/
+		@Tip_Hombre = 'M',          /*  Valor para sexo Hombre */
+        @Tip_Mujer  = 'H'           /*  Valor para sexo Mujer */
 
 
 if (@NumTransac	= @Str_Vacio or isnull(@NumTransac, @Str_Vacio)	= @Str_Vacio) begin
@@ -252,6 +261,13 @@ if (@Per_Tipo	= @Per_Fisica and len(ltrim(rtrim(@Per_RFC)))	= @Lon_Fisica) OR
 		rollback
 		return 1
 	end
+end
+
+if @Adi_Sexo not in (@Tip_Hombre, @Tip_Mujer) begin
+	select	Err_Codigo	= '000005',
+			Err_Mensaj 	= 'Sexo no válido'
+	rollback
+	return 1
 end
 
 

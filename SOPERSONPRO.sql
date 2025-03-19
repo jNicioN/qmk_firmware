@@ -26,10 +26,15 @@
 	
 as
 
-/*******************************************************************/
-/* DESCRIPCION: Personas (Proceso)						  		   */
-/*******************************************************************/
-/** REFERENCIAS:
+/*******************************************************************
+** DESCRIPCION: Personas (Proceso)						  		   
+********************************************************************
+** REFERENCIAS:
+********************************************************************
+** Modificó:	Francisco Euan          						****
+** Fecha:		14/Marzo/2025							        ****
+** Help:		TCELNC-23684								    ****
+** Descripción:	Comprobación de valores para Adi_Sexo           ****
 ********************************************************************
 ** Modifico:	Karla Morfín									****
 ** Fecha:		10/junio/2021									****
@@ -85,8 +90,7 @@ as
 ** Help:		1147468											****
 ** Descripción:	Proceso para actualizar datos tanto en SOPERSON,****
 **				SOPEDACO y SOPERADI								****
-********************************************************************
-*/
+*******************************************************************/
 
 declare	@Status		int,					/*	Declaracion de Variables	*/
 		@Bit_NumPer	char(8),
@@ -134,7 +138,9 @@ declare	@Str_Vacio	char(1),				/*	Declaracion de Constantes	*/
 		@Pai_Mexico	char(3),
 		@Nac_Nacion	char(1),
 		@Nac_Extran	char(1),
-		@Ent_Uno	int
+		@Ent_Uno	int,
+		@Tip_Hombre char(1),
+        @Tip_Mujer  char(1)
 
 select	@Str_Vacio	= '',					/*	String Vacio				*/
 		@Ent_Cero	= 0,					/*	Entero: Cero				*/
@@ -148,7 +154,9 @@ select	@Str_Vacio	= '',					/*	String Vacio				*/
 		@Pai_Mexico	= '001',				/*	País de nacimiento México */
 		@Nac_Nacion	= 'N',					/*	Nacionalidad: Nacional */
 		@Nac_Extran	= 'E',					/*	Nacionalidad: Extranjejo */
-		@Ent_Uno	= 1						/*	Entero en uno */
+		@Ent_Uno	= 1,					/*	Entero en uno */
+		@Tip_Hombre = 'M',          		/*  Valor para sexo Hombre */
+        @Tip_Mujer  = 'H'           		/*  Valor para sexo Mujer */
 
 if @Tip_Proces = @Tip_Renapo begin
 	if len(rtrim(ltrim(@Per_CURP))) <> @Ent_LonCur begin
@@ -161,6 +169,13 @@ if @Tip_Proces = @Tip_Renapo begin
 	if isnull(@Adi_NacExt, @Str_Vacio) = @Str_Vacio  or (@Adi_NacExt != @Nac_Nacion and  @Adi_NacExt!= @Nac_Extran) begin
 		select	Err_Codigo	= '000002',
 				Err_Mensaj	= 'La nacionalidad enviada es un valor inválido'
+		rollback
+		return 1
+	end
+	
+	if @Adi_Sexo not in (@Tip_Hombre, @Tip_Mujer) begin
+		select	Err_Codigo	= '000021',
+				Err_Mensaj 	= 'Sexo no válido'
 		rollback
 		return 1
 	end

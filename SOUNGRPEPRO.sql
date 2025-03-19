@@ -26,6 +26,11 @@ as
 ****************************************************************************
 ** REFERENCIAS: 														****
 ****************************************************************************
+** Modificó:	Francisco Euan          								****
+** Fecha:		14/Marzo/2025							        		****
+** Help:		TCELNC-23684								    		****
+** Descripción:	Comprobación de valores para Adi_Sexo           		****
+****************************************************************************
 ** Modificó:	Carlos Copto										 	****
 ** Fecha:		11/03/2024											   	****
 ** Help: 		38996 											   		****
@@ -191,7 +196,9 @@ declare	@Ent_Uno	int,					/*Entero: Uno*/
 		@Str_NacExt char(1),				/*String nacionalidad extranjera*/
 		@Str_EntExt char(2),				/*String Entidad en el extranjero*/
 		@Str_PaiMex char(3),				/*String pais mexico*/
-		@Ent_180	int
+		@Ent_180	int,
+		@Tip_Hombre char(1),
+        @Tip_Mujer  char(1)
 
 
 select	@Ent_Uno	= 1,
@@ -207,7 +214,9 @@ select	@Ent_Uno	= 1,
 		@Str_NacExt = 'E',
 		@Str_EntExt = 'NE',
 		@Str_PaiMex = '001',
-		@Ent_180	= 180
+		@Ent_180	= 180,
+		@Tip_Hombre = 'M',          /*  Valor para sexo Hombre */
+        @Tip_Mujer  = 'H'           /*  Valor para sexo Mujer */
 
 if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 
@@ -400,6 +409,14 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 		select @Adi_NacExt = @Str_NacMex,
 			   @Per_Nacion = @Str_PaiMex
 
+	end
+	
+	if @Gpc_Sexo not in (@Tip_Hombre, @Tip_Mujer) begin
+		select	Err_Codigo	= '000001',
+				Err_Mensaj 	= 'Sexo no válido',
+				Err_Variab	= 'Gpc_Sexo'
+		rollback
+		return @Ent_Uno
 	end
 
 	update SOPERSON set
