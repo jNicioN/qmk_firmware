@@ -202,8 +202,8 @@ declare	@Str_Vacio	char(1),	/*	Declaracion de Constantes	*/
 		@Act_TarAdi	char(1),		/*Actualizacion tarjetas adicionales*/
 		@Ent_Uno	int,
 		@Ent_180	int,
-		@Tip_Hombre char(1),
-        @Tip_Mujer  char(1)
+		@Tip_Mascul char(1),
+        @Tip_Femeni char(1)
 
 select	@Str_Vacio	= '',			/* String Vacio	*/
 		@Per_Moral	= '1',			/* Persona Moral */
@@ -220,8 +220,8 @@ select	@Str_Vacio	= '',			/* String Vacio	*/
 		@Act_TarAdi	= 'H',			/*Actualizacion tarjetas adicionales*/
 		@Ent_Uno	= 1,
 		@Ent_180	= 180,
-		@Tip_Hombre = 'M',          /*  Valor para sexo Hombre */
-        @Tip_Mujer  = 'H'           /*  Valor para sexo Mujer */
+		@Tip_Mascul = 'M',          /*  Valor para sexo Masculino */
+        @Tip_Femeni = 'F'           /*  Valor para sexo Femenino */
 
 if not exists (	select	Per_Numero
 					from SOPERSON noholdlock
@@ -261,7 +261,7 @@ if @Per_Tipo = @Per_Moral and @Per_RFC = @Str_Vacio begin
 	return @Ent_Uno
 end
 
-if @Adi_Sexo not in (@Tip_Hombre, @Tip_Mujer) begin
+if @Adi_Sexo not in (@Tip_Mascul, @Tip_Femeni) begin
 	select	Err_Codigo	= '000005',
 			Err_Mensaj 	= 'Sexo no válido'
 	rollback

@@ -220,8 +220,8 @@ declare	@Str_Vacio	char(1),		/*	Declaracion de Constantes	*/
 		@Str_No123	char(6),
 		@Str_23		char(4),
 		@Ent_180	int,
-		@Tip_Hombre char(1),
-        @Tip_Mujer  char(1)
+		@Tip_Mascul char(1),
+        @Tip_Femeni char(1)
 
 select	@Str_Vacio	= '',			/* String Vacio	*/
 		@Str_Espaci	= ' ',			/* String Espacio */
@@ -245,8 +245,8 @@ select	@Str_Vacio	= '',			/* String Vacio	*/
 		@Str_No123	= '[^123]',
 	 	@Str_23		= '[23]',
 	 	@Ent_180	= 180,
-	 	@Tip_Hombre = 'M',          /*  Valor para sexo Hombre */
-        @Tip_Mujer  = 'H'           /*  Valor para sexo Mujer */
+	 	@Tip_Mascul = 'M',          /*  Valor para sexo Masculino */
+        @Tip_Femeni = 'F'           /*  Valor para sexo Femenino */
 
 if (@NumTransac =  @Str_Vacio or isnull(@NumTransac, @Str_Vacio) = @Str_Vacio)  begin
 	/***** Genera el @NumTransac *****/
@@ -303,7 +303,7 @@ if @Per_Tipo = @Per_Moral and @Per_RFC = @Str_Vacio begin
 	return @Ent_Uno
 end
 
-if @Adi_Sexo not in (@Tip_Hombre, @Tip_Mujer) begin
+if @Adi_Sexo not in (@Tip_Mascul, @Tip_Femeni) begin
 	select	Err_Codigo	= '000005',
 			Err_Mensaj 	= 'Sexo no válido'
 	rollback

@@ -177,8 +177,8 @@ declare	@Str_Vacio	char(1),		/*	Declaracion de Constantes	*/
 		@Tip_PerNum char(1),
 		@Ent_180	int,
 		@Ent_40		int,
-		@Tip_Hombre char(1),
-        @Tip_Mujer  char(1)
+		@Tip_Mascul char(1),
+        @Tip_Femeni char(1)
 
 /*Asignacion de constantes*/
 select	@Str_Vacio	= '',			/* String Vacio	*/
@@ -204,8 +204,8 @@ select	@Str_Vacio	= '',			/* String Vacio	*/
 		@Tip_PerNum = 'F',			/*  Tipo proceso para actualizar el numero de folio*/
 		@Ent_180 	= 180,			/* Numero 180*/
 		@Ent_40 	= 40,			/* Numero 40*/
-		@Tip_Hombre = 'M',          /*  Valor para sexo Hombre */
-        @Tip_Mujer  = 'H'           /*  Valor para sexo Mujer */
+		@Tip_Mascul = 'M',          /*  Valor para sexo Masculino */
+        @Tip_Femeni = 'F'           /*  Valor para sexo Femenino */
 
 
 if (@NumTransac	= @Str_Vacio or isnull(@NumTransac, @Str_Vacio)	= @Str_Vacio) begin
@@ -263,7 +263,7 @@ if (@Per_Tipo	= @Per_Fisica and len(ltrim(rtrim(@Per_RFC)))	= @Lon_Fisica) OR
 	end
 end
 
-if @Adi_Sexo not in (@Tip_Hombre, @Tip_Mujer) begin
+if @Adi_Sexo not in (@Tip_Mascul, @Tip_Femeni) begin
 	select	Err_Codigo	= '000005',
 			Err_Mensaj 	= 'Sexo no válido'
 	rollback

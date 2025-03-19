@@ -155,8 +155,8 @@ declare	@Str_Vacio	char(1),		/*	Declaracion de Constantes	*/
 		@Tip_Hered	char(1),
 		@Tip_Titula	char(1),
 		@Sta_Inacti	char(1),
-        @Tip_Hombre char(1),
-        @Tip_Mujer char(1)
+        @Tip_Mascul char(1),
+        @Tip_Femeni char(1)
 
 select	@Str_Vacio	= '',			/* String Vacio	*/
 		@Ent_Cero	= 0,			/* Entero en cero */
@@ -188,8 +188,8 @@ select	@Str_Vacio	= '',			/* String Vacio	*/
 		@Tip_Hered	= 'H',
 		@Tip_Titula	= '1',
 		@Sta_Inacti	= 'I',			/* Status Inactivo para validar localidad */
-        @Tip_Hombre = 'M',          /* Valor para sexo Hombre */
-        @Tip_Mujer  = 'H'           /* Valor para sexo Mujer */
+        @Tip_Mascul = 'M',          /* Valor para sexo Masculino */
+        @Tip_Femeni = 'F'           /* Valor para sexo Femenino */
 
 if @Cob_Tipo	= @Tip_Titula and @Tip_Proces = @Tip_CueChe begin
 	select	@Err_Descri	= ' del Cliente'
@@ -246,7 +246,7 @@ if	@Tip_Proces = @Tip_CueChe and @Cob_Tipo <> @Per_ApoRea begin
 			rollback
 			return 1
 		end
-		if (@Adi_Sexo not in (@Tip_Hombre, @Tip_Mujer)) and @Cob_Tipo <> @Tip_Hered begin
+		if (@Adi_Sexo not in (@Tip_Mascul, @Tip_Femeni)) and @Cob_Tipo <> @Tip_Hered begin
 			select	Err_Codigo	= '000020',
 					Err_Mensaj 	= 'Sexo no válido' + @Err_Descri,
 					Err_Variab 	= 'vAdi_Sexo'
