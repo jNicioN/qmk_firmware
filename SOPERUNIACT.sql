@@ -261,7 +261,7 @@ if @Per_Tipo = @Per_Moral and @Per_RFC = @Str_Vacio begin
 	return @Ent_Uno
 end
 
-if @Adi_Sexo not in (@Tip_Mascul, @Tip_Femeni) begin
+if @Per_Tipo <> @Per_Moral and @Adi_Sexo not in (@Tip_Mascul, @Tip_Femeni) begin
 	select	Err_Codigo	= '000005',
 			Err_Mensaj 	= 'Sexo no válido'
 	rollback
@@ -413,6 +413,7 @@ end
 if @Per_Tipo = @Per_Moral begin
 	select	@Per_Comple	= LTrim(RTrim(@Per_RazSoc))
 	select	@Per_ComOrd	= LTrim(RTrim(@Per_RazSoc))
+	select	@Adi_Sexo	= @Str_Vacio
 end else begin
 	select	@Per_Comple	= LTrim(RTrim(@Per_ApePat)) + @Str_Vacio1 + LTrim(RTrim(@Per_ApeMat)) + @Str_Vacio1 + LTrim(RTrim(@Per_Nombre))
 	select	@Per_ComOrd	= LTrim(RTrim(@Per_Nombre)) + @Str_Vacio1 + LTrim(RTrim(@Per_ApePat)) + @Str_Vacio1 + LTrim(RTrim(@Per_ApeMat))

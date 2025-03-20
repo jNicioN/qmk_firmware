@@ -248,7 +248,8 @@ select	@Per_Tipo	= Per_Tipo
 	where	Per_Numero	= @Adi_PerNum
 
 if @Per_Tipo = @Per_Moral begin
-	select	@Adi_FecCon	= @Adi_FecNac
+	select	@Adi_FecCon	= @Adi_FecNac,
+			@Adi_Sexo	= @Str_Vacio
 end
 
 if @Cob_Tipo = @Tip_Titula and @Tip_Proces = @Tip_CueChe begin

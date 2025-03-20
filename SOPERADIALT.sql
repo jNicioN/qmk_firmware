@@ -218,7 +218,8 @@ select	@Per_Locali	= isnull(@Per_Locali, @Str_Vacio)
 select	@Per_CodPos	= isnull(@Per_CodPos, @Str_Vacio)
 
 if @Per_Tipo = @Per_Moral begin
-	select @Adi_FecCon = @Adi_FecNac
+	select 	@Adi_FecCon = @Adi_FecNac,
+			@Adi_Sexo	= @Str_Vacio
 end
 
 if @Per_RFC	= @Str_Vacio and @Adi_NuIdFi = @Str_Vacio and @Adi_NacExt = 'E' begin

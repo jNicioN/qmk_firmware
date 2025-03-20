@@ -124,7 +124,8 @@ declare	@Status		int,					/*	Declaracion de Variables	*/
 		@Bit_Giro	char(30),
 		@Bit_Sector	char(3),
 		@Bit_Activi	char(10),
-		@Bit_ActINE	varchar(10)
+		@Bit_ActINE	varchar(10),
+		@Per_Tipo	char(1)
 	
 declare	@Str_Vacio	char(1),				/*	Declaracion de Constantes	*/
 		@Ent_Cero	int,
@@ -140,7 +141,8 @@ declare	@Str_Vacio	char(1),				/*	Declaracion de Constantes	*/
 		@Nac_Extran	char(1),
 		@Ent_Uno	int,
 		@Tip_Mascul char(1),
-        @Tip_Femeni char(1)
+        @Tip_Femeni char(1),
+        @Per_Moral	char(1)
 
 select	@Str_Vacio	= '',					/*	String Vacio				*/
 		@Ent_Cero	= 0,					/*	Entero: Cero				*/
@@ -156,9 +158,15 @@ select	@Str_Vacio	= '',					/*	String Vacio				*/
 		@Nac_Extran	= 'E',					/*	Nacionalidad: Extranjejo */
 		@Ent_Uno	= 1,					/*	Entero en uno */
 		@Tip_Mascul = 'M',          		/*  Valor para sexo Masculino */
-        @Tip_Femeni = 'F'           		/*  Valor para sexo Femenino */
+        @Tip_Femeni = 'F',           		/*  Valor para sexo Femenino */
+        @Per_Moral	= '1'					/*  Persona Moral */
 
 if @Tip_Proces = @Tip_Renapo begin
+	
+	select	@Per_Tipo = Per_Tipo
+		from SOPERSON noholdlock
+		where	Per_Numero	= @Per_Numero
+	
 	if len(rtrim(ltrim(@Per_CURP))) <> @Ent_LonCur begin
 		select	Err_Codigo	= '000001',
 				Err_Mensaj	= 'La CURP no es válido'
@@ -173,11 +181,15 @@ if @Tip_Proces = @Tip_Renapo begin
 		return 1
 	end
 	
-	if @Adi_Sexo not in (@Tip_Mascul, @Tip_Femeni) begin
-		select	Err_Codigo	= '000021',
-				Err_Mensaj 	= 'Sexo no válido'
-		rollback
-		return 1
+	if @Per_Tipo <> @Per_Moral begin
+		if @Adi_Sexo not in (@Tip_Mascul, @Tip_Femeni) begin
+			select	Err_Codigo	= '000021',
+					Err_Mensaj 	= 'Sexo no válido'
+			rollback
+			return 1
+		end
+	end	else begin 
+		set @Adi_Sexo = @Str_Vacio
 	end
 	
 	insert into SOBITPER (

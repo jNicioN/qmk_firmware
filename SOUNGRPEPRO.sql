@@ -198,7 +198,8 @@ declare	@Ent_Uno	int,					/*Entero: Uno*/
 		@Str_PaiMex char(3),				/*String pais mexico*/
 		@Ent_180	int,
 		@Tip_Mascul char(1),
-        @Tip_Femeni  char(1)
+        @Tip_Femeni  char(1),
+        @Per_Moral char(1)
 
 
 select	@Ent_Uno	= 1,
@@ -216,7 +217,8 @@ select	@Ent_Uno	= 1,
 		@Str_PaiMex = '001',
 		@Ent_180	= 180,
 		@Tip_Mascul = 'M',          /*  Valor para sexo Masculino */
-        @Tip_Femeni = 'F'           /*  Valor para sexo Femenino */
+        @Tip_Femeni = 'F',          /*  Valor para sexo Femenino */
+        @Per_Moral	= '1'			/*  Persona Moral */
 
 if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 
@@ -411,7 +413,7 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 
 	end
 	
-	if @Gpc_Sexo not in (@Tip_Mascul, @Tip_Femeni) begin
+	if @Bit_Tipo <> @Per_Moral and @Gpc_Sexo not in (@Tip_Mascul, @Tip_Femeni) begin
 		select	Err_Codigo	= '000001',
 				Err_Mensaj 	= 'Sexo no válido',
 				Err_Variab	= 'Gpc_Sexo'

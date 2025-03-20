@@ -263,7 +263,7 @@ if (@Per_Tipo	= @Per_Fisica and len(ltrim(rtrim(@Per_RFC)))	= @Lon_Fisica) OR
 	end
 end
 
-if @Adi_Sexo not in (@Tip_Mascul, @Tip_Femeni) begin
+if @Per_Tipo <> @Per_Moral and @Adi_Sexo not in (@Tip_Mascul, @Tip_Femeni) begin
 	select	Err_Codigo	= '000005',
 			Err_Mensaj 	= 'Sexo no válido'
 	rollback
@@ -276,6 +276,7 @@ if @Per_Tipo	= @Per_Moral begin
 	select  @Per_RazSoc = UPPER(LTrim(RTrim(@Per_RazSoc)))
 	select	@Per_Comple	= @Per_RazSoc
 	select	@Per_ComOrd	= @Per_RazSoc
+	select	@Adi_Sexo	= @Str_Vacio
 end else begin
 	--Sanitizamos Nombre y apellidos
 	select @Per_ApePat = str_replace(@Per_ApePat, @Str_DobEsp, @Str_Espaci),
