@@ -366,7 +366,19 @@ exec @Status = SOPERSONPRO
 	end
 
 /* Datos Adicionales */
-insert into SOPERADI values (
+insert into SOPERADI 
+   (Adi_PerNum,	Adi_Fecha,	Adi_NumTra,	Adi_LugNac,	Adi_Sexo,
+	Adi_FecNac,	Adi_RegMat,	Adi_VivCas,	Adi_TieRes,	Adi_Fax,
+	Adi_NumDep,	Adi_Puesto,	Adi_Ocupac,	Adi_AntLab,	Adi_LugTra,
+	Adi_TelTra,	Adi_CalTra,	Adi_NuCaTr,	Adi_ColTra,	Adi_Locali,
+	Adi_CPTra,	Adi_FecCon,	Adi_CaNuIn,	Adi_NacExt,	Adi_Reside,
+	Adi_DocEst,	Adi_OtDoEs,	Adi_FeExDo,	Adi_CalInm,	Adi_CalExt,
+	Adi_CaNuEx,	Adi_ColExt,	Adi_LocExt,	Adi_EntExt,	Adi_PaiExt,
+	Adi_CoPoEx,	Adi_TelExt,	Adi_TipIde,	Adi_OtrIde,	Adi_NumIde,
+	Adi_FeExId,	Adi_FeVeId,	Adi_NuIdFi,	Adi_EntPri,	Adi_EntSeg,
+	NumTransac,	Transaccio,	Usuario,	FechaSis,	SucOrigen,
+	SucDestino)
+values (
 	@Per_Numero,	@Per_Fecha,		@Per_NumTra,	@Adi_LugNac,	@Adi_Sexo,
 	@Adi_FecNac,	@Adi_RegMat,	@Adi_VivCas,	@Adi_TieRes,	@Adi_Fax,
 	@Adi_NumDep,	@Adi_Puesto,	@Adi_Ocupac,	@Adi_AntLab,	@Adi_LugTra,

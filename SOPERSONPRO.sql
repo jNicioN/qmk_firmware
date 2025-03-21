@@ -477,8 +477,7 @@ if @Tip_Proces = @Tip_Docume begin
 		Adi_FeVeId, Adi_NuIdFi, Adi_EntPri, Adi_EntSeg, NumTransac,
 		Transaccio, Usuario,    FechaSis,   SucOrigen,  SucDestino
 	from SOPERADI noholdlock
-	where	 Adi_PerNum 	= @Per_Numero
-	or       Adi_PerNum     = @Peu_Grupo
+	where	 Adi_PerNum in(@Per_Numero, @Peu_Grupo)
 	
 	update SOPERADI set
 		Adi_TipIde	= @Adi_TipIde,
