@@ -181,15 +181,15 @@ if @Tip_Proces = @Tip_Renapo begin
 		return 1
 	end
 	
-	if @Per_Tipo <> @Per_Moral begin
+	if @Per_Tipo = @Per_Moral begin
+		set @Adi_Sexo = @Str_Vacio
+	end	else begin
 		if @Adi_Sexo not in (@Tip_Mascul, @Tip_Femeni) begin
 			select	Err_Codigo	= '000021',
 					Err_Mensaj 	= 'Sexo no válido'
 			rollback
 			return 1
 		end
-	end	else begin 
-		set @Adi_Sexo = @Str_Vacio
 	end
 	
 	insert into SOBITPER (

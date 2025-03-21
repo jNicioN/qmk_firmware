@@ -413,13 +413,18 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 
 	end
 	
-	if @Bit_Tipo <> @Per_Moral and @Gpc_Sexo not in (@Tip_Mascul, @Tip_Femeni) begin
-		select	Err_Codigo	= '000001',
-				Err_Mensaj 	= 'Sexo no válido',
-				Err_Variab	= 'Gpc_Sexo'
-		rollback
-		return @Ent_Uno
+	if @Bit_Tipo = @Per_Moral begin
+		set @Gpc_Sexo = @Str_Vacio
+	end else begin
+		if @Gpc_Sexo not in (@Tip_Mascul, @Tip_Femeni) begin
+			select	Err_Codigo	= '000001',
+					Err_Mensaj 	= 'Sexo no válido',
+					Err_Variab	= 'Gpc_Sexo'
+			rollback
+			return @Ent_Uno
+		end
 	end
+
 
 	update SOPERSON set
 		Per_Nombre	= @Gpc_Nombre,
