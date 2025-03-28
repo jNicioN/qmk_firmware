@@ -6,7 +6,7 @@ create procedure SORICOAAPRO (
 	@Rca_ConMuj int,
 	@Rca_PeAlDi int,
 	@Rca_MuAlDi int,
-	@Rca_DiPrMi bit,
+	@Rca_DiPrMi int,
 	@Rca_GeDiGe int,
 	@Rca_GePrCo int,
    
@@ -23,6 +23,11 @@ as
 /****************************************************************/
 /* DESCRIPCION: Procesamiento de registros de Composicion		*/
 /*				Accionaria de RIB								*/
+/****************************************************************/
+/* Modifico:	Raul Muniz										*/
+/* Fecha:		28/03/2025										*/
+/* Descripcion:	Se modifica tipo de parametro @Rca_DiPrMi a int	*/
+/* ID Jira:		TCELEM-11573									*/
 /****************************************************************/
 /* Modifico:	Raul Muniz										*/
 /* Fecha:		21/06/2023										*/
