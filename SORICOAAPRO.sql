@@ -42,13 +42,13 @@ as
 	declare	@Str_A		char(1),
 			@Int_Cero	int
 
-	select	@Str_A		= 'A',
-			@Int_Cero	= 0
+	select	@Str_A		= 'A',	/* String A */
+			@Int_Cero	= 0		/* Entero Cero */
 
 	/* declaracion de variables */
-	declare	@Int_Index	int,
-			@Status		int,
-			@Tipo   	int
+	declare	@Int_Index	int,	/* Indice */
+			@Status		int,	/* Campo de retorno */
+			@Tipo   	int		/* Tipo */
 	
 	if @Tip_Proces = @Str_A begin				
 		Delete from SORICOAA
@@ -58,7 +58,7 @@ as
 		select @Int_Index = charindex(',', @Rca_Tipo)
 		while @Int_Index > @Int_Cero begin
 			select @Tipo = CONVERT(INT,left(@Rca_Tipo, @Int_Index-1))
-			exec SORICOAAALT
+			exec @Status = SORICOAAALT
 			   @Int_Cero,	@Rca_NumRib,	@Tipo,			@Rca_PoPaMu,	@Rca_ConMuj,
 			   @Rca_PeAlDi,	@Rca_MuAlDi,	@Rca_DiPrMi,	@Rca_GeDiGe,	@Rca_GePrCo,
 			   @NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,
@@ -70,7 +70,7 @@ as
 
 		if (datalength(@Rca_Tipo) > @Int_Cero) begin
 			select @Tipo = CONVERT(INT,@Rca_Tipo)
-			exec SORICOAAALT
+			exec @Status = SORICOAAALT
 				@Int_Cero,		@Rca_NumRib,	@Tipo,			@Rca_PoPaMu,	@Rca_ConMuj,
 				@Rca_PeAlDi,	@Rca_MuAlDi,	@Rca_DiPrMi,	@Rca_GeDiGe,	@Rca_GePrCo,
 				@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,
