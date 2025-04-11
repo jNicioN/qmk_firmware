@@ -26,6 +26,11 @@ as
 ****************************************************************************
 ** REFERENCIAS: 														****
 ****************************************************************************
+** Modificó:	Francisco Euan          								****
+** Fecha:		14/Marzo/2025							        		****
+** Help:		TCELNC-23684								    		****
+** Descripción:	Comprobación de valores para Adi_Sexo           		****
+****************************************************************************
 ** Modificó:	Carlos Copto										 	****
 ** Fecha:		11/03/2024											   	****
 ** Help: 		38996 											   		****
@@ -191,7 +196,10 @@ declare	@Ent_Uno	int,					/*Entero: Uno*/
 		@Str_NacExt char(1),				/*String nacionalidad extranjera*/
 		@Str_EntExt char(2),				/*String Entidad en el extranjero*/
 		@Str_PaiMex char(3),				/*String pais mexico*/
-		@Ent_180	int
+		@Ent_180	int,
+		@Tip_Mascul char(1),
+        @Tip_Femeni  char(1),
+        @Per_Moral char(1)
 
 
 select	@Ent_Uno	= 1,
@@ -207,7 +215,10 @@ select	@Ent_Uno	= 1,
 		@Str_NacExt = 'E',
 		@Str_EntExt = 'NE',
 		@Str_PaiMex = '001',
-		@Ent_180	= 180
+		@Ent_180	= 180,
+		@Tip_Mascul = 'M',          /*  Valor para sexo Masculino */
+        @Tip_Femeni = 'F',          /*  Valor para sexo Femenino */
+        @Per_Moral	= '1'			/*  Persona Moral */
 
 if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 
@@ -401,6 +412,19 @@ if @Tip_Proces = @Pro_Datos begin		/*Actualización de Datos*/
 			   @Per_Nacion = @Str_PaiMex
 
 	end
+	
+	if @Bit_Tipo = @Per_Moral begin
+		set @Gpc_Sexo = @Str_Vacio
+	end else begin
+		if @Gpc_Sexo not in (@Tip_Mascul, @Tip_Femeni) begin
+			select	Err_Codigo	= '000001',
+					Err_Mensaj 	= 'Sexo no válido',
+					Err_Variab	= 'Gpc_Sexo'
+			rollback
+			return @Ent_Uno
+		end
+	end
+
 
 	update SOPERSON set
 		Per_Nombre	= @Gpc_Nombre,

@@ -59,57 +59,62 @@ as
 
 /*******************************************************************************
 ** DESCRIPCION: **Modificacion de la Informacion Adicional de la Persona**	****
+********************************************************************************
+** REFERENCIAS:
+********************************************************************************
+** 					STORE CONVERTIDO										****
+********************************************************************************
+** Modificó:	Francisco Euan          						          	****
+** Fecha:		14/Marzo/2025							                  	****
+** Help:		TCELNC-23684								              	****
+** Descripción:	Comprobación de valores para Adi_Sexo                     	****
+********************************************************************************
+** Modificó:	Rolando Bernal												****
+** Fecha:		12/Nov/2015													****
+** Help:		00801121													****
+** Descripción:	Seccionar validaciones segÃºn el Tipo de Pantalla para		****
+**				Sibamex3													****
+********************************************************************************
+** Modificó:	Marcelo Bautista Hernandez									****
+** Fecha:		16/Junio/2015												****
+** Help:		774214														****
+** Descripción:	asignar valor a @Adi_FecCon									****
+********************************************************************************
+** Modificó:	Karina ChavarrÃ­a Tovar										****
+** Fecha:		26/Sep/2008													****
+** Descripción:	Agregar @Adi_EntPri, @Adi_EntSeg							****
+** HelpDesk:	100187														****
+********************************************************************************
+** Modificó:	Lucina Gonzalez Trejo										****
+** Fecha:		22/Agosto/07												****
+** Descripción:	Agregar var Err_Descri										****
+** Help:		3666														****
+********************************************************************************
+** 				STORE CONVERTIDO											****
+** Fecha:		23/Julio	/07												****
+** Convirtió:	Karina ChavarrÃa Tovar										****
+********************************************************************************
+** Modificó:	Juan Mario Galindo de Leon									****
+** Fecha:		05/Julio/07		  											****
+** Descripción:	Agregar campos Adi_Reside, Adi_OtDoEs,						****
+**	 			Bit_Reside y Bit_OtDoEs										****
+** Help:			7100													****
+********************************************************************************
+** Modificó:	Lucina Gonzalez Trejo										****
+** Fecha:		12/Marzo/07													****
+** Descripción:	Agregar campos												****
+** Help:		3666														****
+********************************************************************************
+** Modificó:	Estela Mendoza												****
+** Fecha:		28/Sep/06													****
+** Descripción:	Faltaba un campo al dar de alta en 							****
+**  			SOPERADIMOD 												****
+** Help:		4099														****
+********************************************************************************
+** Creó:		Ricardo Salinas												****
+** Fecha:		06/Ene/06													****
+** Descripción:	Actuliza inf en tabal soperadi								****
 *******************************************************************************/
-/* REFERENCIAS:
-****************************************************************************
-** 					STORE CONVERTIDO									****
-****************************************************************************
-** Modifico:	Rolando Bernal											****
-** Fecha:		12/Nov/2015												****
-** Help:		00801121												****
-** Descripcion:	Seccionar validaciones segÃºn el Tipo de Pantalla para	****
-**				Sibamex3												****
-****************************************************************************
-** ModificÃ³:	Marcelo Bautista Hernandez								****
-** Fecha:		16/Junio/2015											****
-** Help:		774214													****
-** DescripciÃ³n:	asignar valor a @Adi_FecCon								****
-****************************************************************************
-** ModificÃ³:	Karina ChavarrÃ­a Tovar									****
-** Fecha:		26/Sep/2008												****
-** DescripciÃ³n:	Agregar @Adi_EntPri, @Adi_EntSeg						****
-** HelpDesk:	100187													****
-****************************************************************************
-** ModificÃ³:	Lucina Gonzalez Trejo									****
-** Fecha:		22/Agosto/07											****
-** DescripciÃ³n:	Agregar var Err_Descri									****
-** Help:		3666													****
-****************************************************************************
-** 				STORE CONVERTIDO										****
-** Fecha:		23/Julio	/07											****
-** ConvirtiÃ³:	Karina ChavarrÃa Tovar									****
-****************************************************************************
-** Modifico:	Juan Mario Galindo de Leon								****
-** Fecha:		05/Julio/07		  										****
-** DescripciÃ³n:	Agregar campos Adi_Reside, Adi_OtDoEs,					****
-**	 			Bit_Reside y Bit_OtDoEs									****
-** Help:			7100												****
-****************************************************************************
-** ModificÃ³:	Lucina Gonzalez Trejo									****
-** Fecha:		12/Marzo/07												****
-** DescripciÃ³n:	Agregar campos											****
-** Help:		3666													****
-****************************************************************************
-** Modif:		Estela Mendoza											****
-** Fecha:		28/Sep/06												****
-** Descripcion:	Faltaba un campo al dar de alta en 						****
-**  			SOPERADIMOD 											****
-** Help:		4099													****
-****************************************************************************
-** CreÃ³:		Ricardo Salinas											****
-** Fecha:		06/Ene/06												****
-** Descripcion:	Actuliza inf en tabal soperadi							****
-***************************************************************************/
 
 									/*	DeclaraciÃ³n de Variables */
 declare	@Status		int,
@@ -198,7 +203,9 @@ declare	@Str_Vacio	char(1),		/*	Declaracion de Constantes	*/
 		@Pan_DatCon	char(2),
 		@Pan_Promot	char(2),
 		@Pan_PerCli	char(2),
-		@Pan_ActFin	char(2)
+		@Pan_ActFin	char(2),
+		@Tip_Mascul char(1),
+        @Tip_Femeni char(1)
 
 select	@Str_Vacio	= '',					-- String Vacio
 		@Tip_CueChe	= 'CH',					-- Proceso: Personas relacionadas a Cuenta de cheques
@@ -232,14 +239,17 @@ select	@Str_Vacio	= '',					-- String Vacio
 		@Pan_DatCon	= '02',					-- Pantalla Sibamex3: Datos de Contacto
 		@Pan_Promot	= '03',					-- Pantalla Sibamex3: Promotores
 		@Pan_PerCli	= '04',					-- Pantalla Sibamex3: Perfilamiento
-		@Pan_ActFin	= '05'					-- Pantalla Sibamex3: Actividad Financiera
+		@Pan_ActFin	= '05',					-- Pantalla Sibamex3: Actividad Financiera
+		@Tip_Mascul = 'M',          		-- Valor para sexo Masculino
+        @Tip_Femeni = 'F'           		-- Valor para sexo Femenino
 
 select	@Per_Tipo	= Per_Tipo
 	from SOPERSON noholdlock
 	where	Per_Numero	= @Adi_PerNum
 
 if @Per_Tipo = @Per_Moral begin
-	select	@Adi_FecCon	= @Adi_FecNac
+	select	@Adi_FecCon	= @Adi_FecNac,
+			@Adi_Sexo	= @Str_Vacio
 end
 
 if @Cob_Tipo = @Tip_Titula and @Tip_Proces = @Tip_CueChe begin
@@ -315,6 +325,14 @@ if	@Tip_Proces = @Tip_CueChe and @Cob_Tipo <> @Per_ApoRea begin
 			select	Err_Codigo	= '000003',
 					Err_Mensaj	= 'Proporcione el sexo' + @Err_Descri,
 					Err_Variab	= 'vAdi_Sexo'
+			rollback
+			return 1
+		end
+		
+		if (@Adi_Sexo not in (@Tip_Mascul, @Tip_Femeni)) and @Cob_Tipo <> @Tip_Hered begin
+			select	Err_Codigo	= '000021',
+					Err_Mensaj 	= 'Sexo no válido' + @Err_Descri,
+					Err_Variab 	= 'vAdi_Sexo'
 			rollback
 			return 1
 		end

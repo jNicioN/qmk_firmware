@@ -52,6 +52,11 @@ as
 ********************************************************************
 *** REFERENCIAS: 												  **
 ********************************************************************
+** Modificó:	Francisco Euan          						****
+** Fecha:		14/Marzo/2025							        ****
+** Help:		TCELNC-23684								    ****
+** Descripción:	Comprobación de valores para Adi_Sexo           ****
+********************************************************************
 ** Modificó:	Carlos Copto									****
 ** Fecha:		11/03/2024									   	****
 ** Help: 		38996 											****
@@ -196,7 +201,9 @@ declare	@Str_Vacio	char(1),	/*	Declaracion de Constantes	*/
 		@Str_Vacio1 char(1),		/* Cadena vacia con un espacio */
 		@Act_TarAdi	char(1),		/*Actualizacion tarjetas adicionales*/
 		@Ent_Uno	int,
-		@Ent_180	int
+		@Ent_180	int,
+		@Tip_Mascul char(1),
+        @Tip_Femeni char(1)
 
 select	@Str_Vacio	= '',			/* String Vacio	*/
 		@Per_Moral	= '1',			/* Persona Moral */
@@ -212,7 +219,9 @@ select	@Str_Vacio	= '',			/* String Vacio	*/
 		@Str_Vacio1 = ' ',			/*String vacio*/
 		@Act_TarAdi	= 'H',			/*Actualizacion tarjetas adicionales*/
 		@Ent_Uno	= 1,
-		@Ent_180	= 180
+		@Ent_180	= 180,
+		@Tip_Mascul = 'M',          /*  Valor para sexo Masculino */
+        @Tip_Femeni = 'F'           /*  Valor para sexo Femenino */
 
 if not exists (	select	Per_Numero
 					from SOPERSON noholdlock
@@ -248,6 +257,13 @@ end
 if @Per_Tipo = @Per_Moral and @Per_RFC = @Str_Vacio begin
 	select	Err_Codigo	= '000004',
 			Err_Mensaj	= 'Proporcione el RFC'
+	rollback
+	return @Ent_Uno
+end
+
+if @Per_Tipo <> @Per_Moral and @Adi_Sexo not in (@Tip_Mascul, @Tip_Femeni) begin
+	select	Err_Codigo	= '000005',
+			Err_Mensaj 	= 'Sexo no válido'
 	rollback
 	return @Ent_Uno
 end
@@ -397,6 +413,7 @@ end
 if @Per_Tipo = @Per_Moral begin
 	select	@Per_Comple	= LTrim(RTrim(@Per_RazSoc))
 	select	@Per_ComOrd	= LTrim(RTrim(@Per_RazSoc))
+	select	@Adi_Sexo	= @Str_Vacio
 end else begin
 	select	@Per_Comple	= LTrim(RTrim(@Per_ApePat)) + @Str_Vacio1 + LTrim(RTrim(@Per_ApeMat)) + @Str_Vacio1 + LTrim(RTrim(@Per_Nombre))
 	select	@Per_ComOrd	= LTrim(RTrim(@Per_Nombre)) + @Str_Vacio1 + LTrim(RTrim(@Per_ApePat)) + @Str_Vacio1 + LTrim(RTrim(@Per_ApeMat))
