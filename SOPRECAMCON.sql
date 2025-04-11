@@ -97,4 +97,4 @@ end else if @Tip_ConTip = @Str_L begin				/*Consulta por Lista*/
 			from SOPRECAM noholdlock	
 			where Prc_Activo = @Ent_Uno
 	end
-end;
+end
