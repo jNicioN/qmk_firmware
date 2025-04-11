@@ -22,16 +22,21 @@ as
 
 /*
 ****************************************************************************
-** Modifico:	Joel Barcenas													****
-** Fecha:		18/Sep/19												    	****
-** HelpDesk:	1184558														****
-** Descripcion:	Agrega consulta de Tipo de cambio para   	****
-						Pantallas de Sucursal en L9							****
+** Modifico:	Hébel Cruz												****
+** Fecha:		11/04/25												****
+** HelpDesk:	TCELTO-12900											****
+** Descripcion:	Agrega consulta para metales por número   				****				
 ****************************************************************************
-** Modifico:	Francisco Mora												****
-** Fecha:		11/Oct/18														****
-** HelpDesk:	1071093														****
-** Descripcion:	Agrega consulta monedas tradair L8			****
+** Modifico:	Joel Barcenas											****
+** Fecha:		18/Sep/19												****
+** HelpDesk:	1184558													****
+** Descripcion:	Agrega consulta de Tipo de cambio para   				****
+						Pantallas de Sucursal en L9						****
+****************************************************************************
+** Modifico:	Francisco Mora											****
+** Fecha:		11/Oct/18												****
+** HelpDesk:	1071093													****
+** Descripcion:	Agrega consulta monedas tradair L8						****
 ****************************************************************************
 ** Modifico:	Felipe Castillo Rendon									****
 ** Fecha:		12/Abr/18												****
@@ -252,6 +257,7 @@ declare	@Str_Vacio	char(1),
 		@Con_Ventan	char(1),
 		@Con_TodMon	char(1),
 		@Con_PizDol	char(1),
+		@Con_PreMet char(1),
 		@Con_CajAut char(1),
 		@Con_LimFac char(1),
 		@Con_LisGen	char(1),
@@ -300,6 +306,7 @@ select	@Str_Vacio	= '',				/* String Vacio */
 		@Con_FixVal	= '7',				/* Consulta de Fix Valuacion */
 		@Con_Ventan	= '8',				/* Consulta para Ventanilla */
 		@Con_PizDol	= '9',				/* Consulta de cotizacion de Dolares para Pizarron Tesoreria */
+		@Con_PreMet	= 'M',				/* Consulta de precios para metal */
 		@Con_CajAut	= 'T',				/* Consulta para Cajeros Automaticos (Dispensar Dolares) */
 		@Con_LimFac	= 'F',				/* Consulta de limites considerando el Factor TC */
 		@Con_LisGen	= '1',				/* Consulta de lista general (Visual Basic) */
@@ -566,7 +573,20 @@ end else begin			/* Cliente:  Visual Basic */
 				where	Mon_Numero	= @Mon_Numero
 				  and	(Mon_OpeCam	= @Ope_MonCam
 				   or	Mon_Numero	= @Mon_Pesos)
+		end else if @Tip_ConCon = @Con_PreMet begin		/* Consulta de Metales */
+			select	@Val_SpoDol	= Mon_SpoVen
+				from SOMONEDA noholdlock
+				where	Mon_Numero	= @Mon_Dolar
+				
+			select  Mon_Numero,	Mon_Descri,
+					Mon_ValMet	= Mon_EfeCom,
+					Val_SpoDol	= @Val_SpoDol
+				from SOMONEDA noholdlock
+				where	Mon_Tipo	= @Tip_Metal
+				  and   Mon_Numero	= @Mon_Numero
+				order by Mon_Numero
 		end
+		
 
 	end else begin					/* 'L':  Lista */
 		select	@Mon_Descri	= ltrim(rtrim(@Mon_Descri)) + @Str_Porcen

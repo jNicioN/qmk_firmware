@@ -20,7 +20,12 @@ as
 /*******************************************************************
 ** Descripcion : Consulta Precios de Cambio                        *
 ********************************************************************
-** REFERENCIAS:                       
+** REFERENCIAS:
+********************************************************************
+** Creó:          Hébel Cruz          						 	   *
+** Fecha:         11/04/2025									   *
+** Help Desk: 	  TCELTO-12900                                     *  
+** Descripción:	  Se añade lista general para precios cambios	   *                     
 ********************************************************************
 ** Creó:          Shaila Palafox          						   *
 ** Fecha:         05/12/2022									   *
@@ -87,5 +92,9 @@ end else if @Tip_ConTip = @Str_L begin				/*Consulta por Lista*/
 		select Prc_Precio 
 			from SOPRECAM noholdlock
 			where Prc_Moneda = @Prc_Moneda
+	end else if @Tip_ConCon = @Str_Dos begin		/*Consulta General (Registros Activos)*/
+		select Prc_Moneda, Prc_Precio 
+			from SOPRECAM noholdlock	
+			where Prc_Activo = @Ent_Uno
 	end
-end
+end;
