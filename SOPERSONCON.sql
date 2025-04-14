@@ -424,8 +424,7 @@ declare	@Str_Vacio	char(1),
 		@Str_LetraG	char(1),
 		@Str_LetraH	char(1),
 		@Str_LetraI	char(1),
-		@Str_LetraJ	char(1),
-		@Val_CarRFC int
+		@Str_LetraJ	char(1)
 
 /* Asignacion de Constantes */
 select	@Str_Vacio	= '',			-- String Vacio
@@ -480,8 +479,7 @@ select	@Str_Vacio	= '',			-- String Vacio
 		@Str_LetraG = 'G',			/* Cadena letra G */		
 		@Str_LetraH = 'H',			/* Cadena letra H */
 		@Str_LetraI = 'I',			/* Cadena letra I */
-		@Str_LetraJ = 'J',			/* Cadena letra J */
-		@Val_CarRFC	= 10			/* Caracteres necesarios para consulta por RFC */
+		@Str_LetraJ = 'J'			/* Cadena letra J */
 		
 select	@Busqueda	= @Per_Comple
 select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
@@ -717,7 +715,7 @@ if @Tip_ConTip = @Str_LetraC begin
 
 		select	Per_Numero,	Adi_EntPri,	Adi_EntSeg
 			from #Soperson
-			where Per_RFC = @Per_RFC
+		where Per_RFC = @Per_RFC
 
 		drop table #Soperson
 	end
