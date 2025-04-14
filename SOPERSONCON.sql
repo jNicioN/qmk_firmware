@@ -20,6 +20,13 @@ as
 ********************************************************************
 ** REFERENCIAS:													****
 ********************************************************************
+** Modificó:	Jesus Hernandez									****
+** Fecha:		14/04/2025									   	****
+** Help: 		TCELNC-24119									****
+** Descripcion:	Consulta por numero de cliente y numero de      ****
+**				persona para optener a l persona principal      ****
+**              Se agrega consulta CI y CJ              		****
+********************************************************************
 ** Modificó:	Angel Encalada									****
 ** Fecha:		05/04/2025									   	****
 ** Help: 		TCELNC-23481									****
@@ -358,7 +365,10 @@ declare	@Tip_ConTip	char(1),
 		@Int_Client	int,
 		@Rfc_Like	varchar(15),
 		@Ent_NumReg	int,
-		@Status		int
+		@Status		int,
+		@Peu_Grupo char(8),
+		@Cli_Numero char(8),
+		@Adi_NumPer char(8)
 
 /* Declaracion de Constantes */
 declare	@Str_Vacio	char(1),
@@ -412,7 +422,10 @@ declare	@Str_Vacio	char(1),
 		@Str_LetraD	char(1),
 		@Str_LetraF	char(1),
 		@Str_LetraG	char(1),
-		@Str_LetraH	char(1)
+		@Str_LetraH	char(1),
+		@Str_LetraI	char(1),
+		@Str_LetraJ	char(1),
+		@Val_CarRFC int
 
 /* Asignacion de Constantes */
 select	@Str_Vacio	= '',			-- String Vacio
@@ -465,7 +478,10 @@ select	@Str_Vacio	= '',			-- String Vacio
 		@Str_LetraD = 'D',			/* Cadena letra D */
 		@Str_LetraF = 'F',			/* Cadena letra F */
 		@Str_LetraG = 'G',			/* Cadena letra G */		
-		@Str_LetraH = 'H'			/* Cadena letra H */
+		@Str_LetraH = 'H',			/* Cadena letra H */
+		@Str_LetraI = 'I',			/* Cadena letra I */
+		@Str_LetraJ = 'J',			/* Cadena letra J */
+		@Val_CarRFC	= 10			/* Caracteres necesarios para consulta por RFC */
 		
 select	@Busqueda	= @Per_Comple
 select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
@@ -564,6 +580,17 @@ if @Tip_ConTip = @Str_LetraC begin
 			  and	len(rtrim(ltrim(Per_Numero)))	= @Ent_Ocho
 	end
 	if @Tip_ConCon = @Str_Seis begin	/*	Consulta persona por RFC*/
+		
+		select @Per_RFC = isnull(@Per_RFC,@Str_Vacio)
+		
+		if len(@Per_RFC) < @Val_CarRFC begin
+			select	Err_Codigo	= '000010',
+					Err_Mensaj	= 'El minimo de caracteres para consulta por RFC es '+convert(varchar(10),@Val_CarRFC),
+					Err_Variab	= 'Per_RFC'
+			return 1
+		end
+		
+		
 		select	Per_Nombre,	Per_ApePat,	Per_ApeMat,	Per_RFC,	Per_Calle,
 				Per_CalNum,	Per_Coloni,	Per_Locali,	Per_CodPos,	Per_Telefo,
 				Per_EstCiv,	Per_Nacion,	Per_ActEmp,	Per_Activi,
@@ -576,6 +603,15 @@ if @Tip_ConTip = @Str_LetraC begin
 			where	Per_RFC		= @Per_RFC
 	end
 	if @Tip_ConCon = @Str_Siete begin	/*	Consulta persona Toda la inf por RFC*/
+		
+		select @Per_RFC = isnull(@Per_RFC,@Str_Vacio)
+		
+		if len(@Per_RFC) < @Val_CarRFC begin
+			select	Err_Codigo	= '000011',
+					Err_Mensaj	= 'El minimo de caracteres para consulta por RFC es '+convert(varchar(10),@Val_CarRFC),
+					Err_Variab	= 'Per_RFC'
+			return 1
+		end
 		
 		create table #Soperson(
 			Per_Numero	char(8),	
@@ -696,12 +732,10 @@ if @Tip_ConTip = @Str_LetraC begin
 				Adi_NuIdFi,	Adi_TieRes,	Adi_NumDep,	Adi_AntLab,	Adi_FecCon,
 				Adi_CaNuIn, PerPersoID
 			from #Soperson
-			where Per_RFC = @Per_RFC
 			order by  PerPersoID desc
 
 		select	Per_Numero,	Adi_EntPri,	Adi_EntSeg
 			from #Soperson
-		where Per_RFC = @Per_RFC
 
 		drop table #Soperson
 	end
@@ -996,6 +1030,46 @@ if @Tip_ConTip = @Str_LetraC begin
 			left outer join SONOMLAR noholdlock on Nol_Person = PerPersoID
 			where	Per_Numero	=  @Per_Numero
 
+	end else if @Tip_ConCon = @Str_LetraI begin --Consulta de personas con numero de cliente
+
+		select  @Adi_NumPer = Adi_NumPer from    CLADICIO    noholdlock where   Adi_Client  = @Per_Numero       
+		select @Peu_Grupo = Peu_Grupo from SOUNIPER noholdlock where Peu_Person = @Adi_NumPer   
+
+		select  Per_Numero, Per_Tipo,   Per_Benefi, Per_NuSeFi, Per_Titulo,  
+				Per_Nombre, Per_ApePat, Per_ApeMat, Per_RazSoc, Per_Comple,
+				Per_ComOrd, Per_RFC,    Per_CURP,   Per_Calle,  Per_CalNum,
+				Per_Coloni, Per_Entida, Per_Locali, Per_CodPos, Per_ApaPos,
+				Per_LadTel, Per_Telefo, Per_EstCiv, Per_Email,  Per_ComDom,    
+				Per_Nacion, Per_ActEmp, Per_Giro,   Per_Sector, Per_Activi, 
+				Per_ActINE, Adi_LugNac, Adi_Sexo,   Adi_FecNac, Adi_RegMat,    
+				Adi_VivCas, Adi_TieRes, Adi_Fax,    Adi_NumDep, Adi_Puesto, 
+				Adi_Ocupac, Adi_AntLab, Adi_LugTra, Adi_TelTra, Adi_CalTra,    
+				Adi_NuCaTr, Adi_ColTra, Adi_Locali, Adi_CPTra,	Adi_FecCon, 
+				Adi_CaNuIn, Adi_NacExt, Adi_NuIdFi, Adi_TipIde, Adi_NumIde,
+				Adi_FeExId, Adi_EntPri, Adi_EntSeg, PerPersoID
+			from SOPERSON noholdlock 
+			left join SOPERADI noholdlock on Per_Numero = Adi_PerNum 
+			where   Per_Numero  =  @Peu_Grupo
+
+	end else if @Tip_ConCon = @Str_LetraJ begin --Consulta de personas por numero de persona, retorna persona unica 
+		
+		select @Peu_Grupo = Peu_Grupo from SOUNIPER noholdlock where Peu_Person = @Per_Numero	
+
+		select	PerPersoID, Per_Numero,	Per_Tipo, Per_Benefi,	Per_NuSeFi,	
+				Per_Titulo,	Per_Nombre,	Per_ApePat,	Per_ApeMat,	Per_RazSoc,	
+				Per_Comple,	Per_ComOrd,	Per_RFC, Per_CURP, Per_Calle,	
+				Per_CalNum,	Per_Coloni,	Per_Entida,	Per_Locali,	Per_CodPos,	
+				Per_ApaPos,	Per_LadTel,	Per_Telefo,	Per_EstCiv,	Per_Email,
+				Per_ComDom,	Per_Nacion,	Per_ActEmp,	Per_Giro,	Per_Sector,	
+				Per_Activi,	Per_ActINE,	Adi_LugNac,	Adi_Sexo,	Adi_FecNac,	
+				Adi_RegMat,	Adi_VivCas, Adi_TieRes,	Adi_Fax,	Adi_NumDep,	
+				Adi_Puesto,	Adi_Ocupac,	Adi_AntLab,	Adi_LugTra,	Adi_TelTra,	
+				Adi_CalTra,	Adi_NuCaTr,	Adi_ColTra,	Adi_Locali,	Adi_CPTra,
+				Adi_FecCon,	Adi_CaNuIn,	Adi_NacExt,	Adi_NuIdFi,	Adi_TipIde,
+				Adi_NumIde,	Adi_FeExId,	Adi_EntPri,	Adi_EntSeg				
+				from SOPERSON noholdlock 
+				left join SOPERADI noholdlock on Per_Numero = Adi_PerNum 
+				where	Per_Numero	=  @Peu_Grupo
 	end
 
 end else begin
