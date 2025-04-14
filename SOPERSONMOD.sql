@@ -50,7 +50,7 @@ as
 ** Modifico:	Francisco Euan											****
 ** Fecha:		14/04/2025												****
 ** Descripcion:	Se agrega validacion de cliente relacionado a persona 	****
-				para modificación por módulo de soporte					****
+				para modificación por proceso de soporte				****
 ** Help:		TCELNC-24119											****
 ****************************************************************************
 ** Modifico:	Javier Ceron											****
@@ -252,7 +252,7 @@ declare	@Str_Vacio	char(1),		/*	Declaracion de Constantes	*/
 		@Ent_Uno	int,
 		@Ban_Electr	char(2),
 		@Pro_Intern	char(2),
-		@Mod_Soport	char(2),
+		@Tip_Soport	char(2),
 		@Tip_CueChe	char(2),
 		@Tip_CliNom	char(2),
 		@Sta_Benefi	char(1),
@@ -291,7 +291,7 @@ select	@Str_Vacio	= '',				-- String Vacio
 		@Tip_CueChe	= 'CH',				-- Proceso: Personas relacionadas a Cuenta de cheques
 		@Tip_CliNom	= 'CN',				-- Proceso: Clientes de Nomina
 		@Pro_Intern	= 'IT',				-- Proceso de Internacional
-		@Mod_Soport = 'SO',				-- Proceso: Modificacion de personas sin registro de cliente
+		@Tip_Soport = 'SO',				-- Proceso: Modificacion de personas sin registro de cliente
 		@Sta_Benefi	= 'S',				-- Status: Beneficiario
 		@Tip_Benefi	= '4',				-- Beneficiario
 		@Tip_ProRec	= '5',				-- Proveedor de Recursos
@@ -764,7 +764,7 @@ if(@Per_Tipo <> @Per_Moral and @Aux_Adi_NumPer <> @Str_Vacio) begin
 	end	
 end
 
-if @Modulo = @Mod_Soport and isnull(@Aux_Adi_NumPer,@Str_Vacio) <> @Str_Vacio begin
+if @Tip_Proces = @Tip_Soport and isnull(@Aux_Adi_NumPer,@Str_Vacio) <> @Str_Vacio begin
 				
 	select	Err_Codigo	= '000023',
 			Err_Mensaj	= 'La persona está relacionada a un registro de cliente'
