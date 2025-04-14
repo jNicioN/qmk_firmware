@@ -25,9 +25,7 @@ as
 ** Help: 		TCELNC-24119									****
 ** Descripcion:	Consulta por numero de cliente y numero de      ****
 **				persona para optener a l persona principal      ****
-**              Se agrega consulta CI y CJ 						****
-**              Consulta de datos de persona que no cuente con	****
-**				registro de cliente se agrega consulta CK		****
+**              Se agrega consulta CI, CJ y CK					****
 ********************************************************************
 ** Modificó:	Angel Encalada									****
 ** Fecha:		05/04/2025									   	****
@@ -1056,27 +1054,17 @@ if @Tip_ConTip = @Str_LetraC begin
 				where	Per_Numero	=  @Peu_Grupo
 	end else if @Tip_ConCon = @Str_LetraK begin
 		
-		select @Adi_NumPer = Adi_NumPer
-		from CLADICIO noholdlock
-		where Adi_NumPer = @Per_Numero
-		
-		if isnull(@Adi_NumPer,@Str_Vacio) = @Str_Vacio begin
-			select	Per_Nombre,	Per_ApePat,	Per_ApeMat,	Per_RFC,	Per_Calle,
-				Per_CalNum,	Per_Coloni,	Per_Locali,	Per_CodPos,	Per_Telefo,
-				Per_EstCiv,	Per_Nacion,	Per_ActEmp,	Per_Activi,
-				Per_FecNac	= Adi_FecNac,
-				PerPersoID, Per_Tipo, 	Adi_Sexo,	Per_CURP,	Per_Comple,
-				Per_Entida, Per_LadTel, Adi_FecCon, Per_ActINE, Adi_FecCon,
-				Per_RazSoc, Per_Numero 
-			from SOPERSON noholdlock
-			left join SOPERADI noholdlock on Per_Numero	= Adi_PerNum
-			where	Per_Numero	= @Per_Numero
-			
-		end else begin 
-			select	Err_Codigo	= '000001',
-					Err_Mensaj	= 'La persona está relacionada a un registro de cliente'
-			return 1
-		end
+		select PER.Per_Nombre,	PER.Per_ApePat,	PER.Per_ApeMat,	PER.Per_RFC, PER.Per_Calle,
+				PER.Per_CalNum,	PER.Per_Coloni,	PER.Per_Locali,	PER.Per_CodPos,	PER.Per_Telefo,
+				PER.Per_EstCiv,	PER.Per_Nacion,	PER.Per_ActEmp,	PER.Per_Activi,
+				Per_FecNac = PDI.Adi_FecNac,
+				PER.PerPersoID, PER.Per_Tipo, PDI.Adi_Sexo,	PER.Per_CURP, PER.Per_Comple,
+				PER.Per_Entida, PER.Per_LadTel, PDI.Adi_FecCon, PER.Per_ActINE, PDI.Adi_FecCon,
+				PER.Per_RazSoc, PER.Per_Numero, CAD.Adi_NumPer 
+			from SOPERSON PER noholdlock
+			left join SOPERADI PDI noholdlock on PER.Per_Numero	= PDI.Adi_PerNum
+			left join CLADICIO CAD noholdlock on PER.Per_Numero = CAD.Adi_NumPer
+			where	PER.Per_RFC	= @Per_RFC
 		
 	end
 	
