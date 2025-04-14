@@ -25,7 +25,9 @@ as
 ** Help: 		TCELNC-24119									****
 ** Descripcion:	Consulta por numero de cliente y numero de      ****
 **				persona para optener a l persona principal      ****
-**              Se agrega consulta CI y CJ              		****
+**              Se agrega consulta CI y CJ 						****
+**              Consulta de datos de persona que no cuente con	****
+**				registro de cliente se agrega consulta CK		****
 ********************************************************************
 ** Modificó:	Angel Encalada									****
 ** Fecha:		05/04/2025									   	****
@@ -424,7 +426,8 @@ declare	@Str_Vacio	char(1),
 		@Str_LetraG	char(1),
 		@Str_LetraH	char(1),
 		@Str_LetraI	char(1),
-		@Str_LetraJ	char(1)
+		@Str_LetraJ	char(1),
+		@Str_LetraK char(1)
 
 /* Asignacion de Constantes */
 select	@Str_Vacio	= '',			-- String Vacio
@@ -479,7 +482,8 @@ select	@Str_Vacio	= '',			-- String Vacio
 		@Str_LetraG = 'G',			/* Cadena letra G */		
 		@Str_LetraH = 'H',			/* Cadena letra H */
 		@Str_LetraI = 'I',			/* Cadena letra I */
-		@Str_LetraJ = 'J'			/* Cadena letra J */
+		@Str_LetraJ = 'J',			/* Cadena letra J */
+		@Str_LetraK = 'K'			/* Cadena letra K */
 		
 select	@Busqueda	= @Per_Comple
 select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
@@ -1050,7 +1054,32 @@ if @Tip_ConTip = @Str_LetraC begin
 				from SOPERSON noholdlock 
 				left join SOPERADI noholdlock on Per_Numero = Adi_PerNum 
 				where	Per_Numero	=  @Peu_Grupo
+	end else if @Tip_ConCon = @Str_LetraK begin
+		
+		select @Adi_NumPer = Adi_NumPer
+		from CLADICIO noholdlock
+		where Adi_NumPer = @Per_Numero
+		
+		if isnull(@Adi_NumPer,@Str_Vacio) = @Str_Vacio begin
+			select	Per_Nombre,	Per_ApePat,	Per_ApeMat,	Per_RFC,	Per_Calle,
+				Per_CalNum,	Per_Coloni,	Per_Locali,	Per_CodPos,	Per_Telefo,
+				Per_EstCiv,	Per_Nacion,	Per_ActEmp,	Per_Activi,
+				Per_FecNac	= Adi_FecNac,
+				PerPersoID, Per_Tipo, 	Adi_Sexo,	Per_CURP,	Per_Comple,
+				Per_Entida, Per_LadTel, Adi_FecCon, Per_ActINE, Adi_FecCon,
+				Per_RazSoc, Per_Numero 
+			from SOPERSON noholdlock
+			left join SOPERADI noholdlock on Per_Numero	= Adi_PerNum
+			where	Per_Numero	= @Per_Numero
+			
+		end else begin 
+			select	Err_Codigo	= '000001',
+					Err_Mensaj	= 'La persona está relacionada a un registro de cliente'
+			return 1
+		end
+		
 	end
+	
 
 end else begin
 	select	@Per_Comple	= ltrim(rtrim(@Per_Comple)) + @Str_Porcen
