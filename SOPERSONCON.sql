@@ -580,17 +580,6 @@ if @Tip_ConTip = @Str_LetraC begin
 			  and	len(rtrim(ltrim(Per_Numero)))	= @Ent_Ocho
 	end
 	if @Tip_ConCon = @Str_Seis begin	/*	Consulta persona por RFC*/
-		
-		select @Per_RFC = isnull(@Per_RFC,@Str_Vacio)
-		
-		if len(@Per_RFC) < @Val_CarRFC begin
-			select	Err_Codigo	= '000010',
-					Err_Mensaj	= 'El minimo de caracteres para consulta por RFC es '+convert(varchar(10),@Val_CarRFC),
-					Err_Variab	= 'Per_RFC'
-			return 1
-		end
-		
-		
 		select	Per_Nombre,	Per_ApePat,	Per_ApeMat,	Per_RFC,	Per_Calle,
 				Per_CalNum,	Per_Coloni,	Per_Locali,	Per_CodPos,	Per_Telefo,
 				Per_EstCiv,	Per_Nacion,	Per_ActEmp,	Per_Activi,
@@ -603,15 +592,6 @@ if @Tip_ConTip = @Str_LetraC begin
 			where	Per_RFC		= @Per_RFC
 	end
 	if @Tip_ConCon = @Str_Siete begin	/*	Consulta persona Toda la inf por RFC*/
-		
-		select @Per_RFC = isnull(@Per_RFC,@Str_Vacio)
-		
-		if len(@Per_RFC) < @Val_CarRFC begin
-			select	Err_Codigo	= '000011',
-					Err_Mensaj	= 'El minimo de caracteres para consulta por RFC es '+convert(varchar(10),@Val_CarRFC),
-					Err_Variab	= 'Per_RFC'
-			return 1
-		end
 		
 		create table #Soperson(
 			Per_Numero	char(8),	
@@ -732,10 +712,12 @@ if @Tip_ConTip = @Str_LetraC begin
 				Adi_NuIdFi,	Adi_TieRes,	Adi_NumDep,	Adi_AntLab,	Adi_FecCon,
 				Adi_CaNuIn, PerPersoID
 			from #Soperson
+			where Per_RFC = @Per_RFC
 			order by  PerPersoID desc
 
 		select	Per_Numero,	Adi_EntPri,	Adi_EntSeg
 			from #Soperson
+			where Per_RFC = @Per_RFC
 
 		drop table #Soperson
 	end
