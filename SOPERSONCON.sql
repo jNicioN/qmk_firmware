@@ -1060,7 +1060,7 @@ if @Tip_ConTip = @Str_LetraC begin
 				Per_FecNac = PDI.Adi_FecNac,
 				PER.PerPersoID, PER.Per_Tipo, PDI.Adi_Sexo,	PER.Per_CURP, PER.Per_Comple,
 				PER.Per_Entida, PER.Per_LadTel, PDI.Adi_FecCon, PER.Per_ActINE, PDI.Adi_FecCon,
-				PER.Per_RazSoc, PER.Per_Numero, CAD.Adi_NumPer 
+				PER.Per_RazSoc, PER.Per_Numero, isnull(CAD.Adi_NumPer,@Str_Vacio) as Adi_NumPer
 			from SOPERSON PER noholdlock
 			left join SOPERADI PDI noholdlock on PER.Per_Numero	= PDI.Adi_PerNum
 			left join CLADICIO CAD noholdlock on PER.Per_Numero = CAD.Adi_NumPer
