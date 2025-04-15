@@ -25,7 +25,7 @@ as
 ** Help: 		TCELNC-24119									****
 ** Descripcion:	Consulta por numero de cliente y numero de      ****
 **				persona para optener a l persona principal      ****
-**              Se agrega consulta CI, CJ y CK					****
+**              Se agrega consulta CI, CJ y LK					****
 ********************************************************************
 ** Modificó:	Angel Encalada									****
 ** Fecha:		05/04/2025									   	****
@@ -424,8 +424,7 @@ declare	@Str_Vacio	char(1),
 		@Str_LetraG	char(1),
 		@Str_LetraH	char(1),
 		@Str_LetraI	char(1),
-		@Str_LetraJ	char(1),
-		@Str_LetraK char(1)
+		@Str_LetraJ	char(1)
 
 /* Asignacion de Constantes */
 select	@Str_Vacio	= '',			-- String Vacio
@@ -480,8 +479,7 @@ select	@Str_Vacio	= '',			-- String Vacio
 		@Str_LetraG = 'G',			/* Cadena letra G */		
 		@Str_LetraH = 'H',			/* Cadena letra H */
 		@Str_LetraI = 'I',			/* Cadena letra I */
-		@Str_LetraJ = 'J',			/* Cadena letra J */
-		@Str_LetraK = 'K'			/* Cadena letra K */
+		@Str_LetraJ = 'J'			/* Cadena letra J */
 		
 select	@Busqueda	= @Per_Comple
 select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
@@ -1052,22 +1050,7 @@ if @Tip_ConTip = @Str_LetraC begin
 				from SOPERSON noholdlock 
 				left join SOPERADI noholdlock on Per_Numero = Adi_PerNum 
 				where	Per_Numero	=  @Peu_Grupo
-	end else if @Tip_ConCon = @Str_LetraK begin
-		
-		select PER.Per_Nombre,	PER.Per_ApePat,	PER.Per_ApeMat,	PER.Per_RFC, PER.Per_Calle,
-				PER.Per_CalNum,	PER.Per_Coloni,	PER.Per_Locali,	PER.Per_CodPos,	PER.Per_Telefo,
-				PER.Per_EstCiv,	PER.Per_Nacion,	PER.Per_ActEmp,	PER.Per_Activi,
-				Per_FecNac = PDI.Adi_FecNac,
-				PER.PerPersoID, PER.Per_Tipo, PDI.Adi_Sexo,	PER.Per_CURP, PER.Per_Comple,
-				PER.Per_Entida, PER.Per_LadTel, PDI.Adi_FecCon, PER.Per_ActINE, PDI.Adi_FecCon,
-				PER.Per_RazSoc, PER.Per_Numero, isnull(CAD.Adi_NumPer,@Str_Vacio) as Adi_NumPer
-			from SOPERSON PER noholdlock
-			left join SOPERADI PDI noholdlock on PER.Per_Numero	= PDI.Adi_PerNum
-			left join CLADICIO CAD noholdlock on PER.Per_Numero = CAD.Adi_NumPer
-			where	PER.Per_RFC	= @Per_RFC
-		
-	end
-	
+	end 
 
 end else begin
 	select	@Per_Comple	= ltrim(rtrim(@Per_Comple)) + @Str_Porcen
@@ -1472,5 +1455,21 @@ end else begin
 				where	Per_Tipo	<> @Tip_Moral
 			  	  and	Per_RFC		like @Rfc_Like
 		end
+	end else if @Tip_ConCon = @Str_LetraB begin
+		
+		select PER.Per_Nombre,	PER.Per_ApePat,	PER.Per_ApeMat,	PER.Per_RFC, PER.Per_Calle,
+				PER.Per_CalNum,	PER.Per_Coloni,	PER.Per_Locali,	PER.Per_CodPos,	PER.Per_Telefo,
+				PER.Per_EstCiv,	PER.Per_Nacion,	PER.Per_ActEmp,	PER.Per_Activi,
+				Per_FecNac = PDI.Adi_FecNac,
+				PER.PerPersoID, PER.Per_Tipo, PDI.Adi_Sexo,	PER.Per_CURP, PER.Per_Comple,
+				PER.Per_Entida, PER.Per_LadTel, PDI.Adi_FecCon, PER.Per_ActINE, PDI.Adi_FecCon,
+				PER.Per_RazSoc, PER.Per_Numero, isnull(CAD.Adi_Client,@Str_Vacio) as Adi_Client
+			from SOPERSON PER noholdlock
+			left join SOPERADI PDI noholdlock on PER.Per_Numero	= PDI.Adi_PerNum
+			left join CLADICIO CAD noholdlock on PER.Per_Numero = CAD.Adi_NumPer
+			where	PER.Per_RFC	= @Per_RFC
+		
 	end
+	
+	
 end
