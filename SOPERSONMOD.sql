@@ -53,6 +53,11 @@ as
 				para modificación por proceso de soporte				****
 ** Help:		TCELNC-24119											****
 ****************************************************************************
+** Modifico:	Job Martinez											****
+** Fecha:		15/04/2025												****
+** Descripcion:	se agrega sentencia sea vacio en caso null Aux_Adi_NumPer***
+** Help:		TCELNC-24119											****
+****************************************************************************
 ** Modifico:	Javier Ceron											****
 ** Fecha:		03/07/2024												****
 ** Descripcion:	Se agrega validacion de tamaño de nombre para guardar 	****
@@ -751,6 +756,8 @@ select	@PerPersoID = PerPersoID,
 select @Aux_Adi_NumPer= Adi_NumPer 
 from CLADICIO noholdlock
 where Adi_NumPer = @Per_Numero
+
+select @Aux_Adi_NumPer = isnull(@Aux_Adi_NumPer, @Str_Vacio)
 
 if(@Per_Tipo <> @Per_Moral and @Aux_Adi_NumPer <> @Str_Vacio) begin 
 	exec @Status = CLCURCLIVAL
