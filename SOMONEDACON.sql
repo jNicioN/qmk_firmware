@@ -291,7 +291,7 @@ declare	@Str_Vacio	char(1),
 		@Str_N		char(1),		/*	Cadena con valor N	*/
 		@Con_LisTra	char(1),
 		@Mon_NumMxn	char(2),
-		@Tip_CamSuc   char(1) 
+		@Tip_CamSuc   char(1)
 
 /* Asignacion de valores a constantes */
 select	@Str_Vacio	= '',				/* String Vacio */
@@ -342,6 +342,14 @@ select	@Str_Vacio	= '',				/* String Vacio */
 		@Mon_NumMxn	= '01',				/*	Numero de moneda para pesos */
 		@Tip_CamSuc = '9'			/*Tipo de cambio para pantallas de sucursal. L9*/
 		
+/* Inicalizacion Variable*/
+select  @NumTransac = isnull(@NumTransac,@Str_Vacio),
+        @Transaccio = isnull(@Transaccio,@Str_Vacio),
+        @Usuario    = isnull(@Usuario,@Str_Vacio),
+        @FechaSis   = isnull(@FechaSis,@Str_Vacio),
+        @SucOrigen     = isnull(@SucOrigen,@Str_Vacio),
+        @SucDestino    = isnull(@SucDestino,@Str_Vacio),
+        @Modulo     = isnull(@Modulo,@Str_Vacio)
 		
 select	@Par_FecAct	= Par_FecAct
 	from SOPARAMS noholdlock
@@ -568,11 +576,28 @@ end else begin			/* Cliente:  Visual Basic */
 
 		/* - Monedas de Cartas de Credito-*/ 
 		end else if @Tip_ConCon = @Con_CarCre begin		/* Consulta de Codigo ISO */
+			create table #Monedas (
+				Mon_Numero   char(2) default '',
+				Mon_Descri   varchar(30)  default '',
+				Mon_Simbol   varchar(10) default '',
+				Mon_AbrISO   varchar(3) default '',
+			)
+			
+			insert into #Monedas (Mon_Numero,	Mon_Descri,	Mon_Simbol,	Mon_AbrISO)
 			select  Mon_Numero,	Mon_Descri,	Mon_Simbol,	Mon_AbrISO
 				from SOMONEDA noholdlock
-				where	Mon_Numero	= @Mon_Numero
-				  and	(Mon_OpeCam	= @Ope_MonCam
-				   or	Mon_Numero	= @Mon_Pesos)
+				where	Mon_OpeCam	= @Ope_MonCam
+				   
+			insert into #Monedas (Mon_Numero,	Mon_Descri,	Mon_Simbol,	Mon_AbrISO)
+			select  Mon_Numero,	Mon_Descri,	Mon_Simbol,	Mon_AbrISO
+				from SOMONEDA noholdlock
+				where	Mon_Numero	= @Mon_Pesos
+				
+			select Mon_Numero,	Mon_Descri,	Mon_Simbol,	Mon_AbrISO 
+				from #Monedas
+				where Mon_Numero = @Mon_Numero
+				
+			drop table #Monedas
 		end else if @Tip_ConCon = @Con_PreMet begin		/* Consulta de Metales */
 			select	@Val_SpoDol	= Mon_SpoVen
 				from SOMONEDA noholdlock
@@ -638,19 +663,53 @@ end else begin			/* Cliente:  Visual Basic */
 					  and	Mon_Descri like @Mon_Descri
 					  
 		end else if @Tip_ConCon = @Con_LisCar begin		/* Lista de Moneda de Cartas de Credito */
+			create table #MonedasL (
+				Mon_Numero   char(2) default '',
+				Mon_Descri   varchar(30)  default '',
+				Mon_Simbol   varchar(10) default '',
+				Mon_AbrISO   varchar(3) default '',
+			)
+			
+			insert into #MonedasL (Mon_Numero,	Mon_Descri,	Mon_Simbol,	Mon_AbrISO)
 			select  Mon_Numero,	Mon_Descri,	Mon_Simbol,	Mon_AbrISO
 				from SOMONEDA noholdlock
 				where	Mon_Descri like @Mon_Descri
-				  and	Mon_OpeCam	= @Ope_MonCam
-				   or	Mon_Numero	= @Mon_Pesos
+				and 	Mon_OpeCam	= @Ope_MonCam
+				   
+			insert into #MonedasL (Mon_Numero,	Mon_Descri,	Mon_Simbol,	Mon_AbrISO)
+			select  Mon_Numero,	Mon_Descri,	Mon_Simbol,	Mon_AbrISO
+				from SOMONEDA noholdlock
+				where	Mon_Numero	= @Mon_Pesos
+		
+			select  Mon_Numero,	Mon_Descri,	Mon_Simbol,	Mon_AbrISO
+				from #MonedasL 
 				order by Mon_Numero
+				
+			drop table #MonedasL
 		end else if @Tip_ConCon = @Con_LisTra begin		/* Lista de monedas de cambio de tradair */
-			select  Mon_Numero,	Mon_Descri,	Mon_Simbol, Mon_AbrISO 
+			create table #MonedasT (
+				Mon_Numero   char(2) default '',
+				Mon_Descri   varchar(30)  default '',
+				Mon_Simbol   varchar(10) default '',
+				Mon_AbrISO   varchar(3) default '',
+			)
+			
+			insert into #MonedasT (Mon_Numero,	Mon_Descri,	Mon_Simbol,	Mon_AbrISO)
+			select  Mon_Numero,	Mon_Descri,	Mon_Simbol,	Mon_AbrISO
 				from SOMONEDA noholdlock
 				where	Mon_Descri like @Mon_Descri
-				  and	Mon_OpeCam	= @Ope_MonCam 
-				  or	Mon_Numero	= @Mon_NumMxn
+				and 	Mon_OpeCam	= @Ope_MonCam
+				   
+			insert into #MonedasT (Mon_Numero,	Mon_Descri,	Mon_Simbol,	Mon_AbrISO)
+			select  Mon_Numero,	Mon_Descri,	Mon_Simbol,	Mon_AbrISO
+				from SOMONEDA noholdlock
+				where	Mon_Numero	= @Mon_NumMxn
+		
+			select  Mon_Numero,	Mon_Descri,	Mon_Simbol,	Mon_AbrISO
+				from #MonedasT 
 				order by Mon_Numero
+				
+			drop table #MonedasT
 		end else if @Tip_ConCon = @Tip_CamSuc begin
 			select Mon_Numero, Mon_Descri,	Mon_EfeCom,	Mon_EfeVen, Mon_Simbol
 			from SOMONEDA noholdlock

@@ -43,7 +43,8 @@ declare	@Ent_Uno	int,
 		@Str_L		char(1),
 		@Str_Uno	char(1),
 		@Str_Dos	char(1),
-		@Fec_Vacia	smalldatetime
+		@Fec_Vacia	smalldatetime,
+		@Str_Vacio	char(1)
 												/*Asignacion de Constantes*/												
 select  @Ent_Uno	= 1,						/*Entero Uno*/
 		@Ent_Dos	= 2,						/*Entero Dos*/
@@ -51,7 +52,17 @@ select  @Ent_Uno	= 1,						/*Entero Uno*/
 		@Str_L		= 'L',
 		@Str_Uno	= '1',
 		@Str_Dos	= '2',
-		@Fec_Vacia	= '1900-01-01'
+		@Fec_Vacia	= '1900-01-01',
+		@Str_Vacio	= ''
+		
+/* Inicalizacion Variable*/
+select  @NumTransac = isnull(@NumTransac,@Str_Vacio),
+        @Transaccio = isnull(@Transaccio,@Str_Vacio),
+        @Usuario    = isnull(@Usuario,@Str_Vacio),
+        @FechaSis   = isnull(@FechaSis,@Str_Vacio),
+        @SucOrigen     = isnull(@SucOrigen,@Str_Vacio),
+        @SucDestino    = isnull(@SucDestino,@Str_Vacio),
+        @Modulo     = isnull(@Modulo,@Str_Vacio)
 
 select	@Par_FecAct	= Par_FecAct
 	from SOPARAMS noholdlock
