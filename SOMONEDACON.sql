@@ -563,7 +563,7 @@ end else begin			/* Cliente:  Visual Basic */
 			select	Mon_Numero	= @Str_NumMXP, 
 					Mon_Descri	= @Str_DesMXP, 
 					Mon_Simbol	= @Str_SimMXP
-			union
+			union all
 				select	Mon_Numero,	Mon_Descri,	Mon_Simbol
 					from SOMONEDA noholdlock
 					where 	Mon_OpeCam	= @Ope_MonCam
@@ -656,7 +656,7 @@ end else begin			/* Cliente:  Visual Basic */
 			select	Mon_Numero	= @Str_NumMXP, 
 					Mon_Descri	= @Str_DesMXP, 
 					Mon_Simbol	= @Str_SimMXP
-			union
+			union all
 				select	Mon_Numero,	Mon_Descri,	Mon_Simbol
 					from SOMONEDA noholdlock
 					where 	Mon_OpeCam	= @Ope_MonCam
