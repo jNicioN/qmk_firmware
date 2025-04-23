@@ -26,10 +26,15 @@
 	
 as
 
-/*******************************************************************/
-/* DESCRIPCION: Personas (Proceso)						  		   */
-/*******************************************************************/
-/** REFERENCIAS:
+/*******************************************************************
+** DESCRIPCION: Personas (Proceso)						  		   
+********************************************************************
+** REFERENCIAS:
+********************************************************************
+** Modificó:	Francisco Euan          						****
+** Fecha:		14/Marzo/2025							        ****
+** Help:		TCELNC-23684								    ****
+** Descripción:	Comprobación de valores para Adi_Sexo           ****
 ********************************************************************
 ** Modifico:	Karla Morfín									****
 ** Fecha:		10/junio/2021									****
@@ -85,8 +90,7 @@ as
 ** Help:		1147468											****
 ** Descripción:	Proceso para actualizar datos tanto en SOPERSON,****
 **				SOPEDACO y SOPERADI								****
-********************************************************************
-*/
+*******************************************************************/
 
 declare	@Status		int,					/*	Declaracion de Variables	*/
 		@Bit_NumPer	char(8),
@@ -120,7 +124,8 @@ declare	@Status		int,					/*	Declaracion de Variables	*/
 		@Bit_Giro	char(30),
 		@Bit_Sector	char(3),
 		@Bit_Activi	char(10),
-		@Bit_ActINE	varchar(10)
+		@Bit_ActINE	varchar(10),
+		@Per_Tipo	char(1)
 	
 declare	@Str_Vacio	char(1),				/*	Declaracion de Constantes	*/
 		@Ent_Cero	int,
@@ -134,7 +139,10 @@ declare	@Str_Vacio	char(1),				/*	Declaracion de Constantes	*/
 		@Pai_Mexico	char(3),
 		@Nac_Nacion	char(1),
 		@Nac_Extran	char(1),
-		@Ent_Uno	int
+		@Ent_Uno	int,
+		@Tip_Mascul char(1),
+        @Tip_Femeni char(1),
+        @Per_Moral	char(1)
 
 select	@Str_Vacio	= '',					/*	String Vacio				*/
 		@Ent_Cero	= 0,					/*	Entero: Cero				*/
@@ -148,9 +156,17 @@ select	@Str_Vacio	= '',					/*	String Vacio				*/
 		@Pai_Mexico	= '001',				/*	País de nacimiento México */
 		@Nac_Nacion	= 'N',					/*	Nacionalidad: Nacional */
 		@Nac_Extran	= 'E',					/*	Nacionalidad: Extranjejo */
-		@Ent_Uno	= 1						/*	Entero en uno */
+		@Ent_Uno	= 1,					/*	Entero en uno */
+		@Tip_Mascul = 'M',          		/*  Valor para sexo Masculino */
+        @Tip_Femeni = 'F',           		/*  Valor para sexo Femenino */
+        @Per_Moral	= '1'					/*  Persona Moral */
 
 if @Tip_Proces = @Tip_Renapo begin
+	
+	select	@Per_Tipo = Per_Tipo
+		from SOPERSON noholdlock
+		where	Per_Numero	= @Per_Numero
+	
 	if len(rtrim(ltrim(@Per_CURP))) <> @Ent_LonCur begin
 		select	Err_Codigo	= '000001',
 				Err_Mensaj	= 'La CURP no es válido'
@@ -163,6 +179,17 @@ if @Tip_Proces = @Tip_Renapo begin
 				Err_Mensaj	= 'La nacionalidad enviada es un valor inválido'
 		rollback
 		return 1
+	end
+	
+	if @Per_Tipo = @Per_Moral begin
+		set @Adi_Sexo = @Str_Vacio
+	end	else begin
+		if @Adi_Sexo not in (@Tip_Mascul, @Tip_Femeni) begin
+			select	Err_Codigo	= '000021',
+					Err_Mensaj 	= 'Sexo no válido'
+			rollback
+			return 1
+		end
 	end
 	
 	insert into SOBITPER (
@@ -450,8 +477,7 @@ if @Tip_Proces = @Tip_Docume begin
 		Adi_FeVeId, Adi_NuIdFi, Adi_EntPri, Adi_EntSeg, NumTransac,
 		Transaccio, Usuario,    FechaSis,   SucOrigen,  SucDestino
 	from SOPERADI noholdlock
-	where	 Adi_PerNum 	= @Per_Numero
-	or       Adi_PerNum     = @Peu_Grupo
+	where	 Adi_PerNum in(@Per_Numero, @Peu_Grupo)
 	
 	update SOPERADI set
 		Adi_TipIde	= @Adi_TipIde,

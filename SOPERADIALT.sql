@@ -56,55 +56,59 @@ create procedure SOPERADIALT (
 	@Modulo		char(2))
 as
 
-/*****************************************************************************/
-/* DESCRIPCION: **Alta de la Informacion Adicional de la Persona** */
-/*****************************************************************************/
-/** REFERENCIAS: 
-****************************************************************************
-** 					STORE CONVERTIDO					****
-****************************************************************************
-** Modificó:		Marcelo Bautista Hernandez						****
-** Fecha:		16/Junio/2015								****
-** Help:			774214										****
-** Descripción:	asignar valor a @Adi_FecCon			****
-****************************************************************************
-** Modificó:		Ignacio Ordaz Valtierra						****
-** Fecha:		12/Sep/2012								****
-** Help:			386371										****
-** Descripción:	Validar localidad este activo			****
-****************************************************************************
-** Modificó:		Karina Chavarría Tovar						****
-** Fecha:		26/Sep/2008								****
-** Descripción:	Agregar @Adi_EntPri, @Adi_EntSeg			****
-** HelpDesk:	100187										****
-****************************************************************************
-** Modificó:		Gerardo Valladares							****
-** Fecha:		25/Sep/07									****
-** Descripción:	Agregar var Err_Descri						****
-** Help:			3666										****
-****************************************************************************
-** 				STORE CONVERTIDO						****
-** Fecha:		21/Agosto/2007	  							****
-** Convirtió:		Karina Chavarría Tovar						****
-****************************************************************************
-** Modificó:		Juan Mario Galindo de Leon					****
-** Fecha:		05/Julio/07		  							****
-** Descripción:	Agregar campos Adi_Reside y Adi_OtDoEs	****
-** Help:			7100										****
-****************************************************************************
-** Modificó:		Lucina Gonzalez Trejo						****
-** Fecha:		12/Marzo/07								****
-** Descripción:	Agregar campos								****
-** Help:			3666										****
-****************************************************************************
-** Creó:			Ricardo Salinas								****
-** Fecha:		06/Ene/06									****
-** Descripcion    Da Alta de inf de persona  					****
-****************************************************************************
-****************************************************************************
-** Creó:			BANREGIO-A453F0							****
-** Fecha:		06/Ene/06									****
-** Help:		       No. de Help al que pertenece la modificación	****
+/*****************************************************************************
+** DESCRIPCION: **Alta de la Informacion Adicional de la Persona		  ****
+******************************************************************************
+** REFERENCIAS:															  
+******************************************************************************
+** 					STORE CONVERTIDO					                  ****
+******************************************************************************
+** Modificó:	Francisco Euan          						          ****
+** Fecha:		14/Marzo/2025							                  ****
+** Help:		TCELNC-23684								              ****
+** Descripción:	Comprobación de valores para Adi_Sexo                     ****
+******************************************************************************
+** Modificó:	Marcelo Bautista Hernandez						          ****
+** Fecha:		16/Junio/2015							                  ****
+** Help:		774214										              ****
+** Descripción:	asignar valor a @Adi_FecCon			                      ****
+******************************************************************************
+** Modificó:	Ignacio Ordaz Valtierra						              ****
+** Fecha:		12/Sep/2012								                  ****
+** Help:		386371										              ****
+** Descripción:	Validar localidad este activo			                  ****
+******************************************************************************
+** Modificó:    Karina Chavarría Tovar						              ****
+** Fecha:		26/Sep/2008								                  ****
+** Descripción:	Agregar @Adi_EntPri, @Adi_EntSeg			              ****
+** HelpDesk:	100187										              ****
+******************************************************************************
+** Modificó:	Gerardo Valladares							              ****
+** Fecha:		25/Sep/07									              ****
+** Descripción:	Agregar var Err_Descri						              ****
+** Help:		3666										              ****
+******************************************************************************
+** 				STORE CONVERTIDO						                  ****
+** Fecha:		21/Agosto/2007	  							              ****
+** Convirtió:	Karina Chavarría Tovar						              ****
+******************************************************************************
+** Modificó:	Juan Mario Galindo de Leon					              ****
+** Fecha:		05/Julio/07		  							              ****
+** Descripción:	Agregar campos Adi_Reside y Adi_OtDoEs	                  ****
+** Help:		7100										              ****
+******************************************************************************
+** Modificó:	Lucina Gonzalez Trejo						              ****
+** Fecha:		12/Marzo/07								                  ****
+** Descripción:	Agregar campos								              ****
+** Help:		3666									                  ****
+******************************************************************************
+** Creó:		Ricardo Salinas								              ****
+** Fecha:		06/Ene/06									              ****
+** Descripcion  Da Alta de inf de persona  					              ****
+******************************************************************************
+** Creó:		BANREGIO-A453F0							                  ****
+** Fecha:		06/Ene/06									              ****
+** Help:        No. de Help al que pertenece la modificación	          ****
 ******************************************************************************/
 
 
@@ -150,7 +154,9 @@ declare	@Str_Vacio	char(1),		/*	Declaracion de Constantes	*/
 		@Tip_Apode	char(1),
 		@Tip_Hered	char(1),
 		@Tip_Titula	char(1),
-		@Sta_Inacti	char(1)
+		@Sta_Inacti	char(1),
+        @Tip_Mascul char(1),
+        @Tip_Femeni char(1)
 
 select	@Str_Vacio	= '',			/* String Vacio	*/
 		@Ent_Cero	= 0,			/* Entero en cero */
@@ -181,7 +187,9 @@ select	@Str_Vacio	= '',			/* String Vacio	*/
 		@Tip_Apode	= '2',			/* Apoderado de la Cuenta para Personas Morales de CHCOTBEN	*/
 		@Tip_Hered	= 'H',
 		@Tip_Titula	= '1',
-		@Sta_Inacti	= 'I'			/* Status Inactivo para validar localidad */
+		@Sta_Inacti	= 'I',			/* Status Inactivo para validar localidad */
+        @Tip_Mascul = 'M',          /* Valor para sexo Masculino */
+        @Tip_Femeni = 'F'           /* Valor para sexo Femenino */
 
 if @Cob_Tipo	= @Tip_Titula and @Tip_Proces = @Tip_CueChe begin
 	select	@Err_Descri	= ' del Cliente'
@@ -210,7 +218,8 @@ select	@Per_Locali	= isnull(@Per_Locali, @Str_Vacio)
 select	@Per_CodPos	= isnull(@Per_CodPos, @Str_Vacio)
 
 if @Per_Tipo = @Per_Moral begin
-	select @Adi_FecCon = @Adi_FecNac
+	select 	@Adi_FecCon = @Adi_FecNac,
+			@Adi_Sexo	= @Str_Vacio
 end
 
 if @Per_RFC	= @Str_Vacio and @Adi_NuIdFi = @Str_Vacio and @Adi_NacExt = 'E' begin
@@ -234,6 +243,13 @@ if	@Tip_Proces = @Tip_CueChe and @Cob_Tipo <> @Per_ApoRea begin
 		if 	(@Adi_Sexo = @Str_Vacio) and @Cob_Tipo <> @Tip_Hered begin
 			select	Err_Codigo	= '000003',
 					Err_Mensaj 	= 'Proporcione el sexo' + @Err_Descri,
+					Err_Variab 	= 'vAdi_Sexo'
+			rollback
+			return 1
+		end
+		if (@Adi_Sexo not in (@Tip_Mascul, @Tip_Femeni)) and @Cob_Tipo <> @Tip_Hered begin
+			select	Err_Codigo	= '000020',
+					Err_Mensaj 	= 'Sexo no válido' + @Err_Descri,
 					Err_Variab 	= 'vAdi_Sexo'
 			rollback
 			return 1

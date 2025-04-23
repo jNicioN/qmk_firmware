@@ -84,7 +84,12 @@ as
 /* DESCRIPCION: Alta de Personas Unicas (por sistemas externos)	  */
 /******************************************************************/
 /** REFERENCIAS: 
-*********************************************************************
+********************************************************************
+** Modificó:	Francisco Euan          						****
+** Fecha:		14/Marzo/2025							        ****
+** Help:		TCELNC-23684								    ****
+** Descripción:	Comprobación de valores para Adi_Sexo           ****
+********************************************************************
 ** Modifico:	Raul Muniz										****
 ** Fecha:		06/Octubre/2021									****
 ** Help:		1504301											****
@@ -171,7 +176,9 @@ declare	@Str_Vacio	char(1),		/*	Declaracion de Constantes	*/
 		@Fec_Vacia	smalldatetime,
 		@Tip_PerNum char(1),
 		@Ent_180	int,
-		@Ent_40		int
+		@Ent_40		int,
+		@Tip_Mascul char(1),
+        @Tip_Femeni char(1)
 
 /*Asignacion de constantes*/
 select	@Str_Vacio	= '',			/* String Vacio	*/
@@ -196,7 +203,9 @@ select	@Str_Vacio	= '',			/* String Vacio	*/
 		@Usu_Prueba	= '009999',		/*Usuario Pruebas*/
 		@Tip_PerNum = 'F',			/*  Tipo proceso para actualizar el numero de folio*/
 		@Ent_180 	= 180,			/* Numero 180*/
-		@Ent_40 	= 40			/* Numero 40*/
+		@Ent_40 	= 40,			/* Numero 40*/
+		@Tip_Mascul = 'M',          /*  Valor para sexo Masculino */
+        @Tip_Femeni = 'F'           /*  Valor para sexo Femenino */
 
 
 if (@NumTransac	= @Str_Vacio or isnull(@NumTransac, @Str_Vacio)	= @Str_Vacio) begin
@@ -254,12 +263,20 @@ if (@Per_Tipo	= @Per_Fisica and len(ltrim(rtrim(@Per_RFC)))	= @Lon_Fisica) OR
 	end
 end
 
+if @Per_Tipo <> @Per_Moral and @Adi_Sexo not in (@Tip_Mascul, @Tip_Femeni) begin
+	select	Err_Codigo	= '000005',
+			Err_Mensaj 	= 'Sexo no válido'
+	rollback
+	return 1
+end
+
 
 if @Per_Tipo	= @Per_Moral begin
 	select  @Per_RazSoc = str_replace(@Per_RazSoc, @Str_DobEsp, @Str_Espaci)
 	select  @Per_RazSoc = UPPER(LTrim(RTrim(@Per_RazSoc)))
 	select	@Per_Comple	= @Per_RazSoc
 	select	@Per_ComOrd	= @Per_RazSoc
+	select	@Adi_Sexo	= @Str_Vacio
 end else begin
 	--Sanitizamos Nombre y apellidos
 	select @Per_ApePat = str_replace(@Per_ApePat, @Str_DobEsp, @Str_Espaci),
@@ -349,7 +366,19 @@ exec @Status = SOPERSONPRO
 	end
 
 /* Datos Adicionales */
-insert into SOPERADI values (
+insert into SOPERADI 
+   (Adi_PerNum,	Adi_Fecha,	Adi_NumTra,	Adi_LugNac,	Adi_Sexo,
+	Adi_FecNac,	Adi_RegMat,	Adi_VivCas,	Adi_TieRes,	Adi_Fax,
+	Adi_NumDep,	Adi_Puesto,	Adi_Ocupac,	Adi_AntLab,	Adi_LugTra,
+	Adi_TelTra,	Adi_CalTra,	Adi_NuCaTr,	Adi_ColTra,	Adi_Locali,
+	Adi_CPTra,	Adi_FecCon,	Adi_CaNuIn,	Adi_NacExt,	Adi_Reside,
+	Adi_DocEst,	Adi_OtDoEs,	Adi_FeExDo,	Adi_CalInm,	Adi_CalExt,
+	Adi_CaNuEx,	Adi_ColExt,	Adi_LocExt,	Adi_EntExt,	Adi_PaiExt,
+	Adi_CoPoEx,	Adi_TelExt,	Adi_TipIde,	Adi_OtrIde,	Adi_NumIde,
+	Adi_FeExId,	Adi_FeVeId,	Adi_NuIdFi,	Adi_EntPri,	Adi_EntSeg,
+	NumTransac,	Transaccio,	Usuario,	FechaSis,	SucOrigen,
+	SucDestino)
+values (
 	@Per_Numero,	@Per_Fecha,		@Per_NumTra,	@Adi_LugNac,	@Adi_Sexo,
 	@Adi_FecNac,	@Adi_RegMat,	@Adi_VivCas,	@Adi_TieRes,	@Adi_Fax,
 	@Adi_NumDep,	@Adi_Puesto,	@Adi_Ocupac,	@Adi_AntLab,	@Adi_LugTra,

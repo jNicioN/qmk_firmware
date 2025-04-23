@@ -89,6 +89,11 @@ as
 /***************************************************************************/
 /** REFERENCIAS: 												  
 ****************************************************************************
+** Modificó:	Francisco Euan          								****
+** Fecha:		14/Marzo/2025							        		****
+** Help:		TCELNC-23684								    		****
+** Descripción:	Comprobación de valores para Adi_Sexo           		****
+****************************************************************************
 ** Modificó:	Carlos Copto										 	****
 ** Fecha:		11/03/2024											   	****
 ** Help: 		38996 											   		****
@@ -214,7 +219,9 @@ declare	@Str_Vacio	char(1),		/*	Declaracion de Constantes	*/
 		@Tip_Titula char(1),
 		@Str_No123	char(6),
 		@Str_23		char(4),
-		@Ent_180	int
+		@Ent_180	int,
+		@Tip_Mascul char(1),
+        @Tip_Femeni char(1)
 
 select	@Str_Vacio	= '',			/* String Vacio	*/
 		@Str_Espaci	= ' ',			/* String Espacio */
@@ -237,7 +244,9 @@ select	@Str_Vacio	= '',			/* String Vacio	*/
 		@RFC_PMExtr	= 'EXT990101NI9', /* Rfc para Persona MOral Extranjera */	
 		@Str_No123	= '[^123]',
 	 	@Str_23		= '[23]',
-	 	@Ent_180	= 180
+	 	@Ent_180	= 180,
+	 	@Tip_Mascul = 'M',          /*  Valor para sexo Masculino */
+        @Tip_Femeni = 'F'           /*  Valor para sexo Femenino */
 
 if (@NumTransac =  @Str_Vacio or isnull(@NumTransac, @Str_Vacio) = @Str_Vacio)  begin
 	/***** Genera el @NumTransac *****/
@@ -294,9 +303,17 @@ if @Per_Tipo = @Per_Moral and @Per_RFC = @Str_Vacio begin
 	return @Ent_Uno
 end
 
+if @Per_Tipo <> @Per_Moral and @Adi_Sexo not in (@Tip_Mascul, @Tip_Femeni) begin
+	select	Err_Codigo	= '000005',
+			Err_Mensaj 	= 'Sexo no válido'
+	rollback
+	return @Ent_Uno
+end
+
 if @Per_Tipo = @Per_Moral begin
 	select	@Per_Comple	= LTrim(RTrim(@Per_RazSoc))
 	select	@Per_ComOrd	= LTrim(RTrim(@Per_RazSoc))
+	select	@Adi_Sexo	= @Str_Vacio
 end else begin
 	select	@Per_Comple	= LTrim(RTrim(@Per_ApePat)) + ' ' + LTrim(RTrim(@Per_ApeMat)) + ' ' + LTrim(RTrim(@Per_Nombre))
 	select	@Per_ComOrd	= LTrim(RTrim(@Per_Nombre)) + ' ' + LTrim(RTrim(@Per_ApePat)) + ' ' + LTrim(RTrim(@Per_ApeMat))
