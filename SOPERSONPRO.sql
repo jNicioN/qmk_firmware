@@ -1,4 +1,4 @@
-﻿create procedure SOPERSONPRO (
+create procedure SOPERSONPRO (
 	@Per_Numero	char(8),
 	@Per_CURP	varchar(18),
 	@Peu_Grupo	char(8),
@@ -30,6 +30,12 @@ as
 ** DESCRIPCION: Personas (Proceso)						  		   
 ********************************************************************
 ** REFERENCIAS:
+********************************************************************
+** Modificó:	Jesus Hernandez          						****
+** Fecha:		16/Abrir/2025							        ****
+** Help:		TCELNC-24119								    ****
+** Descripción:	Al actualizar la CUPR se validan campos que no  ****
+**               se esten actualizando vacios		            ****
 ********************************************************************
 ** Modificó:	Francisco Euan          						****
 ** Fecha:		14/Marzo/2025							        ****
@@ -257,13 +263,13 @@ if @Tip_Proces = @Tip_Renapo begin
 	if @Adi_NacExt = @Nac_Nacion begin
 		
 		update SOPERADI set
-			Adi_FecNac	= @Adi_FecNac,
-			Adi_Sexo	= @Adi_Sexo,
-			Adi_NumIde	= @Adi_NumIde,
-			Adi_TipIde	= @Adi_TipIde,
-			Adi_FeExId	= @Adi_FeExId,
-			Adi_FeVeId	= @Adi_FeVeId,
-			Adi_NacExt	= @Adi_NacExt,
+			Adi_FecNac	= (case @Adi_FecNac	when @Str_Vacio then Adi_FecNac else @Adi_FecNac end),
+			Adi_Sexo	= (case @Adi_Sexo	    when @Str_Vacio then Adi_Sexo   else @Adi_Sexo end),
+			Adi_NumIde	= (case @Adi_NumIde	when @Str_Vacio then Adi_NumIde else @Adi_NumIde end),
+			Adi_TipIde	= (case @Adi_TipIde	when @Str_Vacio then Adi_TipIde else @Adi_TipIde end),
+			Adi_FeExId	= (case @Adi_FeExId	when @Str_Vacio then Adi_FeExId else @Adi_FeExId end),
+			Adi_FeVeId	= (case @Adi_FeVeId	when @Str_Vacio then Adi_FeVeId else @Adi_FeVeId end),
+			Adi_NacExt	= (case @Adi_NacExt	when @Str_Vacio then Adi_NacExt else @Adi_NacExt end),
 			
 			NumTransac	= @NumTransac,
 			Transaccio	= @Transaccio,
@@ -278,9 +284,9 @@ if @Tip_Proces = @Tip_Renapo begin
 	end else begin
 		
 		update SOPERADI set
-			Adi_FecNac	= @Adi_FecNac,
-			Adi_Sexo	= @Adi_Sexo,
-			Adi_NacExt	= @Adi_NacExt,
+			Adi_FecNac	= (case @Adi_FecNac	when @Str_Vacio then Adi_FecNac else @Adi_FecNac end),
+			Adi_Sexo	= (case @Adi_Sexo	    when @Str_Vacio then Adi_Sexo   else @Adi_Sexo end),
+			Adi_NacExt	= (case @Adi_NacExt	when @Str_Vacio then Adi_NacExt else @Adi_NacExt end),
 			
 			NumTransac	= @NumTransac,
 			Transaccio	= @Transaccio,
@@ -315,10 +321,10 @@ if @Tip_Proces = @Tip_Renapo begin
 	--Exranjero, no actualizamos información ligada al INE/IFE
 	if @Adi_NacExt = @Nac_Nacion begin
 		update SOPEDACO set
-			DaP_PaiNac	= @DaP_PaiNac,
-			DaP_EntNac	= @DaP_EntNac,
-			DaP_ClvEle	= @DaP_ClvEle,	
-			DaP_NumEmi	= @DaP_NumEmi,
+			DaP_PaiNac	= (case @DaP_PaiNac	when @Str_Vacio then DaP_PaiNac else @DaP_PaiNac end),
+			DaP_EntNac	= (case @DaP_EntNac	when @Str_Vacio then DaP_EntNac else @DaP_EntNac end),
+			DaP_ClvEle	= (case @DaP_ClvEle	when @Str_Vacio then DaP_ClvEle else @DaP_ClvEle end),
+			DaP_NumEmi	= (case @DaP_NumEmi	when @Str_Vacio then DaP_NumEmi else @DaP_NumEmi end),
 
 			NumTransac	= @NumTransac,
 			Transaccio	= @Transaccio,
@@ -331,8 +337,8 @@ if @Tip_Proces = @Tip_Renapo begin
 		where	Peu_Grupo	= @Peu_Grupo
 	end else begin
 		update SOPEDACO set
-			DaP_PaiNac	= @DaP_PaiNac,
-			DaP_EntNac	= @DaP_EntNac,
+			DaP_PaiNac	= (case @DaP_PaiNac	when @Str_Vacio then DaP_PaiNac else @DaP_PaiNac end),
+			DaP_EntNac	= (case @DaP_EntNac	when @Str_Vacio then DaP_EntNac else @DaP_EntNac end),
 
 			NumTransac	= @NumTransac,
 			Transaccio	= @Transaccio,
