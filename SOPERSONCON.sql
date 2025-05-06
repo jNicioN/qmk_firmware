@@ -20,6 +20,11 @@ as
 ********************************************************************
 ** REFERENCIAS:													****
 ********************************************************************
+** Modificó:	Angel Encalada									****
+** Fecha:		06/05/2025									   	****
+** Help: 		TCELNC-24329									****
+** Descripcion:	Ajuste en consulta LB por rfc de persona	    ****
+********************************************************************
 ** Modificó:	Jesus Hernandez									****
 ** Fecha:		14/04/2025									   	****
 ** Help: 		TCELNC-24119									****
@@ -1463,12 +1468,18 @@ end else begin
 				Per_FecNac = PDI.Adi_FecNac,
 				PER.PerPersoID, PER.Per_Tipo, PDI.Adi_Sexo,	PER.Per_CURP, PER.Per_Comple,
 				PER.Per_Entida, PER.Per_LadTel, PDI.Adi_FecCon, PER.Per_ActINE, PDI.Adi_FecCon,
-				PER.Per_RazSoc, PER.Per_Numero, isnull(CAD.Adi_Client,@Str_Vacio) as Adi_Client
+				PER.Per_RazSoc, PER.Per_Numero, max(isnull(CAD.Adi_Client,@Str_Vacio)) as Adi_Client
 			from SOPERSON PER noholdlock
 			left join SOPERADI PDI noholdlock on PER.Per_Numero	= PDI.Adi_PerNum
 			left join CLADICIO CAD noholdlock on PER.Per_Numero = CAD.Adi_NumPer
 			where	PER.Per_RFC	= @Per_RFC
-		
+			group by PER.Per_Nombre,    PER.Per_ApePat,    PER.Per_ApeMat,    PER.Per_RFC, PER.Per_Calle,
+                PER.Per_CalNum,    PER.Per_Coloni,    PER.Per_Locali,    PER.Per_CodPos,    PER.Per_Telefo,
+                PER.Per_EstCiv,    PER.Per_Nacion,    PER.Per_ActEmp,    PER.Per_Activi,
+                PDI.Adi_FecNac,
+                PER.PerPersoID, PER.Per_Tipo, PDI.Adi_Sexo,    PER.Per_CURP, PER.Per_Comple,
+                PER.Per_Entida, PER.Per_LadTel, PDI.Adi_FecCon, PER.Per_ActINE, PDI.Adi_FecCon,
+                PER.Per_RazSoc, PER.Per_Numero
 	end
 	
 	
