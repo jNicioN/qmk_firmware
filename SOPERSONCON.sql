@@ -20,6 +20,14 @@ as
 ********************************************************************
 ** REFERENCIAS:													****
 ********************************************************************
+** Modificó:	Carlos Copto									****
+** Fecha:		01/07/2025									   	****
+** Help: 		            									****
+** Descripcion:	Se agrega el retorno de los campos 	            ****
+**  Per_NumTra, Per_NuSeFi, Per_Titulo, Per_ApaPos, Per_Email,  ****
+**  Per_ComDom, Per_Nacion, Per_Giro, Per_Sector en la          ****
+**  consulta LB                                                 ****
+********************************************************************
 ** Modificó:	Angel Encalada									****
 ** Fecha:		06/05/2025									   	****
 ** Help: 		TCELNC-24329									****
@@ -1462,13 +1470,16 @@ end else begin
 		end
 	end else if @Tip_ConCon = @Str_LetraB begin
 		
-		select PER.Per_Nombre,	PER.Per_ApePat,	PER.Per_ApeMat,	PER.Per_RFC, PER.Per_Calle,
+        select PER.Per_Nombre,	PER.Per_ApePat,	PER.Per_ApeMat,	PER.Per_RFC, PER.Per_Calle,
 				PER.Per_CalNum,	PER.Per_Coloni,	PER.Per_Locali,	PER.Per_CodPos,	PER.Per_Telefo,
 				PER.Per_EstCiv,	PER.Per_Nacion,	PER.Per_ActEmp,	PER.Per_Activi,
 				Per_FecNac = PDI.Adi_FecNac,
 				PER.PerPersoID, PER.Per_Tipo, PDI.Adi_Sexo,	PER.Per_CURP, PER.Per_Comple,
 				PER.Per_Entida, PER.Per_LadTel, PDI.Adi_FecCon, PER.Per_ActINE, PDI.Adi_FecCon,
-				PER.Per_RazSoc, PER.Per_Numero, max(isnull(CAD.Adi_Client,@Str_Vacio)) as Adi_Client
+				PER.Per_RazSoc, PER.Per_Numero,
+				PER.Per_NumTra, PER.Per_NuSeFi, PER.Per_Titulo, PER.Per_ApaPos, PER.Per_Email,
+				PER.Per_ComDom, PER.Per_Nacion, PER.Per_Giro, PER.Per_Sector,
+				max(isnull(CAD.Adi_Client,@Str_Vacio)) as Adi_Client
 			from SOPERSON PER noholdlock
 			left join SOPERADI PDI noholdlock on PER.Per_Numero	= PDI.Adi_PerNum
 			left join CLADICIO CAD noholdlock on PER.Per_Numero = CAD.Adi_NumPer
@@ -1479,7 +1490,10 @@ end else begin
                 PDI.Adi_FecNac,
                 PER.PerPersoID, PER.Per_Tipo, PDI.Adi_Sexo,    PER.Per_CURP, PER.Per_Comple,
                 PER.Per_Entida, PER.Per_LadTel, PDI.Adi_FecCon, PER.Per_ActINE, PDI.Adi_FecCon,
-                PER.Per_RazSoc, PER.Per_Numero
+                PER.Per_RazSoc, PER.Per_Numero,
+                PER.Per_NumTra, PER.Per_NuSeFi, PER.Per_Titulo, PER.Per_ApaPos, PER.Per_Email,
+                PER.Per_ComDom, PER.Per_Giro, PER.Per_Sector
+
 	end
 	
 	
