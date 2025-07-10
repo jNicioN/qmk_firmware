@@ -1477,7 +1477,7 @@ end else begin
 			PER.Per_RFC, PER.Per_Calle,
 			PER.Per_CalNum,	PER.Per_Coloni,	PER.Per_Locali,	PER.Per_CodPos,	PER.Per_Telefo,
 			PER.Per_EstCiv,	PER.Per_Nacion,	PER.Per_ActEmp,	PER.Per_Activi,
-			Per_FecNac = PDI.Adi_FecNac,
+			Per_FecNac = PDI.Adi_FecNac, PDI.Adi_FecNac,
 			PER.PerPersoID, PER.Per_Tipo, PDI.Adi_Sexo,	PER.Per_CURP, PER.Per_Comple,
 			PER.Per_Entida, PER.Per_LadTel, PDI.Adi_FecCon, PER.Per_ActINE, PDI.Adi_FecCon,
 			case when NOM.Nol_Person is not null then NOM.Nol_RazSoc else PER.Per_RazSoc end as Per_RazSoc, PER.Per_Numero,
