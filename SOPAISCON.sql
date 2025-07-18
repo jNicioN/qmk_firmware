@@ -17,7 +17,14 @@ as
 /*****************************************************************************/
 /** REFERENCIAS:
 ****************************************************************************
-** Modifico:	Jonatan Diaz Garces								****
+*** Modifico:	Oscar Trevino											****
+** Fecha:		17/07/2025												****
+** Jira:		TCELPLD-8082											****
+** Modificar:	Se modifica L3 para validar modulo. Regrea los paises	****
+**				sin sancion o en cuarentena o que no esten bloqueados 	****
+**				para el modulo											****
+****************************************************************************
+** Modifico:	Jonatan Diaz Garces							****
 ** Fecha:		07/03/2020									****
 ** Jira:		TCELTU-1302									****
 ** Modificar:	Se modifica L3								****
@@ -51,13 +58,36 @@ as
 ** Fecha:		31/Oct/04									****
 ****************************************************************************/
 
+/*	Declaracion De Constantes	*/
+declare @Ent_Cero	int,
+		@Est_Bloque int,
+		@Par_UsBaEl varchar(50),
+		@Mod_BanEle char(2)
+		
 /*	Declaracion De Variables	*/
 declare	@Tip_ConTip	char(1),
-		@Tip_ConCon	char(1)
+		@Tip_ConCon	char(1),
+		@Usu_BanEle	varchar(6)
+		
+		
+select @Ent_Cero	= 0,
+	   @Est_Bloque	= 2,
+	   @Par_UsBaEl = 'UsuarioBancaElectronica',
+	   @Mod_BanEle = 'BE'
 
 select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
 		@Tip_ConCon	= substring(@Tip_Consul, 2, 1)
 
+		
+select @Usu_BanEle = Par_Valor
+	from SOPARGEN noholdlock
+	where Par_Nombre = @Par_UsBaEl
+
+if @Usuario = @Usu_BanEle begin
+	select @Modulo = @Mod_BanEle
+end
+
+		
 if @Tip_ConTip = 'C' begin					/*	C O N S U L T A S	*/
 	if @Tip_ConCon = '1' begin	/*	Consulta por Llave Principal	*/
 		select	Pai_Numero,	Pai_Nombre,	Pai_Abrevi,	Pai_ISR, Pai_Gentil, Pai_IdeBMX, Pai_IdCNBV
@@ -81,11 +111,14 @@ end else begin								/*	L I S T A S	*/
 			order by Pai_Gentil
 	end	
 	if @Tip_ConCon = '3' begin	/* Lista de paises filtrados por paises sancionados swift */	
-		select p.Pai_Numero,	p.Pai_Nombre,	p.Pai_Abrevi,	p.Pai_ISR, p.Pai_Gentil, p.Pai_IdeBMX, p.Pai_IdCNBV, Pas_EstPai
+		
+		select distinct p.Pai_Numero,	p.Pai_Nombre,	p.Pai_Abrevi,	p.Pai_ISR, p.Pai_Gentil, p.Pai_IdeBMX, p.Pai_IdCNBV, isnull(Pas.Pas_EstPai,@Ent_Cero) as Pas_EstPai
 		from SOPAIS p noholdlock
-		left  join LDPAISAN ps noholdlock on p.Pai_IdCNBV = ps.Pas_ClaPai
-		where ps.Pas_EstPai <> 2 or ps.Pas_Numero  is null
-		and	Pai_Nombre	like @Pai_Nombre
+		left join LDPAISAN Pas noholdlock on p.Pai_IdCNBV = Pas.Pas_ClaPai and Pas.Pas_TipMod = @Modulo
+		where Pai_Nombre	like @Pai_Nombre
+		  and (Pas.Pas_EstPai <> @Est_Bloque or Pas.Pas_Numero  is null)
 		order by Pai_Nombre
+		
+		
 	end
 end
