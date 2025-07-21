@@ -19,6 +19,7 @@ as
 * REFERENCIAS:
 **************************************************************************
 ** Creó:       Diego Valdés                                            ***
+** KeyJira:    TCELOP-11943                                            ***
 ** Fecha:      25/06/2025                                              ***
 ** Descripción: Procedimiento para consulta de monedas y denominaciones**
 ************************************************************************/
