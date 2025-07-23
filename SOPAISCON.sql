@@ -17,6 +17,11 @@ as
 /*****************************************************************************/
 /** REFERENCIAS:
 ****************************************************************************
+* *** Modifico:	Ignacio Ordaz											****
+** Fecha:		18/07/2025												****
+** Jira:		TCELPLD-8134											****
+** Modificar:	Se valida el modulo SO por IT para tesoreria            ****
+****************************************************************************
 *** Modifico:	Oscar Trevino											****
 ** Fecha:		17/07/2025												****
 ** Jira:		TCELPLD-8082											****
@@ -62,7 +67,9 @@ as
 declare @Ent_Cero	int,
 		@Est_Bloque int,
 		@Par_UsBaEl varchar(50),
-		@Mod_BanEle char(2)
+		@Mod_BanEle char(2),
+		@Mod_Soport	char(2),
+		@Mod_Intern	char(2)
 		
 /*	Declaracion De Variables	*/
 declare	@Tip_ConTip	char(1),
@@ -73,19 +80,26 @@ declare	@Tip_ConTip	char(1),
 select @Ent_Cero	= 0,
 	   @Est_Bloque	= 2,
 	   @Par_UsBaEl = 'UsuarioBancaElectronica',
-	   @Mod_BanEle = 'BE'
+	   @Mod_BanEle = 'BE',
+	   @Mod_Soport = 'SO',
+	   @Mod_Intern = 'IT'
 
 select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
 		@Tip_ConCon	= substring(@Tip_Consul, 2, 1)
 
-		
+-- Validacion para tesoreria para cambiar el modulo de SO a IT
+if @Modulo = @Mod_Soport begin
+	select @Modulo = @Mod_Intern
+end	
+
+-- Validacion para BE por el usuario para cambiar el modulo a BE
 select @Usu_BanEle = Par_Valor
 	from SOPARGEN noholdlock
 	where Par_Nombre = @Par_UsBaEl
 
 if @Usuario = @Usu_BanEle begin
 	select @Modulo = @Mod_BanEle
-end
+end 
 
 		
 if @Tip_ConTip = 'C' begin					/*	C O N S U L T A S	*/
