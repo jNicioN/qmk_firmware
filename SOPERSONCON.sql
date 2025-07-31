@@ -24,10 +24,10 @@ as
 ** Fecha:		01/07/2025									   	****
 ** Help: 		56765          									****
 ** Descripcion:	Se agrega el retorno de los campos 	            ****
-**  Per_NumTra, Per_NuSeFi, Per_Titulo, Per_ApaPos, Per_Email,  ****
-**  Per_ComDom, Per_Nacion, Per_Giro, Per_Sector en la          ****
-**  consulta LB y se ajusta para considerar el retorno de los 	****
-**	campos de la tabla SONOMLAR en caso de existir registro    	****
+**  completos de SOPERSON Y SOPERADI en la consulta LB y se 	****
+**	ajusta para considerar el retorno de los campos de la 		****
+**	tabla SONOMLAR en caso de existir registro. Tambien se 		****
+**	crea consulta LC por nombre retornando los mismos campos    ****
 ********************************************************************
 ** Modificó:	Angel Encalada									****
 ** Fecha:		06/05/2025									   	****
@@ -75,7 +75,7 @@ as
 **  Help:		1482775											****
 **	Descripcion: optimizar CB, L9, quitar L8, LB	 			****
 ********************************************************************
-**	Modificó:	Frank canul										****
+**	Modifico:	Frank canul										****
 **  Fecha:		23/12/2020										****
 **  Help:		1286068											****
 **	Descripción: se elimina el convert para la columna 			****
@@ -1132,7 +1132,7 @@ end else begin
 
 			select	Per_Numero,	Per_Comple,	Per_Nombre,	Per_ApePat,	Per_ApeMat,
 					Per_Entida,	Per_Locali,	Per_Coloni,	Per_CodPos,	Per_Calle,
-					Per_CalNum,	Per_Telefo,	Per_RFC,	Adi_FecNac,	Adi_CaNuIn,
+					Per_CalNum,	Per_Telefo,	Per_RFC,		Adi_FecNac,	Adi_CaNuIn,
 					day(Adi_FecNac) DiaNac, month(Adi_FecNac) as MesNac, year(Adi_FecNac) as AnioNac,
 					Per_Titulo, Adi_NacExt
 				from SOPERSON noholdlock,
@@ -1456,55 +1456,79 @@ end else begin
 		drop table #PersonasRfc
 	end	else if @Tip_ConCon	= @Str_LetraA begin
 		
-		select	@Rfc_Like	= @Per_RFC	+ @Str_Porcen
-		
-		if char_length(ltrim(rtrim(@Per_RFC)))	= @Ent_Trece begin
-			select	PerPersoID, Per_RFC, Per_Comple		/* LA - Busqueda con RFC completo*/
+		select	PerPersoID, Per_RFC, Per_Comple		/* LA - Busqueda con RFC completo*/
 				from SOPERSON noholdlock
 				where	Per_Tipo	<> @Tip_Moral
 				  and	Per_RFC		= @Per_RFC
-		end else begin 
+		end else begin
 			select	PerPersoID, Per_RFC, Per_Comple		/* LA - Busqueda con RFC incompleto*/
 				from SOPERSON noholdlock
 				where	Per_Tipo	<> @Tip_Moral
 			  	  and	Per_RFC		like @Rfc_Like
 		end
-	end else if @Tip_ConCon = @Str_LetraB begin
+	end else if @Tip_ConCon = @Str_LetraB begin /* LB - Consulta de personas por Per_RFC */
 		
 		select 	case when NOM.Nol_Person is not null then NOM.Nol_Nombre else PER.Per_Nombre end as Per_Nombre,
-			case when NOM.Nol_Person is not null then NOM.Nol_ApePat else PER.Per_ApePat end as Per_ApePat,
-			case when NOM.Nol_Person is not null then NOM.Nol_ApeMat else PER.Per_ApeMat end as Per_ApeMat,
-			PER.Per_RFC, PER.Per_Calle,
-			PER.Per_CalNum,	PER.Per_Coloni,	PER.Per_Locali,	PER.Per_CodPos,	PER.Per_Telefo,
-			PER.Per_EstCiv,	PER.Per_Nacion,	PER.Per_ActEmp,	PER.Per_Activi,
-			Per_FecNac = PDI.Adi_FecNac,
-			PER.PerPersoID, PER.Per_Tipo, PDI.Adi_Sexo,	PER.Per_CURP, PER.Per_Comple,
-			PER.Per_Entida, PER.Per_LadTel, PDI.Adi_FecCon, PER.Per_ActINE, PDI.Adi_FecCon,
-			case when NOM.Nol_Person is not null then NOM.Nol_RazSoc else PER.Per_RazSoc end as Per_RazSoc, PER.Per_Numero,
-			PER.Per_NumTra, PER.Per_NuSeFi, PER.Per_Titulo, PER.Per_ApaPos, PER.Per_Email,
-			PER.Per_ComDom, PER.Per_Nacion, PER.Per_Giro, PER.Per_Sector,
-			max(isnull(CAD.Adi_Client,'')) as Adi_Client
-		from SOPERSON PER noholdlock
-		left join SOPERADI PDI noholdlock on PER.Per_Numero	= PDI.Adi_PerNum
-		left join CLADICIO CAD noholdlock on PER.Per_Numero = CAD.Adi_NumPer
-		left join SONOMLAR NOM noholdlock on PER.PerPersoID = NOM.Nol_Person
-		where	PER.Per_RFC	= @Per_RFC
-		group by 
-			case when NOM.Nol_Person is not null then NOM.Nol_Nombre else PER.Per_Nombre end,
-			case when NOM.Nol_Person is not null then NOM.Nol_ApePat else PER.Per_ApePat end,
-			case when NOM.Nol_Person is not null then NOM.Nol_ApeMat else PER.Per_ApeMat end,
-			PER.Per_RFC, PER.Per_Calle,
-			PER.Per_CalNum,	PER.Per_Coloni,	PER.Per_Locali,	PER.Per_CodPos,	PER.Per_Telefo,
-			PER.Per_EstCiv,	PER.Per_Nacion,	PER.Per_ActEmp,	PER.Per_Activi,
-			PDI.Adi_FecNac,
-			PER.PerPersoID, PER.Per_Tipo, PDI.Adi_Sexo,	PER.Per_CURP, PER.Per_Comple,
-			PER.Per_Entida, PER.Per_LadTel, PDI.Adi_FecCon, PER.Per_ActINE, PDI.Adi_FecCon,
-			case when NOM.Nol_Person is not null then NOM.Nol_RazSoc else PER.Per_RazSoc end,
-			PER.Per_Numero,
-			PER.Per_NumTra, PER.Per_NuSeFi, PER.Per_Titulo, PER.Per_ApaPos, PER.Per_Email,
-			PER.Per_ComDom, PER.Per_Giro, PER.Per_Sector
+				case when NOM.Nol_Person is not null then NOM.Nol_ApePat else PER.Per_ApePat end as Per_ApePat,
+				case when NOM.Nol_Person is not null then NOM.Nol_ApeMat else PER.Per_ApeMat end as Per_ApeMat,
+				PER.Per_RFC, 	PER.Per_Calle, 	PER.Per_CalNum,	PER.Per_Coloni,	PER.Per_Locali,	
+				PER.Per_CodPos,	PER.Per_Telefo, PER.Per_EstCiv,	PER.Per_Nacion,	PER.Per_ActEmp,	
+				PER.Per_Activi, Per_FecNac = PDI.Adi_FecNac, 	PER.PerPersoID, PER.Per_Tipo, PDI.Adi_Sexo,	
+				PER.Per_CURP, 	PER.Per_Comple, PER.Per_Entida, PER.Per_LadTel, PDI.Adi_FecCon, 
+				PER.Per_ActINE, PDI.Adi_FecCon, case when NOM.Nol_Person is not null then NOM.Nol_RazSoc else PER.Per_RazSoc end as Per_RazSoc, 
+				PER.Per_Numero, PER.Per_NumTra, PER.Per_NuSeFi, PER.Per_Titulo, PER.Per_ApaPos, 
+				PER.Per_Email, 	PER.Per_ComDom, PER.Per_Nacion, PER.Per_Giro, 	PER.Per_Sector,
+				max(isnull(CAD.Adi_Client,'')) as Adi_Client
+			from SOPERSON PER noholdlock
+			left join SOPERADI PDI noholdlock on PER.Per_Numero	= PDI.Adi_PerNum
+			left join CLADICIO CAD noholdlock on PER.Per_Numero = CAD.Adi_NumPer
+			left join SONOMLAR NOM noholdlock on PER.PerPersoID = NOM.Nol_Person
+			where PER.Per_RFC = @Per_RFC
+			group by 
+				case when NOM.Nol_Person is not null then NOM.Nol_Nombre else PER.Per_Nombre end,
+				case when NOM.Nol_Person is not null then NOM.Nol_ApePat else PER.Per_ApePat end,
+				case when NOM.Nol_Person is not null then NOM.Nol_ApeMat else PER.Per_ApeMat end,
+				PER.Per_RFC, 	PER.Per_Calle, 	PER.Per_CalNum,	PER.Per_Coloni,	PER.Per_Locali,	
+				PER.Per_CodPos,	PER.Per_Telefo, PER.Per_EstCiv,	PER.Per_Nacion,	PER.Per_ActEmp,	
+				PER.Per_Activi, PDI.Adi_FecNac, PER.PerPersoID, PER.Per_Tipo, 	PDI.Adi_Sexo,	
+				PER.Per_CURP, 	PER.Per_Comple, PER.Per_Entida, PER.Per_LadTel, PDI.Adi_FecCon, 
+				PER.Per_ActINE, PDI.Adi_FecCon, case when NOM.Nol_Person is not null then NOM.Nol_RazSoc else PER.Per_RazSoc end,
+				PER.Per_Numero, PER.Per_NumTra, PER.Per_NuSeFi, PER.Per_Titulo, PER.Per_ApaPos, 
+				PER.Per_Email, 	PER.Per_ComDom, PER.Per_Giro, 	PER.Per_Sector
+
+	end else if @Tip_ConCon = @Str_LetraC begin /* LC - Consulta de personas por Per_Comple */
+
+		select @Per_Comple = @Per_Comple + @Str_Porcen -- El porcentaje se debe poner antes de usarse en la consulta para que sea rapido
+		
+		select 	top 20 --se limita a 20 resultados para aligerar la consulta 
+				case when NOM.Nol_Person is not null then NOM.Nol_Nombre else PER.Per_Nombre end as Per_Nombre,
+				case when NOM.Nol_Person is not null then NOM.Nol_ApePat else PER.Per_ApePat end as Per_ApePat,
+				case when NOM.Nol_Person is not null then NOM.Nol_ApeMat else PER.Per_ApeMat end as Per_ApeMat,
+				PER.Per_RFC, 	PER.Per_Calle, 	PER.Per_CalNum,	PER.Per_Coloni,	PER.Per_Locali,	
+				PER.Per_CodPos,	PER.Per_Telefo, PER.Per_EstCiv,	PER.Per_Nacion,	PER.Per_ActEmp,	
+				PER.Per_Activi, Per_FecNac = PDI.Adi_FecNac, 	PER.PerPersoID, PER.Per_Tipo, PDI.Adi_Sexo,	
+				PER.Per_CURP, 	PER.Per_Comple, PER.Per_Entida, PER.Per_LadTel, PDI.Adi_FecCon, 
+				PER.Per_ActINE, PDI.Adi_FecCon, case when NOM.Nol_Person is not null then NOM.Nol_RazSoc else PER.Per_RazSoc end as Per_RazSoc, 
+				PER.Per_Numero, PER.Per_NumTra, PER.Per_NuSeFi, PER.Per_Titulo, PER.Per_ApaPos, 
+				PER.Per_Email, 	PER.Per_ComDom, PER.Per_Nacion, PER.Per_Giro, 	PER.Per_Sector,
+				max(isnull(CAD.Adi_Client,'')) as Adi_Client
+			from SOPERSON PER noholdlock
+			left join SOPERADI PDI noholdlock on PER.Per_Numero	= PDI.Adi_PerNum
+			left join CLADICIO CAD noholdlock on PER.Per_Numero = CAD.Adi_NumPer
+			left join SONOMLAR NOM noholdlock on PER.PerPersoID = NOM.Nol_Person
+			where PER.Per_Comple like @Per_Comple
+			group by 
+				case when NOM.Nol_Person is not null then NOM.Nol_Nombre else PER.Per_Nombre end,
+				case when NOM.Nol_Person is not null then NOM.Nol_ApePat else PER.Per_ApePat end,
+				case when NOM.Nol_Person is not null then NOM.Nol_ApeMat else PER.Per_ApeMat end,
+				PER.Per_RFC, 	PER.Per_Calle, 	PER.Per_CalNum,	PER.Per_Coloni,	PER.Per_Locali,	
+				PER.Per_CodPos,	PER.Per_Telefo, PER.Per_EstCiv,	PER.Per_Nacion,	PER.Per_ActEmp,	
+				PER.Per_Activi, PDI.Adi_FecNac, PER.PerPersoID, PER.Per_Tipo, 	PDI.Adi_Sexo,	
+				PER.Per_CURP, 	PER.Per_Comple, PER.Per_Entida, PER.Per_LadTel, PDI.Adi_FecCon, 
+				PER.Per_ActINE, PDI.Adi_FecCon, case when NOM.Nol_Person is not null then NOM.Nol_RazSoc else PER.Per_RazSoc end,
+				PER.Per_Numero, PER.Per_NumTra, PER.Per_NuSeFi, PER.Per_Titulo, PER.Per_ApaPos, 
+				PER.Per_Email, 	PER.Per_ComDom, PER.Per_Giro, 	PER.Per_Sector
 
 	end
-	
 	
 end
