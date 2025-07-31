@@ -21,7 +21,7 @@ as
 ** REFERENCIAS:													****
 ********************************************************************
 ** Modificó:	Carlos Copto									****
-** Fecha:		01/07/2025									   	****
+** Fecha:		01/08/2025									   	****
 ** Help: 		56765          									****
 ** Descripcion:	Se agrega el retorno de los campos 	            ****
 **  completos de SOPERSON Y SOPERADI en la consulta LB y se 	****
@@ -75,7 +75,7 @@ as
 **  Help:		1482775											****
 **	Descripcion: optimizar CB, L9, quitar L8, LB	 			****
 ********************************************************************
-**	Modifico:	Frank canul										****
+**	Modificó:	Frank canul										****
 **  Fecha:		23/12/2020										****
 **  Help:		1286068											****
 **	Descripción: se elimina el convert para la columna 			****
@@ -1132,7 +1132,7 @@ end else begin
 
 			select	Per_Numero,	Per_Comple,	Per_Nombre,	Per_ApePat,	Per_ApeMat,
 					Per_Entida,	Per_Locali,	Per_Coloni,	Per_CodPos,	Per_Calle,
-					Per_CalNum,	Per_Telefo,	Per_RFC,		Adi_FecNac,	Adi_CaNuIn,
+					Per_CalNum,	Per_Telefo,	Per_RFC,	Adi_FecNac,	Adi_CaNuIn,
 					day(Adi_FecNac) DiaNac, month(Adi_FecNac) as MesNac, year(Adi_FecNac) as AnioNac,
 					Per_Titulo, Adi_NacExt
 				from SOPERSON noholdlock,
@@ -1456,11 +1456,14 @@ end else begin
 		drop table #PersonasRfc
 	end	else if @Tip_ConCon	= @Str_LetraA begin
 		
-		select	PerPersoID, Per_RFC, Per_Comple		/* LA - Busqueda con RFC completo*/
+		select	@Rfc_Like	= @Per_RFC	+ @Str_Porcen
+		
+		if char_length(ltrim(rtrim(@Per_RFC)))	= @Ent_Trece begin
+			select	PerPersoID, Per_RFC, Per_Comple		/* LA - Busqueda con RFC completo*/
 				from SOPERSON noholdlock
 				where	Per_Tipo	<> @Tip_Moral
 				  and	Per_RFC		= @Per_RFC
-		end else begin
+		end else begin 
 			select	PerPersoID, Per_RFC, Per_Comple		/* LA - Busqueda con RFC incompleto*/
 				from SOPERSON noholdlock
 				where	Per_Tipo	<> @Tip_Moral
