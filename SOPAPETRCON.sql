@@ -1,4 +1,4 @@
-create or replace procedure SOPAPETRCON (
+create procedure SOPAPETRCON (
     @Ppt_PerFis char(1),            -- Personalidad fiscal del cliente, SOPERFIS.Per_Numero. 1 = PM, 2 = PF, 3 = PFAE
     @Ppt_Valor  bit out,            -- Valor del parámetro. 0 = Inactivo, 1 = Activo
 
