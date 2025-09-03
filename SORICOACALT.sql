@@ -30,6 +30,12 @@ create procedure SORICOACALT (
 /* DESCRIPCION: Alta de registros de Composicion Accionaria de	*/
 /*				RIB												*/
 /****************************************************************/
+/** Modifico:	Raul Muniz										*/
+/** Fecha:		27/08/2025                               		*/
+/** ID Jira:	TCELEM-13418					 				*/
+/** Descripcion: Atencion a incidente por registros duplicados  */
+/**				con el mismo RIB								*/
+/****************************************************************/
 /** Modifico:	Jose Rodriguez									*/
 /** Fecha:		07/06/2019                               		*/
 /** Help:		1229452					 						*/
@@ -45,12 +51,18 @@ create procedure SORICOACALT (
 /* Help:		929417											*/
 /****************************************************************/
 
+/* Declaracion de Variables */
+DECLARE	@Int_CanRib	int,	/* Cantidad RIB */
+		@Status		int		/* Status */
+
 /* Declaracion de Constantes */
-DECLARE @Int_Uno int,    /*Entero Uno*/
-	    @Int_Menos1 int  /*Entero Menos Uno*/
+DECLARE @Int_Cero	int,	/* Entero Cero */
+		@Int_Uno	int,	/* Entero Uno */
+	    @Int_Menos1	int		/* Entero Menos Uno */
 		 
-SELECT  @Int_Uno = 1,
-		@Int_Menos1=-1
+SELECT  @Int_Cero	= 0,
+		@Int_Uno	= 1,
+		@Int_Menos1	= -1
 
 
 if (@Rca_CuExBa = @Int_Menos1) begin
@@ -85,20 +97,44 @@ if (@Rca_InArRi = @Int_Menos1) begin
 	select @Rca_InArRi=null
 end
 
-Insert Into SORICOAC 
-	(Rca_NumRib,	Rca_CoPaGP,		Rca_TipAdm,		Rca_NuCoTo,		Rca_NuCoIn, 
-	Rca_TiAdUn,		Rca_PlaSuc,		Rca_OrAdSe,		Rca_ArACIn,		Rca_PrCuAd,
-	Rca_CuExBa,		Rca_CuExPr,		Rca_EdFiAu,		Rca_PrExBa,		Rca_EnCuEm,
-	Rca_ExPoPr,		Rca_InArRi,		NumTransac,		Transaccio,		Usuario,		
-	FechaSis,       SucOrigen,		SucDestino) 
-	values(
-	@Rca_NumRib,    @Rca_CoPaGP,    @Rca_TipAdm,    @Rca_NuCoTo,    @Rca_NuCoIn,
-	@Rca_TiAdUn,	@Rca_PlaSuc,	@Rca_OrAdSe,	@Rca_ArACIn,	@Rca_PrCuAd,
-	@Rca_CuExBa,	@Rca_CuExPr,	@Rca_EdFiAu,	@Rca_PrExBa,	@Rca_EnCuEm,
-	@Rca_ExPoPr,	@Rca_InArRi,	@NumTransac,	@Transaccio,	@Usuario,		
-	@FechaSis,		@SucOrigen,		@SucDestino) 
+select	@Int_CanRib	= count(1)
+	from	SORICOAC noholdlock
+	where	Rca_NumRib	= @Rca_NumRib
 
-select @Rca_Numero = @@IDENTITY 
+/* Se valida si ya existe algun registro existente para ese RIB*/
+if (@Int_CanRib	> @Int_Cero) begin
+	select	top 1 @Rca_Numero	= Rca_Numero
+		from SORICOAC noholdlock
+		where Rca_NumRib = @Rca_NumRib
+		order by FechaSis desc
+	
+	exec @Status = SORICOACMOD
+		@Rca_Numero,	@Rca_NumRib,	@Rca_CoPaGP,	@Rca_TipAdm,	@Rca_NuCoTo,
+   		@Rca_NuCoIn,	@Rca_TiAdUn,	@Rca_PlaSuc,	@Rca_OrAdSe,	@Rca_ArACIn,
+   		@Rca_PrCuAd,	@Rca_CuExBa,	@Rca_CuExPr,	@Rca_EdFiAu,	@Rca_PrExBa,
+   		@Rca_EnCuEm,	@Rca_ExPoPr,	@Rca_InArRi,	@NumTransac,	@Transaccio,
+   		@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
+		
+	if @Status <> @Int_Cero begin
+		rollback
+		return @Int_Uno
+	end
+end else begin
+	Insert Into SORICOAC 
+		(Rca_NumRib,	Rca_CoPaGP,		Rca_TipAdm,		Rca_NuCoTo,		Rca_NuCoIn, 
+		Rca_TiAdUn,		Rca_PlaSuc,		Rca_OrAdSe,		Rca_ArACIn,		Rca_PrCuAd,
+		Rca_CuExBa,		Rca_CuExPr,		Rca_EdFiAu,		Rca_PrExBa,		Rca_EnCuEm,
+		Rca_ExPoPr,		Rca_InArRi,		NumTransac,		Transaccio,		Usuario,		
+		FechaSis,       SucOrigen,		SucDestino) 
+		values(
+		@Rca_NumRib,    @Rca_CoPaGP,    @Rca_TipAdm,    @Rca_NuCoTo,    @Rca_NuCoIn,
+		@Rca_TiAdUn,	@Rca_PlaSuc,	@Rca_OrAdSe,	@Rca_ArACIn,	@Rca_PrCuAd,
+		@Rca_CuExBa,	@Rca_CuExPr,	@Rca_EdFiAu,	@Rca_PrExBa,	@Rca_EnCuEm,
+		@Rca_ExPoPr,	@Rca_InArRi,	@NumTransac,	@Transaccio,	@Usuario,		
+		@FechaSis,		@SucOrigen,		@SucDestino) 
+	
+	select @Rca_Numero = @@IDENTITY 
+end
 
 if @@nestlevel = @Int_Uno begin 
      select Err_Codigo = '000000', 
