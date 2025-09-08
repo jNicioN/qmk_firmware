@@ -21,6 +21,12 @@ as
 ** REFERENCIAS:													****
 ********************************************************************
 ** Modificó:	Carlos Copto									****
+** Fecha:		03/09/2025									   	****
+** Help: 		58989          									****
+** Descripcion:	Se agregan validaciones a todas las consultas 	****
+**	para comprobar que los parametros no sean vacios		    ****
+********************************************************************
+** Modificó:	Carlos Copto									****
 ** Fecha:		01/08/2025									   	****
 ** Help: 		56765          									****
 ** Descripcion:	Se agrega el retorno de los campos 	            ****
@@ -501,6 +507,14 @@ select	@Tip_ConTip	= substring(@Tip_Consul, 1, 1),
 
 if @Tip_ConTip = @Str_LetraC begin
 	if @Tip_ConCon	= @Str_Uno begin
+
+		if isnull(@Per_Numero, @Str_Vacio) = @Str_Vacio begin
+			select	Err_Codigo	= '000003',
+					Err_Mensaj	= 'El numero de persona no puede ser vacio.',
+					Err_Variab	= 'Per_Numero'
+			return 1
+		end
+	
 		select	Per_Numero,	Per_Tipo,	Per_Benefi,	Per_NuSeFi,	Per_Titulo,
 				Per_Nombre,	Per_ApePat,	Per_ApeMat,	Per_RazSoc,	Per_Comple,
 				Per_ComOrd,	Per_RFC,	Per_CURP,	Per_Calle,	Per_CalNum,
@@ -519,6 +533,21 @@ if @Tip_ConTip = @Str_LetraC begin
 			 and	Per_Numero	*= Adi_PerNum
 	end
 	if @Tip_ConCon	= @Str_Dos begin
+
+		if isnull(@Per_Numero, @Str_Vacio) = @Str_Vacio begin
+			select	Err_Codigo	= '000004',
+					Err_Mensaj	= 'El numero de persona no puede ser vacio.',
+					Err_Variab	= 'Per_Numero'
+			return 1
+		end
+
+		if isnull(@Per_Tipo, @Str_Vacio) = @Str_Vacio begin
+			select	Err_Codigo	= '000005',
+					Err_Mensaj	= 'El tipo de persona no puede ser vacio.',
+					Err_Variab	= 'Per_Tipo'
+			return 1
+		end
+
 		select	Per_Numero,	Per_Tipo,	Per_Titulo,	Per_Nombre,	Per_ApePat,
 				Per_ApeMat,	Per_RazSoc,	Per_Comple,	Per_ComOrd,	Per_RFC,
 				Per_CURP,	Per_Calle,	Per_CalNum,	Per_Coloni,	Per_Entida,
@@ -530,6 +559,14 @@ if @Tip_ConTip = @Str_LetraC begin
 			  and	Per_Tipo	= @Per_Tipo
 	end
 	if @Tip_ConCon	= @Str_Tres begin
+
+		if isnull(@Per_Tipo, @Str_Vacio) = @Str_Vacio begin
+			select	Err_Codigo	= '000006',
+					Err_Mensaj	= 'El tipo de persona no puede ser vacio.',
+					Err_Variab	= 'Per_Tipo'
+			return 1
+		end
+
 		select	Per_Numero,	Per_Tipo,	Per_Titulo,	Per_Nombre,	Per_ApePat,
 				Per_ApeMat,	Per_RazSoc,	Per_Comple,	Per_ComOrd,	Per_RFC,
 				Per_CURP,	Per_Calle,	Per_CalNum,	Per_Coloni,	Per_Entida,
@@ -540,6 +577,14 @@ if @Tip_ConTip = @Str_LetraC begin
 			where	Per_Tipo	= @Per_Tipo
 	end
 	if @Tip_ConCon	= @Str_Cuatro begin			/* Consulta De Ejecutivo en Base A Su RFC	*/
+
+		if isnull(@Per_RFC, @Str_Vacio) = @Str_Vacio begin
+			select	Err_Codigo	= '000007',
+					Err_Mensaj	= 'El RFC no puede ser vacio.',
+					Err_Variab	= 'Per_RFC'
+			return 1
+		end
+
 		select	Per_Existe	= @Sta_Si,
 				Eje_Existe	= @Sta_No,
 				Per_Numero,	Per_Tipo,	Per_Titulo,	Per_Nombre,	Per_ApePat,
@@ -577,6 +622,14 @@ if @Tip_ConTip = @Str_LetraC begin
 		drop table #Person
 	end
 	if @Tip_ConCon = @Str_Cinco begin				/*	Consulta De Ejecutivos De Arrendadora	*/
+
+		if isnull(@Per_Numero, @Str_Vacio) = @Str_Vacio begin
+			select	Err_Codigo	= '000008',
+					Err_Mensaj	= 'El numero de persona no puede ser vacio.',
+					Err_Variab	= 'Per_Numero'
+			return 1
+		end
+
 		select	Per_Existe	= @Sta_Si,
 				Eje_Existe	= @Sta_Si,
 				Per_Numero,	Per_Tipo,	Per_Titulo,	Per_Nombre,	Per_ApePat,
@@ -592,6 +645,14 @@ if @Tip_ConTip = @Str_LetraC begin
 			  and	len(rtrim(ltrim(Per_Numero)))	= @Ent_Ocho
 	end
 	if @Tip_ConCon = @Str_Seis begin	/*	Consulta persona por RFC*/
+
+		if isnull(@Per_RFC, @Str_Vacio) = @Str_Vacio begin
+			select	Err_Codigo	= '000009',
+					Err_Mensaj	= 'El RFC no puede ser vacio.',
+					Err_Variab	= 'Per_RFC'
+			return 1
+		end
+
 		select	Per_Nombre,	Per_ApePat,	Per_ApeMat,	Per_RFC,	Per_Calle,
 				Per_CalNum,	Per_Coloni,	Per_Locali,	Per_CodPos,	Per_Telefo,
 				Per_EstCiv,	Per_Nacion,	Per_ActEmp,	Per_Activi,
@@ -604,6 +665,13 @@ if @Tip_ConTip = @Str_LetraC begin
 			where	Per_RFC		= @Per_RFC
 	end
 	if @Tip_ConCon = @Str_Siete begin	/*	Consulta persona Toda la inf por RFC*/
+
+		if isnull(@Per_RFC, @Str_Vacio) = @Str_Vacio begin
+			select	Err_Codigo	= '000010',
+					Err_Mensaj	= 'El RFC no puede ser vacio.',
+					Err_Variab	= 'Per_RFC'
+			return 1
+		end
 		
 		create table #Soperson(
 			Per_Numero	char(8),	
@@ -734,6 +802,14 @@ if @Tip_ConTip = @Str_LetraC begin
 		drop table #Soperson
 	end
 	if @Tip_ConCon	= @Str_Ocho begin /* C8 Consulta con Informacion de adicional */
+
+		if isnull(@Per_Numero, @Str_Vacio) = @Str_Vacio begin
+			select	Err_Codigo	= '000011',
+					Err_Mensaj	= 'El numero de persona no puede ser vacio.',
+					Err_Variab	= 'Per_Numero'
+			return 1
+		end
+
 		select	Per_Numero,	Per_Fecha,	Per_NumTra,	Per_Tipo,	Per_Sector,
 				Per_Nombre,	Per_ApePat,	Per_ApeMat,	Per_RazSoc,	Per_Comple,
 				Per_ComOrd,	Per_RFC,	Per_CURP,	Per_Calle,	Per_CalNum,
@@ -855,6 +931,14 @@ if @Tip_ConTip = @Str_LetraC begin
 		drop table #InformacionPer, #InformacionAdi
 	end
 	if @Tip_ConCon	= @Str_Nueve begin
+
+		if isnull(@Per_Numero, @Str_Vacio) = @Str_Vacio begin
+			select	Err_Codigo	= '000012',
+					Err_Mensaj	= 'El numero de persona no puede ser vacio.',
+					Err_Variab	= 'Per_Numero'
+			return 1
+		end
+
 		select	Per_Numero,	Per_Tipo,	Per_Benefi,	Per_NuSeFi,	Per_Titulo,
 				Per_Nombre,	Per_ApePat,	Per_ApeMat,	Per_RazSoc,	Per_Comple,
 				Per_ComOrd,	Per_RFC,	Per_CURP,	Per_Calle,	Per_CalNum,
@@ -876,6 +960,14 @@ if @Tip_ConTip = @Str_LetraC begin
 			 and	Per_Numero	*= Adi_PerNum
 			 and	Per_Numero	*= DaP_Person 
 	end else if @Tip_ConCon	= @Str_LetraA begin   /* Consulta Móvil por RFC **/
+
+		if isnull(@Per_RFC, @Str_Vacio) = @Str_Vacio begin
+			select	Err_Codigo	= '000013',
+					Err_Mensaj	= 'El RFC no puede ser vacio.',
+					Err_Variab	= 'Per_RFC'
+			return 1
+		end
+
 		create table #PersonasRFC (
 			Per_Numero	char(8)
 		)
@@ -910,6 +1002,14 @@ if @Tip_ConTip = @Str_LetraC begin
 
 		drop table #PersonasRFC, #MovilPersonaRFC
 	end else if @Tip_ConCon	= @Str_LetraB begin   /* Consulta Móvil por Nombre Completo**/
+
+		if isnull(@Per_Comple, @Str_Vacio) = @Str_Vacio begin
+			select	Err_Codigo	= '000014',
+					Err_Mensaj	= 'El nombre de cliente no puede ser vacio.',
+					Err_Variab	= 'Per_Comple'
+			return 1
+		end
+
 		select @Per_Comple = @Per_Comple + @Str_Porcen -- El porcentaje se debe poner antes de usarse en la consulta para que sea rapido
 		
 		select distinct top 100 Peu_Grupo Per_Numero, Per_Comple, Per_ComOrd, Per_RFC, Per_CURP,
@@ -920,6 +1020,14 @@ if @Tip_ConTip = @Str_LetraC begin
 		 order by Peu_Grupo
 
 	end else if @Tip_ConCon = @Str_LetraC begin /*Consulta por persona registrada en internacional para tercero autorizado*/
+
+		if isnull(@Per_RFC, @Str_Vacio) = @Str_Vacio begin
+			select	Err_Codigo	= '000015',
+					Err_Mensaj	= 'El RFC no puede ser vacio.',
+					Err_Variab	= 'Per_RFC'
+			return 1
+		end
+
 		 select	sp.Per_Numero,	sp.Per_Tipo,	sp.Per_Benefi,	sp.Per_NuSeFi,	sp.Per_Titulo,
 				sp.Per_Nombre,	sp.Per_ApePat,	sp.Per_ApeMat,	sp.Per_RazSoc,	sp.Per_Comple,
 				sp.Per_ComOrd,	sp.Per_RFC,		sp.Per_CURP
@@ -928,17 +1036,35 @@ if @Tip_ConTip = @Str_LetraC begin
 			where Per_Tipo in (@Tip_Fisica,@Tip_FisAE)
 			  and Per_RFC = @Per_RFC
 	end else if @Tip_ConCon = @Str_LetraD begin /*Consulta para personas que no existen en lIsta negra de Tercero autorizado*/
-				select	sp.Per_Numero,	sp.Per_Tipo,	sp.Per_Benefi,	sp.Per_NuSeFi,	sp.Per_Titulo,
-						sp.Per_Nombre,	sp.Per_ApePat,	sp.Per_ApeMat,	sp.Per_RazSoc,	sp.Per_Comple,
-						sp.Per_ComOrd,	sp.Per_RFC,		sp.Per_CURP,	sp.PerPersoID
-				from SOPERSON sp noholdlock
-				where Per_Tipo	in (@Tip_Fisica,@Tip_FisAE)
-				  and Per_RFC	= @Per_RFC	
-				order by  PerPersoID desc
+
+			if isnull(@Per_RFC, @Str_Vacio) = @Str_Vacio begin
+				select	Err_Codigo	= '000016',
+						Err_Mensaj	= 'El RFC no puede ser vacio.',
+						Err_Variab	= 'Per_RFC'
+				return 1
+			end
+
+			select	sp.Per_Numero,	sp.Per_Tipo,	sp.Per_Benefi,	sp.Per_NuSeFi,	sp.Per_Titulo,
+					sp.Per_Nombre,	sp.Per_ApePat,	sp.Per_ApeMat,	sp.Per_RazSoc,	sp.Per_Comple,
+					sp.Per_ComOrd,	sp.Per_RFC,		sp.Per_CURP,	sp.PerPersoID
+			from SOPERSON sp noholdlock
+			where Per_Tipo	in (@Tip_Fisica,@Tip_FisAE)
+				and Per_RFC	= @Per_RFC	
+			order by  PerPersoID desc
+
 	end else if @Tip_ConCon = @Str_LetraF begin /*Consulta para obtener a todas las personas con el mismo RFC*/
+
+		if isnull(@Per_Numero, @Str_Vacio) = @Str_Vacio begin
+			select	Err_Codigo	= '000017',
+					Err_Mensaj	= 'El numero de persona no puede ser vacio.',
+					Err_Variab	= 'Per_Numero'
+			return 1
+		end
+
 		select @Per_RFC	= Per_RFC
 		from SOPERSON noholdlock
 		where Per_Numero = @Per_Numero
+
 		if isnull(@Per_RFC,@Str_Vacio) = @Str_Vacio begin
 			select	sp.Per_Numero,	sp.Per_Tipo,	sp.Per_Benefi,	sp.Per_NuSeFi,	sp.Per_Titulo,
 				sp.Per_Nombre,	sp.Per_ApePat,	sp.Per_ApeMat,	sp.Per_RazSoc,	sp.Per_Comple,
@@ -954,6 +1080,7 @@ if @Tip_ConTip = @Str_LetraC begin
 			where Per_Tipo in (@Tip_Fisica,@Tip_FisAE)
 			and Per_RFC = @Per_RFC	
 		end 
+
 	end else if @Tip_ConCon = @Str_LetraG begin /*Consulta para personas que no existen en lIsta negra de Tercero autorizado*/
 	
 		if @Per_RFC = @Str_Vacio begin
@@ -1005,6 +1132,13 @@ if @Tip_ConTip = @Str_LetraC begin
 
 	end else if @Tip_ConCon = @Str_LetraH begin --Consulta de personas con nombre largo
 
+		if isnull(@Per_Numero, @Str_Vacio) = @Str_Vacio begin
+			select	Err_Codigo	= '000018',
+					Err_Mensaj	= 'El numero de persona no puede ser vacio.',
+					Err_Variab	= 'Per_Numero'
+			return 1
+		end
+
 		select	PerPersoID, Per_Numero,	Per_Tipo,	Per_Benefi,	Per_NuSeFi,	
 				Per_Titulo, Per_Nombre,	Per_ApePat,	Per_ApeMat,	Per_RazSoc,	
 				Per_Comple, Per_ComOrd,	Nol_Nombre,	Nol_ApePat,	Nol_ApeMat, 
@@ -1026,6 +1160,13 @@ if @Tip_ConTip = @Str_LetraC begin
 
 	end else if @Tip_ConCon = @Str_LetraI begin --Consulta de personas con numero de cliente
 
+		if isnull(@Per_Numero, @Str_Vacio) = @Str_Vacio begin
+			select	Err_Codigo	= '000019',
+					Err_Mensaj	= 'El numero de persona no puede ser vacio.',
+					Err_Variab	= 'Per_Numero'
+			return 1
+		end
+
 		select  @Adi_NumPer = Adi_NumPer from    CLADICIO    noholdlock where   Adi_Client  = @Per_Numero       
 		select @Peu_Grupo = Peu_Grupo from SOUNIPER noholdlock where Peu_Person = @Adi_NumPer   
 
@@ -1046,7 +1187,14 @@ if @Tip_ConTip = @Str_LetraC begin
 			where   Per_Numero  =  @Peu_Grupo
 
 	end else if @Tip_ConCon = @Str_LetraJ begin --Consulta de personas por numero de persona, retorna persona unica 
-		
+
+		if isnull(@Per_Numero, @Str_Vacio) = @Str_Vacio begin
+			select	Err_Codigo	= '000020',
+					Err_Mensaj	= 'El numero de persona no puede ser vacio.',
+					Err_Variab	= 'Per_Numero'
+			return 1
+		end
+
 		select @Peu_Grupo = Peu_Grupo from SOUNIPER noholdlock where Peu_Person = @Per_Numero	
 
 		select	PerPersoID, Per_Numero,	Per_Tipo, Per_Benefi,	Per_NuSeFi,	
@@ -1067,6 +1215,7 @@ if @Tip_ConTip = @Str_LetraC begin
 	end 
 
 end else begin
+
 	select	@Per_Comple	= ltrim(rtrim(@Per_Comple)) + @Str_Porcen
 
 	if @Tip_ConCon = @Str_Uno begin
@@ -1090,6 +1239,13 @@ end else begin
 						Err_Mensaj	= @Msj_MasInf,
 						Err_Variab	= 'Per_Comple'
 				return 1
+		end
+
+		if isnull(@Per_Tipo, @Str_Vacio) = @Str_Vacio begin
+			select	Err_Codigo	= '000021',
+					Err_Mensaj	= 'El tipo de persona no puede ser vacio.',
+					Err_Variab	= 'Per_Tipo'
+			return 1
 		end
 
 		select	Per_Numero,	Per_Comple
@@ -1455,6 +1611,13 @@ end else begin
 			
 		drop table #PersonasRfc
 	end	else if @Tip_ConCon	= @Str_LetraA begin
+
+		if isnull(@Per_RFC, @Str_Vacio) = @Str_Vacio begin
+			select	Err_Codigo	= '000022',
+					Err_Mensaj	= 'El RFC no puede ser vacio.',
+					Err_Variab	= 'Per_RFC'
+			return 1
+		end
 		
 		select	@Rfc_Like	= @Per_RFC	+ @Str_Porcen
 		
@@ -1470,6 +1633,13 @@ end else begin
 			  	  and	Per_RFC		like @Rfc_Like
 		end
 	end else if @Tip_ConCon = @Str_LetraB begin /* LB - Consulta de personas por Per_RFC */
+
+		if isnull(@Per_RFC, @Str_Vacio) = @Str_Vacio begin
+			select	Err_Codigo	= '000023',
+					Err_Mensaj	= 'El RFC no puede ser vacio.',
+					Err_Variab	= 'Per_RFC'
+			return 1
+		end
 		
 		select 
 			case when NOM.Nol_Person is not null then NOM.Nol_Nombre else PER.Per_Nombre end as Per_Nombre,
@@ -1523,6 +1693,13 @@ end else begin
 
 
 	end else if @Tip_ConCon = @Str_LetraC begin /* LC - Consulta de personas por Per_Comple */
+
+		if isnull(@Per_Comple, @Str_Vacio) = @Str_Vacio begin
+			select	Err_Codigo	= '000024',
+					Err_Mensaj	= 'El nombre de cliente no puede ser vacio.',
+					Err_Variab	= 'Per_Comple'
+			return 1
+		end
 
 		select @Per_Comple = @Per_Comple + @Str_Porcen -- El porcentaje se debe poner antes de usarse en la consulta para que sea rapido
 		
