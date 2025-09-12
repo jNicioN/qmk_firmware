@@ -23,8 +23,9 @@ as
 ** Modificó:	Carlos Copto									****
 ** Fecha:		03/09/2025									   	****
 ** Help: 		58989          									****
-** Descripcion:	Se agregan validaciones a todas las consultas 	****
-**	para retornar Resultset vacio si se manda vacio el parametro****
+** Descripcion:	Se agregan validaciones a las consultas para 	****
+** retornar Resultset vacio si se manda vacio el parametro.		****
+** Se ajustan selects into para colocar los campos explicitos	****
 ********************************************************************
 ** Modificó:	Carlos Copto									****
 ** Fecha:		01/08/2025									   	****
@@ -907,7 +908,7 @@ if @Tip_ConTip = @Str_LetraC begin
 		end else if isnull(@Per_RFC, @Str_Vacio) <> @Str_Vacio and len(@Per_RFC) >= @Len_RFCOrd begin
 			select @Per_RFC = @Per_RFC + @Str_Porcen
 
-			insert into #PersonasRFC
+			insert into #PersonasRFC (Per_Numero)
 			select Per_Numero
 			  from SOPERSON noholdlock
 			 where Per_RFC like @Per_RFC
@@ -992,13 +993,13 @@ if @Tip_ConTip = @Str_LetraC begin
 		create table #RFCBloqueados(
 			Per_RFC varchar(15)
 		)
-		insert into #RFCBloqueados
+		insert into #RFCBloqueados (Per_RFC)
 		select Per_RFC
 		from ITTELINE noholdlock 
 		inner join SOPERSON noholdlock on PerPersoID = Tel_Person
 		where Tel_Estatu = @Str_A
 		
-		insert into #PersonasBloqueadas
+		insert into #PersonasBloqueadas (Per_Numero)
 		select per.Per_Numero
 		from #RFCBloqueados bloc 
 		inner join SOPERSON per noholdlock on per.Per_RFC = bloc.Per_RFC
@@ -1351,7 +1352,7 @@ end else begin
 		/* SE BUSCA POR RFC COMPLETO */
 		if char_length(ltrim(rtrim(@Per_RFC))) = @Ent_Doce or
 		   char_length(ltrim(rtrim(@Per_RFC))) = @Ent_Trece begin
-			insert into #PersonasExis
+			insert into #PersonasExis (Per_Numero,	Per_Comple,	Per_Nombre,	Per_ApePat,	Per_ApeMat,Per_RazSoc, Per_RFC, Per_Coinci)
 				select	Per_Numero,	Per_Comple,	Per_Nombre,	Per_ApePat,	Per_ApeMat,
 						Per_RazSoc, Per_RFC,	@Coi_Total
 					from SOPERSON noholdlock
@@ -1455,7 +1456,11 @@ end else begin
 							where	Per_Tipo in (@Tip_Moral, @Tip_Fisica, @Tip_FisAE) and Per_RFC	like @Per_RFC
 				end
 			end else begin
-			insert into #PersonasRfc
+			insert into #PersonasRfc (Per_Numero, Per_Tipo, Per_Nombre, Per_ApePat, Per_ApeMat, 
+									Per_RazSoc, Per_Comple, Per_RFC, Per_Calle, Per_CalNum, 
+									Per_Entida, Per_Locali, Per_CodPos, Per_Coloni, Per_LadTel, 
+									Per_Telefo, Per_Email, Per_ActEmp, Adi_FecNac, Adi_Sexo, 
+									Cli_Numero, Per_NumTra, Per_Fecha, Adi_TelTra, Adi_FecCon)
 				select	Per_Numero,	Per_Tipo,	Per_Nombre,	Per_ApePat,	Per_ApeMat,
 						Per_RazSoc,	Per_Comple,	Per_RFC,	Per_Calle,	Per_CalNum,
 						Per_Entida,	Per_Locali,	Per_CodPos,	Per_Coloni,	Per_LadTel,
