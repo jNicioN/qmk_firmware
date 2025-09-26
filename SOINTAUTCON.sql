@@ -194,8 +194,9 @@ if isnull(@Opi_TipOpe, @Ent_Cero) != @Ent_Cero and isnull(@Cio_Status, @Str_Vaci
 			insert into #PersonasAutorizadas
 				select	Cob_Person,	Cob_Tipo, @Ent_Cero
 					from CHCOTBEN noholdlock
-					where	Cob_Cuenta	like (@Cli_Numero + '%')
-					  and	Cob_Tipo in( select Tii_TipInt
+					inner join CHCUENTA noholdlock on Cue_Numero = Cob_Cuenta
+					where	Cue_Client	= @Cli_Numero
+					  and	Cob_Tipo in(select	Tii_TipInt
 											from SOTIINID noholdlock
 											where	Tii_NuIdCo	= @Cio_NuIdCo
 											  and	Tii_Status	= @Sta_Activo)
