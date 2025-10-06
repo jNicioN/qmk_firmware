@@ -1140,7 +1140,7 @@ end else begin
 					Per_Entida,	Per_Locali,	Per_Coloni,	Per_CodPos,	Per_Calle,
 					Per_CalNum,	Per_Telefo,	Per_RFC,	Adi_FecNac,	Adi_CaNuIn,
 					day(Adi_FecNac) DiaNac, month(Adi_FecNac) as MesNac, year(Adi_FecNac) as AnioNac,
-					Per_Titulo, Adi_NacExt, Per_Email
+					Per_Titulo, Adi_NacExt, Per_Email, PerPersoID
 				from SOPERSON noholdlock,
 					 SOPERADI noholdlock
 				where	Per_Numero	*= Adi_PerNum
