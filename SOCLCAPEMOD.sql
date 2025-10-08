@@ -27,6 +27,12 @@ as
 /**************************************************************************/
 /* REFERENCIAS:															***/
 /****************************************************************************
+** Modific:		Javier Eduardo Ceron Rangel								****
+** Fecha:		16/06/2025												****
+** Help:		58967													****
+** Descripciónn:	Se agrega validacion para no permitir altas			****
+** de personas diferentes de PM											****
+****************************************************************************
 ** Modificó:		Marcelo Bautista Hernandez					****
 ** Fecha:		12/Junio/2015								****
 ** Help:			774214										****
@@ -47,6 +53,37 @@ as
 ** Fecha:		11/Febrero/2014							****
 ** Help:		      538910										****
 ****************************************************************************/
+declare @Per_Tipo char(1),
+		@Status		int
+
+declare	@Str_Vacio	char(1),		/*	Declaracion de Constantes	*/
+		@Per_Fisica	char(1),
+		@Str_Si		char(1),
+		@Ent_Cero	int,
+		@Ent_Uno	int
+		
+
+select	@Str_Vacio	= '',
+		@Per_Fisica	= '2',			/* Persona Fisica */
+		@Str_Si		= 'S',
+		@Ent_Cero	= 0,
+		@Ent_Uno	= 1
+
+
+select @Per_Tipo = Per_Tipo
+from SOPERSON noholdlock
+where Per_Numero = @Clp_NumPer
+
+if	@Per_Tipo	!= @Str_Vacio begin	
+	if @Per_Tipo = @Per_Fisica and @Clp_Fideic = @Str_Si begin
+		select	Err_Codigo	= '000001', 
+				Err_Mensaj  = 'Error de Dato Fideicomiso, no esta permitido dar de alta fideicomiso para PF/PFAE', 
+				Err_Variab	= 'Clp_Fideic'
+		rollback
+		return 1
+	end
+end
+
 
 select	@Clp_EntFin	= Tis_EntFin
 	from	CLTIPSOC noholdlock
@@ -58,11 +95,15 @@ if not exists(select Clp_NumPer
 				from SOCLCAPE noholdlock
 				where	Clp_NumPer	= @Clp_NumPer) begin
 	
-	exec SOCLCAPEALT	@Clp_NumPer,	@Clp_InsReg,	@Clp_OtoCre,	@Clp_Bancar,	@Clp_SubBan,
+	exec @Status =  SOCLCAPEALT	@Clp_NumPer,	@Clp_InsReg,	@Clp_OtoCre,	@Clp_Bancar,	@Clp_SubBan,
 						@Clp_Fideic,	@Clp_TipSoc,	@Clp_NomSoc,	@Clp_EntFin,	@Clp_UsBuCr,
 						@Clp_LocINE,	@Clp_EntINE,	@NumTransac,	@Transaccio,	@Usuario,
 						@FechaSis,		@SucOrigen,		@SucDestino,	@Modulo
-	
+	if @Status <> @Ent_Cero begin
+		rollback
+		return @Ent_Uno
+	end	
+
 end else begin
 	update SOCLCAPE set
 	Clp_InsReg	= @Clp_InsReg,
@@ -75,7 +116,15 @@ end else begin
 	Clp_EntFin	= @Clp_EntFin,
 	Clp_UsBuCr	= @Clp_UsBuCr,
 	Clp_LocINE	= @Clp_LocINE,
-	Clp_EntINE	= @Clp_EntINE
+	Clp_EntINE	= @Clp_EntINE,
+
+	NumTransac = @NumTransac,
+	Transaccio = @Transaccio,
+	Usuario = @Usuario,
+	FechaSis = @FechaSis,
+	SucOrigen = @SucOrigen,
+	SucDestino = @SucDestino
+
 	where	Clp_NumPer	= @Clp_NumPer
 
 	select	Err_Codigo	= '000000', 
