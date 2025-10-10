@@ -100,6 +100,7 @@ declare	@Str_C		char(1),
 		@Tip_CoTeMa	char(2),
 		@Nom_Titula varchar(50),
 		@Nom_Cotitu varchar(50),
+		@Nom_Apoder varchar(50),
 		@Nom_Tercer varchar(50),
 		@Nom_Otro varchar(50)
 
@@ -127,6 +128,7 @@ select	@Str_C		= 'C',		/* Tipo C */
 		@Tip_CoTeMa	= 'PM',		/* Tipo de configuración de Terceros-Mancomunados(Intervinientes requeridos)*/
 		@Nom_Titula = 'Titular',/* Nombre titular */
 		@Nom_Cotitu = 'Cotitular',/* Nombre cotitular */
+		@Nom_Apoder = 'Apoderado',/* Nombre apoderado */
 		@Nom_Tercer = 'Tercero',/* Nombre tercero */
 		@Nom_Otro	= ''		/* Nombre para otros */
 		
@@ -192,7 +194,7 @@ if isnull(@Opi_TipOpe, @Ent_Cero) != @Ent_Cero and isnull(@Cio_Status, @Str_Vaci
 		end else if @Cli_Tipo = @Tip_PerMor begin
 
 			insert into #PersonasAutorizadas
-				select	Cob_Person,	Cob_Tipo, @Ent_Cero
+				select	Cob_Person,	min(Cob_Tipo), @Ent_Cero
 					from CHCOTBEN noholdlock
 					inner join CHCUENTA noholdlock on Cue_Numero = Cob_Cuenta
 					where	Cue_Client	= @Cli_Numero
@@ -200,6 +202,7 @@ if isnull(@Opi_TipOpe, @Ent_Cero) != @Ent_Cero and isnull(@Cio_Status, @Str_Vaci
 											from SOTIINID noholdlock
 											where	Tii_NuIdCo	= @Cio_NuIdCo
 											  and	Tii_Status	= @Sta_Activo)
+					group by Cob_Person
 
 		end
 				
@@ -418,6 +421,10 @@ end else begin
 					  and	ltrim(Per_TipFir) is null
 			end
 		end		
+		
+		select	@Cli_Tipo	= Cli_Tipo
+			from	CLCLIENT noholdlock
+			where	Cli_Numero	= @Cli_Numero
 			
 		--Salida de intervinientes autorizados para identificación
 		select	Per_Numero, Per_ComOrd, Per_Comple,	Per_RFC,	Per_CURP,
@@ -425,7 +432,10 @@ end else begin
 				Adi_FeVeId,	Per_Nacion,	Adi_NacExt,	Per_TipFir,	Per_CobTip,
 				Per_CoNoTi = case 
 					when Per_CobTip = @Tip_Titula then @Nom_Titula
-					when Per_CobTip = @Tip_Cotitu then @Nom_Cotitu
+					when Per_CobTip = @Tip_Cotitu then case
+						when @Cli_Tipo = @Tip_PerFis then @Nom_Cotitu
+						when @Cli_Tipo = @Tip_PerMor then @Nom_Apoder
+						end
 					when Per_CobTip = @Tip_Tercer then @Nom_Tercer
 					else @Nom_Otro
 				end,
