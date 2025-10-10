@@ -233,15 +233,15 @@ if isnull(@Opi_TipOpe, @Ent_Cero) != @Ent_Cero and isnull(@Cio_Status, @Str_Vaci
 										where	Tii_NuIdCo	= @Cio_NuIdCo
 										  and	Tii_Status	= @Sta_Activo)
 		
-		insert into #PersonasAutorizadas
+		insert into #PersonasAutorizadas (Per_Numero, Cob_Tipo, Cob_EsTerc)
 			select	Ped_Numero, min(Ped_Tipo), @Ent_Cero
 				from  #PersonasDuplicadas
 				group by Ped_Numero
 		
-		insert into #Terceros 
+		insert into #Terceros (Ter_Grupo)
 			select Peu_Grupo
 				from #PersonasDuplicadas as duplicadas
-					 inner join SOUNIPER on Ped_Numero = Peu_Person
+					 inner join SOUNIPER noholdlock on Ped_Numero = Peu_Person
 				where	Ped_Tipo	= @Tip_Tercer
 				  and	ltrim(Ped_Numero) is not null
 				group by Peu_Grupo
@@ -255,7 +255,7 @@ if isnull(@Opi_TipOpe, @Ent_Cero) != @Ent_Cero and isnull(@Cio_Status, @Str_Vaci
 										from SOTIINID noholdlock
 										where	Tii_NuIdCo	= @Cio_NuIdCo
 										  and	Tii_Status	= @Sta_Activo) begin
-					insert into #PersonasAutorizadas
+					insert into #PersonasAutorizadas (Per_Numero, Cob_Tipo, Cob_EsTerc)
 						select	adi.Adi_NumPer,	@Tip_Titula, @Ent_Uno
 							from CLCLIENT cli noholdlock
 								 inner join CLADICIO adi noholdlock on adi.ClClientID = cli.ClClientID 					
@@ -270,7 +270,7 @@ end
 				  	  
 if @Tip_ConTip = @Str_C begin
 	if @Tip_ConCon	= @Str_Uno begin /* C1 - Búsqueda de interviniente autorizado(consulta principal) por id único de persona*/
-		insert into #Personas
+		insert into #Personas (Per_Person, Per_Grupo, Per_TipFir, Per_CobTip, Per_CobNom, Per_EsTerc)
 			select	aut.Per_Numero,	aut.Per_Numero,	@Str_Vacio,	aut.Cob_Tipo,	@Str_Vacio,	Cob_EsTerc
 				from #PersonasAutorizadas as aut
 					 inner join SOPERSON as per noholdlock on per.Per_Numero	= aut.Per_Numero 
@@ -351,7 +351,7 @@ if @Tip_ConTip = @Str_C begin
 end else begin
 	if @Tip_ConCon	= @Str_Uno begin /* L1 - Búsqueda de personas autorizadas ligadas a configuración por nombre completo*/
 		if isnull(@Per_Comple, @Str_Vacio) = @Str_Vacio begin
-			insert into #Personas
+			insert into #Personas (Per_Person, Per_Grupo, Per_TipFir, Per_CobTip, Per_CobNom, Per_EsTerc)
 				select	aut.Per_Numero,	aut.Per_Numero,	@Str_Vacio,	aut.Cob_Tipo,	@Str_Vacio,	Cob_EsTerc
 					from #PersonasAutorizadas as aut
 						 inner join SOPERSON as per noholdlock on per.Per_Numero	= aut.Per_Numero 
@@ -359,7 +359,7 @@ end else begin
 		end	else begin
 			select	@Per_Comple	= ltrim(isnull(@Per_Comple, @Str_Vacio)) + @Str_Porcie
 			
-			insert into #Personas
+			insert into #Personas (Per_Person, Per_Grupo, Per_TipFir, Per_CobTip, Per_CobNom, Per_EsTerc)
 				select	aut.Per_Numero,	aut.Per_Numero,	@Str_Vacio,	aut.Cob_Tipo,	@Str_Vacio,	Cob_EsTerc
 					from #PersonasAutorizadas as aut
 						 inner join SOPERSON as per noholdlock on per.Per_Numero	= aut.Per_Numero 
