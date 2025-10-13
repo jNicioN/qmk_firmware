@@ -27,6 +27,13 @@ as
 ** Per_Email de SOPERSON en las consultas L4 y C6			 	****
 ********************************************************************
 ** Modificó:	Carlos Copto									****
+** Fecha:		03/09/2025									   	****
+** Help: 		58989          									****
+** Descripcion:	Se agregan validaciones a las consultas para 	****
+** retornar Resultset vacio si se manda vacio el parametro.		****
+** Se ajustan selects into para colocar los campos explicitos	****
+********************************************************************
+** Modificó:	Carlos Copto									****
 ** Fecha:		01/08/2025									   	****
 ** Help: 		56765          									****
 ** Descripcion:	Se agrega el retorno de los campos 	            ****
@@ -521,7 +528,8 @@ if @Tip_ConTip = @Str_LetraC begin
 				Adi_NumIde,	Adi_FeExId,	Adi_EntPri,	Adi_EntSeg,	PerPersoID
 			from SOPERSON noholdlock,
 				 SOPERADI noholdlock
-			where	Per_Numero	=  @Per_Numero
+			where	Per_Numero	=  @Per_Numero 
+             and    @Per_Numero <> ''
 			 and	Per_Numero	*= Adi_PerNum
 	end
 	if @Tip_ConCon	= @Str_Dos begin
@@ -533,7 +541,9 @@ if @Tip_ConTip = @Str_LetraC begin
 				Per_ActINE
 			from SOPERSON noholdlock
 			where	Per_Numero	= @Per_Numero
+              and   @Per_Numero <> @Str_Vacio
 			  and	Per_Tipo	= @Per_Tipo
+              and   @Per_Tipo <> @Str_Vacio
 	end
 	if @Tip_ConCon	= @Str_Tres begin
 		select	Per_Numero,	Per_Tipo,	Per_Titulo,	Per_Nombre,	Per_ApePat,
@@ -543,7 +553,8 @@ if @Tip_ConTip = @Str_LetraC begin
 				Per_Nacion,	Per_ActEmp,	Per_Giro,	Per_Sector,	Per_Activi,
 				Per_ActINE
 			from SOPERSON noholdlock
-			where	Per_Tipo	= @Per_Tipo
+			where	Per_Tipo = @Per_Tipo
+            and     @Per_Tipo <> @Str_Vacio
 	end
 	if @Tip_ConCon	= @Str_Cuatro begin			/* Consulta De Ejecutivo en Base A Su RFC	*/
 		select	Per_Existe	= @Sta_Si,
@@ -561,6 +572,7 @@ if @Tip_ConTip = @Str_LetraC begin
 			into #Person
 			from SOPERSON noholdlock  
 			where	Per_RFC	= @Per_RFC
+            and     @Per_RFC <> @Str_Vacio
 
 		update #Person set
 			Eje_Existe	= @Sta_Si,
@@ -596,6 +608,7 @@ if @Tip_ConTip = @Str_LetraC begin
 			where	Per_Numero	= Eje_Numero
 			  and	Eje_Numero	= @Per_Numero
 			  and	len(rtrim(ltrim(Per_Numero)))	= @Ent_Ocho
+              and   @Per_Numero <> @Str_Vacio
 	end
 	if @Tip_ConCon = @Str_Seis begin	/*	Consulta persona por RFC*/
 		select	Per_Nombre,	Per_ApePat,	Per_ApeMat,	Per_RFC,	Per_Calle,
@@ -607,7 +620,8 @@ if @Tip_ConTip = @Str_LetraC begin
 				Per_RazSoc, Per_Numero, Per_Email 
 			from SOPERSON noholdlock
 			left join SOPERADI noholdlock on Per_Numero	= Adi_PerNum
-			where	Per_RFC		= @Per_RFC
+			where	Per_RFC	= @Per_RFC
+            and     @Per_RFC <> @Str_Vacio
 	end
 	if @Tip_ConCon = @Str_Siete begin	/*	Consulta persona Toda la inf por RFC*/
 		
@@ -713,7 +727,8 @@ if @Tip_ConTip = @Str_LetraC begin
 				Adi_CaNuIn,	Adi_EntPri,	Adi_EntSeg, PerPersoID 
 			from SOPERSON noholdlock
 			left join SOPERADI noholdlock on Per_Numero	= Adi_PerNum
-			where	Per_RFC		= @Per_RFC
+			where	Per_RFC	= @Per_RFC
+            and     @Per_RFC <> @Str_Vacio
 
 		select	Per_Numero,	Per_Tipo,	Per_Benefi,	Per_NuSeFi,	Per_Titulo,
 				Per_Nombre,	Per_ApePat,	Per_ApeMat,	Per_RazSoc,	Per_Comple,
@@ -752,6 +767,7 @@ if @Tip_ConTip = @Str_LetraC begin
 			from SOPERSON noholdlock
 				left join SOCLCAPE noholdlock on Clp_NumPer = Per_Numero
 			where	Per_Numero	= @Per_Numero
+            and   @Per_Numero <> @Str_Vacio
 
 		select	Num_Person	= Per_Numero,
 				Loc_Nombre	= replicate(@Str_Vacio, 40),
@@ -879,10 +895,12 @@ if @Tip_ConTip = @Str_LetraC begin
 				 SOPERADI noholdlock,
 				 SOPEDACO noholdlock
 			where	Per_Numero	=  @Per_Numero
+             and    @Per_Numero <> @Str_Vacio
 			 and	Per_Numero	*= Adi_PerNum
 			 and	Per_Numero	*= DaP_Person 
 	end else if @Tip_ConCon	= @Str_LetraA begin   /* Consulta Móvil por RFC **/
-		create table #PersonasRFC (
+		
+        create table #PersonasRFC (
 			Per_Numero	char(8)
 		)
 
@@ -896,7 +914,7 @@ if @Tip_ConTip = @Str_LetraC begin
 		end else if isnull(@Per_RFC, @Str_Vacio) <> @Str_Vacio and len(@Per_RFC) >= @Len_RFCOrd begin
 			select @Per_RFC = @Per_RFC + @Str_Porcen
 
-			insert into #PersonasRFC
+			insert into #PersonasRFC (Per_Numero)
 			select Per_Numero
 			  from SOPERSON noholdlock
 			 where Per_RFC like @Per_RFC
@@ -923,6 +941,7 @@ if @Tip_ConTip = @Str_LetraC begin
 		  from SOPERSON noholdlock
 	  	 inner join SOUNIPER noholdlock on Per_Numero = Peu_Grupo
 		 where Per_Comple like @Per_Comple
+         and @Per_Comple <> @Str_Porcen
 		 order by Peu_Grupo
 
 	end else if @Tip_ConCon = @Str_LetraC begin /*Consulta por persona registrada en internacional para tercero autorizado*/
@@ -933,6 +952,8 @@ if @Tip_ConTip = @Str_LetraC begin
 			inner join ITPETEAU pe noholdlock on sp.PerPersoID = pe.Pta_PerId 
 			where Per_Tipo in (@Tip_Fisica,@Tip_FisAE)
 			  and Per_RFC = @Per_RFC
+              and @Per_RFC <> @Str_Vacio
+
 	end else if @Tip_ConCon = @Str_LetraD begin /*Consulta para personas que no existen en lIsta negra de Tercero autorizado*/
 				select	sp.Per_Numero,	sp.Per_Tipo,	sp.Per_Benefi,	sp.Per_NuSeFi,	sp.Per_Titulo,
 						sp.Per_Nombre,	sp.Per_ApePat,	sp.Per_ApeMat,	sp.Per_RazSoc,	sp.Per_Comple,
@@ -940,11 +961,15 @@ if @Tip_ConTip = @Str_LetraC begin
 				from SOPERSON sp noholdlock
 				where Per_Tipo	in (@Tip_Fisica,@Tip_FisAE)
 				  and Per_RFC	= @Per_RFC	
+                  and @Per_RFC <> @Str_Vacio
 				order by  PerPersoID desc
 	end else if @Tip_ConCon = @Str_LetraF begin /*Consulta para obtener a todas las personas con el mismo RFC*/
+
 		select @Per_RFC	= Per_RFC
 		from SOPERSON noholdlock
 		where Per_Numero = @Per_Numero
+        and @Per_Numero <> @Str_Vacio
+
 		if isnull(@Per_RFC,@Str_Vacio) = @Str_Vacio begin
 			select	sp.Per_Numero,	sp.Per_Tipo,	sp.Per_Benefi,	sp.Per_NuSeFi,	sp.Per_Titulo,
 				sp.Per_Nombre,	sp.Per_ApePat,	sp.Per_ApeMat,	sp.Per_RazSoc,	sp.Per_Comple,
@@ -974,13 +999,13 @@ if @Tip_ConTip = @Str_LetraC begin
 		create table #RFCBloqueados(
 			Per_RFC varchar(15)
 		)
-		insert into #RFCBloqueados
+		insert into #RFCBloqueados (Per_RFC)
 		select Per_RFC
 		from ITTELINE noholdlock 
 		inner join SOPERSON noholdlock on PerPersoID = Tel_Person
 		where Tel_Estatu = @Str_A
 		
-		insert into #PersonasBloqueadas
+		insert into #PersonasBloqueadas (Per_Numero)
 		select per.Per_Numero
 		from #RFCBloqueados bloc 
 		inner join SOPERSON per noholdlock on per.Per_RFC = bloc.Per_RFC
@@ -1029,11 +1054,19 @@ if @Tip_ConTip = @Str_LetraC begin
 			inner join SOPERADI noholdlock on Per_Numero = Adi_PerNum
 			left outer join SONOMLAR noholdlock on Nol_Person = PerPersoID
 			where	Per_Numero	=  @Per_Numero
+            and     @Per_Numero <> @Str_Vacio
 
 	end else if @Tip_ConCon = @Str_LetraI begin --Consulta de personas con numero de cliente
 
-		select  @Adi_NumPer = Adi_NumPer from    CLADICIO    noholdlock where   Adi_Client  = @Per_Numero       
-		select @Peu_Grupo = Peu_Grupo from SOUNIPER noholdlock where Peu_Person = @Adi_NumPer   
+		select  @Adi_NumPer = Adi_NumPer 
+        from    CLADICIO    noholdlock 
+            where   Adi_Client  = @Per_Numero       
+            and     @Per_Numero <> @Str_Vacio
+
+		select @Peu_Grupo = Peu_Grupo 
+        from SOUNIPER noholdlock 
+        where Peu_Person = @Adi_NumPer   
+        and   @Adi_NumPer <> @Str_Vacio
 
 		select  Per_Numero, Per_Tipo,   Per_Benefi, Per_NuSeFi, Per_Titulo,  
 				Per_Nombre, Per_ApePat, Per_ApeMat, Per_RazSoc, Per_Comple,
@@ -1050,10 +1083,14 @@ if @Tip_ConTip = @Str_LetraC begin
 			from SOPERSON noholdlock 
 			left join SOPERADI noholdlock on Per_Numero = Adi_PerNum 
 			where   Per_Numero  =  @Peu_Grupo
+            and     @Peu_Grupo <> @Str_Vacio
 
 	end else if @Tip_ConCon = @Str_LetraJ begin --Consulta de personas por numero de persona, retorna persona unica 
 		
-		select @Peu_Grupo = Peu_Grupo from SOUNIPER noholdlock where Peu_Person = @Per_Numero	
+		select @Peu_Grupo = Peu_Grupo 
+        from SOUNIPER noholdlock 
+        where Peu_Person = @Per_Numero	
+        and   @Per_Numero <> @Str_Vacio
 
 		select	PerPersoID, Per_Numero,	Per_Tipo, Per_Benefi,	Per_NuSeFi,	
 				Per_Titulo,	Per_Nombre,	Per_ApePat,	Per_ApeMat,	Per_RazSoc,	
@@ -1070,6 +1107,7 @@ if @Tip_ConTip = @Str_LetraC begin
 				from SOPERSON noholdlock 
 				left join SOPERADI noholdlock on Per_Numero = Adi_PerNum 
 				where	Per_Numero	=  @Peu_Grupo
+                and    @Peu_Grupo <> @Str_Vacio
 	end 
 
 end else begin
@@ -1122,6 +1160,7 @@ end else begin
 			  and	len(rtrim(ltrim(Per_Numero)))	= @Ent_Ocho
 	end
 	if @Tip_ConCon = @Str_Cuatro begin
+    
 		if @Per_Comple = @Str_Vacio begin
 			select	Err_Codigo	= '000001',
 					Err_Mensaj	= @Msj_MasInf,
@@ -1319,7 +1358,7 @@ end else begin
 		/* SE BUSCA POR RFC COMPLETO */
 		if char_length(ltrim(rtrim(@Per_RFC))) = @Ent_Doce or
 		   char_length(ltrim(rtrim(@Per_RFC))) = @Ent_Trece begin
-			insert into #PersonasExis
+			insert into #PersonasExis (Per_Numero,	Per_Comple,	Per_Nombre,	Per_ApePat,	Per_ApeMat,Per_RazSoc, Per_RFC, Per_Coinci)
 				select	Per_Numero,	Per_Comple,	Per_Nombre,	Per_ApePat,	Per_ApeMat,
 						Per_RazSoc, Per_RFC,	@Coi_Total
 					from SOPERSON noholdlock
@@ -1423,7 +1462,11 @@ end else begin
 							where	Per_Tipo in (@Tip_Moral, @Tip_Fisica, @Tip_FisAE) and Per_RFC	like @Per_RFC
 				end
 			end else begin
-			insert into #PersonasRfc
+			insert into #PersonasRfc (Per_Numero, Per_Tipo, Per_Nombre, Per_ApePat, Per_ApeMat, 
+									Per_RazSoc, Per_Comple, Per_RFC, Per_Calle, Per_CalNum, 
+									Per_Entida, Per_Locali, Per_CodPos, Per_Coloni, Per_LadTel, 
+									Per_Telefo, Per_Email, Per_ActEmp, Adi_FecNac, Adi_Sexo, 
+									Cli_Numero, Per_NumTra, Per_Fecha, Adi_TelTra, Adi_FecCon)
 				select	Per_Numero,	Per_Tipo,	Per_Nombre,	Per_ApePat,	Per_ApeMat,
 						Per_RazSoc,	Per_Comple,	Per_RFC,	Per_Calle,	Per_CalNum,
 						Per_Entida,	Per_Locali,	Per_CodPos,	Per_Coloni,	Per_LadTel,
@@ -1443,7 +1486,7 @@ end else begin
 			where	#PersonasRfc.Per_Numero	= Adi_PerNum
 			
 
-		/* Actualizamos la tabla con el nÃºmero de cliente relacionando con CLADICIO */
+		/* Actualizamos la tabla con el numero de cliente relacionando con CLADICIO */
 		update #PersonasRfc set
 			Cli_Numero	= Adi_Client
 			from CLADICIO noholdlock
@@ -1474,6 +1517,8 @@ end else begin
 				from SOPERSON noholdlock
 				where	Per_Tipo	<> @Tip_Moral
 			  	  and	Per_RFC		like @Rfc_Like
+                  and   @Per_RFC    <> @Str_Vacio
+
 		end
 	end else if @Tip_ConCon = @Str_LetraB begin /* LB - Consulta de personas por Per_RFC */
 		
@@ -1505,6 +1550,7 @@ end else begin
 		left join CLADICIO CAD noholdlock on PER.Per_Numero = CAD.Adi_NumPer
 		left join SONOMLAR NOM noholdlock on PER.PerPersoID = NOM.Nol_Person
 		where PER.Per_RFC = @Per_RFC
+        and  @Per_RFC <> @Str_Vacio
 		group by 
 			case when NOM.Nol_Person is not null then NOM.Nol_Nombre else PER.Per_Nombre end,
 			case when NOM.Nol_Person is not null then NOM.Nol_ApePat else PER.Per_ApePat end,
@@ -1559,7 +1605,9 @@ end else begin
 		left join SOPERADI PDI noholdlock on PER.Per_Numero = PDI.Adi_PerNum
 		left join CLADICIO CAD noholdlock on PER.Per_Numero = CAD.Adi_NumPer
 		left join SONOMLAR NOM noholdlock on PER.PerPersoID = NOM.Nol_Person
-		where PER.Per_Comple like @Per_Comple
+		WHERE PER.Per_Comple like @Per_Comple
+          AND @Per_Comple <> @Str_Porcen
+          AND char_length(ltrim(rtrim(@Per_Comple))) > @Ent_Cinco
 		group by 
 			case when NOM.Nol_Person is not null then NOM.Nol_Nombre else PER.Per_Nombre end,
 			case when NOM.Nol_Person is not null then NOM.Nol_ApePat else PER.Per_ApePat end,
