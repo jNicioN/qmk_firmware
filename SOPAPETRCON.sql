@@ -1,6 +1,6 @@
 create procedure SOPAPETRCON (
     @Ppt_PerFis char(1),            -- Personalidad fiscal del cliente, SOPERFIS.Per_Numero. 1 = PM, 2 = PF, 3 = PFAE
-    @Ppt_Valor  bit out,            -- Valor del parámetro. 0 = Inactivo, 1 = Activo
+    @Ppt_Valor  smallint out,            -- Valor del parámetro. 0 = Inactivo, 1 = Activo
 
     @NumTransac char(10),
     @Transaccio char(3),
@@ -18,9 +18,14 @@ create procedure SOPAPETRCON (
 ************************************************************************************
 **	REFERENCIAS:                                                                ****
 ************************************************************************************
-** Creo:		Aldo Archundia Alvarez 									        ****
-** Fecha:		20/Agosto/2025											        ****
-** Help:		TCELCV-32996											        ****
+** Modifico:    Andrea.R                                                        ****
+** Fecha:       14/Octubr/2025                                                  ****
+** id-jira:     TCELCV-34361                                                    ****
+** descripcion: actualiza tipo de dato a Ppt_Valor de bit a smallint            ****
+************************************************************************************
+** Creo:        Aldo Archundia Alvarez                                          ****
+** Fecha:       20/Agosto/2025                                                  ****
+** Help:        TCELCV-32996                                                    ****
 ***********************************************************************************/
 
 /*Declaración de Variables */
@@ -53,7 +58,7 @@ select  @Str_Person = case @Ppt_PerFis
 
 select @Ppt_Parame = ltrim(rtrim(@Ppt_Parame)) + ltrim(rtrim(@Str_Person))
 
-select @Ppt_Valor = convert(bit,Par_Valor)
+select @Ppt_Valor = convert(smallint,Par_Valor)
     from SOPARGEN noholdlock
     where Par_Nombre = @Ppt_Parame
 
