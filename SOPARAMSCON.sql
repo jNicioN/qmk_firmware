@@ -110,7 +110,8 @@ declare	@Str_Vacio	char(1),
 		@Str_Dos	char(1),
 		@Str_Tres	char(1),
 		@Str_Cuatro	char(1),
-		@Str_Cinco	char(1)
+		@Str_Cinco	char(1),
+		@Str_Six	char(1)
 										/* Asignación de constantes */
 select	@Str_Vacio	= '',				/* String: Vacío */
 		@Fec_LetH	= 'H',
@@ -121,7 +122,8 @@ select	@Str_Vacio	= '',				/* String: Vacío */
 		@Str_Dos	= '2',				/* String: Dos */
 		@Str_Tres	= '3',				/* String: Tres */
 		@Str_Cuatro	= '4',				/* String: Cuatro */
-		@Str_Cinco  = '5'				/* String: Cinco */
+		@Str_Cinco  = '5',				/* String: Cinco */
+		@Str_Six	= '6'
 
 select	@Par_TiCaDi	= @Par_Sucurs
 select	@Dia_Actual = getdate()
@@ -200,6 +202,11 @@ end else begin
 		end
 		if @Tip_ConCon = @Str_Cinco begin /* Consulta para Tc Diferenciado Next */
 			select	Par_Sucurs, Par_IVA, Par_DiBaCr, Par_FecAct, Par_TiCaDi
+				from SOPARAMS noholdlock
+				where	Par_Sucurs	= @Par_Sucurs
+		end
+        if @Tip_ConCon = @Str_Six begin /* Consulta parametro de ISR */
+			select	Par_ISR
 				from SOPARAMS noholdlock
 				where	Par_Sucurs	= @Par_Sucurs
 		end
