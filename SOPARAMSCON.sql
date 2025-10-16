@@ -13,9 +13,15 @@
 as
 
 /***************************************************************************
-** DESCRIPCION: ** Consulta de Parametros  de Soporte 						****
+** DESCRIPCION: ** Consulta de Parametros  de Soporte 					****
 ****************************************************************************
 ** REFERENCIAS: 														****
+****************************************************************************
+ *** Modificó:	Kevin Quiroz					 						****
+** Fecha:		015/Octubre/2024										****
+** Help Desk:	TCELER-15538-8668										****
+** Descripcion: Se crea consulta para obtener el valor de la tasa de	****
+** 				ISR														****
 ****************************************************************************
 *** Modificó:	Gerardo Santos					 						****
 ** Fecha:		02/Agosto/2024											****
@@ -124,6 +130,7 @@ select	@Str_Vacio	= '',				/* String: Vacío */
 		@Str_Cuatro	= '4',				/* String: Cuatro */
 		@Str_Cinco  = '5',				/* String: Cinco */
 		@Str_Six	= '6'
+		
 
 select	@Par_TiCaDi	= @Par_Sucurs
 select	@Dia_Actual = getdate()
@@ -205,7 +212,7 @@ end else begin
 				from SOPARAMS noholdlock
 				where	Par_Sucurs	= @Par_Sucurs
 		end
-        if @Tip_ConCon = @Str_Six begin /* Consulta parametro de ISR */
+		if @Tip_ConCon = @Str_Six begin /* Consulta parametro de ISR */
 			select	Par_ISR
 				from SOPARAMS noholdlock
 				where	Par_Sucurs	= @Par_Sucurs
