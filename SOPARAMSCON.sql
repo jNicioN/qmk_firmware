@@ -19,7 +19,7 @@ as
 ****************************************************************************
  *** Modificó:	Kevin Quiroz					 						****
 ** Fecha:		015/Octubre/2024										****
-** Help Desk:	TCELER-15538-8668										****
+** Help Desk:	TCELER-15538-60404										****
 ** Descripcion: Se crea consulta para obtener el valor de la tasa de	****
 ** 				ISR														****
 ****************************************************************************
