@@ -55,10 +55,10 @@ if @Tip_ConTip = @Str_TipCon begin
             cli.ClClientID, cli.Cli_Numero, cli.Cli_Comple, cli.Cli_RFC,	cli.Cli_CURP,  
             cot.Cob_Person, cot.Cob_Cuenta, per.Per_Nombre, per.Per_ApePat,	per.Per_ApeMat, 
             per.Per_Comple, cot.Cob_Tipo  
-        FROM dbo.CHCOTBEN cot
-        INNER JOIN dbo.CHCUENTA cue on cot.Cob_Cuenta = cue.Cue_Numero 
-        INNER JOIN dbo.CLCLIENT cli on cue.Cue_Client = cli.Cli_Numero 
-        INNER JOIN dbo.SOPERSON per on per.Per_Numero = cot.Cob_Person 
+        FROM dbo.CHCOTBEN cot noholdlock
+        INNER JOIN dbo.CHCUENTA cue noholdlock on cot.Cob_Cuenta = cue.Cue_Numero 
+        INNER JOIN dbo.CLCLIENT cli noholdlock on cue.Cue_Client = cli.Cli_Numero 
+        INNER JOIN dbo.SOPERSON per noholdlock on per.Per_Numero = cot.Cob_Person 
         WHERE per.Per_Comple = @Per_Comple
         AND cot.Cob_Tipo = @Str_CobTip
     end
