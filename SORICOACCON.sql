@@ -13,6 +13,12 @@ create procedure SORICOACCON (
 /****************************************************************/
 /* DESCRIPCION: Consulta de registros de Composicion Accionaria	*/
 /****************************************************************/
+/** Modifico:	Antonio Contreras											*/
+/** Fecha:		27/08/2025													*/
+/** ID Jira:	TCELEM-13418												*/
+/** Descripcion: Se modifica consulta L2 para regresa el 		*/
+/**					ultimo registro										*/
+/****************************************************************/
 /** Modifico:	Jose Rodriguez									*/
 /** Fecha:		07/06/2019                               		*/
 /** Help:		1229452					 						*/
@@ -59,12 +65,13 @@ end else begin
   end
 
    if @Tip_ConCon = @Str_Dos begin 
-     select 
+     select top 1
           Rca_Numero,    Rca_NumRib,    Rca_CoPaGP,    Rca_TipAdm,    Rca_NuCoTo, 
           Rca_NuCoIn,    Rca_TiAdUn,    Rca_PlaSuc,    Rca_OrAdSe,    Rca_ArACIn, 
           Rca_PrCuAd,    Rca_CuExBa,    Rca_CuExPr,    Rca_EdFiAu,    Rca_PrExBa, 
           Rca_EnCuEm,	 Rca_ExPoPr,    Rca_InArRi 
      from SORICOAC noholdlock 
       where Rca_NumRib = @Rca_NumRib 
+      order by Rca_Numero desc
    end 
 end
