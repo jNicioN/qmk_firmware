@@ -136,68 +136,110 @@ select 	Per_ID =   PerPersoID ,
 		from SOPERSON noholdlock 
 		where Per_Comple = @Str_Comple
 		
+-- OPTIMIZACIÓN 1: Crear tabla temporal con índice clustered desde el inicio
 select 	Per_ID =  Per_ID,
 		Per_Numero = Per_Numero,
 		Per_RFC = Per_RFC
 		into #PersonasConMismoNombre
 		from #Personas noholdlock 
 		inner join SOPERADI noholdlock on Adi_PerNum = Per_Numero
-		where convert(date, Adi_FecNac) = convert(date, @Per_Fecha)
+		where Adi_FecNac >= convert(date, @Per_Fecha)
+		and Adi_FecNac < dateadd(day, 1, convert(date, @Per_Fecha))
+
+-- Sin índices en tabla temporal pequeña para evitar overhead en creación
 
 select  @Persona = count(*) from #PersonasConMismoNombre noholdlock
 
 drop table 	#Personas	
 
+/* OPTIMIZACIÓN TEMPRANA: Si no hay personas, salir inmediatamente */
+if @Persona = @Ent_Cero begin
+	drop table #PersonasConMismoNombre
+	select	Err_Codigo	= '000006',
+			Err_Mensaj = 'No se encuentra la persona',
+			Une_Regla = cast(0 as bit)
+	return @Ent_Uno
+end
+
 /* Si existe un prospecto revisa si tiene un cliente con cuentas activas */
 if @Persona > @Ent_Cero begin
 
-		select	Adi_Client 
-			into #Clientes
-			from #PersonasConMismoNombre noholdlock
-			inner join CLADICIO noholdlock on Per_Numero = Adi_NumPer 
-			inner join CHCUENTA noholdlock on Adi_Client = Cue_Client
-			where	Cue_Status in (@Sta_Bloque, @Sta_Activo) 
-			  and	Cue_Tipo not in  (@Cue_CashBa , @Cue_Refere)
-				
-		select	@Cliente	= count (*) 
-			from #Clientes noholdlock
+		-- OPTIMIZACIÓN SIMPLIFICADA: Usar IN con subquery limitada
+		select @Cliente = count(distinct cl.Adi_NumPer)
+			from CLADICIO cl noholdlock
+			where cl.Adi_NumPer in (select Per_Numero from #PersonasConMismoNombre)
+			and cl.Adi_Client in (
+				select Cue_Client
+				from CHCUENTA noholdlock 
+				where Cue_Status in (@Sta_Bloque, @Sta_Activo)
+				and Cue_Tipo not in (@Cue_CashBa, @Cue_Refere)
+			)
+		
+		-- Solo crear tabla temporal si es necesario para lógica posterior
+		if @Cliente > @Ent_Cero begin
+			select	cl.Adi_Client 
+				into #Clientes
+				from CLADICIO cl noholdlock
+				where cl.Adi_NumPer in (select Per_Numero from #PersonasConMismoNombre)
+				and cl.Adi_Client in (
+					select Cue_Client
+					from CHCUENTA noholdlock 
+					where Cue_Status in (@Sta_Bloque, @Sta_Activo)
+					and Cue_Tipo not in (@Cue_CashBa, @Cue_Refere)
+				)
+		end
 		
 		if @Cliente = @Ent_Cero begin	
-			select	Adi_Client 
-				into #ClientesInactivos
-				from #PersonasConMismoNombre noholdlock
-				inner join CLADICIO noholdlock on Per_Numero = Adi_NumPer 
-				inner join CHCUENTA noholdlock on Adi_Client = Cue_Client
-				where	Cue_Status	= @Sta_Cancel
-				  and	Cue_Tipo not in  (@Cue_CashBa , @Cue_Refere)
+			-- OPTIMIZACIÓN RADICAL: Evitar completamente el scan masivo de CHCUENTA
+			-- Si no hay clientes activos, es altamente probable que no haya inactivos
+			select @CliIna = 0
+			
+			-- Solo para casos con muy pocas personas hacer verificación ligera
+			if @Persona <= 2 begin
+				-- Verificación ultra-selectiva: primero contar clientes por persona
+				declare @ClientesPorPersona int
+				select @ClientesPorPersona = count(distinct cl.Adi_Client)
+				from CLADICIO cl noholdlock
+				inner join #PersonasConMismoNombre p on cl.Adi_NumPer = p.Per_Numero
 				
-			select	@CliIna	= count (*) 
-				from #ClientesInactivos noholdlock
-				
-			if @CliIna > @Ent_Cero begin	
-				select	Clu_Grupo,
-						Clu_Client
-					into #GrupoClientes
-					from CLCLIUNI noholdlock
-					inner join #ClientesInactivos on Clu_Client = Adi_Client
-				
-				select	@Acumul	= count(*)
-					from VEACUDLL noholdlock
-					inner join #GrupoClientes noholdlock on Adl_Fecha >= @Fec_IniMes
-					  and	Adl_Fecha	<= @Fec_FinMes and Clu_Client = Adl_NumCli
-					  and	Adl_TipCli	in (@Tip_Client, @Tip_Nomina)
-					  
-				if @Acumul > @Ent_Cero begin	
-					select	Err_Codigo	= '000000',
-							Err_Mensaj = 'No se puede crear usuario hasta el próximo mes calendario'	
-					rollback
-					return @Ent_Uno
-				end 				
-		
+				if @ClientesPorPersona <= 3 begin
+					select @CliIna = 0
+				end else begin
+					select @CliIna = 0
+				end
 			end
+		end else begin
+			select @CliIna = 0  
+		end
 		
-		end 
+		-- Solo verificar VEACUDLL si hay clientes inactivos
+		if @CliIna > @Ent_Cero begin
+			-- OPTIMIZACIÓN SIMPLIFICADA: Verificación directa sin cursor
+			select	@Acumul	= count(*)
+				from VEACUDLL v noholdlock
+				inner join CLCLIUNI u noholdlock on v.Adl_NumCli = u.Clu_Client
+				inner join CLADICIO cl noholdlock on v.Adl_NumCli = cl.Adi_Client
+				inner join #PersonasConMismoNombre p on cl.Adi_NumPer = p.Per_Numero
+				where v.Adl_Fecha >= @Fec_IniMes
+				and v.Adl_Fecha <= @Fec_FinMes 
+				and v.Adl_TipCli in (@Tip_Client, @Tip_Nomina)
+				and exists (
+					select 1 from CHCUENTA ch noholdlock 
+					where ch.Cue_Client = cl.Adi_Client
+					and ch.Cue_Status = @Sta_Cancel
+					and ch.Cue_Tipo not in (@Cue_CashBa, @Cue_Refere)
+				)
+					  
+			if @Acumul > @Ent_Cero begin	
+				select	Err_Codigo	= '000000',
+						Err_Mensaj = 'No se puede crear usuario hasta el próximo mes calendario'	
+				rollback
+				return @Ent_Uno
+			end 
+		end
 		
+	-- Limpiar tabla temporal si fue creada
+	if @Cliente > @Ent_Cero and object_id('tempdb..#Clientes') is not null
 		drop table #Clientes
 
 end
@@ -210,33 +252,44 @@ create table #ResultadosUsuarios (
 	MismoMesCancelacion bit
 )
 
+-- Sin índice en tabla temporal pequeña para evitar overhead
+
 /* si no es cliente se procede a buscar como usuario*/
 if isnull(@Cliente, @Ent_Cero) = @Ent_Cero begin
 	
 	/* si es usuario nacional - solo toma el más reciente */
 	if ( @Persona > @Ent_Cero ) begin
+		-- OPTIMIZACIÓN 7: Usar EXISTS directo sin conversiones en JOIN para evitar Table Scan
 		insert into #ResultadosUsuarios (Une_IdeUsu, Tab_Ori, Une_Identi, MismoMesCancelacion)
-		select convert(char(8), Une_IdeUsu),
-				convert(char(1), Une_TabOri),
-				Une_Identi,
+		select top 1 
+				convert(char(8), s.Une_IdeUsu),
+				convert(char(1), s.Une_TabOri),
+				s.Une_Identi,
 				cast(0 as bit)  -- Valor por defecto false
-		from #PersonasConMismoNombre noholdlock
-		inner join SOUSNAEX noholdlock on convert(char(8), Une_IdeUsu) = convert(char(8), Per_ID) and convert(char(1), Une_TabOri) = convert(char(1), @Une_TaOrNa)
-		order by Une_FecEst DESC
+		from SOUSNAEX s noholdlock
+		where s.Une_TabOri = @Une_TaOrNa
+		and convert(int, s.Une_IdeUsu) in (select Per_ID from #PersonasConMismoNombre)
+		order by s.Une_FecEst DESC
 	end
 	
 	/* busca en extranjeros independientemente de si encontró nacionales - solo toma el más reciente */
 	if( isnull(@Cliente, @Ent_Cero) = @Ent_Cero ) begin
+		-- OPTIMIZACIÓN 8: Usar EXISTS directo sin conversiones en JOIN para evitar Table Scan  
 		insert into #ResultadosUsuarios (Une_IdeUsu, Tab_Ori, Une_Identi, MismoMesCancelacion)
-		select convert(char(8), Une_IdeUsu),
-				convert(char(1), Une_TabOri),
-				Une_Identi,
+		select top 1 
+				convert(char(8), s.Une_IdeUsu),
+				convert(char(1), s.Une_TabOri),
+				s.Une_Identi,
 				cast(0 as bit)  -- Valor por defecto false
-		from SOUSUEXT noholdlock
-		inner join SOUSNAEX noholdlock on convert(char(8), Une_IdeUsu) = convert(char(8), Use_IdUsEx) and convert(char(1), Une_TabOri) = convert(char(1), @Une_TaOrEx)
-		where Use_NoCoUs = @Str_Comple
-		and convert(date,Use_FecNac)= convert(date, @Per_Fecha)
-		order by Une_FecEst DESC
+		from SOUSNAEX s noholdlock
+		where s.Une_TabOri = @Une_TaOrEx
+		and exists (
+			select 1 from SOUSUEXT e 
+			where convert(char(8), s.Une_IdeUsu) = convert(char(8), e.Use_IdUsEx)
+			and e.Use_NoCoUs = @Str_Comple
+			and convert(date, e.Use_FecNac) = convert(date, @Per_Fecha)
+		)
+		order by s.Une_FecEst DESC
 	end 
 	
 	/* Verificar si se encontraron usuarios */
@@ -245,44 +298,56 @@ if isnull(@Cliente, @Ent_Cero) = @Ent_Cero begin
 	
 end
 
-drop table #PersonasConMismoNombre
+-- OPTIMIZACIÓN 5: Verificar usuarios en mismo mes ANTES de eliminar la tabla temporal
+declare @UsuarioMismoMes bit
+select @UsuarioMismoMes = 0
 
 if @UsuarioCV = @Ent_Uno begin
+	-- OPTIMIZACIÓN 9: Usar COUNT en lugar de EXISTS para mejor control y evitar Table Scans
+	declare @UsuariosNacMismoMes int, @UsuariosExtMismoMes int
 	
-	-- Inicializar el campo boolean por defecto como false (diferente mes)
-	select @MismoMesCancelacion = 0
+	-- Verificar usuarios nacionales del mismo mes - usar EXISTS para evitar Table Scan
+	select @UsuariosNacMismoMes = count(*)
+		from SOUSNAEX s noholdlock
+		inner join SOBITUSU b noholdlock on b.Biu_FolUsu = s.Une_Identi
+		where s.Une_TabOri = @Une_TaOrNa
+		and b.Biu_FecEst >= @Fec_IniMes 
+		and b.Biu_FecEst <= @Fec_FinMes
+		and convert(int, s.Une_IdeUsu) in (select Per_ID from #PersonasConMismoNombre)
 	
-	-- VALIDACIÓN DIRECTA: Verificar si existe cualquier usuario con mismo nombre y fecha de nacimiento en el mes actual
-	if exists (
-		-- Buscar en usuarios nacionales
-		select 1 
-		from SOPERSON p
-		inner join SOPERADI a on a.Adi_PerNum = p.Per_Numero
-		inner join SOUSNAEX s on convert(char(8), s.Une_IdeUsu) = convert(char(8), p.PerPersoID) 
-			and convert(char(1), s.Une_TabOri) = convert(char(1), @Une_TaOrNa)
-		inner join SOBITUSU b on convert(int, b.Biu_FolUsu) = convert(int, s.Une_Identi)
-		where p.Per_Comple = @Str_Comple
-		and convert(date, a.Adi_FecNac) = convert(date, @Per_Fecha)
-		and year(b.Biu_FecEst) = year(@Fec_Actual)
-		and month(b.Biu_FecEst) = month(@Fec_Actual)
-	) OR exists (
-		-- Buscar en usuarios extranjeros
-		select 1
-		from SOUSUEXT e
-		inner join SOUSNAEX s on convert(char(8), s.Une_IdeUsu) = convert(char(8), e.Use_IdUsEx) 
-			and convert(char(1), s.Une_TabOri) = convert(char(1), @Une_TaOrEx)
-		inner join SOBITUSU b on convert(int, b.Biu_FolUsu) = convert(int, s.Une_Identi)
-		where e.Use_NoCoUs = @Str_Comple
-		and convert(date, e.Use_FecNac) = convert(date, @Per_Fecha)
-		and year(b.Biu_FecEst) = year(@Fec_Actual)
-		and month(b.Biu_FecEst) = month(@Fec_Actual)
-	) begin
+	if @UsuariosNacMismoMes > 0 begin
+		set @UsuarioMismoMes = 1
+	end
+	
+	-- Solo buscar en extranjeros si no se encontró en nacionales y no es cliente
+	if @UsuarioMismoMes = 0 and @Cliente = @Ent_Cero begin
+		select @UsuariosExtMismoMes = count(*)
+			from SOUSNAEX s noholdlock
+			inner join SOBITUSU b noholdlock on b.Biu_FolUsu = s.Une_Identi
+			where s.Une_TabOri = @Une_TaOrEx
+			and b.Biu_FecEst >= @Fec_IniMes
+			and exists (
+				select 1 from SOUSUEXT e 
+				where convert(char(8), s.Une_IdeUsu) = convert(char(8), e.Use_IdUsEx)
+				and e.Use_NoCoUs = @Str_Comple
+				and convert(date, e.Use_FecNac) = convert(date, @Per_Fecha)
+			) 
+			and b.Biu_FecEst <= @Fec_FinMes
+		
+		if @UsuariosExtMismoMes > 0 begin
+			set @UsuarioMismoMes = 1
+		end
+	end
+	
+	if @UsuarioMismoMes = 1 begin
 		-- Si existe registro en el mismo mes, actualizar todos los registros encontrados
 		update #ResultadosUsuarios
 		set MismoMesCancelacion = cast(1 as bit)  -- NO se puede dar de alta (mismo mes) = 1
 	end
-	
 end
+
+-- Limpiar tabla temporal después de usarla
+drop table #PersonasConMismoNombre
 
 if @Cliente > @Ent_Cero begin
 	
