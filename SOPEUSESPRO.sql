@@ -259,7 +259,6 @@ if isnull(@Cliente, @Ent_Cero) = @Ent_Cero begin
 	
 	/* si es usuario nacional - solo toma el más reciente */
 	if ( @Persona > @Ent_Cero ) begin
-		-- OPTIMIZACIÓN 7: Usar EXISTS directo sin conversiones en JOIN para evitar Table Scan
 		insert into #ResultadosUsuarios (Une_IdeUsu, Tab_Ori, Une_Identi, MismoMesCancelacion)
 		select top 1 
 				convert(char(8), s.Une_IdeUsu),
@@ -273,8 +272,7 @@ if isnull(@Cliente, @Ent_Cero) = @Ent_Cero begin
 	end
 	
 	/* busca en extranjeros independientemente de si encontró nacionales - solo toma el más reciente */
-	if( isnull(@Cliente, @Ent_Cero) = @Ent_Cero ) begin
-		-- OPTIMIZACIÓN 8: Usar EXISTS directo sin conversiones en JOIN para evitar Table Scan  
+	if( isnull(@Cliente, @Ent_Cero) = @Ent_Cero ) begin 
 		insert into #ResultadosUsuarios (Une_IdeUsu, Tab_Ori, Une_Identi, MismoMesCancelacion)
 		select top 1 
 				convert(char(8), s.Une_IdeUsu),
@@ -284,7 +282,7 @@ if isnull(@Cliente, @Ent_Cero) = @Ent_Cero begin
 		from SOUSNAEX s noholdlock
 		where s.Une_TabOri = @Une_TaOrEx
 		and exists (
-			select 1 from SOUSUEXT e 
+			select 1 from SOUSUEXT e noholdlock
 			where convert(char(8), s.Une_IdeUsu) = convert(char(8), e.Use_IdUsEx)
 			and e.Use_NoCoUs = @Str_Comple
 			and convert(date, e.Use_FecNac) = convert(date, @Per_Fecha)
@@ -327,7 +325,7 @@ if @UsuarioCV = @Ent_Uno begin
 			where s.Une_TabOri = @Une_TaOrEx
 			and b.Biu_FecEst >= @Fec_IniMes
 			and exists (
-				select 1 from SOUSUEXT e 
+				select 1 from SOUSUEXT e noholdlock
 				where convert(char(8), s.Une_IdeUsu) = convert(char(8), e.Use_IdUsEx)
 				and e.Use_NoCoUs = @Str_Comple
 				and convert(date, e.Use_FecNac) = convert(date, @Per_Fecha)
