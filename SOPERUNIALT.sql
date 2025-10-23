@@ -244,14 +244,14 @@ if (@Per_Tipo	= @Per_Moral) and (@Per_RazSoc	= @Str_Vacio) begin
 	return 1
 end
 
-if (@Per_Tipo like @Str_23) and (@Per_Nombre	= @Str_Vacio) begin
+if (@Per_Tipo = @Per_Fisica) and (@Per_Nombre	= @Str_Vacio) begin
 	select	Err_Codigo	= '000003',
 			Err_Mensaj	= 'Proporcione el Nombre'
 	rollback
 	return 1
 end
 
-if (@Per_Tipo like @Str_23) and (@Per_ApePat	= @Str_Vacio) begin
+if (@Per_Tipo = @Per_Fisica) and (@Per_ApePat = @Str_Vacio) begin
 	select	Err_Codigo	= '000004',
 			Err_Mensaj	= 'Proporcione el Apellido paterno'
 	rollback
