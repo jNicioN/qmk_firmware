@@ -136,7 +136,7 @@ select 	Per_ID =   PerPersoID ,
 		from SOPERSON noholdlock 
 		where Per_Comple = @Str_Comple
 		
--- OPTIMIZACIÓN 1: Crear tabla temporal con índice clustered desde el inicio
+-- Crear tabla temporal con índice clustered desde el inicio
 select 	Per_ID =  Per_ID,
 		Per_Numero = Per_Numero,
 		Per_RFC = Per_RFC
@@ -152,13 +152,24 @@ select  @Persona = count(*) from #PersonasConMismoNombre noholdlock
 
 drop table 	#Personas	
 
-/* OPTIMIZACIÓN TEMPRANA: Si no hay personas, salir inmediatamente */
+/* Si no hay personas nacionales, verificar extranjeros antes de salir */
 if @Persona = @Ent_Cero begin
-	drop table #PersonasConMismoNombre
-	select	Err_Codigo	= '000006',
-			Err_Mensaj = 'No se encuentra la persona',
-			Une_Regla = cast(0 as bit)
-	return @Ent_Uno
+	-- Verificar si existe la persona como extranjera (por nombre completo y fecha de nacimiento)
+	declare @PersonaExt int
+	select @PersonaExt = count(*)
+	from SOUSUEXT e noholdlock
+	where e.Use_NoCoUs = @Str_Comple
+	and convert(date, e.Use_FecNac) = convert(date, @Per_Fecha)
+
+	-- Si tampoco existe como extranjera, entonces sí retornamos el error
+	if @PersonaExt = @Ent_Cero begin
+		drop table #PersonasConMismoNombre
+		select	Err_Codigo	= '000006',
+				Err_Mensaj = 'No se encuentra la persona',
+				Une_Regla = cast(0 as bit)
+		return @Ent_Uno
+	end
+	-- Si existe como extranjera, continuamos con el flujo
 end
 
 /* Si existe un prospecto revisa si tiene un cliente con cuentas activas */
@@ -176,7 +187,7 @@ if @Persona > @Ent_Cero begin
 			)
 		
 		-- Solo crear tabla temporal si es necesario para lógica posterior
-		if @Cliente > @Ent_Cero begin
+		if isnull(@Cliente, @Ent_Cero) = @Ent_Cero begin
 			select	cl.Adi_Client 
 				into #Clientes
 				from CLADICIO cl noholdlock
@@ -189,8 +200,8 @@ if @Persona > @Ent_Cero begin
 				)
 		end
 		
-		if @Cliente = @Ent_Cero begin	
-			-- OPTIMIZACIÓN RADICAL: Evitar completamente el scan masivo de CHCUENTA
+		if isnull(@Cliente, @Ent_Cero) = @Ent_Cero begin	
+			-- Evitar completamente el scan masivo de CHCUENTA
 			-- Si no hay clientes activos, es altamente probable que no haya inactivos
 			select @CliIna = 0
 			
@@ -239,7 +250,7 @@ if @Persona > @Ent_Cero begin
 		end
 		
 	-- Limpiar tabla temporal si fue creada
-	if @Cliente > @Ent_Cero and object_id('tempdb..#Clientes') is not null
+	if isnull(@Cliente, @Ent_Cero) = @Ent_Cero and object_id('tempdb..#Clientes') is not null
 		drop table #Clientes
 
 end
@@ -251,8 +262,6 @@ create table #ResultadosUsuarios (
 	Une_Identi int,
 	MismoMesCancelacion bit
 )
-
--- Sin índice en tabla temporal pequeña para evitar overhead
 
 /* si no es cliente se procede a buscar como usuario*/
 if isnull(@Cliente, @Ent_Cero) = @Ent_Cero begin
@@ -296,7 +305,7 @@ if isnull(@Cliente, @Ent_Cero) = @Ent_Cero begin
 	
 end
 
--- OPTIMIZACIÓN 5: Verificar usuarios en mismo mes ANTES de eliminar la tabla temporal
+-- Verificar usuarios en mismo mes ANTES de eliminar la tabla temporal
 declare @UsuarioMismoMes bit
 select @UsuarioMismoMes = 0
 
@@ -318,7 +327,7 @@ if @UsuarioCV = @Ent_Uno begin
 	end
 	
 	-- Solo buscar en extranjeros si no se encontró en nacionales y no es cliente
-	if @UsuarioMismoMes = 0 and @Cliente = @Ent_Cero begin
+	if @UsuarioMismoMes = 0 and isnull(@Cliente, @Ent_Cero) = @Ent_Cero begin
 		select @UsuariosExtMismoMes = count(*)
 			from SOUSNAEX s noholdlock
 			inner join SOBITUSU b noholdlock on b.Biu_FolUsu = s.Une_Identi
