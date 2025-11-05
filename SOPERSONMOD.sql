@@ -46,6 +46,12 @@ as
 ** DESCRIPCION: **Modificación de Apoderados** 							****
 ***************************************************************************/
 /** REFERENCIAS:
+****************************************************************************
+** Modifico:	Javier Ceron											****
+** Fecha:		03/07/2024												****
+** Descripcion:	Se agrega validacion de tamaño de nombre para guardar 	****
+				en CLNOMLAR												****
+** Help:		TRACL-9032												****
  ***************************************************************************
 ** Modifico:	Francisco Euan											****
 ** Fecha:		14/04/2025												****
@@ -418,6 +424,7 @@ end
 
 select	@Per_RFC	= isnull(@Per_RFC, @Str_Vacio)
 select	@Per_RFC	= ltrim(rtrim(@Per_RFC))
+select	@Per_RFC	= UPPER(@Per_RFC)
 
 /* Validar Datos Personales */
 if @Modulo not in (@Pan_DatCon, @Pan_Promot, @Pan_PerCli, @Pan_ActFin) begin
@@ -758,6 +765,11 @@ from CLADICIO noholdlock
 where Adi_NumPer = @Per_Numero
 
 select @Aux_Adi_NumPer = isnull(@Aux_Adi_NumPer, @Str_Vacio)
+
+/* Normalización CURP en mayúsculas */
+select @Per_CURP = isnull(@Per_CURP, @Str_Vacio)
+select @Per_CURP = ltrim(rtrim(@Per_CURP))
+select @Per_CURP = UPPER(@Per_CURP)
 
 if(@Per_Tipo <> @Per_Moral and @Aux_Adi_NumPer <> @Str_Vacio) begin 
 	exec @Status = CLCURCLIVAL
