@@ -46,7 +46,14 @@ as
 /***************************************************************************/
 /** DESCRIPCION: ** Altas de Apoderados **						  		   */
 /***************************************************************************/
-/** REFERENCIAS:														   */
+/** REFERENCIAS:				
+****************************************************************************
+** Modifico:	Javier Eduardo Ceron Rangel								****
+** Fecha:		04/11/2025												****
+** Descripcion:	NORMALIZACION DE CAMPOS  - HOMOLOGACION MAYUSCULAS      ****
+** 				Aplicar UPPER() a RFC, CURP, nombres y apellidos      	****
+**              para consistencia de datos      						****
+** Help:		TRACL-14540										        ****										   */
 /****************************************************************************
 ** Modifico:	Javier Ceron											****
 ** Fecha:		03/07/2024												****

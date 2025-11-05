@@ -47,11 +47,12 @@ as
 ***************************************************************************/
 /** REFERENCIAS:
 ****************************************************************************
-** Modifico:	Javier Ceron											****
-** Fecha:		03/07/2024												****
-** Descripcion:	Se agrega validacion de tamaño de nombre para guardar 	****
-				en CLNOMLAR												****
-** Help:		TRACL-9032												****
+** Modifico:	Javier Eduardo Ceron Rangel								****
+** Fecha:		04/11/2025												****
+** Descripcion:	NORMALIZACION DE CAMPOS  - HOMOLOGACION MAYUSCULAS      ****
+** 				Aplicar UPPER() a RFC, CURP, nombres y apellidos      	****
+**              para consistencia de datos      						****
+** Help:		TRACL-14540										        ****
  ***************************************************************************
 ** Modifico:	Francisco Euan											****
 ** Fecha:		14/04/2025												****
