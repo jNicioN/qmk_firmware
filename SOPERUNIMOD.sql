@@ -89,6 +89,12 @@ as
 /***************************************************************************/
 /** REFERENCIAS: 												  
 ****************************************************************************
+** Modificó:	Javier E Ceron 									        ****
+** Fecha:		22/Oct/2025										        ****
+** Help: 		TRACL-14410										        ****
+** Descripcion:	Se agrega validación para que  				            ****
+**				Per_Tipo acepte sólo 1 o 2					            ****
+****************************************************************************
 ** Modificó:	Francisco Euan          								****
 ** Fecha:		14/Marzo/2025							        		****
 ** Help:		TCELNC-23684								    		****
@@ -218,6 +224,7 @@ declare	@Str_Vacio	char(1),		/*	Declaracion de Constantes	*/
 		@RFC_PMExtr	char(12),
 		@Tip_Titula char(1),
 		@Str_No123	char(6),
+		@Str_No12	char(6),
 		@Str_23		char(4),
 		@Ent_180	int,
 		@Tip_Mascul char(1),
@@ -243,6 +250,7 @@ select	@Str_Vacio	= '',			/* String Vacio	*/
 		@Tip_Hered	= 'H',			/* Tipo herederos legales */
 		@RFC_PMExtr	= 'EXT990101NI9', /* Rfc para Persona MOral Extranjera */	
 		@Str_No123	= '[^123]',
+		@Str_No12	= '[^12]',
 	 	@Str_23		= '[23]',
 	 	@Ent_180	= 180,
 	 	@Tip_Mascul = 'M',          /*  Valor para sexo Masculino */
@@ -275,36 +283,45 @@ if @NumPer = @Str_Vacio begin
 	return @Ent_Uno
 end
 
+/* Validación del tipo de persona */
+if (@Per_Tipo like @Str_No12) begin
+	select	Err_Codigo	= '000002',
+			Err_Mensaj	= 'Tipo de Persona incorrecto',
+			Err_Variab	= 'Per_Tipo'
+	rollback
+	return @Ent_Uno
+end
+
 if (@Per_Tipo = @Per_Moral) and (@Per_RazSoc = @Str_Vacio) begin
-	select	Err_Codigo	= '000001',
+	select	Err_Codigo	= '000003',
 			Err_Mensaj	= 'Proporcione la Razon social'
 	rollback
 	return @Ent_Uno
 end
 
-if (@Per_Tipo like @Str_23) and (@Per_Nombre = @Str_Vacio) begin
-	select	Err_Codigo	= '000002',
+if (@Per_Tipo = @Per_Fisica) and (@Per_Nombre = @Str_Vacio) begin
+	select	Err_Codigo	= '000004',
 			Err_Mensaj	= 'Proporcione el Nombre'
 	rollback
 	return @Ent_Uno
 end
 
-if (@Per_Tipo like @Str_23) and (@Per_ApePat = @Str_Vacio) begin
-	select	Err_Codigo	= '000003',
+if (@Per_Tipo = @Per_Fisica) and (@Per_ApePat = @Str_Vacio) begin
+	select	Err_Codigo	= '000005',
 			Err_Mensaj	= 'Proporcione el Apellido paterno'
 	rollback
 	return @Ent_Uno
 end
 
 if @Per_Tipo = @Per_Moral and @Per_RFC = @Str_Vacio begin
-	select	Err_Codigo	= '000004',
+	select	Err_Codigo	= '000006',
 			Err_Mensaj	= 'Proporcione el RFC'
 	rollback
 	return @Ent_Uno
 end
 
 if @Per_Tipo <> @Per_Moral and @Adi_Sexo not in (@Tip_Mascul, @Tip_Femeni) begin
-	select	Err_Codigo	= '000005',
+	select	Err_Codigo	= '000007',
 			Err_Mensaj 	= 'Sexo no válido'
 	rollback
 	return @Ent_Uno
