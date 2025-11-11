@@ -405,10 +405,6 @@ if (@Per_Tipo like @Str_23) and (@Per_ApeMat = @Str_Vacio) and @Cob_Tipo <> @Tip
 	return @Ent_Uno
 end
 
-select	@Per_RFC	= isnull(@Per_RFC, @Str_Vacio)
-select	@Per_RFC	= ltrim(rtrim(@Per_RFC))
-select	@Per_RFC	= UPPER(@Per_RFC)
-
 if @Per_Tipo = @Per_Moral and @Per_RFC = @Str_Vacio begin
 	select	Err_Codigo	= '000006',
 			Err_Mensaj	= 'Proporcione el RFC' + @Err_Descri,
@@ -424,6 +420,11 @@ if (@Per_Tipo like @Str_23) and @Per_RFC = @Str_Vacio begin
 			Err_Variab	= 'Per_RFC'
 	rollback
 	return @Ent_Uno
+end
+
+if @Per_RFC <> @Str_Vacio
+    select @Per_RFC = ltrim(rtrim(@Per_RFC))
+    select @Per_RFC = UPPER(@Per_RFC)
 end
 
 if (Convert(int, @Per_Numero) > @Ent_Cero) begin
@@ -684,10 +685,10 @@ select @Aux_CLPAGECL = convert(int, Pgc_Valor)
     from CLPAGECL noholdlock 
     where Pgc_Nombre = @Validacion_CURP
 
-/* Normalización CURP en mayúsculas */
-select @Per_CURP = isnull(@Per_CURP, @Str_Vacio)
-select @Per_CURP = ltrim(rtrim(@Per_CURP))
-select @Per_CURP = UPPER(@Per_CURP)
+/* Normalización CURP en mayúsculas - Solo para personas físicas */
+if @Per_Tipo <> @Per_Moral begin
+	select @Per_CURP = UPPER(@Per_CURP)
+end
 
 /*Validar si la Validacion de CURP esta activa*/
 if(@Aux_CLPAGECL= @Ent_Uno)begin

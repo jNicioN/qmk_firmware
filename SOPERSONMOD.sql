@@ -423,10 +423,6 @@ if @Tip_Proces = @Tip_CueChe and @Cob_Tipo = @Tip_Titula begin
 	select	@Per_Nacion	= @Nacion
 end
 
-select	@Per_RFC	= isnull(@Per_RFC, @Str_Vacio)
-select	@Per_RFC	= ltrim(rtrim(@Per_RFC))
-select	@Per_RFC	= UPPER(@Per_RFC)
-
 /* Validar Datos Personales */
 if @Modulo not in (@Pan_DatCon, @Pan_Promot, @Pan_PerCli, @Pan_ActFin) begin
 
@@ -502,6 +498,11 @@ if @Modulo not in (@Pan_DatCon, @Pan_Promot, @Pan_PerCli, @Pan_ActFin) begin
 		end
 	end
 
+end
+
+if @Per_RFC <> @Str_Vacio
+    select @Per_RFC = ltrim(rtrim(@Per_RFC))
+    select @Per_RFC = UPPER(@Per_RFC)
 end
 
 /* Estructura Basica para el SOPERSON*/
@@ -767,10 +768,10 @@ where Adi_NumPer = @Per_Numero
 
 select @Aux_Adi_NumPer = isnull(@Aux_Adi_NumPer, @Str_Vacio)
 
-/* Normalización CURP en mayúsculas */
-select @Per_CURP = isnull(@Per_CURP, @Str_Vacio)
-select @Per_CURP = ltrim(rtrim(@Per_CURP))
-select @Per_CURP = UPPER(@Per_CURP)
+/* Normalización CURP en mayúsculas - Solo para personas físicas */
+if @Per_Tipo <> @Per_Moral begin
+	select @Per_CURP = UPPER(@Per_CURP)
+end
 
 if(@Per_Tipo <> @Per_Moral and @Aux_Adi_NumPer <> @Str_Vacio) begin 
 	exec @Status = CLCURCLIVAL
