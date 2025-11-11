@@ -422,7 +422,7 @@ if (@Per_Tipo like @Str_23) and @Per_RFC = @Str_Vacio begin
 	return @Ent_Uno
 end
 
-if @Per_RFC <> @Str_Vacio
+if @Per_RFC <> @Str_Vacio begin
     select @Per_RFC = ltrim(rtrim(@Per_RFC))
     select @Per_RFC = UPPER(@Per_RFC)
 end

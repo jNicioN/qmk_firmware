@@ -500,7 +500,7 @@ if @Modulo not in (@Pan_DatCon, @Pan_Promot, @Pan_PerCli, @Pan_ActFin) begin
 
 end
 
-if @Per_RFC <> @Str_Vacio
+if @Per_RFC <> @Str_Vacio begin
     select @Per_RFC = ltrim(rtrim(@Per_RFC))
     select @Per_RFC = UPPER(@Per_RFC)
 end
