@@ -1,0 +1,36 @@
+name: Inactivo
+
+# yamllint disable-line rule:truthy
+on:
+  schedule:
+    - cron: "0 8 * * *"
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  stale:
+    name: 🧹Limpieza de PR inactivos
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🚀 Ejecución de inhactivos
+        uses: actions/stale@v10.1.0
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          days-before-stale: 30
+          days-before-close: 7
+          remove-stale-when-updated: true
+          stale-issue-label: "inactivo"
+          exempt-issue-labels: "no-inactivo"
+          stale-issue-message: >
+            Como no ha habido actividad reciente en esta rama,
+            hemos cerrado algunas de las ramas más antiguas e inactivas.
+            Asegúrate de actualizar a la última versión y comprueba si se soluciona el problema.
+            Si funciona, déjanos un comentario 👍
+            Esta rama ha sido marcada como inactiva y se cerrará si no hay más actividad. ¡Gracias!
+          stale-pr-label: "inactivo"
+          exempt-pr-labels: "no-inactivo"
+          stale-pr-message: >
+            No ha habido actividad reciente en esta solicitud de extracción.
+            Esta solicitud de extracción se ha marcado automáticamente como obsoleta debido a esto.
+            Se cerrará si no se registra más actividad en los próximos 7 días.
+            Gracias por sus contribuciones.
