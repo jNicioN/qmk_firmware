@@ -22,7 +22,7 @@ as
 ********************************************************************
 ** Modificó:	Angel Encalada									****
 ** Fecha:		18/09/2025									   	****
-** Help: 		59458          									****
+** Help: 		60689          									****
 ** Descripcion:	Se agrega el retorno del campo  	            ****
 ** Per_Email de SOPERSON en las consultas L4 y C6			 	****
 ********************************************************************
