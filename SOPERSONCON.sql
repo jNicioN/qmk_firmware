@@ -20,6 +20,12 @@ as
 ********************************************************************
 ** REFERENCIAS:													****
 ********************************************************************
+** Modificó:	Angel Encalada									****
+** Fecha:		18/09/2025									   	****
+** Help: 		60689          									****
+** Descripcion:	Se agrega el retorno del campo  	            ****
+** Per_Email de SOPERSON en las consultas L4 y C6			 	****
+********************************************************************
 ** Modificó:	Carlos Copto									****
 ** Fecha:		03/09/2025									   	****
 ** Help: 		58989          									****
@@ -611,7 +617,7 @@ if @Tip_ConTip = @Str_LetraC begin
 				Per_FecNac	= Adi_FecNac,
 				PerPersoID, Per_Tipo, 	Adi_Sexo,	Per_CURP,	Per_Comple,
 				Per_Entida, Per_LadTel, Adi_FecCon, Per_ActINE, Adi_FecCon,
-				Per_RazSoc, Per_Numero 
+				Per_RazSoc, Per_Numero, Per_Email 
 			from SOPERSON noholdlock
 			left join SOPERADI noholdlock on Per_Numero	= Adi_PerNum
 			where	Per_RFC	= @Per_RFC
@@ -1173,7 +1179,7 @@ end else begin
 					Per_Entida,	Per_Locali,	Per_Coloni,	Per_CodPos,	Per_Calle,
 					Per_CalNum,	Per_Telefo,	Per_RFC,	Adi_FecNac,	Adi_CaNuIn,
 					day(Adi_FecNac) DiaNac, month(Adi_FecNac) as MesNac, year(Adi_FecNac) as AnioNac,
-					Per_Titulo, Adi_NacExt
+					Per_Titulo, Adi_NacExt, Per_Email, PerPersoID
 				from SOPERSON noholdlock,
 					 SOPERADI noholdlock
 				where	Per_Numero	*= Adi_PerNum
