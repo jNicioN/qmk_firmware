@@ -18,6 +18,11 @@ as
 ***************************************************************************/
 /* REFERENCIAS:
 ****************************************************************************
+** Modificó:	Jovani Duque											****
+** Fecha:		29/Dic/2025												****
+** Jira Key:	TCPC-22363												****
+** Descripción:	Se agrega tabla AUAMORTI,CRPAGAMO & CRAMOHIP			****
+****************************************************************************
 ** Modificó:	Denisse Castillo										****
 ** Fecha:		21/Feb/2025												****
 ** Jira Key:	TCPC-17633												****
@@ -94,6 +99,8 @@ declare	@Ent_Cero	int,
 		@Sta_P		char(1),
 		@Sta_R		char(1),
 		@Sta_C		char(1),
+		@Amo_TipAut	char(1),
+		@Amo_TipSeg char(1),
 		
 		@Tip_IniPro	char(3),
 		@Tip_Respa1	char(3),
@@ -191,7 +198,13 @@ declare	@Ent_Cero	int,
 		@Tip_ABPRCO char(3),
 		@Tip_Resp48	char(3),
 		@Tip_AUREMA char(3),
-		
+		@Tip_Resp49	char(3),
+		@Tip_AUAMOR char(3),
+		@Tip_Resp50	char(3),
+		@Tip_CRPAGA char(3),
+		@Tip_Resp51	char(3),
+		@Tip_CRAMOH char(3),
+
 		@Des_SODIFE	varchar(33),
 		@Tab_SODIFE	char(8),
 		
@@ -207,7 +220,7 @@ declare	@Ent_Cero	int,
 		@Cam_ABAmCr	char(10),
 		@Cam_ABAmNu	char(10),
 		@Cam_ABPaFe	char(10),
-		@Cam_ABPasi	char(10), 
+		@Cam_ABPasi	char(10),
 		@Cam_ABPaNu	char(10),
 		@Cam_ABAmor	char(10),
 		@Cam_MovFec	char(10),
@@ -322,7 +335,15 @@ declare	@Ent_Cero	int,
         @Cam_ProAmor char(10),
         @Cam_ReaCon char(10),
 		@Cam_FecRen char(10),
-		
+		@Cam_ConCre	char(10),
+		@Cam_PAPaga	char(10),
+		@Cam_PANume	char(10),
+		@Cam_PAFePa	char(10),
+		@Cam_HICont	char(10),
+		@Cam_HINume	char(10),
+		@Cam_HIFePa	char(10),
+
+
 		@Tab_FAFACT	char(8),
 		@Tab_FADOCU	char(8),
 		@Tab_CRAMOR	char(8),
@@ -366,6 +387,9 @@ declare	@Ent_Cero	int,
 		@Tab_TESUBA	char(8),
 		@Tab_ABPRCO char(8),
 		@Tab_AUREMA char(8),
+		@Tab_AUAMOR char(8),
+		@Tab_CRPAGA char(8),
+		@Tab_CRAMOH char(8),
 		@Ent_CieOch	smallint
 
 -- Asignación de Constantes
@@ -392,7 +416,9 @@ select	@Ent_Cero	= 0,				-- Entero Cero
 		@Sta_P		= 'P',				/* Estatus: P - Pendiente */
 		@Sta_R		= 'R',				/* Estatus: R - Registrado*/
 		@Sta_C		= 'C',				/* Estatus: C - Cancelado */
-		
+		--@Amo_TipAut	= 'A',				/* Tipo de Amortizacion: A - Auto */
+		--@Amo_TipSeg	= 'S',				/* Tipo de Amortizacion: S - Seguro */
+
 		@Tip_IniPro	= '000',			-- Inicio del Proceso de Actualizacion
 		@Tip_SODIFE	= '001',			-- Registro del dia SODIAFES
 		@Tip_Respa1	= '002',			-- Respaldo CHREMESA
@@ -489,6 +515,12 @@ select	@Ent_Cero	= 0,				-- Entero Cero
 		@Tip_ABPRCO	= '093',			-- Actualización ABPRCOAM		
 		@Tip_Resp48	= '094',			-- Respaldo AURENMAS
 		@Tip_AUREMA	= '095',			-- Actualización AURENMAS	
+		@Tip_Resp49	= '096',			-- Respaldo AUAMORTI
+		@Tip_AUAMOR	= '097',			-- Actualización AUAMORTI
+		@Tip_Resp50	= '098',			-- Respaldo CRPAGAMO
+		@Tip_CRPAGA	= '099',			-- Actualización CRPAGAMO
+		@Tip_Resp51	= '100',			-- Respaldo CRAMOHIP
+		@Tip_CRAMOH	= '101',			-- Actualización CRAMOHIP
 
 		
 		@Tab_CHREME	= 'CHREMESA',
@@ -539,13 +571,16 @@ select	@Ent_Cero	= 0,				-- Entero Cero
 		@Tab_ABPRCO	= 'ABPRCOAM',
 		@Tab_SODIFE	= 'SODIAFES',
 		@Tab_AUREMA	= 'AURENMAS',
-		
+		@Tab_AUAMOR	= 'AUAMORTI',
+		@Tab_CRPAGA	= 'CRPAGAMO',
+		@Tab_CRAMOH	= 'CRAMOHIP',
+
 		@Cam_FePaFi	= 'Rem_FePaFi',
 		@Cam_CueRem	= 'Rem_CueRem',
 		@Cam_NumChe	= 'Rem_NumChe',
 		@Cam_ABFePa	= 'Amo_FecPag',
 		@Cam_ABAmCr	= 'Amo_Credit',
-		@Cam_ABAmNu	= 'Amo_Numero',	
+		@Cam_ABAmNu	= 'Amo_Numero',
 		@Cam_ABPaFe	= 'Paa_FecPag',
 		@Cam_ABPasi	= 'Paa_Pasivo',
 		@Cam_ABPaNu	= 'Paa_Numero',
@@ -662,6 +697,13 @@ select	@Ent_Cero	= 0,				-- Entero Cero
         @Cam_ProAmor = 'Pro_Amorti',
         @Cam_ReaCon = 'Rea_Contra',
 		@Cam_FecRen = 'Rea_FecRen',
+		@Cam_ConCre = 'Amo_Contra',
+		@Cam_PAPaga	= 'Pam_Pagare',
+		@Cam_PANume	= 'Pam_Numero',
+		@Cam_PAFePa	= 'Pam_FecPag',
+		@Cam_HICont	= 'Amh_Contra',
+		@Cam_HINume	= 'Amh_Numero',
+		@Cam_HIFePa	= 'Amh_FecPag',
 		@Ent_CieOch = 108
 
 select	@Fec_IniPro	= getdate(),
@@ -767,7 +809,9 @@ if @Var_Contin = @Sta_Si begin
 			@Fec_IniPro	= getdate()
 	
 	-- respaldamos
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_CHREME, 	@Cam_CueRem,	Rem_CueRem,		@Cam_NumChe,	Rem_NumChe,
 			@Cam_FePaFi,	Rem_FePaFi,		@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -845,7 +889,9 @@ if @Var_Contin = @Sta_Si begin
 			@Fec_IniPro	= getdate()
 
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_ABAMOR, 	@Cam_ABAmCr,	Amo_Credit,		@Cam_ABAmNu,	Amo_Numero,
 			@Cam_ABFePa,	Amo_FecPag,		@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -924,7 +970,9 @@ if @Var_Contin = @Sta_Si begin
 			@Fec_IniPro	= getdate()
 	
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_ABPASA, 	@Cam_ABPasi,	Paa_Pasivo,		@Cam_ABPaNu,	Paa_Numero,
 			@Cam_ABPaFe,	Paa_FecPag,		@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -1004,7 +1052,9 @@ if @Var_Contin = @Sta_Si begin
 			@Fec_IniPro	= getdate()
 
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_ABAMOT, 	@Cam_ABAmCr,	Amo_Credit,		@Cam_ABAmor,	Amo_Amorti,
 			@Cam_ABFePa,	Amo_FecPag, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -1082,7 +1132,9 @@ if @Var_Contin = @Sta_Si begin
 			@Fec_IniPro	= getdate()
 
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_FAFACT, 	@Cam_FaNume,	Fac_Numero,		@Cam_FaCont,	Fac_Contra,
 			@Cam_FaFeVe,	Fac_FecVen, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -1154,7 +1206,7 @@ if @Status <> @Ent_Cero begin
 	return @Ent_Uno
 end
 
-if @Var_Contin = @Sta_Si begin	
+if @Var_Contin = @Sta_Si begin
 	begin transaction
 	select	@Pro_Descri	= @Des_Respal + @Str_Espaci + @Tab_FADOCU,
 			@Fec_IniPro	= getdate()
@@ -1238,7 +1290,9 @@ if @Var_Contin = @Sta_Si begin
 			@Fec_IniPro	= getdate()
 
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_CRAMOR, 	@Cam_ABAmCr,	Amo_Credit,		@Cam_ABAmNu,	Amo_Numero,
 			@Cam_ABFePa,	Amo_FecPag, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -1395,7 +1449,9 @@ if @Var_Contin = @Sta_Si begin
 			@Fec_IniPro	= getdate()
 
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_CRREGA, 	@Cam_ABAmCr,	Amo_Credit,		@Cam_ABAmNu,	Amo_Numero,
 			@Cam_ABFePa,	Amo_FecPag, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -1473,7 +1529,9 @@ if @Var_Contin = @Sta_Si begin
 			@Fec_IniPro	= getdate()
 
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_CCAMOR, 	@Cam_ABAmCr,	Amo_Credit,		@Cam_ABAmNu,	Amo_Numero,
 			@Cam_ABFePa,	Amo_FecPag, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -1551,7 +1609,9 @@ if @Var_Contin = @Sta_Si begin
 			@Fec_IniPro	= getdate()
 
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_CRINCR, 	@Cam_CriCre,	Cri_Credit,		@Cam_CriInv,	Cri_Invers,
 			@Cam_CriFeV,	Cri_FecVen, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -1627,7 +1687,9 @@ if @Var_Contin = @Sta_Si begin
 			@Fec_IniPro	= getdate()
 
 	-- Respaldo Inv_FecIni
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_FDINVE, 	@Cam_InnCon,	Inv_Contra,		@Cam_InvNum,	Inv_Numero,
 			@Cam_InFeIn,	Inv_FecIni, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -1636,7 +1698,9 @@ if @Var_Contin = @Sta_Si begin
 	  and Inv_Status in (@Sta_N, @Sta_M, @Sta_P, @Sta_R)
 
 	-- Respaldo Inv_FecVen
-	insert into SOREDIFE			
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_FDINVE, 	@Cam_InnCon,	Inv_Contra,		@Cam_InvNum,	Inv_Numero,
 			@Cam_InFeVe,	Inv_FecVen, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -1727,7 +1791,9 @@ if @Var_Contin = @Sta_Si begin
 			@Fec_IniPro	= getdate()
 			
 	-- Respaldo Amo_FecIni
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_CEAMOR, 	@Cam_AmoInv,	Amo_Invers,		@Cam_ABAmNu,	Amo_Numero,
 			@Cam_AmFeIn,	Amo_FecIni, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -1736,7 +1802,9 @@ if @Var_Contin = @Sta_Si begin
 	  and Amo_Status = @Sta_N
 			
 	-- Respaldo Amo_FecVen
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_CEAMOR, 	@Cam_AmoInv,	Amo_Invers,		@Cam_ABAmNu,	Amo_Numero,
 			@Cam_AmFeVe,	Amo_FecVen, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -1827,7 +1895,9 @@ if @Var_Contin = @Sta_Si begin
 			@Fec_IniPro	= getdate()
 
 	-- Respaldo Inv_FecVen
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_CEINVE, 	@Cam_InvNum,	Inv_Numero,		@Str_Vacio,		@Str_Vacio,
 			@Cam_InFeVe,	Inv_FecVen, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -1903,7 +1973,9 @@ if @Var_Contin = @Sta_Si begin
 			@Fec_IniPro	= getdate()
 
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_CSREGT, 	@Cam_ReNuAu,	Reg_NumAut,		@Cam_RegFol,	Reg_Folio,
 			@Cam_ReFeCo,	Reg_FecCon, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -1978,7 +2050,9 @@ if @Var_Contin = @Sta_Si begin
 			@Fec_IniPro	= getdate()
 
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_ININVE, 	@Cam_InvNum,	Inv_Numero,		@Str_Vacio,		@Str_Vacio,
 			@Cam_InFeVe,	Inv_FecVen, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -2056,7 +2130,9 @@ if @Var_Contin = @Sta_Si begin
 			@Fec_IniPro	= getdate()
 
 	-- Respaldo  Inv_FecIni
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_MDINVE, 	@Cam_InvNum,	Inv_Numero,		@Str_Vacio,		@Str_Vacio,
 			@Cam_InFeIn,	Inv_FecIni, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -2065,7 +2141,9 @@ if @Var_Contin = @Sta_Si begin
 	  and Inv_Status = @Sta_N
 
 	-- Respaldo Inv_FecVen
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_MDINVE, 	@Cam_InvNum,	Inv_Numero,		@Str_Vacio,		@Str_Vacio,
 			@Cam_InFeVe,	Inv_FecVen, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -2074,7 +2152,9 @@ if @Var_Contin = @Sta_Si begin
 	  and Inv_Status = @Sta_N
 
 	-- Respaldo Inv_FecLiq
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_MDINVE, 	@Cam_InvNum,	Inv_Numero,		@Str_Vacio,		@Str_Vacio,
 			@Cam_InFeLi,	Inv_FecLiq, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -2178,7 +2258,9 @@ if @Var_Contin = @Sta_Si begin
 			@Fec_IniPro	= getdate()
 			
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_MDINVC,	@Cam_IncInv,	Inc_Invers,		@Cam_IncNum,	Inc_Numero,	
 			@Cam_IcFeIn,	Inc_FecIni, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -2186,7 +2268,9 @@ if @Var_Contin = @Sta_Si begin
 	where Inc_FecIni = @Dfe_Fecha
 			
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_MDINVC, 	@Cam_IncInv,	Inc_Invers,		@Cam_IncNum,	Inc_Numero,
 			@Cam_IcFeVe,	Inc_FecVen, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -2194,7 +2278,9 @@ if @Var_Contin = @Sta_Si begin
 	where Inc_FecVen = @Dfe_Fecha
 			
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_MDINVC, 	@Cam_IncInv,	Inc_Invers,		@Cam_IncNum,	Inc_Numero,
 			@Cam_IcFeLi,	Inc_FecLiq, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -2294,7 +2380,9 @@ if @Var_Contin = @Sta_Si begin
 			@Fec_IniPro	= getdate()
 
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_MDPAPE, 	@Cam_PapNum,	Pap_Numero,		@Str_Vacio,		@Str_Vacio,
 			@Cam_PaFeIn,	Pap_FecIni, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -2303,7 +2391,9 @@ if @Var_Contin = @Sta_Si begin
 	  and Pap_Status <> @Sta_C
 
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_MDPAPE, 	@Cam_PapNum,	Pap_Numero,		@Str_Vacio,		@Str_Vacio,
 			@Cam_PaFeVe,	Pap_FecVen, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -2312,7 +2402,9 @@ if @Var_Contin = @Sta_Si begin
 	  and Pap_Status <> @Sta_C
 
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_MDPAPE, 	@Cam_PapNum,	Pap_Numero,		@Str_Vacio,		@Str_Vacio,
 			@Cam_PaFeLi,	Pap_FecLiq, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -2416,7 +2508,9 @@ if @Var_Contin = @Sta_Si begin
 			@Fec_IniPro	= getdate()
 
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_MDPAPC, 	@Cam_PacPap,	Pac_Papel,		@Cam_PacNum,	Pac_Numero,
 			@Cam_PcFeIn,	Pac_FecIni, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -2424,7 +2518,9 @@ if @Var_Contin = @Sta_Si begin
 	where Pac_FecIni = @Dfe_Fecha
 
 	-- Respaldo Pac_FecVen
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_MDPAPC, 	@Cam_PacPap,	Pac_Papel,		@Cam_PacNum,	Pac_Numero,
 			@Cam_PcFeVe,	Pac_FecVen, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -2532,7 +2628,9 @@ if @Var_Contin = @Sta_Si begin
 			@Fec_IniPro	= getdate()
 
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_MDEMIS, 	@Cam_EmiNum,	Emi_Numero,		@Str_Vacio,		@Str_Vacio,
 			@Cam_EmFeVe,	Emi_FecVen, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -2608,7 +2706,9 @@ if @Var_Contin = @Sta_Si begin
 			@Fec_IniPro	= getdate()
 
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_MDEMIC, 	@Cam_EcEmis,	Emc_Emisio,		@Cam_EcNume,	Emc_Numero,
 			@Cam_EcFeIn,	Emc_FecIni, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -2616,7 +2716,9 @@ if @Var_Contin = @Sta_Si begin
 	where Emc_FecIni = @Dfe_Fecha
 
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_MDEMIC, 	@Cam_EcEmis,	Emc_Emisio,		@Cam_EcNume,	Emc_Numero,
 			@Cam_EcFeLi,	Emc_FecLiq, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -2624,7 +2726,9 @@ if @Var_Contin = @Sta_Si begin
 	where Emc_FecLiq = @Dfe_Fecha
 
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_MDEMIC, 	@Cam_EcEmis,	Emc_Emisio,		@Cam_EcNume,	Emc_Numero,
 			@Cam_EcFeVe,	Emc_FecVen, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -2724,7 +2828,9 @@ if @Var_Contin = @Sta_Si begin
 			@Fec_IniPro	= getdate()
 
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_MDVENI, 	@Cam_VeiNum,	Vei_Numero,		@Cam_VeiIns,	Vei_Instit,
 			@Cam_ViFeLi,	Vei_FecLiq, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -2732,7 +2838,9 @@ if @Var_Contin = @Sta_Si begin
 	where Vei_FecLiq = @Dfe_Fecha
 
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_MDVENI, 	@Cam_VeiNum,	Vei_Numero,		@Cam_VeiIns,	Vei_Instit,
 			@Cam_ViFeVe,	Vei_FecVen, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -2820,7 +2928,9 @@ if @Var_Contin = @Sta_Si begin
 			@Fec_IniPro	= getdate()
 
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_MDCUST, 	@Cam_CutNum,	Cut_Numero,		@Str_Vacio,		@Str_Vacio,
 			@Cam_CuFeLi,	Cut_FecLiq, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -2829,7 +2939,9 @@ if @Var_Contin = @Sta_Si begin
 	  and Cut_Status <> @Sta_C
 	   
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_MDCUST, 	@Cam_CutNum,	Cut_Numero,		@Str_Vacio,		@Str_Vacio,
 			@Cam_CuFeVe,	Cut_FecVen, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -2920,7 +3032,9 @@ if @Var_Contin = @Sta_Si begin
 			@Fec_IniPro	= getdate()
 
 	-- Respaldo Cuc_FecIni
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_MDCUSC, 	@Cam_CucTit,	Cuc_CusTit,		@Cam_CucNum,	Cuc_Numero,
 			@Cam_CcFeIn,	Cuc_FecIni, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -2929,7 +3043,9 @@ if @Var_Contin = @Sta_Si begin
 	  and Cuc_Status <> @Sta_C
 
 	-- Respaldo Cuc_FecVen
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_MDCUSC, 	@Cam_CucTit,	Cuc_CusTit,		@Cam_CucNum,	Cuc_Numero,
 			@Cam_CcFeVe,	Cuc_FecVen, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -2938,7 +3054,9 @@ if @Var_Contin = @Sta_Si begin
 	  and Cuc_Status <> @Sta_C
 
 	-- Respaldo Cuc_FecLiq
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_MDCUSC, 	@Cam_CucTit,	Cuc_CusTit,		@Cam_CucNum,	Cuc_Numero,
 			@Cam_CcFeLi,	Cuc_FecLiq, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -3042,7 +3160,9 @@ if @Var_Contin = @Sta_Si begin
 			@Fec_IniPro	= getdate()
 
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_MDOPFE, 	@Cam_OfvNum,	Ofv_Numero,		@Str_Vacio,		@Str_Vacio,
 			@Cam_OfFeIn,	Ofv_FecIni, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -3118,7 +3238,9 @@ if @Var_Contin = @Sta_Si begin
 			@Fec_IniPro	= getdate()
 
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_MDDEAL, 	@Cam_DeaNum,	Dea_Numero,		@Str_Vacio,		@Str_Vacio,
 			@Cam_DeFeLi,	Dea_FecLiq, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -3194,7 +3316,9 @@ if @Var_Contin = @Sta_Si begin
 			@Fec_IniPro	= getdate()
 
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_DEOPER, 	@Cam_OpeNum,	Ope_Numero,		@Str_Vacio,		@Str_Vacio,
 			@Cam_OpFeLi,	Ope_FecLiq, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -3203,7 +3327,9 @@ if @Var_Contin = @Sta_Si begin
 	  and Ope_Status <> @Sta_C
 
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_DEOPER, 	@Cam_OpeNum,	Ope_Numero,		@Str_Vacio,		@Str_Vacio,
 			@Cam_OpFeVe,	Ope_FecVen, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -3294,7 +3420,9 @@ if @Var_Contin = @Sta_Si begin
 			@Fec_IniPro	= getdate()
 
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_DEAMOR, 	@Cam_AmoOpe,	Amo_Operac,		@Cam_ABAmNu,	Amo_Numero,
 			@Cam_AmFeIn,	Amo_FecIni, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -3303,7 +3431,9 @@ if @Var_Contin = @Sta_Si begin
 	  and Amo_Status <> @Sta_C
 	  
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_DEAMOR, 	@Cam_AmoOpe,	Amo_Operac,		@Cam_ABAmNu,	Amo_Numero,
 			@Cam_AmFeLi,	Amo_FecLiq,		@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -3312,7 +3442,9 @@ if @Var_Contin = @Sta_Si begin
 	  and Amo_Status <> @Sta_C
 
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_DEAMOR, 	@Cam_AmoOpe,	Amo_Operac,		@Cam_ABAmNu,	Amo_Numero,
 			@Cam_AmFeVe,	Amo_FecVen,		@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -3494,7 +3626,9 @@ if @Var_Contin = @Sta_Si begin
 			@Fec_IniPro	= getdate()
 
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_TEEMIS, 	@Cam_EmiNum,	Emi_Numero,		@Str_Vacio,		@Str_Vacio,
 			@Cam_EmFeVe,	Emi_FecVen, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -3572,7 +3706,9 @@ if @Var_Contin = @Sta_Si begin
 			@Fec_IniPro	= getdate()
 
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_TEOPFE, 	@Cam_OfvNum,	Ofv_Numero,		@Str_Vacio,		@Str_Vacio,
 			@Cam_OfFeIn,	Ofv_FecIni, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -3648,7 +3784,9 @@ if @Var_Contin = @Sta_Si begin
 			@Fec_IniPro	= getdate()
 
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_TEPAPC, 	@Cam_PacPap,	Pac_Papel,		@Cam_PacNum,	Pac_Numero,
 			@Cam_PcFeVe,	Pac_FecVen, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -3724,21 +3862,27 @@ if @Var_Contin = @Sta_Si begin
 			@Fec_IniPro	= getdate()
 
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_TECURE, 	@Str_Vacio, 	@Str_Vacio,		@Str_Vacio, 	@Str_Vacio,
 			@Cam_TeFeIn,	Crm_FecIni, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
 	from TECUREMO noholdlock
 	where Crm_FecIni = @Dfe_Fecha
 	
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_TECURE, 	@Str_Vacio, 	@Str_Vacio,		@Str_Vacio, 	@Str_Vacio,
 			@Cam_TeFeVe,	Crm_FecVen, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
 	from TECUREMO noholdlock
 	where Crm_FecVen = @Dfe_Fecha
 	
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_TECURE, 	@Str_Vacio, 	@Str_Vacio,		@Str_Vacio, 	@Str_Vacio,
 			@Cam_TeFeLi,	Crm_FecLiq, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -3838,7 +3982,9 @@ if @Var_Contin = @Sta_Si begin
 			@Fec_IniPro	= getdate()
 
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_ITORDP, 	@Cam_OrpTra,	Orp_Transa,		@Cam_OrpNum,	Orp_Numero,
 			@Cam_OrFeVe,	Orp_FecVen, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -3916,7 +4062,9 @@ if @Var_Contin = @Sta_Si begin
 			@Fec_IniPro	= getdate()
 
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_ITCOMV, 	@Cam_CovNum,	Cov_Numero,		@Cam_CovTip,		Cov_Tipo,
 			@Cam_CvFeVe,	Cov_FecVen, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -3994,16 +4142,20 @@ if @Var_Contin = @Sta_Si begin
 			@Fec_IniPro	= getdate()
 		
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_ITPASA, 	@Cam_AmPaDo,	Amp_PasDol,		@Cam_AmpNum,	Amp_Numero,
 			@Cam_AmFePa,	Amp_FecPag, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
 	from ITPASAMO noholdlock
 	where Amp_FecPag = @Dfe_Fecha
 	  and Amp_Status = @Sta_N
-		
+
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_ITPASA, 	@Cam_AmPaDo,	Amp_PasDol,		@Cam_AmpNum,	Amp_Numero,
 			@Cam_ApFeVe,	Amp_FecVen, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -4055,7 +4207,7 @@ if @Var_Contin = @Sta_Si begin
 	-- Actualizamos
 	Update ITPASAMO set
 		Amp_FecVen	= @Fec_SiDiHa,
-		
+
 		NumTransac	= @NumTransac,
 		Transaccio	= @Transaccio,
 		Usuario		= @Usuario,
@@ -4094,7 +4246,9 @@ if @Var_Contin = @Sta_Si begin
 			@Fec_IniPro	= getdate()
 
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_TACORT,	@Cam_CorLin,	Cor_Linea,		@Cam_CorNum,	Cor_Numero,
 			@Cam_CoFeVe,	Cor_FecVen, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -4123,7 +4277,7 @@ if @Status <> @Ent_Cero begin
 	return @Ent_Uno
 end
 
-if @Var_Contin = @Sta_Si begin	
+if @Var_Contin = @Sta_Si begin
 	begin transaction
 	select	@Pro_Descri	= @Des_Actual + @Str_Espaci + @Tab_TACORT,
 			@Fec_IniPro	= getdate()
@@ -4131,7 +4285,7 @@ if @Var_Contin = @Sta_Si begin
 	-- Actualizamos
 	Update TACORTCR set
 		Cor_FecVen	= @Fec_SiDiHa,
-		
+
 		NumTransac	= @NumTransac,
 		Transaccio	= @Transaccio,
 		Usuario		= @Usuario,
@@ -4144,7 +4298,7 @@ if @Var_Contin = @Sta_Si begin
 
 	exec @Status = SOBIDIFEALT
 		@Tip_TACORT,	@Pro_Descri,	@Pro_Tiempo,	@Dfe_Fecha,		@Fec_IniPro,
-		@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,	
+		@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
@@ -4162,13 +4316,15 @@ if @Status <> @Ent_Cero begin
 	return @Ent_Uno
 end
 
-if @Var_Contin = @Sta_Si begin	
+if @Var_Contin = @Sta_Si begin
 	begin transaction
 	select	@Pro_Descri	= @Des_Respal + @Str_Espaci + @Tab_TASALV,
 			@Fec_IniPro	= getdate()
 
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_TASALV,	@Cam_SavLin,	Sav_Linea,		@Cam_SavCor,	Sav_Corte,
 			@Cam_SaFeVe,	Sav_FecVen, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -4179,7 +4335,7 @@ if @Var_Contin = @Sta_Si begin
 
 	exec @Status = SOBIDIFEALT
 		@Tip_Resp40,	@Pro_Descri,	@Pro_Tiempo,	@Dfe_Fecha,		@Fec_IniPro,
-		@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,	
+		@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
@@ -4218,7 +4374,7 @@ if @Var_Contin = @Sta_Si begin
 
 	exec @Status = SOBIDIFEALT
 		@Tip_TASALV,	@Pro_Descri,	@Pro_Tiempo,	@Dfe_Fecha,		@Fec_IniPro,
-		@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,	
+		@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
@@ -4242,7 +4398,9 @@ if @Var_Contin = @Sta_Si begin
 			@Fec_IniPro	= getdate()
 
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_SGSEGT,	@Cam_SeNuPo,	Seg_NumPol,		@Str_Vacio,		@Str_Vacio,
 			@Cam_SeFeFi,	Seg_FecFin, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -4279,7 +4437,7 @@ if @Var_Contin = @Sta_Si begin
 	-- Actualizamos
 	Update SGSEGTEL set
 		Seg_FecFin	= @Fec_SiDiHa,
-		
+
 		NumTransac	= @NumTransac,
 		Transaccio	= @Transaccio,
 		Usuario		= @Usuario,
@@ -4292,7 +4450,7 @@ if @Var_Contin = @Sta_Si begin
 
 	exec @Status = SOBIDIFEALT
 		@Tip_SGSEGT,	@Pro_Descri,	@Pro_Tiempo,	@Dfe_Fecha,		@Fec_IniPro,
-		@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,	
+		@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
@@ -4310,13 +4468,15 @@ if @Status <> @Ent_Cero begin
 	return @Ent_Uno
 end
 
-if @Var_Contin = @Sta_Si begin	
+if @Var_Contin = @Sta_Si begin
 	begin transaction
 	select	@Pro_Descri	= @Des_Respal + @Str_Espaci + @Tab_SGDOSE,
 			@Fec_IniPro	= getdate()
 
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_SGDOSE, 	@Cam_DocPol,	Doc_Poliza,		@Cam_DocDoc,	Doc_Docume,
 			@Cam_DoFePa,	Doc_FecPag, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -4325,7 +4485,9 @@ if @Var_Contin = @Sta_Si begin
 	  and Doc_Status = @Sta_N
 
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_SGDOSE, 	@Cam_DocPol,	Doc_Poliza,		@Cam_DocDoc,	Doc_Docume,
 			@Cam_DoFeVe,	Doc_FecVen, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -4355,7 +4517,7 @@ if @Status <> @Ent_Cero begin
 	return @Ent_Uno
 end
 
-if @Var_Contin = @Sta_Si begin	
+if @Var_Contin = @Sta_Si begin
 	begin transaction
 	select	@Pro_Descri	= @Des_Actual + @Str_Espaci + @Tab_SGDOSE,
 			@Fec_IniPro	= getdate()
@@ -4363,7 +4525,7 @@ if @Var_Contin = @Sta_Si begin
 	-- Actualizamos
 	Update SGDOSETE set
 		Doc_FecPag	= @Fec_SiDiHa,
-		
+
 		NumTransac	= @NumTransac,
 		Transaccio	= @Transaccio,
 		Usuario		= @Usuario,
@@ -4376,7 +4538,7 @@ if @Var_Contin = @Sta_Si begin
 	-- Actualizamos
 	Update SGDOSETE set
 		Doc_FecVen	= @Fec_SiDiHa,
-		
+
 		NumTransac	= @NumTransac,
 		Transaccio	= @Transaccio,
 		Usuario		= @Usuario,
@@ -4415,7 +4577,9 @@ if @Var_Contin = @Sta_Si begin
 			@Fec_IniPro	= getdate()
 
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_BEFADO, 	@Cam_DocCon,	Doc_Contra,		@Cam_DocNum,	convert(varchar, Doc_Numero),
 			@Cam_DoFePa,	Doc_FecPag, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -4424,7 +4588,9 @@ if @Var_Contin = @Sta_Si begin
 	  and Doc_Status = @Sta_N
 
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_BEFADO, 	@Cam_DocCon,	Doc_Contra,		@Cam_DocNum,	convert(varchar, Doc_Numero),
 			@Cam_DoFeVe,	Doc_FecVen, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -4436,7 +4602,7 @@ if @Var_Contin = @Sta_Si begin
 
 	exec @Status = SOBIDIFEALT
 		@Tip_Resp43,	@Pro_Descri,	@Pro_Tiempo,	@Dfe_Fecha,		@Fec_IniPro,
-		@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,	
+		@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
@@ -4462,7 +4628,7 @@ if @Var_Contin = @Sta_Si begin
 	-- Actualizamos
 	Update BEFADOCU set
 		Doc_FecPag	= @Fec_SiDiHa,
-		
+
 		NumTransac	= @NumTransac,
 		Transaccio	= @Transaccio,
 		Usuario		= @Usuario,
@@ -4495,7 +4661,7 @@ if @Var_Contin = @Sta_Si begin
 		rollback
 		return @Ent_Uno
 	end
-	
+
 	commit
 end
 
@@ -4520,7 +4686,9 @@ if datediff(dd, @Par_FecApe, @Dfe_Fecha) = 0 begin
 				@Fec_IniPro	= getdate()
 
 		-- Respaldo
-		insert into SOREDIFE
+		insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 		select	@Tab_TEPARA, 	@Cam_PaFeAp,	Par_FecApe,		@Cam_ParFec,	Par_Fecha,
 				@Cam_PaFeAp,	Par_FecApe, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 				@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -4530,7 +4698,7 @@ if datediff(dd, @Par_FecApe, @Dfe_Fecha) = 0 begin
 
 		exec @Status = SOBIDIFEALT
 			@Tip_Resp44,	@Pro_Descri,	@Pro_Tiempo,	@Dfe_Fecha,		@Fec_IniPro,
-			@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,	
+			@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,
 			@SucDestino,	@Modulo
 		if @Status <> @Ent_Cero begin
 			rollback
@@ -4588,13 +4756,15 @@ if @Status <> @Ent_Cero begin
 	return @Ent_Uno
 end
 
-if @Var_Contin = @Sta_Si begin	
+if @Var_Contin = @Sta_Si begin
 	begin transaction
 	select	@Pro_Descri	= @Des_Respal + @Str_Espaci + @Tab_TECAMO,
 			@Fec_IniPro	= getdate()
 
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_TECAMO, 	@Cam_CamNum,	Cam_Numero,		@Cam_CamPla,	convert(varchar, Cam_Plazo),
 			@Cam_CaFeLi,	Cam_FecLiq, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -4632,7 +4802,7 @@ if @Var_Contin = @Sta_Si begin
 	Update TECALMON set
 		Cam_FecLiq	= @Fec_SiDiHa,
 		Cam_Plazo 	= convert(int, datediff(dd, Cam_FecIni, @Fec_SiDiHa)),
-		
+
 		NumTransac	= @NumTransac,
 		Transaccio	= @Transaccio,
 		Usuario		= @Usuario,
@@ -4708,7 +4878,7 @@ if @Var_Contin = @Sta_Si begin
 	Update TESUBAST set
 		Sub_FecLiq	= @Fec_SiDiHa,
 		Sub_Plazo 	= convert(int, datediff(dd, Sub_FecIni, @Fec_SiDiHa)),
-		
+
 		NumTransac	= @NumTransac,
 		Transaccio	= @Transaccio,
 		Usuario		= @Usuario,
@@ -4721,7 +4891,7 @@ if @Var_Contin = @Sta_Si begin
 
 	exec @Status = SOBIDIFEALT
 		@Tip_TESUBA,	@Pro_Descri,	@Pro_Tiempo,	@Dfe_Fecha,		@Fec_IniPro,
-		@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,	
+		@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
@@ -4746,7 +4916,9 @@ if @Var_Contin = @Sta_Si begin
 			@Fec_IniPro	= getdate()
 
 	-- Respaldo
-	insert into SOREDIFE
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
 	select	@Tab_ABPRCO, 	@Cam_ProCon,	convert(varchar,Pro_Consec),	@Cam_ProAmor,	Pro_Amorti,
 			@Cam_PrFeDe,	Pro_FePrDe, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
 			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
@@ -4776,7 +4948,7 @@ if @Status <> @Ent_Cero begin
 	return @Ent_Uno
 end
 
-if @Var_Contin = @Sta_Si begin 
+if @Var_Contin = @Sta_Si begin
 	begin transaction
 	select	@Pro_Descri	= @Des_Actual + @Str_Espaci + @Tab_ABPRCO,
 			@Fec_IniPro	= getdate()
@@ -4805,7 +4977,7 @@ if @Var_Contin = @Sta_Si begin
 		return @Ent_Uno
 	end
 	commit
-end 
+end
 
 /** Respaldamos AURENMAS **/
 exec @Status = SOBIDIFECON
@@ -4837,7 +5009,7 @@ if @Var_Contin = @Sta_Si begin
 
 	exec @Status = SOBIDIFEALT
 		@Tip_Resp48,	@Pro_Descri,	@Pro_Tiempo,	@Dfe_Fecha,		@Fec_IniPro,
-		@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,	
+		@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
@@ -4877,11 +5049,251 @@ if @Var_Contin = @Sta_Si begin
 
 	exec @Status = SOBIDIFEALT
 		@Tip_AUREMA,	@Pro_Descri,	@Pro_Tiempo,	@Dfe_Fecha,		@Fec_IniPro,
-		@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,	
+		@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,
 		@SucDestino,	@Modulo
 	if @Status <> @Ent_Cero begin
 		rollback
 		return @Ent_Uno
 	end
 	commit
-end 
+end
+
+/** Respaldamos de AUAMORTI **/
+exec @Status = SOBIDIFECON
+	@Tip_Resp49,	@Dfe_Fecha,		@Var_Contin output,	@NumTransac,	@Transaccio,
+	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
+if @Status <> @Ent_Cero begin
+	rollback
+	return @Ent_Uno
+end
+
+if @Var_Contin = @Sta_Si begin
+	begin transaction
+	select	@Pro_Descri	= @Des_Respal + @Str_Espaci + @Tab_AUAMOR,
+			@Fec_IniPro	= getdate()
+
+	-- Respaldo
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
+	select	@Tab_AUAMOR, 	@Cam_ConCre,	Amo_Contra,		@Cam_ABAmNu,	Amo_Numero,
+			@Cam_ABFePa,	Amo_FecPag, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
+			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
+	from AUAMORTI noholdlock
+	where Amo_FecPag = @Dfe_Fecha
+
+	select	@Pro_Tiempo	= convert(int, datediff(ss, @Fec_IniPro, getdate()))
+
+	exec @Status = SOBIDIFEALT
+		@Tip_Resp49,	@Pro_Descri,	@Pro_Tiempo,	@Dfe_Fecha,		@Fec_IniPro,
+		@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,
+		@SucDestino,	@Modulo
+	if @Status <> @Ent_Cero begin
+		rollback
+		return @Ent_Uno
+	end
+
+	commit
+end
+
+/** Actualización de AUAMORTI **/
+exec @Status = SOBIDIFECON
+	@Tip_AUAMOR,	@Dfe_Fecha,		@Var_Contin output,	@NumTransac,	@Transaccio,
+	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
+if @Status <> @Ent_Cero begin
+	rollback
+	return @Ent_Uno
+end
+
+if @Var_Contin = @Sta_Si begin
+	begin transaction
+	select	@Pro_Descri	= @Des_Actual + @Str_Espaci + @Tab_AUAMOR,
+			@Fec_IniPro	= getdate()
+
+	-- Actualizamos
+	Update AUAMORTI set
+		Amo_FecPag	= @Fec_SiDiHa,
+
+		NumTransac	= @NumTransac,
+		Transaccio	= @Transaccio,
+		Usuario		= @Usuario,
+		FechaSis	= @FechaSis,
+		SucOrigen	= @SucOrigen,
+		SucDestino	= @SucDestino
+	from AUAMORTI
+	where Amo_FecPag = @Dfe_Fecha
+
+
+	select	@Pro_Tiempo	= convert(int, datediff(ss, @Fec_IniPro, getdate()))
+
+	exec @Status = SOBIDIFEALT
+		@Tip_AUAMOR,	@Pro_Descri,	@Pro_Tiempo,	@Dfe_Fecha,		@Fec_IniPro,
+		@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,
+		@SucDestino,	@Modulo
+	if @Status <> @Ent_Cero begin
+		rollback
+		return @Ent_Uno
+	end
+
+	commit
+end
+
+
+/** Respaldamos de CRPAGAMO **/
+exec @Status = SOBIDIFECON
+	@Tip_Resp50,	@Dfe_Fecha,		@Var_Contin output,	@NumTransac,	@Transaccio,
+	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
+if @Status <> @Ent_Cero begin
+	rollback
+	return @Ent_Uno
+end
+
+if @Var_Contin = @Sta_Si begin
+	begin transaction
+	select	@Pro_Descri	= @Des_Respal + @Str_Espaci + @Tab_CRPAGA,
+			@Fec_IniPro	= getdate()
+
+	-- Respaldo
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
+	select	@Tab_CRPAGA, 	@Cam_PAPaga,	Pam_Pagare,		@Cam_PANume,	Pam_Numero,
+			@Cam_PAFePa,	Pam_FecPag, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
+			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
+	from CRPAGAMO noholdlock
+	where Pam_FecPag = @Dfe_Fecha
+
+	select	@Pro_Tiempo	= convert(int, datediff(ss, @Fec_IniPro, getdate()))
+
+	exec @Status = SOBIDIFEALT
+		@Tip_Resp50,	@Pro_Descri,	@Pro_Tiempo,	@Dfe_Fecha,		@Fec_IniPro,
+		@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,
+		@SucDestino,	@Modulo
+	if @Status <> @Ent_Cero begin
+		rollback
+		return @Ent_Uno
+	end
+
+	commit
+end
+
+/** Actualización de CRPAGAMO **/
+exec @Status = SOBIDIFECON
+	@Tip_CRPAGA,	@Dfe_Fecha,		@Var_Contin output,	@NumTransac,	@Transaccio,
+	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
+if @Status <> @Ent_Cero begin
+	rollback
+	return @Ent_Uno
+end
+
+if @Var_Contin = @Sta_Si begin
+	begin transaction
+	select	@Pro_Descri	= @Des_Actual + @Str_Espaci + @Tab_CRPAGA,
+			@Fec_IniPro	= getdate()
+
+	-- Actualizamos
+	Update CRPAGAMO set
+		Pam_FecPag	= @Fec_SiDiHa,
+
+		NumTransac	= @NumTransac,
+		Transaccio	= @Transaccio,
+		Usuario		= @Usuario,
+		FechaSis	= @FechaSis,
+		SucOrigen	= @SucOrigen,
+		SucDestino	= @SucDestino
+	from CRPAGAMO
+	where Pam_FecPag = @Dfe_Fecha
+
+	select	@Pro_Tiempo	= convert(int, datediff(ss, @Fec_IniPro, getdate()))
+
+	exec @Status = SOBIDIFEALT
+		@Tip_CRPAGA,	@Pro_Descri,	@Pro_Tiempo,	@Dfe_Fecha,		@Fec_IniPro,
+		@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,
+		@SucDestino,	@Modulo
+	if @Status <> @Ent_Cero begin
+		rollback
+		return @Ent_Uno
+	end
+
+	commit
+end
+
+
+/** Respaldamos de CRAMOHIP **/
+exec @Status = SOBIDIFECON
+	@Tip_Resp51,	@Dfe_Fecha,		@Var_Contin output,	@NumTransac,	@Transaccio,
+	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
+if @Status <> @Ent_Cero begin
+	rollback
+	return @Ent_Uno
+end
+
+if @Var_Contin = @Sta_Si begin
+	begin transaction
+	select	@Pro_Descri	= @Des_Respal + @Str_Espaci + @Tab_CRAMOH,
+			@Fec_IniPro	= getdate()
+
+	-- Respaldo
+	insert into SOREDIFE(Rdf_NomTab,	Rdf_NoClPr,	Rdf_VaClPr,	Rdf_NoClSe,	Rdf_VaClSe,
+						 Rdf_NoCaMo,	Rdf_FecOri,	Rdf_FecMod,	NumTransac,	Transaccio,
+						 Usuario,		FechaSis,	SucOrigen,	SucDestino)
+	select	@Tab_CRAMOH, @Cam_HICont,	Amh_Contra,	@Cam_HINume,	Amh_Numero,
+			@Cam_HIFePa,	Amh_FecPag, 	@Fec_SiDiHa,	@NumTransac,	@Transaccio,
+			@Usuario,		@FechaSis,		@SucOrigen,		@SucDestino
+	from CRAMOHIP
+	where Amh_FecPag = @Dfe_Fecha
+
+	select	@Pro_Tiempo	= convert(int, datediff(ss, @Fec_IniPro, getdate()))
+
+	exec @Status = SOBIDIFEALT
+		@Tip_Resp51,	@Pro_Descri,	@Pro_Tiempo,	@Dfe_Fecha,		@Fec_IniPro,
+		@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,
+		@SucDestino,	@Modulo
+	if @Status <> @Ent_Cero begin
+		rollback
+		return @Ent_Uno
+	end
+
+	commit
+end
+
+/** Actualización de CRAMOHIP **/
+exec @Status = SOBIDIFECON
+	@Tip_CRAMOH,	@Dfe_Fecha,		@Var_Contin output,	@NumTransac,	@Transaccio,
+	@Usuario,		@FechaSis,		@SucOrigen,			@SucDestino,	@Modulo
+if @Status <> @Ent_Cero begin
+	rollback
+	return @Ent_Uno
+end
+
+if @Var_Contin = @Sta_Si begin
+	begin transaction
+	select	@Pro_Descri	= @Des_Actual + @Str_Espaci + @Tab_CRAMOH,
+			@Fec_IniPro	= getdate()
+
+	-- Actualizamos
+	Update CRAMOHIP set
+		Amh_FecPag	= @Fec_SiDiHa,
+
+		NumTransac	= @NumTransac,
+		Transaccio	= @Transaccio,
+		Usuario		= @Usuario,
+		FechaSis	= @FechaSis,
+		SucOrigen	= @SucOrigen,
+		SucDestino	= @SucDestino
+	from CRAMOHIP
+	where Amh_FecPag = @Dfe_Fecha
+
+	select	@Pro_Tiempo	= convert(int, datediff(ss, @Fec_IniPro, getdate()))
+
+	exec @Status = SOBIDIFEALT
+		@Tip_CRAMOH,	@Pro_Descri,	@Pro_Tiempo,	@Dfe_Fecha,		@Fec_IniPro,
+		@NumTransac,	@Transaccio,	@Usuario,		@FechaSis,		@SucOrigen,
+		@SucDestino,	@Modulo
+	if @Status <> @Ent_Cero begin
+		rollback
+		return @Ent_Uno
+	end
+
+	commit
+end
