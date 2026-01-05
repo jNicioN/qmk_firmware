@@ -21,7 +21,8 @@ as
 ** Modificó:	Jovani Duque											****
 ** Fecha:		29/Dic/2025												****
 ** Jira Key:	TCPC-22363												****
-** Descripción:	Se agrega tabla AUAMORTI,CRPAGAMO & CRAMOHIP			****
+** Descripción:	Se agrega tabla AUAMORTI,CRPAGAMO & CRAMOHIP y para 	****
+				CRAMORTI se cambia filtro a not in (P,Q) 				****
 ****************************************************************************
 ** Modificó:	Denisse Castillo										****
 ** Fecha:		21/Feb/2025												****
@@ -101,6 +102,8 @@ declare	@Ent_Cero	int,
 		@Sta_C		char(1),
 		@Amo_TipAut	char(1),
 		@Amo_TipSeg char(1),
+		@Sta_Pagado char(1),
+		@Sta_PagCas char(1),
 		
 		@Tip_IniPro	char(3),
 		@Tip_Respa1	char(3),
@@ -418,6 +421,8 @@ select	@Ent_Cero	= 0,				-- Entero Cero
 		@Sta_C		= 'C',				/* Estatus: C - Cancelado */
 		--@Amo_TipAut	= 'A',				/* Tipo de Amortizacion: A - Auto */
 		--@Amo_TipSeg	= 'S',				/* Tipo de Amortizacion: S - Seguro */
+		@Sta_Pagado = 'P',				/* Estatus Credito: P - Pagado */
+		@Sta_PagCas = 'Q',				/* Estatus Credito: Q - Pagado Castigado */
 
 		@Tip_IniPro	= '000',			-- Inicio del Proceso de Actualizacion
 		@Tip_SODIFE	= '001',			-- Registro del dia SODIAFES
@@ -1299,7 +1304,7 @@ if @Var_Contin = @Sta_Si begin
 	from CRAMORTI noholdlock
 		 inner join CRCREDIT noholdlock on Cre_Numero = Amo_Credit and Cre_AjDiPa <> @Sta_A
 	where Amo_FecPag = @Dfe_Fecha
-	  and Amo_Status in (@Sta_N, @Sta_M)
+	  and Amo_Status not in (@Sta_Pagado, @Sta_PagCas)
 
 	select	@Pro_Tiempo	= convert(int, datediff(ss, @Fec_IniPro, getdate()))
 
@@ -1342,7 +1347,7 @@ if @Var_Contin = @Sta_Si begin
 	from CRAMORTI noholdlock
 		 inner join CRCREDIT noholdlock on Cre_Numero = Amo_Credit and Cre_AjDiPa <> @Sta_A
 	where Amo_FecPag = @Dfe_Fecha
-	  and Amo_Status in (@Sta_N, @Sta_M)
+	  and Amo_Status not in (@Sta_Pagado, @Sta_PagCas)
 
 	select	@Pro_Tiempo	= convert(int, datediff(ss, @Fec_IniPro, getdate()))
 
