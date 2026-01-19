@@ -20,14 +20,20 @@ as
 	************************************************************************************
 	** Referencias:
 	************************************************************************************
-	** Modifico:			Ezequiel Gonzalez Cobix										****
+	** Modifico:			Francisco Javier Minajas Carbajal						****
+	** Fecha:			19/Enero/2026												****
+	** Jira:			TRAAC-9198													****
+	** Descripción:		La realiza la consulta a SOBITPER y SOBIUSEX, para obtener  ****
+	*					la fecha de modificacion									**** 
+	************************************************************************************
+	** Modifico:			Ezequiel Gonzalez Cobix									****
 	** Fecha:			03/Noviembre/2022											****
 	** Help:			TRAAC-933													****
 	** Descripción:		La consulta regresa la nacionalidad							**** 
 	************************************************************************************
 	** Creo:			Ezequiel Gonzalez Cobix										****
 	** Fecha:			06/Octubre/2022												****
-	** Req.	:			TRAAC-851														****
+	** Req.	:			TRAAC-851													****
 	** Descripción:		Creación de SP												**** 
 	************************************************************************************/
 	
@@ -162,8 +168,9 @@ as
 	IdUsuTabla					int					null,
 	SucursalInactivo			char(3)				null,
 	SucursalActivo				char(3)				null,
-	SucursalCancelado			char(3)				null
-	
+	SucursalCancelado			char(3)				null,
+	IdentificadorPersona		int					null,
+	FechaModificacion			smalldatetime		null
 	)
 	
 	--Se valida trae id de usuario de divisa
@@ -301,13 +308,13 @@ as
 	
 	
 	Update #ReporteUsuarioDivisa
-		set #ReporteUsuarioDivisa.Nombre	=	SOPERSON.Per_Comple	
+		set #ReporteUsuarioDivisa.Nombre	=	SOPERSON.Per_Comple, 	#ReporteUsuarioDivisa.IdentificadorPersona = SOPERSON.PerPersoID
 		from #ReporteUsuarioDivisa
 		inner join SOPERSON noholdlock on (PerPersoID = #ReporteUsuarioDivisa.IdUsuTabla)
 		where #ReporteUsuarioDivisa.TablaOrigen	=	@Tab_OriUno
 	
 	Update #ReporteUsuarioDivisa
-		set #ReporteUsuarioDivisa.Nombre	=	SOUSUEXT.Use_NoCoUs	
+		set #ReporteUsuarioDivisa.Nombre	=	SOUSUEXT.Use_NoCoUs,	#ReporteUsuarioDivisa.IdentificadorPersona = SOUSUEXT.Use_IdUsEx	
 		from #ReporteUsuarioDivisa
 		inner join SOUSUEXT noholdlock on (Use_IdUsEx = IdUsuTabla)
 		where TablaOrigen	=	@Tab_OriDos
@@ -339,16 +346,64 @@ as
 		
 	Update #ReporteUsuarioDivisa
 		set Sucursal = case Estatus when @Des_Inacti then SucursalInactivo when @Des_Activo then SucursalActivo when @Des_Cancel then SucursalCancelado end
-		
-
+	
+	/* --- OPTIMIZACIÓN PARA NACIONALES --- */
+	
+	-- Paso 1: Obtener solo los Per_Numero que están en mi reporte actual
+	SELECT DISTINCT P.Per_Numero
+	INTO #IDsNacReporte
+	FROM #ReporteUsuarioDivisa R
+	INNER JOIN SOPERSON P noholdlock ON R.IdentificadorPersona = P.PerPersoID
+	WHERE R.TablaOrigen = @Tab_OriUno
+	
+	-- Paso 2: Buscar en bitácora SOLO para esos IDs (Esto reducirá el tiempo drásticamente)
+	SELECT B.Bit_NumPer, MAX(B.Bit_Fecha) AS UltimaFecha
+	INTO #MaxFechasNac
+	FROM SOBITPER B noholdlock
+	INNER JOIN #IDsNacReporte I ON B.Bit_NumPer = I.Per_Numero
+	GROUP BY B.Bit_NumPer
+	
+	-- Paso 3: Actualizar directamente la tabla de reporte
+	UPDATE #ReporteUsuarioDivisa
+	SET #ReporteUsuarioDivisa.FechaModificacion = M.UltimaFecha
+	FROM #ReporteUsuarioDivisa
+	INNER JOIN SOPERSON P noholdlock ON #ReporteUsuarioDivisa.IdentificadorPersona = P.PerPersoID
+	INNER JOIN #MaxFechasNac M ON P.Per_Numero = M.Bit_NumPer
+	WHERE #ReporteUsuarioDivisa.TablaOrigen = @Tab_OriUno
+	
+	-- Limpieza inmediata de temporales de apoyo
+	DROP TABLE #IDsNacReporte
+	DROP TABLE #MaxFechasNac
+	
+	
+	/* --- OPTIMIZACIÓN PARA EXTRANJEROS --- */
+	
+	-- Paso 1: Buscar fechas máximas filtrando directamente por los IDs del reporte
+	SELECT B.Bue_IdUsEx, MAX(B.Bue_FecCre) AS UltimaFecha
+	INTO #MaxFechasExt
+	FROM SOBIUSEX B noholdlock
+	INNER JOIN #ReporteUsuarioDivisa R ON B.Bue_IdUsEx = R.IdentificadorPersona
+	WHERE R.TablaOrigen = @Tab_OriDos
+	GROUP BY B.Bue_IdUsEx
+	
+	-- Paso 2: Actualizar directamente la tabla de reporte
+	UPDATE #ReporteUsuarioDivisa
+	SET #ReporteUsuarioDivisa.FechaModificacion = M.UltimaFecha
+	FROM #ReporteUsuarioDivisa
+	INNER JOIN #MaxFechasExt M ON #ReporteUsuarioDivisa.IdentificadorPersona = M.Bue_IdUsEx
+	WHERE #ReporteUsuarioDivisa.TablaOrigen = @Tab_OriDos
+	
+	-- Limpieza inmediata
+	DROP TABLE #MaxFechasExt
+	
+	
 	select	Sucursal,								IdeUsuario as Une_Identi,			upper(Nombre) Nombre,						Upper(Estatus) Estatus,		
 			Upper(NombreRegistro) NombreRegistro, 	Upper(NombreActivo) NombreActivo,	Upper(NombreCancelo) NombreCancelo,			Upper(MotivoCancelacion) MotivoCancelacion,	
 			FechaRegistro,							FechaCancela, 						FechaActivo, 
-			case when TablaOrigen = @Tab_OriUno then @Str_Nacion  else @Str_Extran end as Biu_Pais 
+			case when TablaOrigen = @Tab_OriUno then @Str_Nacion  else @Str_Extran end as Biu_Pais, FechaModificacion 
 	from #ReporteUsuarioDivisa
 	Order by Sucursal, IdeUsuario
-
 	
 	--Se borrar tabla
-	drop table #UltimoEstatus, #RegistroDeEstatus, #ReporteUsuarioDivisa, #UltimoEstatuResp, #RegUltEstatus, #UsuariosDivisa	
+	drop table #UltimoEstatus, #RegistroDeEstatus, #ReporteUsuarioDivisa, #UltimoEstatuResp, #RegUltEstatus, #UsuariosDivisa
 	
