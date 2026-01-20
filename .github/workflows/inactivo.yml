@@ -3,7 +3,7 @@ name: Inactivo
 # yamllint disable-line rule:truthy
 on:
   schedule:
-    - cron: "0 8 * * *"
+    - cron: "0 8 1 * *"
   workflow_call:
   workflow_dispatch:
 
