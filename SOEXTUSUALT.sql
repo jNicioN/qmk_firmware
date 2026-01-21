@@ -59,9 +59,10 @@ as
 ** JIRA:	 TRAAC-1450		     								*
 *****************************************************************
 *****************************************************************
-** creo: Yhendi ochoa								*
+** creo: Yhendi ochoa											*
+** Descripcion:	se agrega validacion de cliente duplicado 		*
 ** Fecha:	 14/01/2025											*
-** JIRA:	 TRAAC-9222	     								*
+** JIRA:	 TRAAC-9222	     									*
 *****************************************************************
 **/
 
@@ -146,7 +147,7 @@ select	@PerExist = isnull(@PerExist, @Ent_Cero)
 
 if @PerExist <> @Ent_Cero begin
 	
-	select @Une_Identi = right('00000000' + ltrim(rtrim(convert(char, Une_Identi))), 8) from SOUSNAEX 
+	select @Une_Identi = right('00000000' + ltrim(rtrim(convert(char, Une_Identi))), 8) from SOUSNAEX noholdlock
 	inner join SOUSUEXT noholdlock on Une_IdeUsu = Use_IdUsEx 
 	where Use_NomUsu = @Use_NomUsu
 		and	Use_ApPaUs	= @Use_ApPaUs
