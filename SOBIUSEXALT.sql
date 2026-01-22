@@ -1,7 +1,5 @@
 create procedure SOBIUSEXALT (
-	@Bue_Numero		int,
-	@Bue_NumSuc		char(3),  
-	@Bue_FecCre		smalldatetime,		
+	@Bue_Numero		int,	
 	@Bue_NomUsu		varchar(40), 
 	@Bue_ApPaUs		varchar(40), 
 	@Bue_ApMaUs		varchar(40),
@@ -42,19 +40,18 @@ create procedure SOBIUSEXALT (
 	@Usuario	char(6), 
 	@FechaSis	smalldatetime, 
 	@SucOrigen	char(3),
-	@SucDestino char(3),
-	@Modulo		char(2))
+	@SucDestino char(3))
 
 as
 
 /**
 *****************************************************************
-** Descripción : Alta de Bitacora de Usuario Extranjero
+** Descripción : Alta de Bitacora de Usuario Extranjero			*
 *				 para compra de dolares.						*
 *****************************************************************
 ** Referencias: 												*
 *****************************************************************
-* ** Modifico:	Francisco Minajas							 ****
+* ** Creo:	Francisco Minajas								 ****
 ** Fecha:		19/01/2026							         ****
 ** Jira:	    TRAAC-9198									 ****
 ** Descripción:	Se crea SP									 ****
