@@ -46,12 +46,12 @@ as
 
 /**
 *****************************************************************
-** Descripción : Alta de Bitacora de Usuario Extranjero
+** Descripción : Alta de Bitacora de Usuario Extranjero			*
 *				 para compra de dolares.						*
 *****************************************************************
 ** Referencias: 												*
 *****************************************************************
-* ** Modifico:	Francisco Minajas							 ****
+* ** Creo:	Francisco Minajas								 ****
 ** Fecha:		19/01/2026							         ****
 ** Jira:	    TRAAC-9198									 ****
 ** Descripción:	Se crea SP									 ****
