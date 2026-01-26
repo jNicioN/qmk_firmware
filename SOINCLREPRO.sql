@@ -26,6 +26,9 @@ as
 ** Help:		1637684													****
 ****************************************************************************/
 
+/* Declaración de variables */
+declare @Act_EcMeCa	char(1)
+
 -- Declaración de constantes 
 declare	@Str_SI		char(1),
 		@Str_Activo	char(1),
@@ -47,7 +50,8 @@ declare	@Str_SI		char(1),
 		@Ent_Uno	int,
 		@Pro_HeyRec char(4),
 		@Cue_Tipo   char(2),
-		@Str_LetraV char(1) 
+		@Str_LetraV char(1),
+		@Dce_MerCap char(23)
 
 -- Asignación de Constantes 
 select	@Str_SI		= 'S',		-- String Si 
@@ -70,8 +74,9 @@ select	@Str_SI		= 'S',		-- String Si
 		@Ent_Uno	= 1,
 		@Pro_HeyRec = '0228',
 		@Cue_Tipo	= '50',
-		@Str_LetraV = 'V'
-		
+		@Str_LetraV = 'V',
+		@Dce_MerCap = 'DiaCeroMercadoCapitales'		-- Bandera para obtener la información Dia cero de mercado capitales
+
 		
 -- Cantidad de lineas de credito por cliente
 create table #CantidadLineasCre (
@@ -168,7 +173,10 @@ Tit_Cantid	int )
 -----------------------------------------------------------------------------------------
 -- Actualizacion de datos
 -----------------------------------------------------------------------------------------
-
+select @Act_EcMeCa = isnull(Par_Valor, @Str_Cero)
+	from SOPARGEN noholdlock
+	where Par_Nombre = @Dce_MerCap
+	
 update SOCLIREC set 
 	Clr_Nbusua	= @Str_SI,
 	Clr_UsuBan	= Usu_Numero,
@@ -490,13 +498,23 @@ update SOCLIREC set
 	from SOCLIREC noholdlock
 	inner join #CEDClientes noholdlock	on Ced_Client = Clr_CliNum
 
-
 -- Clientes con capitales
-insert into #Capitales
-select Clr_CliNum, count(*)
-	from SOCLIREC noholdlock
-	inner join FICOMECA noholdlock on Con_Client = Clr_CliNum
-	group by  Clr_CliNum
+if @Act_EcMeCa = @Str_Uno begin
+	
+	insert into #Capitales
+	select Clr_CliNum, count(*)
+		from SOCLIREC noholdlock
+		inner join MCCONTRA noholdlock on Con_Client = Clr_CliNum
+		group by  Clr_CliNum
+		
+end else begin
+	
+	insert into #Capitales
+	select Clr_CliNum, count(*)
+		from SOCLIREC noholdlock
+		inner join FICOMECA noholdlock on Con_Client = Clr_CliNum
+		group by  Clr_CliNum
+end
 	
 update SOCLIREC set 
 Clr_CapAct = Cap_Cantid
