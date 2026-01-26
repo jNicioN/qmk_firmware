@@ -56,6 +56,8 @@ declare	@Str_SI		char(1),
 		@Pro_HeyRec char(4),
 		@Cue_Tipo   char(2),
 		@Str_LetraV char(1),
+		@Str_Cero	char(1),
+		@Str_Uno	char(1),
 		@Dce_MerCap char(23)
 
 -- Asignación de Constantes 
@@ -80,6 +82,8 @@ select	@Str_SI		= 'S',		-- String Si
 		@Pro_HeyRec = '0228',
 		@Cue_Tipo	= '50',
 		@Str_LetraV = 'V',
+		@Str_Cero	= '0',							-- String Cero
+		@Str_Uno	= '1',							-- String Uno
 		@Dce_MerCap = 'DiaCeroMercadoCapitales'		-- Bandera para obtener la información Dia cero de mercado capitales
 
 		
