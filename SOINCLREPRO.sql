@@ -16,6 +16,11 @@ as
 ****************************************************************************
 ** REFERENCIAS: 														   *
 ****************************************************************************
+** Modificó:    Victor Hugo Garcia                                    	****
+** Fecha:       26/Enero/2026                                         	****
+** HelpDesk:    TCELTC-7901                                           	****
+** Descripcion: Se agrega bandera día cero para mercado capitales     	****
+****************************************************************************
 ** Modifico:	Fatima Sanchez Luis										****
 ** Fecha:		22/Junio/2022											****
 ** Help:		1637684													****
@@ -504,7 +509,7 @@ if @Act_EcMeCa = @Str_Uno begin
 	insert into #Capitales
 	select Clr_CliNum, count(*)
 		from SOCLIREC noholdlock
-		inner join MCCONTRA noholdlock on Con_Client = Clr_CliNum
+		inner join MCCONTRA noholdlock on Con_Client = Clr_CliIde
 		group by  Clr_CliNum
 		
 end else begin
