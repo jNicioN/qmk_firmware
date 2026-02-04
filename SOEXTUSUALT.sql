@@ -58,6 +58,12 @@ as
 ** Fecha:	 04/05/2023											*
 ** JIRA:	 TRAAC-1450		     								*
 *****************************************************************
+*****************************************************************
+** creo: Yhendi ochoa											*
+** Descripcion:	se agrega validacion de cliente duplicado 		*
+** Fecha:	 14/01/2025											*
+** JIRA:	 TRAAC-9222	     									*
+*****************************************************************
 **/
 
 declare	@Use_NoCoUs	varchar(120),	/*	Declaracion de Variables	*/
@@ -121,6 +127,40 @@ end
 
 
 select @Use_NoCoUs = (ltrim(rtrim(@Use_ApPaUs))+' '+ltrim(rtrim(@Use_ApMaUs))+' '+ltrim(rtrim(@Use_NomUsu)))
+
+/*---------------- VALIDAR SI EXISTE USUARIO ----------------*/
+select	@PerExist = @Ent_Cero
+select	@PerExist = @Ent_Uno
+			from SOUSUEXT noholdlock
+			where	Use_NomUsu	= @Use_NomUsu
+			  and	Use_ApPaUs	= @Use_ApPaUs
+			  and	Use_ApMaUs  = @Use_ApMaUs
+			  and	Use_FecNac	= @Use_FecNac
+			  
+select	@PerExist	= @Ent_Uno
+			from SOUSUEXT noholdlock
+			where	Use_NoCoUs	= @Use_NoCoUs
+			  and	Use_FecNac	= @Use_FecNac
+
+
+select	@PerExist = isnull(@PerExist, @Ent_Cero)
+
+if @PerExist <> @Ent_Cero begin
+	
+	select @Une_Identi = right('00000000' + ltrim(rtrim(convert(char, Une_Identi))), 8) from SOUSNAEX noholdlock
+	inner join SOUSUEXT noholdlock on Une_IdeUsu = Use_IdUsEx 
+	where Use_NomUsu = @Use_NomUsu
+		and	Use_ApPaUs	= @Use_ApPaUs
+		and	Use_ApMaUs  = @Use_ApMaUs
+		and	Use_FecNac	= @Use_FecNac
+	
+	select	Err_Codigo	= '000005',
+			Err_Mensaj	= 'El usuario ' + @Une_Identi + ' ya existe',
+			Err_Variab	= 'Use_NoCoUs'
+		rollback
+		return @Ent_Uno
+end
+/*----------------------------------------------*/
 
 if @Use_FecCre <= convert(smalldatetime, '01/01/1990') begin
 	select	@Use_FecCre	= @FechaSis
