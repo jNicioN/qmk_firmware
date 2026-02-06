@@ -21,6 +21,12 @@ as
 /*******************************************************************
 ** DESCRIPCION: Consulta de Persona Unica						****
 ********************************************************************
+** Modifico:	Jose Juan Rivera								****
+** Fecha:		04/02/2026										****
+** Help:		TRACL-15505										****
+** Descripcion:	Se agregan consultas C7 y C8 para integrar		****
+**				en resultado SONOMLAR. 							****
+********************************************************************
 ** Modifico:	Raul Minor										****
 ** Fecha:		2026-Agosto-22									****
 ** Help:		31965											****
@@ -389,9 +395,105 @@ if @Tip_ConTip = @Str_C begin
 			inner join SOUNIPER noholdlock on (Peu_Person = Per_Numero)
 			where	Peu_Grupo = @Per_Grupo
 	end
+	if @Tip_ConCon	= @Str_Siete begin /* C7 - Consulta de Persona con SONOMLAR del grupo mas reciente*/
+		select	@Per_Grupo = @Per_Numero
+
+		select	@Per_Grupo = Peu_Grupo
+			from SOUNIPER noholdlock
+			where	Peu_Person = @Per_Numero
+
+		/* Crear tabla temporal para personas del grupo */
+		create table #PersonasGrupo (
+			Per_Numero	char(8)
+		)
+		create index #PersonasGrupo on #PersonasGrupo (Per_Numero)
+
+		/* Insertar todas las personas del grupo */
+		insert into #PersonasGrupo
+			select	Peu_Person
+				from SOUNIPER noholdlock
+				where	Peu_Grupo = @Per_Grupo
+
+		/* Validar si hay personas en el grupo, sino agregar la persona base */
+		select	@Int_Existe = @Ent_No
+		select	@Int_Existe = count(1)
+			from #PersonasGrupo
+
+		if @Int_Existe = @Ent_No
+			insert into #PersonasGrupo
+				values (@Per_Grupo)
+
+		/* Crear tabla temporal para nombres largos */
+		create table #NombresLargosGrupo (
+			Nol_Nombre	varchar(84),
+			Nol_ApePat	varchar(84),
+			Nol_ApeMat	varchar(84),
+			Nol_ComOrd	varchar(120),
+			Nol_Comple	varchar(120)
+		)
+
+		/* Buscar el registro SONOMLAR mas reciente del grupo */
+		insert into #NombresLargosGrupo
+			select top 1
+					NOM.Nol_Nombre,	NOM.Nol_ApePat,	NOM.Nol_ApeMat,
+					NOM.Nol_ComOrd,	NOM.Nol_Comple
+				from #PersonasGrupo
+				inner join SOPERSON noholdlock on SOPERSON.Per_Numero = #PersonasGrupo.Per_Numero
+				inner join SONOMLAR NOM noholdlock on NOM.Nol_Person = SOPERSON.PerPersoID
+				order by NOM.Nol_Consec desc
+
+		/* Query final con CASE para fallback a SOPERSON */
+		select	Per_Numero,
+				case when NL.Nol_Nombre is not null then NL.Nol_ComOrd else SOPERSON.Per_ComOrd end as Per_ComOrd,
+				case when NL.Nol_Nombre is not null then NL.Nol_Comple else SOPERSON.Per_Comple end as Per_Comple,
+				Per_RFC,	Per_CURP,
+				case when NL.Nol_Nombre is not null then NL.Nol_Nombre else SOPERSON.Per_Nombre end as Per_Nombre,
+				case when NL.Nol_Nombre is not null then NL.Nol_ApePat else SOPERSON.Per_ApePat end as Per_ApePat,
+				case when NL.Nol_Nombre is not null then NL.Nol_ApeMat else SOPERSON.Per_ApeMat end as Per_ApeMat,
+				Adi_TipIde,	Adi_NumIde,
+				Adi_FeVeId,	Per_Nacion,	Adi_NacExt,	Adi_FeExId,	Adi_Sexo,
+				Adi_FecNac,	Per_Email,	Per_Tipo
+			from SOPERSON noholdlock
+			inner join SOPERADI P noholdlock on Adi_PerNum = Per_Numero
+			left join #NombresLargosGrupo NL on @Ent_Uno = @Ent_Uno
+			where	Per_Numero = @Per_Grupo
+
+		drop table #PersonasGrupo, #NombresLargosGrupo
+	end
+
+	if @Tip_ConCon	= @Str_Ocho begin /* C8 - Consulta de Persona con SONOMLAR basada en C1*/
+		select	Per_Numero,		Per_Fecha,		Per_NumTra,		Per_Tipo,		Per_Benefi,
+				Per_NuSeFi,		Per_Titulo,		
+				case when NOM.Nol_Person is not null then NOM.Nol_Nombre else SOPERSON.Per_Nombre end as Per_Nombre,
+				case when NOM.Nol_Person is not null then NOM.Nol_ApePat else SOPERSON.Per_ApePat end as Per_ApePat,
+				case when NOM.Nol_Person is not null then NOM.Nol_ApeMat else SOPERSON.Per_ApeMat end as Per_ApeMat,
+				case when NOM.Nol_Person is not null then NOM.Nol_RazSoc else SOPERSON.Per_RazSoc end as Per_RazSoc,
+				case when NOM.Nol_Person is not null then NOM.Nol_Comple else SOPERSON.Per_Comple end as Per_Comple,
+				case when NOM.Nol_Person is not null then NOM.Nol_ComOrd else SOPERSON.Per_ComOrd end as Per_ComOrd,
+				Per_RFC,		Per_CURP,
+				Per_Calle,		Per_CalNum,		Per_Coloni,		Per_Entida,		Per_Locali,
+				Per_CodPos,		Per_ApaPos,		Per_LadTel,		Per_Telefo,		Per_Email,
+				Per_ComDom,		Per_EstCiv,		Per_Nacion,		Per_ActEmp,		Per_Giro,
+				Per_Sector,		Per_Activi,		Per_ActINE,		Adi_PerNum,		Adi_Fecha,
+				Adi_NumTra,		Adi.Adi_LugNac,	Adi.Adi_Sexo,	Adi.Adi_FecNac,	Adi_RegMat,
+				Adi_VivCas,		Adi_TieRes,		Adi_Fax,		Adi_NumDep,		Adi.Adi_Puesto,
+				Adi_Ocupac,		Adi_AntLab,		Adi.Adi_LugTra,	Adi.Adi_TelTra,	Adi_CalTra
+				Adi_NuCaTr,		Adi_ColTra,		Adi_Locali,		Adi_CPTra,		Adi_FecCon,
+				Adi_CaNuIn,		Adi_NacExt,		Adi.Adi_Reside,	Adi.Adi_DocEst,	Adi_OtDoEs,
+				Adi.Adi_FeExDo,	Adi.Adi_CalInm,	Adi.Adi_CalExt,	Adi.Adi_CaNuEx,	Adi.Adi_ColExt,
+				Adi.Adi_LocExt,	Adi.Adi_EntExt,	Adi.Adi_PaiExt,	Adi.Adi_CoPoEx,	Adi_TelExt,
+				LTRIM(RTRIM(Adi_TipIde)) as Adi_TipIde,		Adi_OtrIde,		Adi_NumIde,		Adi_FeExId,		Adi_FeVeId,
+				Adi_NuIdFi,		Adi.Adi_EntPri,	Adi.Adi_EntSeg,	Per_Client = Adi_Client,	DaP_ClvEle,
+				DaP_NumEmi,		DaP_EntNac,		DaP_PaiNac
+			from SOPERSON noholdlock
+			join SOPERADI Adi noholdlock  on Adi_PerNum = Per_Numero
+			left join SOPEDACO noholdlock on DaP_Person = Per_Numero
+			left join CLADICIO noholdlock on Adi_NumPer = Per_Numero
+			left join SONOMLAR NOM noholdlock on NOM.Nol_Person = SOPERSON.PerPersoID
+			where	Per_Numero	= @Per_Numero
+	end
+
 end else begin
-
-
 
 	if @Tip_ConCon	= @Str_Uno begin /* L1 - Consulta de Personas Base por RFC */
 		select	P.Per_Numero,	P.Per_Tipo,		P.Per_Benefi,	P.Per_NuSeFi,	P.Per_Titulo,
