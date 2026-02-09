@@ -462,6 +462,11 @@ if @Tip_ConTip = @Str_C begin
 	end
 
 	if @Tip_ConCon	= @Str_Ocho begin /* C8 - Consulta de Persona con SONOMLAR basada en C1*/
+		/* Obtener cliente antes del SELECT principal para cumplir estandar de 4 tablas */
+		select @Cli_Numero = Adi_Client 
+		from CLADICIO noholdlock 
+		where Adi_NumPer = @Per_Numero
+
 		select	Per_Numero,		Per_Fecha,		Per_NumTra,		Per_Tipo,		Per_Benefi,
 				Per_NuSeFi,		Per_Titulo,		
 				case when NOM.Nol_Person is not null then NOM.Nol_Nombre else SOPERSON.Per_Nombre end as Per_Nombre,
@@ -483,12 +488,11 @@ if @Tip_ConTip = @Str_C begin
 				Adi.Adi_FeExDo,	Adi.Adi_CalInm,	Adi.Adi_CalExt,	Adi.Adi_CaNuEx,	Adi.Adi_ColExt,
 				Adi.Adi_LocExt,	Adi.Adi_EntExt,	Adi.Adi_PaiExt,	Adi.Adi_CoPoEx,	Adi_TelExt,
 				LTRIM(RTRIM(Adi_TipIde)) as Adi_TipIde,		Adi_OtrIde,		Adi_NumIde,		Adi_FeExId,		Adi_FeVeId,
-				Adi_NuIdFi,		Adi.Adi_EntPri,	Adi.Adi_EntSeg,	Per_Client = Adi_Client,	DaP_ClvEle,
+				Adi_NuIdFi,		Adi.Adi_EntPri,	Adi.Adi_EntSeg,	Per_Client = @Cli_Numero,	DaP_ClvEle,
 				DaP_NumEmi,		DaP_EntNac,		DaP_PaiNac
 			from SOPERSON noholdlock
-			join SOPERADI Adi noholdlock  on Adi_PerNum = Per_Numero
+			join SOPERADI Adi noholdlock on Adi_PerNum = Per_Numero
 			left join SOPEDACO noholdlock on DaP_Person = Per_Numero
-			left join CLADICIO noholdlock on Adi_NumPer = Per_Numero
 			left join SONOMLAR NOM noholdlock on NOM.Nol_Person = SOPERSON.PerPersoID
 			where	Per_Numero	= @Per_Numero
 	end
