@@ -409,7 +409,7 @@ if @Tip_ConTip = @Str_C begin
 		create index #PersonasGrupo on #PersonasGrupo (Per_Numero)
 
 		/* Insertar todas las personas del grupo */
-		insert into #PersonasGrupo
+		insert into #PersonasGrupo (Per_Numero)
 			select	Peu_Person
 				from SOUNIPER noholdlock
 				where	Peu_Grupo = @Per_Grupo
@@ -420,7 +420,7 @@ if @Tip_ConTip = @Str_C begin
 			from #PersonasGrupo
 
 		if @Int_Existe = @Ent_No
-			insert into #PersonasGrupo
+			insert into #PersonasGrupo (Per_Numero)
 				values (@Per_Grupo)
 
 		/* Crear tabla temporal para nombres largos */
@@ -433,7 +433,7 @@ if @Tip_ConTip = @Str_C begin
 		)
 
 		/* Buscar el registro SONOMLAR mas reciente del grupo */
-		insert into #NombresLargosGrupo
+		insert into #NombresLargosGrupo (Nol_Nombre, Nol_ApePat, Nol_ApeMat, Nol_ComOrd, Nol_Comple)
 			select top 1
 					NOM.Nol_Nombre,	NOM.Nol_ApePat,	NOM.Nol_ApeMat,
 					NOM.Nol_ComOrd,	NOM.Nol_Comple
@@ -592,7 +592,7 @@ end else begin
 			where	Peu_Person = @Per_Numero
 
 
-		insert into #tmpPersoL3
+		insert into #tmpPersoL3 (Per_Person)
 			select	Peu_Person
 				from SOUNIPER noholdlock
 				where	Peu_Grupo = @Per_Grupo
@@ -608,7 +608,7 @@ end else begin
 				values (@Per_Grupo)
 
 
-		insert into #tmpClienL3
+		insert into #tmpClienL3 (Cli_Client, Cli_Unific)
 			select	Adi_Client,	@Str_Vacio
 
 				from CLADICIO noholdlock
@@ -644,7 +644,7 @@ end else begin
 		create index #documentosBitPerDoc on #documentosBitPerDoc (Bad_Status, Bad_Docume)
 
 
-		insert into #documentosBit
+		insert into #documentosBit (Bad_Numero, Bad_Bandej, Bad_Docume, Bad_Status, Bad_Archiv, Bad_PidCM, Ban_Person)
 			select	Bad_Numero,	Bad_Bandej,	Bad_Docume,	Bad_Status,	Bad_Archiv,
 					Bad_PidCM,	Ban_Person
 				from #documentosBitPerDoc
@@ -678,7 +678,7 @@ end else begin
 		create index #documentosBitCliDoc on #documentosBitCliDoc (Bad_Status, Bad_Docume)
 
 
-		insert into #documentosBit
+		insert into #documentosBit (Bad_Numero, Bad_Bandej, Bad_Docume, Bad_Status, Bad_Archiv, Bad_PidCM, Ban_Person)
 			select	Bad_Numero,	Bad_Bandej,	Bad_Docume,	Bad_Status,	Bad_Archiv,
 					Bad_PidCM,	Ban_Person
 				from #documentosBitCliDoc
@@ -691,7 +691,7 @@ end else begin
 		drop table #documentosBitCli, #documentosBitCliDoc
 
 
-		insert into #ultimosDoctos
+		insert into #ultimosDoctos (Tip_Docume, Max_Docume)
 			select	Tip_Docume = Bad_Docume,
 					Max_Docume = max(Bad_Numero)
 				from #documentosBit
@@ -840,7 +840,7 @@ end else begin
 			where	Peu_Person = @Per_Numero
 
 
-		insert into #tmpPersoL5
+		insert into #tmpPersoL5 (Per_Person)
 			select	Peu_Person
 				from SOUNIPER noholdlock
 				where	Peu_Grupo = @Per_Grupo
@@ -856,7 +856,7 @@ end else begin
 				values (@Per_Grupo)
 
 
-		insert into #tmpClienL5
+		insert into #tmpClienL5 (Cli_Client, Cli_Unific)
 			select	Adi_Client,	@Str_Vacio
 				from CLADICIO noholdlock
 				inner join #tmpPersoL5 on Adi_NumPer = Per_Person
@@ -951,7 +951,7 @@ end else begin
 		create index personasUnicas on #PersonasUnicas(Per_Grupo)
 --Genera mucho io cost cuando en el like lleva una variable diferente al parametro de entrada y la asignacion del % tiene que ser antes
 
-		insert into #PersonasUnicas
+		insert into #PersonasUnicas (Per_Person, Per_Grupo)
 			select Per_Numero, Per_Numero
 				from SOPERSON noholdlock
 				where	Per_Comple like @Per_Comple
@@ -1002,13 +1002,15 @@ end else begin
 			Per_Grupo	char(8)
 		)
 		if isnull(@Str_PerRFC, @Str_Vacio) <> @Str_Vacio and len(@Str_PerRFC) = @Len_RFCHom begin
-			insert into #Personas
+			insert into #Personas (Per_Numero, Per_ComOrd, Per_Comple,	Per_RFC, Per_CURP,
+				   Per_Nombre, Per_Grupo)
 			select Per_Numero, Per_ComOrd, Per_Comple,	Per_RFC, Per_CURP,
 				   Per_Nombre, @Str_Vacio
 			from	SOPERSON noholdlock
 			 where Per_RFC = @Str_PerRFC
 		end else if isnull(@Str_PerRFC, @Str_Vacio) <> @Str_Vacio and len(@Str_PerRFC) >= @Len_RFCOrd begin
-			insert into #Personas
+			insert into #Personas (Per_Numero, Per_ComOrd, Per_Comple,	Per_RFC, Per_CURP,
+				   Per_Nombre, Per_Grupo)
 			select Per_Numero, Per_ComOrd, Per_Comple,	Per_RFC, Per_CURP,
 				   Per_Nombre, @Str_Vacio
 			from	SOPERSON noholdlock
@@ -1034,12 +1036,12 @@ end else begin
 			Per_Numero	char(8)
 		)
 		if isnull(@Str_PerRFC, @Str_Vacio) <> @Str_Vacio and len(@Str_PerRFC) = @Len_RFCHom begin
-			insert into #PersonasRFC
+			insert into #PersonasRFC (Per_Numero)
 			select Per_Numero
 			from	SOPERSON noholdlock
 			 where Per_RFC = @Str_PerRFC
 		end else if isnull(@Str_PerRFC, @Str_Vacio) <> @Str_Vacio and len(@Str_PerRFC) >= @Len_RFCOrd begin
-			insert into #PersonasRFC
+			insert into #PersonasRFC (Per_Numero)
 			select Per_Numero
 			from	SOPERSON noholdlock
 			 where Per_RFC like @Per_RFC
