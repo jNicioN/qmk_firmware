@@ -21,6 +21,12 @@ as
 ****************************************************************************
 ** REFERENCIAS: 														****
 ****************************************************************************
+** Modifico:	Javier Eduardo Ceron Rangel								****
+** Fecha:		9/Febrero/2026											****
+** Help: TRACL-15670													****
+** Descripcion:	OPTIMIZACIÓN: Reducción de I/O en búsqueda por RFC		****
+**				- Cambio LIKE por SARG (>=, <) para usar índice			****
+****************************************************************************
 ** Modifico:	Armando Alexis Sepulveda Cruz							****
 ** Fecha:		24/Marzo/2020											****
 ** Help:		1370878													****
@@ -131,10 +137,17 @@ if @Tip_ConTip = 'L' begin
 			  from SOPERSON noholdlock
 			 where Per_RFC = @Str_PerRFC
 		end else if isnull(@Str_PerRFC, @Str_Vacio) <> @Str_Vacio and len(@Str_PerRFC) >= @Len_RFCOrd begin
+			declare @Str_RFCMax varchar(30)
+			
+			/* Calcular límite superior para rango SARG */
+			/* CHAR(255) es el carácter mayor en ASCII - garantiza incluir todo */
+			select @Str_RFCMax = @Str_PerRFC + CHAR(255) 
+			
 			insert into #PersonaBus
 			select Per_Numero
 			  from SOPERSON noholdlock
-			 where Per_RFC like @Str_PerRFC + @Str_Porcen
+			 where Per_RFC >= @Str_PerRFC 
+			   and Per_RFC < @Str_RFCMax
 		end
 		
 		/*Búsqueda de Nombre + CURP*/
