@@ -23,6 +23,11 @@ create procedure SOPERDIRCON (
 ****************************************************************************
 ** REFERENCIAS:															****
 ****************************************************************************
+** Modifico: 	Kevin Becerra											  **
+** Fecha:		03/03/2026						                    	  **
+** HelpDesk:	TCELEM-15429						                      **
+** Descripcion:	Se regresa el campo de sexo en las consultas		   	  **
+****************************************************************************
 ** Modifico: 	Edwin Santiago											  **
 ** Fecha:		03/08/2021						                    	  **
 ** HelpDesk:	1299445						                    	      **
@@ -118,7 +123,8 @@ begin
 			Adi_FecCon smalldatetime null,
 			Adi_FecNac smalldatetime null,
 			Per_Activi char(10)     null,
-			Peu_Grupo  char(8)      null
+			Peu_Grupo  char(8)      null,
+			Adi_Sexo   char(1)      null
 )
 CREATE INDEX #SOPERINF ON #SOPERINF (Per_Numero)
 
@@ -218,9 +224,14 @@ CREATE INDEX #CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 			delete from #CLCLIUNI where Cla_Numero <> @Int_Dos
 			
 			--Obteniendo informacion adicional de la persona
-			update #SOPERINF set Adi_FecCon = so.Adi_FecCon ,Adi_FecNac = so.Adi_FecNac
+			update #SOPERINF set Adi_FecCon = so.Adi_FecCon ,Adi_FecNac = so.Adi_FecNac, Adi_Sexo = so.Adi_Sexo
 			from SOPERADI so noholdlock
 			where  Adi_PerNum = Per_Numero
+			
+			-- Seteando numero de cliente Unico
+			update #SOPERINF set Adi_Client = cu.Adi_Client 
+			from #CLCLIUNI cu
+			where Per_Numero = cu.Adi_NumPer 
 			
 			-- Seteando numero de cliente Unico
 			update #SOPERINF set Adi_Client = cu.Adi_Client 
@@ -254,7 +265,7 @@ CREATE INDEX #CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 					Per_CalNum,	Per_RazSoc,			 Per_Coloni,	rtrim(Col_Nombre) as Col_Nombre,Per_Entida,
 					rtrim(Ent_Nombre) as Ent_Nombre, Per_Locali,	rtrim(Loc_Nombre) as Loc_Nombre,
 					Per_CodPos,			 Adi_Client, Per_Tipo,		Per_Email,
-					Per_LadTel , 		 Per_Telefo, Adi_FecCon, 	Adi_FecNac, Act_Numero, Act_Descri,
+					Per_LadTel , 		 Per_Telefo, Adi_FecCon, 	Adi_FecNac, Act_Numero, Act_Descri, Adi_Sexo,
 					Tis_Numero, Tis_Descri
 			from #SOPERINF
 			left join CLACTIVI noholdlock
@@ -352,7 +363,7 @@ CREATE INDEX #CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 			delete from #CLCLIUNI where Cla_Numero <> @Int_Dos
 			
 			--Obteniendo informacion adicional de la persona
-			update #SOPERINF set Adi_FecCon = so.Adi_FecCon ,Adi_FecNac = so.Adi_FecNac
+			update #SOPERINF set Adi_FecCon = so.Adi_FecCon ,Adi_FecNac = so.Adi_FecNac, Adi_Sexo = so.Adi_Sexo
 			from SOPERADI so noholdlock
 			where  Adi_PerNum = Per_Numero
 			
@@ -389,7 +400,7 @@ CREATE INDEX #CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 					Per_CalNum,	Per_RazSoc,			 Per_Coloni,	rtrim(Col_Nombre) as Col_Nombre,Per_Entida,
 					rtrim(Ent_Nombre) as Ent_Nombre, Per_Locali,	rtrim(Loc_Nombre) as Loc_Nombre,
 					Per_CodPos,			 Adi_Client, Per_Tipo,		Per_Email,
-					Per_LadTel , 		 Per_Telefo, Adi_FecCon, 	Adi_FecNac, Act_Numero, Act_Descri,
+					Per_LadTel , 		 Per_Telefo, Adi_FecCon, 	Adi_FecNac, Act_Numero, Act_Descri, Adi_Sexo,
 					Tis_Numero, Tis_Descri
 			from #SOPERINF
 			left join CLACTIVI noholdlock
@@ -483,7 +494,7 @@ CREATE INDEX #CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 			delete from #CLCLIUNI where Cla_Numero <> @Int_Dos
 			
 			--Obteniendo informacion adicional de la persona
-			update #SOPERINF set Adi_FecCon = so.Adi_FecCon ,Adi_FecNac = so.Adi_FecNac
+			update #SOPERINF set Adi_FecCon = so.Adi_FecCon ,Adi_FecNac = so.Adi_FecNac, Adi_Sexo = so.Adi_Sexo
 			from SOPERADI so noholdlock
 			where  Adi_PerNum = Per_Numero
 			
@@ -520,7 +531,7 @@ CREATE INDEX #CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 					Per_CalNum,	Per_RazSoc,			 Per_Coloni,	rtrim(Col_Nombre) as Col_Nombre,Per_Entida,
 					rtrim(Ent_Nombre) as Ent_Nombre, Per_Locali,	rtrim(Loc_Nombre) as Loc_Nombre,
 					Per_CodPos,			 Adi_Client, Per_Tipo,		Per_Email,
-					Per_LadTel , 		 Per_Telefo, Adi_FecCon, 	Adi_FecNac, Act_Numero, Act_Descri,
+					Per_LadTel , 		 Per_Telefo, Adi_FecCon, 	Adi_FecNac, Act_Numero, Act_Descri, Adi_Sexo,
 					Tis_Numero, Tis_Descri
 			from #SOPERINF
 			left join CLACTIVI noholdlock
@@ -612,7 +623,7 @@ CREATE INDEX #CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 			delete from #CLCLIUNI where Cla_Numero <> @Int_Dos
 			
 			--Obteniendo informacion adicional de la persona
-			update #SOPERINF set Adi_FecCon = so.Adi_FecCon ,Adi_FecNac = so.Adi_FecNac
+			update #SOPERINF set Adi_FecCon = so.Adi_FecCon ,Adi_FecNac = so.Adi_FecNac, Adi_Sexo = so.Adi_Sexo
 			from SOPERADI so noholdlock
 			where  Adi_PerNum = Per_Numero
 			
@@ -649,7 +660,7 @@ CREATE INDEX #CLCOLONI ON #CLCOLONI (Cpc_Nombre)
 					Per_CalNum,	Per_RazSoc,			 Per_Coloni,	rtrim(Col_Nombre) as Col_Nombre,Per_Entida,
 					rtrim(Ent_Nombre) as Ent_Nombre, Per_Locali,	rtrim(Loc_Nombre) as Loc_Nombre,
 					Per_CodPos,			 Adi_Client, Per_Tipo,		Per_Email,
-					Per_LadTel , 		 Per_Telefo, Adi_FecCon, 	Adi_FecNac, Act_Numero, Act_Descri,
+					Per_LadTel , 		 Per_Telefo, Adi_FecCon, 	Adi_FecNac, Act_Numero, Act_Descri, Adi_Sexo,
 					Tis_Numero, Tis_Descri
 			from #SOPERINF
 			left join CLACTIVI noholdlock
