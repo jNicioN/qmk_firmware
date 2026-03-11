@@ -25,7 +25,7 @@ create procedure SOPERDIRCON (
 ****************************************************************************
 ** Modifico: 	Kevin Becerra											  **
 ** Fecha:		03/03/2026						                    	  **
-** HelpDesk:	TCELEM-15429						                      **
+** HelpDesk:	TCELEM-15447						                      **
 ** Descripcion:	Se regresa el campo de sexo en las consultas		   	  **
 ****************************************************************************
 ** Modifico: 	Edwin Santiago											  **
