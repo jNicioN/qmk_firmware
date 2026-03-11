@@ -21,6 +21,12 @@ as
 ** DESCRIPCION: Consulta de intervinientes Autorizados			  **
 **				(para Identificación de Operaciones)			  **
 ********************************************************************
+** Modificó:	Daniel Nevarez									****
+** Fecha:		17/09/2025										****
+** Help:		TCELES-36275									****
+** Descripcion:	Incluir consulta a CHCOTBEN para PM en			****
+				modulo de CLI									****
+********************************************************************
 ** Modificó:	Francisco Javier Carrillo Rojas					****
 ** Fecha:		07/Abril/2020									****
 ** Help:		01379522										****
@@ -66,7 +72,8 @@ declare	@Tip_ConTip	char(1),	/* Consulta Tipo C/L*/
 		@Cio_Status	char(1),	/* Estatus de configuración */
 		@Ins_PerCli	int,		/* Bandera para saber si se inserta el registro de la persona del cliente */
 		@Fof_MaxCon	smallint,	/* Consecutivo máximo del registro de firmas */
-		@Cio_IntReq	char(2)		/* Intervinientes requeridos */
+		@Cio_IntReq	char(2),	/* Intervinientes requeridos */
+		@Cli_Tipo	char(1)		/* Tipo de cliente (física o moral) */
 
 
 /* Declaracion de Constantes */
@@ -77,6 +84,7 @@ declare	@Str_C		char(1),
 		@Str_Vacio	char(1),
 		@Ent_Cero	int,
 		@Tip_PerFis	char(1),
+		@Tip_PerMor	char(1),
 		@Tip_Titula	char(1),
 		@Tip_Cotitu	char(1),
 		@Tip_Tercer	char(1),
@@ -92,6 +100,7 @@ declare	@Str_C		char(1),
 		@Tip_CoTeMa	char(2),
 		@Nom_Titula varchar(50),
 		@Nom_Cotitu varchar(50),
+		@Nom_Apoder varchar(50),
 		@Nom_Tercer varchar(50),
 		@Nom_Otro varchar(50)
 
@@ -103,6 +112,7 @@ select	@Str_C		= 'C',		/* Tipo C */
 		@Str_Vacio	= '',		/* String vacío */
 		@Ent_Cero	= 0,		/* Entero en cero */
 		@Tip_PerFis	= '2',		/* Tipo de persona persona física */
+		@Tip_PerMor	= '1',		/* Tipo de persona persona moral */
 		@Tip_Titula	= '1',		/* Tipo de interviniente Titular */
 		@Tip_Cotitu	= '3',		/* Tipo de interviniente Cotitular */
 		@Tip_Tercer	= '7',		/* Tipo de interviniente Tercero autorizado */
@@ -118,6 +128,7 @@ select	@Str_C		= 'C',		/* Tipo C */
 		@Tip_CoTeMa	= 'PM',		/* Tipo de configuración de Terceros-Mancomunados(Intervinientes requeridos)*/
 		@Nom_Titula = 'Titular',/* Nombre titular */
 		@Nom_Cotitu = 'Cotitular',/* Nombre cotitular */
+		@Nom_Apoder = 'Apoderado',/* Nombre apoderado */
 		@Nom_Tercer = 'Tercero',/* Nombre tercero */
 		@Nom_Otro	= ''		/* Nombre para otros */
 		
@@ -162,17 +173,38 @@ select	@Ins_PerCli	= @Ent_Cero
 /*Base para poder obtener los intervinientes autorizados de acuerdo a la configuración dada */
 if isnull(@Opi_TipOpe, @Ent_Cero) != @Ent_Cero and isnull(@Cio_Status, @Str_Vacio) = @Sta_Activo begin
 	if @Opi_BasOpe	= @Tip_BasCli begin
+
+		select	@Cli_Tipo	= Cli_Tipo
+			 from	CLCLIENT noholdlock
+			where	Cli_Numero	= @Cli_Numero
+
 		/* Solo podemos tener el número de cliente */
-		insert into #PersonasAutorizadas
-			select	adi.Adi_NumPer,	@Tip_Titula, @Ent_Cero
-				from CLCLIENT cli noholdlock
-					 inner join CLADICIO adi noholdlock on adi.ClClientID = cli.ClClientID 					
-				where	cli.Cli_Numero	= @Cli_Numero
-				  and	cli.Cli_Tipo	= @Tip_PerFis
-				  and	@Tip_Titula in(select Tii_TipInt
-										from SOTIINID noholdlock
-										where	Tii_NuIdCo	= @Cio_NuIdCo
-										  and	Tii_Status	= @Sta_Activo)
+		if @Cli_Tipo = @Tip_PerFis begin 
+
+			insert into #PersonasAutorizadas
+				select	adi.Adi_NumPer,	@Tip_Titula, @Ent_Cero
+					from CLCLIENT cli noholdlock
+						inner join CLADICIO adi noholdlock on adi.ClClientID = cli.ClClientID 					
+					where	cli.Cli_Numero	= @Cli_Numero
+					and	cli.Cli_Tipo	= @Tip_PerFis
+					and	@Tip_Titula in(select Tii_TipInt
+											from SOTIINID noholdlock
+											where	Tii_NuIdCo	= @Cio_NuIdCo
+											  and	Tii_Status	= @Sta_Activo)
+		end else if @Cli_Tipo = @Tip_PerMor begin
+
+			insert into #PersonasAutorizadas
+				select	Cob_Person,	min(Cob_Tipo), @Ent_Cero
+					from CHCOTBEN noholdlock
+					inner join CHCUENTA noholdlock on Cue_Numero = Cob_Cuenta
+					where	Cue_Client	= @Cli_Numero
+					  and	Cob_Tipo in(select	Tii_TipInt
+											from SOTIINID noholdlock
+											where	Tii_NuIdCo	= @Cio_NuIdCo
+											  and	Tii_Status	= @Sta_Activo)
+					group by Cob_Person
+
+		end
 				
 	end else if @Opi_BasOpe	= @Tip_BasCue begin
 		/* Se obtienen por referencias en cotitulares/beneficiarios/etc */
@@ -201,15 +233,15 @@ if isnull(@Opi_TipOpe, @Ent_Cero) != @Ent_Cero and isnull(@Cio_Status, @Str_Vaci
 										where	Tii_NuIdCo	= @Cio_NuIdCo
 										  and	Tii_Status	= @Sta_Activo)
 		
-		insert into #PersonasAutorizadas
+		insert into #PersonasAutorizadas (Per_Numero, Cob_Tipo, Cob_EsTerc)
 			select	Ped_Numero, min(Ped_Tipo), @Ent_Cero
 				from  #PersonasDuplicadas
 				group by Ped_Numero
 		
-		insert into #Terceros 
+		insert into #Terceros (Ter_Grupo)
 			select Peu_Grupo
 				from #PersonasDuplicadas as duplicadas
-					 inner join SOUNIPER on Ped_Numero = Peu_Person
+					 inner join SOUNIPER noholdlock on Ped_Numero = Peu_Person
 				where	Ped_Tipo	= @Tip_Tercer
 				  and	ltrim(Ped_Numero) is not null
 				group by Peu_Grupo
@@ -223,7 +255,7 @@ if isnull(@Opi_TipOpe, @Ent_Cero) != @Ent_Cero and isnull(@Cio_Status, @Str_Vaci
 										from SOTIINID noholdlock
 										where	Tii_NuIdCo	= @Cio_NuIdCo
 										  and	Tii_Status	= @Sta_Activo) begin
-					insert into #PersonasAutorizadas
+					insert into #PersonasAutorizadas (Per_Numero, Cob_Tipo, Cob_EsTerc)
 						select	adi.Adi_NumPer,	@Tip_Titula, @Ent_Uno
 							from CLCLIENT cli noholdlock
 								 inner join CLADICIO adi noholdlock on adi.ClClientID = cli.ClClientID 					
@@ -238,7 +270,7 @@ end
 				  	  
 if @Tip_ConTip = @Str_C begin
 	if @Tip_ConCon	= @Str_Uno begin /* C1 - Búsqueda de interviniente autorizado(consulta principal) por id único de persona*/
-		insert into #Personas
+		insert into #Personas (Per_Person, Per_Grupo, Per_TipFir, Per_CobTip, Per_CobNom, Per_EsTerc)
 			select	aut.Per_Numero,	aut.Per_Numero,	@Str_Vacio,	aut.Cob_Tipo,	@Str_Vacio,	Cob_EsTerc
 				from #PersonasAutorizadas as aut
 					 inner join SOPERSON as per noholdlock on per.Per_Numero	= aut.Per_Numero 
@@ -319,7 +351,7 @@ if @Tip_ConTip = @Str_C begin
 end else begin
 	if @Tip_ConCon	= @Str_Uno begin /* L1 - Búsqueda de personas autorizadas ligadas a configuración por nombre completo*/
 		if isnull(@Per_Comple, @Str_Vacio) = @Str_Vacio begin
-			insert into #Personas
+			insert into #Personas (Per_Person, Per_Grupo, Per_TipFir, Per_CobTip, Per_CobNom, Per_EsTerc)
 				select	aut.Per_Numero,	aut.Per_Numero,	@Str_Vacio,	aut.Cob_Tipo,	@Str_Vacio,	Cob_EsTerc
 					from #PersonasAutorizadas as aut
 						 inner join SOPERSON as per noholdlock on per.Per_Numero	= aut.Per_Numero 
@@ -327,7 +359,7 @@ end else begin
 		end	else begin
 			select	@Per_Comple	= ltrim(isnull(@Per_Comple, @Str_Vacio)) + @Str_Porcie
 			
-			insert into #Personas
+			insert into #Personas (Per_Person, Per_Grupo, Per_TipFir, Per_CobTip, Per_CobNom, Per_EsTerc)
 				select	aut.Per_Numero,	aut.Per_Numero,	@Str_Vacio,	aut.Cob_Tipo,	@Str_Vacio,	Cob_EsTerc
 					from #PersonasAutorizadas as aut
 						 inner join SOPERSON as per noholdlock on per.Per_Numero	= aut.Per_Numero 
@@ -389,6 +421,10 @@ end else begin
 					  and	ltrim(Per_TipFir) is null
 			end
 		end		
+		
+		select	@Cli_Tipo	= Cli_Tipo
+			from	CLCLIENT noholdlock
+			where	Cli_Numero	= @Cli_Numero
 			
 		--Salida de intervinientes autorizados para identificación
 		select	Per_Numero, Per_ComOrd, Per_Comple,	Per_RFC,	Per_CURP,
@@ -396,7 +432,10 @@ end else begin
 				Adi_FeVeId,	Per_Nacion,	Adi_NacExt,	Per_TipFir,	Per_CobTip,
 				Per_CoNoTi = case 
 					when Per_CobTip = @Tip_Titula then @Nom_Titula
-					when Per_CobTip = @Tip_Cotitu then @Nom_Cotitu
+					when Per_CobTip = @Tip_Cotitu then case
+						when @Cli_Tipo = @Tip_PerFis then @Nom_Cotitu
+						when @Cli_Tipo = @Tip_PerMor then @Nom_Apoder
+						end
 					when Per_CobTip = @Tip_Tercer then @Nom_Tercer
 					else @Nom_Otro
 				end,

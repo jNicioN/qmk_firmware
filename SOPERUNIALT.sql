@@ -85,6 +85,12 @@ as
 /******************************************************************/
 /** REFERENCIAS: 
 ********************************************************************
+** Modificó:	Javier E Ceron 									****
+** Fecha:		22/Oct/2025										****
+** Help: 		TRACL-14410										****
+** Descripcion:	Se agrega validación para que  				    ****
+**				Per_Tipo acepte sólo 1 o 2					    ****
+********************************************************************
 ** Modificó:	Francisco Euan          						****
 ** Fecha:		14/Marzo/2025							        ****
 ** Help:		TCELNC-23684								    ****
@@ -167,6 +173,7 @@ declare	@Str_Vacio	char(1),		/*	Declaracion de Constantes	*/
 		@Str_No		char(1),
 		@Tip_Titula	char(1),
 		@Str_No123	char(6),
+		@Str_No12	char(6),
 		@Str_23		char(4),
 		@Lon_Fisica	int,
 		@Lon_Moral	int,
@@ -195,7 +202,8 @@ select	@Str_Vacio	= '',			/* String Vacio	*/
 		@Str_Si		= 'S',			/* String Si */
 		@Str_No		= 'N',			/* String No */
 		@Str_No123	= '[^123]',		/*String 1 2 3*/
-		@Str_23		= '[23]',		/*String 2 3*/
+		@Str_No12	= '[^12]',		/*String 1 2*/
+	 	@Str_23		= '[23]',		/*String 2 3*/
 		@Lon_Fisica	= 13,			/*Longitud RFC perosna fisica*/
 		@Lon_Moral	= 12,			/*Longitud RFC persona moral*/
 		@Str_Ceros	='00000000',	/*String ceros*/
@@ -220,29 +228,38 @@ end
 
 select	@Per_NumTra	= @NumTransac
 
-if (@Per_Tipo	= @Per_Moral) and (@Per_RazSoc	= @Str_Vacio) begin
+/* Validación del tipo de persona */
+if (@Per_Tipo like @Str_No12) begin
 	select	Err_Codigo	= '000001',
+			Err_Mensaj	= 'Tipo de Persona incorrecto',
+			Err_Variab	= 'Per_Tipo'
+	rollback
+	return @Ent_Uno
+end
+
+if (@Per_Tipo	= @Per_Moral) and (@Per_RazSoc	= @Str_Vacio) begin
+	select	Err_Codigo	= '000002',
 			Err_Mensaj	= 'Proporcione la Razon social'
 	rollback
 	return 1
 end
 
-if (@Per_Tipo like @Str_23) and (@Per_Nombre	= @Str_Vacio) begin
-	select	Err_Codigo	= '000002',
+if (@Per_Tipo = @Per_Fisica) and (@Per_Nombre	= @Str_Vacio) begin
+	select	Err_Codigo	= '000003',
 			Err_Mensaj	= 'Proporcione el Nombre'
 	rollback
 	return 1
 end
 
-if (@Per_Tipo like @Str_23) and (@Per_ApePat	= @Str_Vacio) begin
-	select	Err_Codigo	= '000003',
+if (@Per_Tipo = @Per_Fisica) and (@Per_ApePat = @Str_Vacio) begin
+	select	Err_Codigo	= '000004',
 			Err_Mensaj	= 'Proporcione el Apellido paterno'
 	rollback
 	return 1
 end
 
 if @Per_Tipo	= @Per_Moral and @Per_RFC	= @Str_Vacio begin
-	select	Err_Codigo	= '000004',
+	select	Err_Codigo	= '000005',
 			Err_Mensaj	= 'Proporcione el RFC'
 	rollback
 	return 1
@@ -256,7 +273,7 @@ if (@Per_Tipo	= @Per_Fisica and len(ltrim(rtrim(@Per_RFC)))	= @Lon_Fisica) OR
 		where	Per_RFC	= ltrim(rtrim(@Per_RFC))
 	
 	if @Existe	= @Str_Si begin
-		select	Err_Codigo	= '000005',
+		select	Err_Codigo	= '000006',
 				Err_Mensaj	= 'Ya existe el RFC ' + @Per_RFC + ', favor de buscar por el nombre completo a la persona capturada' 
 		rollback
 		return 1
@@ -264,7 +281,7 @@ if (@Per_Tipo	= @Per_Fisica and len(ltrim(rtrim(@Per_RFC)))	= @Lon_Fisica) OR
 end
 
 if @Per_Tipo <> @Per_Moral and @Adi_Sexo not in (@Tip_Mascul, @Tip_Femeni) begin
-	select	Err_Codigo	= '000005',
+	select	Err_Codigo	= '000007',
 			Err_Mensaj 	= 'Sexo no válido'
 	rollback
 	return 1
