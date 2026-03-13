@@ -1,0 +1,26 @@
+name: 🔍 SQLCHECKER
+
+on:
+  workflow_dispatch:
+    inputs:
+      rama_a_validar:
+        description: '🌿 Nombre de la rama a validar (ej: test1, feature/nueva-consulta)'
+        required: true
+        type: string
+      es_postgresql:
+        description: '🐘 ¿Es PostgreSQL? (desmarcado = Sybase)'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  revision-sql:
+    uses: regional-ris/arc-calidad-action/.github/workflows/sql_checker.yml@develop
+    with:
+      rama_a_validar: ${{ inputs.rama_a_validar }}
+      es_postgresql: ${{ inputs.es_postgresql }}
+    secrets: inherit
