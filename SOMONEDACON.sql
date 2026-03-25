@@ -22,6 +22,12 @@ as
 
 /*
 ****************************************************************************
+** Modifico:	Miguel Callejas											****
+** Fecha:		25/03/2026												****
+** HelpDesk:	TCELTO-19892    										****
+** Descripcion:	Agrega consulta LA - Monedas para Cartas de Crédito	    ****
+**				(solo Pesos y Dólares)									****
+****************************************************************************
 ** Modifico:	Hébel Cruz												****
 ** Fecha:		11/04/25												****
 ** HelpDesk:	TCELTO-12900											****
@@ -291,7 +297,8 @@ declare	@Str_Vacio	char(1),
 		@Str_N		char(1),		/*	Cadena con valor N	*/
 		@Con_LisTra	char(1),
 		@Mon_NumMxn	char(2),
-		@Tip_CamSuc   char(1)
+		@Tip_CamSuc   char(1),
+		@Con_LiCaCr	char(1)
 
 /* Asignacion de valores a constantes */
 select	@Str_Vacio	= '',				/* String Vacio */
@@ -340,7 +347,8 @@ select	@Str_Vacio	= '',				/* String Vacio */
 		@Str_N		= 'N',
 		@Con_LisTra	= '8',				/* Consulta de lista de monedas de cambio de tradair */
 		@Mon_NumMxn	= '01',				/*	Numero de moneda para pesos */
-		@Tip_CamSuc = '9'			/*Tipo de cambio para pantallas de sucursal. L9*/
+		@Tip_CamSuc = '9',			/*Tipo de cambio para pantallas de sucursal. L9*/
+		@Con_LiCaCr	= 'A'			   /* Lista de Monedas para Cartas de Credito (Pesos y Dolares) */
 		
 /* Inicalizacion Variable*/
 select  @NumTransac = isnull(@NumTransac,@Str_Vacio),
@@ -715,6 +723,11 @@ end else begin			/* Cliente:  Visual Basic */
 			from SOMONEDA noholdlock
 			where  Mon_OpeCam = @Ope_MonCam
 			and Mon_Numero in (@Mon_Dolar,@Mon_Euro)
-		end
+		end else if @Tip_ConCon = @Con_LiCaCr begin
+            select  Mon_Numero,	Mon_Descri,	Mon_Simbol,	Mon_AbrISO
+                from SOMONEDA noholdlock
+                where	Mon_Numero in (@Mon_Pesos, @Mon_Dolar)
+                order by Mon_Numero
+        end
 	end
 end
