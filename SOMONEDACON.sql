@@ -18,18 +18,18 @@ as
 ****************************************************************************
 ** ** Consulta alfabetica o numerica de una Moneda **					****
 ****************************************************************************
-/* REFERENCIAS:															***/
+** REFERENCIAS:                                                         ****
 ****************************************************************************
 ** Modifico:	Miguel Callejas											****
 ** Fecha:		25/03/2026												****
 ** HelpDesk:	TCELTO-19892    										****
-** Descripcion:	Agrega consulta LA - Monedas para Cartas de Crédito	    ****
-**				(solo Pesos y Dólares)									****
+** Descripcion:	Agrega consulta LA - Monedas para Cartas de Credito	    ****
+**				(solo Pesos y Dolares)									****
 ****************************************************************************
-** Modifico:	Hébel Cruz												****
+** Modifico:	Hebel Cruz												****
 ** Fecha:		11/04/25												****
 ** HelpDesk:	TCELTO-12900											****
-** Descripcion:	Agrega consulta para metales por número   				****				
+** Descripcion:	Agrega consulta para metales por numero   				****				
 ****************************************************************************
 ** Modifico:	Joel Barcenas											****
 ** Fecha:		18/Sep/19												****
