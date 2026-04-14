@@ -1,0 +1,50 @@
+name: Copilot Setup Steps
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+  pull_request:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+
+jobs:
+  copilot-setup-steps:
+    name: Prepare Copilot Cloud Agent Environment
+    runs-on: arc-ocp-bro2socp4
+    permissions:
+      contents: read
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Verify runner toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Runner: $RUNNER_NAME"
+          echo "Workspace: $GITHUB_WORKSPACE"
+          uname -a
+          git --version
+          bash --version | head -1
+          java -version 2>&1 || true
+          command -v mvn >/dev/null 2>&1 && mvn -version || true
+          command -v oc >/dev/null 2>&1 && oc version --client || true
+          command -v helm >/dev/null 2>&1 && helm version --short || true
+
+      - name: Validate ARC runner label
+        shell: bash
+        run: |
+          if [[ "$RUNNER_NAME" != *"arc-ocp"* ]]; then
+            echo "ERROR: Runner name '$RUNNER_NAME' does not contain 'arc-ocp'" >&2
+            exit 1
+          fi
+
+      - name: Validate repository files used by Copilot
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f .github/copilot-instructions.md
+          test -f pom.xml
