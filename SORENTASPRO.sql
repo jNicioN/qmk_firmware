@@ -188,7 +188,9 @@ declare	@Ren_ResCap	double precision,		/*Resultado capital*/
 		@Men_Valida char(70),			/* Mensaje de validacion */
 		@Ban_Restri char(1),				/* Bandera de restriccion */ 
 		@Ban_PagExt int,
-		@Exi_PagExt bit
+		@Exi_PagExt bit,
+		@Fec_AltCot smalldatetime
+
 
 declare	@Mon_Cero	smallint,				/*	Declaración de Constantes	*/
 		@Mon_Uno	smallint,
@@ -321,6 +323,8 @@ create table #Rentas (
 	Ren_IvaFac	money,
 	Ren_IvaRen	money, 
 	Ren_Total	money)
+
+select @Fec_AltCot = cast(@FechaSis as date)
 
 select	@Par_DiaMes	= Par_DiaMes,
 		@Par_PorIVA	= Par_PorIVA
@@ -521,14 +525,14 @@ if @Amo_MonCer = @Cad_No begin
 	            @NumPagExt	= count(Pae_Amorti)
 	        from ABTMPPEC noholdlock
 	        where	Pae_NumCot	= @Num_Cotiza
-	          and	Usuario = @Usuario 
-	          and	FechaSis = cast(@FechaSis as date)
+	          and	Usuario 	= @Usuario 
+	          and	FechaSis 	>= @Fec_AltCot
 	          
 	     select  @Ban_PagExt  = count(Pae_Amorti)
 	        from ABTMPPEC noholdlock
 	        where	Pae_NumCot	= @Num_Cotiza
-	          and	Usuario = @Usuario
-	          and	FechaSis = cast(@FechaSis as date)
+	          and	Usuario 	= @Usuario
+	          and	FechaSis 	>= @Fec_AltCot
 	end else begin
 	    select	@SumCaPaEx	= sum(Pae_Cantid),
 	            @NumPagExt	= count(Pae_Amorti)
@@ -621,8 +625,8 @@ if @Amo_MonCer = @Cad_No begin
 			            from ABTMPPEC noholdlock
 			            where	Pae_NumCot	= @Num_Cotiza
 			              and	Pae_Amorti	= right(@Str_3Ceros + ltrim(rtrim(convert(char(3), @Ren_Consec))), @Ent_Tres)
-			              and	Usuario = @Usuario
-			              and	FechaSis = cast(@FechaSis as date)
+			              and	Usuario	 	= @Usuario
+			              and	FechaSis 	>= @Fec_AltCot
 			        ) then @Ent_Uno else @Ent_Cero end
 			end else begin
 			    select @Exi_PagExt = case when exists (
@@ -638,8 +642,8 @@ if @Amo_MonCer = @Cad_No begin
 			            from ABTMPPEC noholdlock
 			            where Pae_NumCot	= @Num_Cotiza
 			              and	Pae_Amorti	= right(@Str_3Ceros + ltrim(rtrim(convert(char(3), @Ren_Consec))), @Ent_Tres)
-			              and	Usuario = @Usuario
-			              and	FechaSis = cast(@FechaSis as date)
+			              and	Usuario 	= @Usuario
+			              and	FechaSis 	>= @Fec_AltCot
 			    end else begin
 			        select	@Pae_Cantid	= Pae_Cantid
 			            from ABTMPPEC noholdlock
