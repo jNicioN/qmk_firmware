@@ -37,6 +37,13 @@ as
 ****************************************************************************
 ** REFERENCIAS:															****
 ****************************************************************************
+** Modifico:	Keni Choreno 											****
+** Fecha:		20/Mayo/2026											****
+** Key jira:	OYOA-3923	 											****
+** Descripción: Se agrega validacion para cuando es creacion de 		****
+**				cotizaciones y todavia no tiene asignado numero de 		****
+**				folio, se validen por usuario y fecha 					****
+****************************************************************************
 *** Modifico:	Edwin Silva 											****
 ** Fecha:		14 de Agosto 2024										****
 ** Key jira:		TCELA-16175 										****
@@ -179,7 +186,11 @@ declare	@Ren_ResCap	double precision,		/*Resultado capital*/
 		@Cot_IntRea smallmoney,				/* Interes Total de la Cotizacion */
 		@Lin_Numero char(12),			/* Numero de Linea a validar*/
 		@Men_Valida char(70),			/* Mensaje de validacion */
-		@Ban_Restri char(1)				/* Bandera de restriccion */ 
+		@Ban_Restri char(1),				/* Bandera de restriccion */ 
+		@Ban_PagExt int,
+		@Exi_PagExt bit,
+		@Fec_AltCot smalldatetime
+
 
 declare	@Mon_Cero	smallint,				/*	Declaración de Constantes	*/
 		@Mon_Uno	smallint,
@@ -312,6 +323,8 @@ create table #Rentas (
 	Ren_IvaFac	money,
 	Ren_IvaRen	money, 
 	Ren_Total	money)
+
+select @Fec_AltCot = cast(@FechaSis as date)
 
 select	@Par_DiaMes	= Par_DiaMes,
 		@Par_PorIVA	= Par_PorIVA
@@ -506,17 +519,35 @@ if @Amo_MonCer = @Cad_No begin
 							when @Tip_FreAnu then @Fre_Mensua
 						  end
 	
-	select	@SumCaPaEx	= sum(Pae_Cantid),
-			@NumPagExt	= count(Pae_Amorti)
-		from ABTMPPEC noholdlock
-		where	Pae_NumCot	= @Num_Cotiza
+	-- Validación para pagos extraordinarios
+	if @Num_Cotiza = @Str_SieCer begin
+	    select	@SumCaPaEx	= sum(Pae_Cantid),
+	            @NumPagExt	= count(Pae_Amorti)
+	        from ABTMPPEC noholdlock
+	        where	Pae_NumCot	= @Num_Cotiza
+	          and	Usuario 	= @Usuario 
+	          and	FechaSis 	>= @Fec_AltCot
+	          
+	     select  @Ban_PagExt  = count(Pae_Amorti)
+	        from ABTMPPEC noholdlock
+	        where	Pae_NumCot	= @Num_Cotiza
+	          and	Usuario 	= @Usuario
+	          and	FechaSis 	>= @Fec_AltCot
+	end else begin
+	    select	@SumCaPaEx	= sum(Pae_Cantid),
+	            @NumPagExt	= count(Pae_Amorti)
+	        from ABTMPPEC noholdlock
+	        where	Pae_NumCot	= @Num_Cotiza
+	        
+	    select  @Ban_PagExt = count(Pae_Amorti)
+	        from ABTMPPEC noholdlock
+	        where	Pae_NumCot	= @Num_Cotiza
+	end
 	
 	/*CALCULO DE LA RENTA*/
 	if @Mon_Intere = @Mon_Cero begin --Tasa Cero
 	
-		if (select	count(Pae_Amorti)
-				from ABTMPPEC noholdlock
-				where	Pae_NumCot	= @Num_Cotiza) > @Ent_Cero begin 
+		if @Ban_PagExt > @Ent_Cero begin 
 	
 			select	@Mon_InAPag	= round((@Amo_MonFin - (@SumCaPaEx/ (@Ent_Uno + (@Amo_IVAFac/@Mon_Cien))))/(@Amo_Plazo - @Amo_PerGra - @NumPagExt), @Ent_Dos)
 	
@@ -525,9 +556,7 @@ if @Amo_MonCer = @Cad_No begin
 		end
 	
 	end else begin
-		if (select	count(Pae_Amorti)
-				from ABTMPPEC noholdlock
-				where	Pae_NumCot	= @Num_Cotiza) > @Ent_Cero begin
+		if @Ban_PagExt > @Ent_Cero begin
 			exec @Status	= ABTMPPECPRO
 				@Amo_Plazo,		@Amo_MonFin,	@Amo_TasBas,	@Num_Meses,			@Amo_PerGra,
 				@Amo_OpcCom,	@Amo_TipArr,	@Amo_IVA,		@Amo_Mensua output,	@Num_Cotiza,
@@ -590,16 +619,37 @@ if @Amo_MonCer = @Cad_No begin
 			select	@Ren_Capita	= @Mon_Cero,
 					@Ban_PaExCe	= @Cad_No
 		else begin
-			if @NumPagExt > @Ent_Cero and 
-			   exists (select	Pae_Amorti
-						from ABTMPPEC noholdlock
-						where	Pae_NumCot	= @Num_Cotiza
-						  and	Pae_Amorti	= right(@Str_3Ceros + ltrim(rtrim(convert(char(3), @Ren_Consec))), @Ent_Tres)) begin
-	
-				select	@Pae_Cantid	= Pae_Cantid
-					from ABTMPPEC noholdlock
-					where Pae_NumCot	= @Num_Cotiza
-					  and	Pae_Amorti	= right(@Str_3Ceros + ltrim(rtrim(convert(char(3), @Ren_Consec))), @Ent_Tres)
+			if @Num_Cotiza = @Str_SieCer begin
+			    select @Exi_PagExt = case when exists (
+			            select	Pae_Amorti
+			            from ABTMPPEC noholdlock
+			            where	Pae_NumCot	= @Num_Cotiza
+			              and	Pae_Amorti	= right(@Str_3Ceros + ltrim(rtrim(convert(char(3), @Ren_Consec))), @Ent_Tres)
+			              and	Usuario	 	= @Usuario
+			              and	FechaSis 	>= @Fec_AltCot
+			        ) then @Ent_Uno else @Ent_Cero end
+			end else begin
+			    select @Exi_PagExt = case when exists (
+			            select	Pae_Amorti
+			            from ABTMPPEC noholdlock
+			            where	Pae_NumCot	= @Num_Cotiza
+			              and	Pae_Amorti	= right(@Str_3Ceros + ltrim(rtrim(convert(char(3), @Ren_Consec))), @Ent_Tres)
+			        ) then @Ent_Uno else @Ent_Cero end
+			end
+			if @NumPagExt > @Ent_Cero and @Exi_PagExt = @Ent_Uno begin
+				if @Num_Cotiza = @Str_SieCer begin
+			        select	@Pae_Cantid	= Pae_Cantid
+			            from ABTMPPEC noholdlock
+			            where Pae_NumCot	= @Num_Cotiza
+			              and	Pae_Amorti	= right(@Str_3Ceros + ltrim(rtrim(convert(char(3), @Ren_Consec))), @Ent_Tres)
+			              and	Usuario 	= @Usuario
+			              and	FechaSis 	>= @Fec_AltCot
+			    end else begin
+			        select	@Pae_Cantid	= Pae_Cantid
+			            from ABTMPPEC noholdlock
+			            where Pae_NumCot	= @Num_Cotiza
+			              and	Pae_Amorti	= right(@Str_3Ceros + ltrim(rtrim(convert(char(3), @Ren_Consec))), @Ent_Tres)
+			    end
 
 				if @Pae_Cantid = @Mon_Cero begin
 					select	@Ren_Capita	= @Mon_Cero,
