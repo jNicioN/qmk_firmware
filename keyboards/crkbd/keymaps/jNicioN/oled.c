@@ -1,6 +1,8 @@
 #include QMK_KEYBOARD_H
 #include "keycodes.h"
 
+#include <string.h>
+
 // 5x3 Pinta el logo de QMQ
 void render_qmk_logo(void) {
     static const char PROGMEM font_qmk_logo[16] = {
@@ -47,43 +49,6 @@ void render_layer_sym(void) {
     oled_write_P(font_layer[layer], false);
 };
 
-
-void render_layers(void) {
-    static const char PROGMEM font_layers[5][16] = {
-        {0x20, 0x85, 0x86, 0x87, 0x20,//capa de enmedio en blanco (entiendase como capa base)
-         0x20, 0xa5, 0xa6, 0xa7, 0x20,//0x20 representa espacios en blanco
-         0x20, 0xc5, 0xc6, 0xc7, 0x20,
-         0},
-        {0x20, 0x88, 0x89, 0x8a, 0x20,//capa superior blanca
-         0x20, 0xa8, 0xa9, 0xaa, 0x20,
-         0x20, 0xc8, 0xc9, 0xca, 0x20,
-         0},
-        {0x20, 0x8b, 0x8c, 0x8d, 0x20,//capa inferior blanca
-         0x20, 0xab, 0xac, 0xad, 0x20,
-         0x20, 0xcb, 0xcc, 0xcd, 0x20,
-         0},
-		{0x20, 0x88, 0x89, 0x8a, 0x20,//capa superior e inferiro blanca
-         0x20, 0xa8, 0xa9, 0xaa, 0x20,
-		 0x20, 0xcb, 0xcc, 0xcd, 0x20,
-         0},
-        {0x20, 0x8e, 0x8f, 0x90, 0x20,//capas difusas
-         0x20, 0xae, 0xaf, 0xb0, 0x20,
-         0x20, 0xce, 0xcf, 0xd0, 0x20,
-         0},
-    };
-
-    uint8_t layer = 0;
-    if (layer_state_is(_NAV)) {
-        layer = 1;
-    } else if (layer_state_is(_SYMBOL)) {
-        layer = 2;
-    } else if (layer_state_is(_NUMPAD)) {
-        layer = 3;
-    } else if (layer_state_is(_CONFIG)) {
-        layer = 4;
-    }
-    oled_write_P(font_layers[layer], false);
-};
 
 #if defined(RGB_MATRIX_ENABLE) || defined(RGBLIGHT_ENABLE)
 	void render_rgb_status(void) {
@@ -158,6 +123,108 @@ void render_feature_status(void) {
 
 static uint16_t key_timer  = 0;
 static bool is_key_processed = true;
+static char last_keylog[4] = "...";
+
+static void set_last_keylog_text(const char *text) {
+    strncpy(last_keylog, text, sizeof(last_keylog) - 1);
+    last_keylog[sizeof(last_keylog) - 1] = '\0';
+}
+
+static uint16_t normalize_keycode(uint16_t keycode) {
+    if (keycode >= QK_MOD_TAP && keycode <= QK_MOD_TAP_MAX) {
+        return QK_MOD_TAP_GET_TAP_KEYCODE(keycode);
+    }
+    if (keycode >= QK_LAYER_TAP && keycode <= QK_LAYER_TAP_MAX) {
+        return QK_LAYER_TAP_GET_TAP_KEYCODE(keycode);
+    }
+    return keycode;
+}
+
+static void set_last_keylog(uint16_t keycode) {
+    keycode = normalize_keycode(keycode);
+
+    if (keycode >= KC_A && keycode <= KC_Z) {
+        char key_char[2] = {(char)('A' + (keycode - KC_A)), '\0'};
+        set_last_keylog_text(key_char);
+        return;
+    }
+
+    if (keycode >= KC_1 && keycode <= KC_9) {
+        char key_char[2] = {(char)('1' + (keycode - KC_1)), '\0'};
+        set_last_keylog_text(key_char);
+        return;
+    }
+
+    if (keycode == KC_0) {
+        set_last_keylog_text("0");
+        return;
+    }
+
+    switch (keycode) {
+        case KC_MINUS:
+            set_last_keylog_text("-");
+            break;
+        case KC_EQUAL:
+            set_last_keylog_text("=");
+            break;
+        case KC_SLASH:
+        case KC_KP_SLASH:
+            set_last_keylog_text("/");
+            break;
+        case KC_BACKSLASH:
+            set_last_keylog_text("\\");
+            break;
+        case KC_DOT:
+        case KC_KP_DOT:
+            set_last_keylog_text(".");
+            break;
+        case KC_COMM:
+            set_last_keylog_text(",");
+            break;
+        case KC_SCLN:
+            set_last_keylog_text(";");
+            break;
+        case KC_QUOT:
+            set_last_keylog_text("'");
+            break;
+        case KC_GRV:
+            set_last_keylog_text("`");
+            break;
+        case KC_LBRC:
+            set_last_keylog_text("[");
+            break;
+        case KC_RBRC:
+            set_last_keylog_text("]");
+            break;
+        case KC_NUBS:
+            set_last_keylog_text("<>");
+            break;
+        case KC_NONUS_HASH:
+            set_last_keylog_text("#");
+            break;
+        case KC_SPC:
+            set_last_keylog_text("SPC");
+            break;
+        case KC_ENT:
+            set_last_keylog_text("ENT");
+            break;
+        case KC_TAB:
+            set_last_keylog_text("TAB");
+            break;
+        case KC_BSPC:
+            set_last_keylog_text("BSP");
+            break;
+        default:
+            set_last_keylog_text("...");
+            break;
+    }
+}
+
+void render_last_key(void) {
+    oled_write_P(PSTR("key"), false);
+    oled_write_P(PSTR(" "), false);
+    oled_write(last_keylog, false);
+}
 
 //pinta el estatus de la capa en la que se encuentra
 void render_prompt(void) {
@@ -169,15 +236,15 @@ void render_prompt(void) {
     const char* default_layer = "   ";  // Espacios en blanco
 
     if (layer_state_is(_NAV)) {
-        oled_write_P(nav_layer, false);
+        oled_write(nav_layer, false);
     } else if (layer_state_is(_SYMBOL)) {
-        oled_write_P(symbol_layer, false);
+        oled_write(symbol_layer, false);
     } else if (layer_state_is(_NUMPAD)) {
-        oled_write_P(numpad_layer, false);
+        oled_write(numpad_layer, false);
     } else if (layer_state_is(_CONFIG)) {
-        oled_write_P(config_layer, false);
+        oled_write(config_layer, false);
     } else {
-        oled_write_P(default_layer, false);
+        oled_write(default_layer, false);
     }
 };
 
@@ -215,7 +282,7 @@ void render_status_main(void) {
     oled_write_ln("", false);
     oled_write_ln("", false);
 
-    render_layers(); //Pinta el icono de la capa sobre la que te encuentras
+    render_last_key(); //Pinta la ultima tecla presionada
 
     oled_write_ln("", false);
     oled_write_ln("", false);
@@ -235,6 +302,7 @@ oled_rotation_t oled_init_user(oled_rotation_t rotation) {
 bool oled_task_user(void) {
     if (is_keyboard_master()) {
         if (is_key_processed && (timer_elapsed(key_timer) < OLED_KEY_TIMEOUT)) {
+            oled_on();
             render_status_main();
         } else if (is_key_processed) {
             is_key_processed = false;
@@ -244,4 +312,13 @@ bool oled_task_user(void) {
         render_status_secondary();
     }
     return false;
+}
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    if (record->event.pressed) {
+        key_timer = timer_read();
+        is_key_processed = true;
+        set_last_keylog(keycode);
+    }
+    return true;
 }
