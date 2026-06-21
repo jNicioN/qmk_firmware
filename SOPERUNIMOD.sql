@@ -126,6 +126,7 @@ as
 declare	@Per_Comple	varchar(254),	/*	Declaracion de Variables	*/
 		@Per_ComOrd	varchar(254),
 		@Per_ActINE	char(6),
+		@Act_ActReg	char(2),
 		@Act_Numero	char(10),
 		@Act_Status	char(1),
 		@Status		int,
@@ -466,9 +467,20 @@ end
 /* Actividad de Inegi */ 
 if isnull(@Per_Activi, @Str_Vacio) != @Str_Vacio begin
 	
-	select	@Per_ActINE	= Act_NumINE 
+	select	@Per_ActINE	= Act_NumINE,
+			@Act_ActReg	= Act_ActReg
 		from CLACTIVI noholdlock
 		where	Act_Numero	= @Per_Activi
+
+	if @Per_Tipo = @Per_Fisica and @Per_ActEmp in (@Str_No, @Str_Si) begin
+		if isnull(@Act_ActReg, '') <> '04' begin
+			select	Err_Codigo	= '000008',
+					Err_Mensaj	= 'Personas fisicas solo pueden registrar actividades de tipo comercial',
+					Err_Variab	= 'Per_Activi'
+			rollback
+			return @Ent_Uno
+		end
+	end
 	
 end
 	

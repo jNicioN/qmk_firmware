@@ -219,6 +219,7 @@ declare	@Per_Comple	varchar(254),	/* Nombre Completo */
 		@Per_ComOrd	varchar(254),	/* Nombre Completo Ordenado */
 		@Act_Numero	char(10),		/* Numero Actividad */
 		@Act_Status	char(1),		/* Estatus Actividad */
+		@Act_ActReg	char(2),		/* Actividad Regulatoria */
 		@Status		int,			/* Estatus */
 		@PerPersoID	int,			/* ID Persona */
 		@PerExist	char(8),		/* Variable Existe Persona */
@@ -510,7 +511,8 @@ if (@Modulo not in (@Ban_Electr, @Ban_NueBan)) and (@Tip_Proces = @Tip_CueChe an
 	if @Per_Activi <> @Str_Vacio and @Cob_Tipo not in (@Tip_Benefi,@Tip_Hered) begin
 
 		select	@Act_Numero	= Act_Numero,
-				@Act_Status	= Act_Status
+				@Act_Status	= Act_Status,
+				@Act_ActReg	= Act_ActReg
 			from CLACTIVI noholdlock
 			where	Act_Numero	= @Per_Activi
 
@@ -530,6 +532,16 @@ if (@Modulo not in (@Ban_Electr, @Ban_NueBan)) and (@Tip_Proces = @Tip_CueChe an
 					Err_Variab	= 'Per_Activi'
 			rollback
 			return @Ent_Uno
+		end
+
+		if @Per_Tipo = @Per_Fisica and @Per_ActEmp in (@Str_No, @Str_Si) begin
+			if isnull(@Act_ActReg, '') <> '04' begin
+				select	Err_Codigo	= '000026',
+						Err_Mensaj	= 'Personas fisicas solo pueden registrar actividades de tipo comercial',
+						Err_Variab	= 'Per_Activi'
+				rollback
+				return @Ent_Uno
+			end
 		end
 	end
 

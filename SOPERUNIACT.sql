@@ -111,6 +111,7 @@ as
 declare	@Per_Comple	varchar(254),	/*	Declaracion de Variables	*/
 		@Per_ComOrd	varchar(254),	/* Persona nombre Ordenado*/
 		@Per_ActINE	char(6),		/* Persona Actividad según INEGI */
+		@Act_ActReg	char(2),		/* Actividad Regulatoria */
 		@Per_Titulo varchar(10),	/* Persona titulo */
 		@Status		int,			/* Status */
 		@Bit_Fecha	smalldatetime,	/* Bitacora Fecha */
@@ -203,7 +204,10 @@ declare	@Str_Vacio	char(1),	/*	Declaracion de Constantes	*/
 		@Ent_Uno	int,
 		@Ent_180	int,
 		@Tip_Mascul char(1),
-        @Tip_Femeni char(1)
+        @Tip_Femeni char(1),
+		@Per_Fisica	char(1),
+		@Sin_ActEmp	char(1),
+		@Con_ActEmp	char(1)
 
 select	@Str_Vacio	= '',			/* String Vacio	*/
 		@Per_Moral	= '1',			/* Persona Moral */
@@ -221,7 +225,10 @@ select	@Str_Vacio	= '',			/* String Vacio	*/
 		@Ent_Uno	= 1,
 		@Ent_180	= 180,
 		@Tip_Mascul = 'M',          /*  Valor para sexo Masculino */
-        @Tip_Femeni = 'F'           /*  Valor para sexo Femenino */
+        @Tip_Femeni = 'F',          /*  Valor para sexo Femenino */
+		@Per_Fisica	= '2',			/* Tipo de Persona: Fisica */
+		@Sin_ActEmp	= 'N',			/* Sin Actividad Empresarial */
+		@Con_ActEmp	= 'S'			/* Con Actividad Empresarial */
 
 if not exists (	select	Per_Numero
 					from SOPERSON noholdlock
@@ -421,9 +428,20 @@ end
 
 /* Actividad de Inegi */ 
 if isnull(@Per_Activi, @Str_Vacio) != @Str_Vacio begin
-	select @Per_ActINE	= Act_NumINE 
+	select @Per_ActINE	= Act_NumINE,
+		   @Act_ActReg	= Act_ActReg
 	  from CLACTIVI noholdlock
 	 where Act_Numero	= @Per_Activi
+
+	if @Per_Tipo = @Per_Fisica and @Per_ActEmp in (@Sin_ActEmp, @Con_ActEmp) begin
+		if isnull(@Act_ActReg, '') <> '04' begin
+			select	Err_Codigo	= '000006',
+					Err_Mensaj	= 'Personas fisicas solo pueden registrar actividades de tipo comercial',
+					Err_Variab	= 'Per_Activi'
+			rollback
+			return @Ent_Uno
+		end
+	end
 end
 
 select	@Per_ActINE	= isnull(@Per_ActINE, @Str_Vacio)
