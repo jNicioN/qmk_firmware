@@ -417,13 +417,23 @@ if not exists (	select	Per_Numero
 		end
 end
 
+if @Per_RFC <> @Str_Vacio
+	select @Per_RFC  = UPPER(@Per_RFC)
+
+if @Per_Tipo <> @Per_Moral
+	select @Per_CURP = UPPER(@Per_CURP)
+
 if @Per_Tipo = @Per_Moral begin
-	select	@Per_Comple	= LTrim(RTrim(@Per_RazSoc))
-	select	@Per_ComOrd	= LTrim(RTrim(@Per_RazSoc))
+	select  @Per_RazSoc = UPPER(LTrim(RTrim(@Per_RazSoc)))
+	select	@Per_Comple	= @Per_RazSoc
+	select	@Per_ComOrd	= @Per_RazSoc
 	select	@Adi_Sexo	= @Str_Vacio
 end else begin
-	select	@Per_Comple	= LTrim(RTrim(@Per_ApePat)) + @Str_Vacio1 + LTrim(RTrim(@Per_ApeMat)) + @Str_Vacio1 + LTrim(RTrim(@Per_Nombre))
-	select	@Per_ComOrd	= LTrim(RTrim(@Per_Nombre)) + @Str_Vacio1 + LTrim(RTrim(@Per_ApePat)) + @Str_Vacio1 + LTrim(RTrim(@Per_ApeMat))
+	select  @Per_ApePat = UPPER(LTrim(RTrim(@Per_ApePat))),
+			@Per_ApeMat = UPPER(LTrim(RTrim(@Per_ApeMat))),
+			@Per_Nombre = UPPER(LTrim(RTrim(@Per_Nombre)))
+	select	@Per_Comple	= @Per_ApePat + @Str_Vacio1 + @Per_ApeMat + @Str_Vacio1 + @Per_Nombre
+	select	@Per_ComOrd	= @Per_Nombre + @Str_Vacio1 + @Per_ApePat + @Str_Vacio1 + @Per_ApeMat
 end
 
 /* Actividad de Inegi */ 

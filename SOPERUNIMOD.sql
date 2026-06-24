@@ -328,13 +328,23 @@ if @Per_Tipo <> @Per_Moral and @Adi_Sexo not in (@Tip_Mascul, @Tip_Femeni) begin
 	return @Ent_Uno
 end
 
+if @Per_RFC <> @Str_Vacio
+	select @Per_RFC  = UPPER(@Per_RFC)
+
+if @Per_Tipo <> @Per_Moral
+	select @Per_CURP = UPPER(@Per_CURP)
+
 if @Per_Tipo = @Per_Moral begin
-	select	@Per_Comple	= LTrim(RTrim(@Per_RazSoc))
-	select	@Per_ComOrd	= LTrim(RTrim(@Per_RazSoc))
+	select  @Per_RazSoc = UPPER(LTrim(RTrim(@Per_RazSoc)))
+	select	@Per_Comple	= @Per_RazSoc
+	select	@Per_ComOrd	= @Per_RazSoc
 	select	@Adi_Sexo	= @Str_Vacio
 end else begin
-	select	@Per_Comple	= LTrim(RTrim(@Per_ApePat)) + ' ' + LTrim(RTrim(@Per_ApeMat)) + ' ' + LTrim(RTrim(@Per_Nombre))
-	select	@Per_ComOrd	= LTrim(RTrim(@Per_Nombre)) + ' ' + LTrim(RTrim(@Per_ApePat)) + ' ' + LTrim(RTrim(@Per_ApeMat))
+	select  @Per_ApePat = UPPER(LTrim(RTrim(@Per_ApePat))),
+			@Per_ApeMat = UPPER(LTrim(RTrim(@Per_ApeMat))),
+			@Per_Nombre = UPPER(LTrim(RTrim(@Per_Nombre)))
+	select	@Per_Comple	= @Per_ApePat + @Str_Espaci + @Per_ApeMat + @Str_Espaci + @Per_Nombre
+	select	@Per_ComOrd	= @Per_Nombre + @Str_Espaci + @Per_ApePat + @Str_Espaci + @Per_ApeMat
 end
 
 if @Per_TipPar = @Tip_Benefi begin
