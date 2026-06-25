@@ -87,7 +87,15 @@ as
 /***************************************************************************/
 /* DESCRIPCION: Modificacion de Personas Unicas (por sistemas externos)	  */
 /***************************************************************************/
-/** REFERENCIAS: 												  
+/** REFERENCIAS:
+ ****************************************************************************
+** Modifico:	José Rivera												****
+** Fecha:		25/06/2026												****
+** Descripcion:	Se agrega validación para tipos de actividades 			****
+				económicas válidas para PF y PFAE						****
+				Se agrega Upper en campos de registro de nombre, 		****
+				RFC y CURP												****
+** Help:		TRACL-17683									            **** 												  
 ****************************************************************************
 ** Modificó:	Javier E Ceron 									        ****
 ** Fecha:		22/Oct/2025										        ****

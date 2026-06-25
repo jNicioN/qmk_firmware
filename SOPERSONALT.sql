@@ -46,7 +46,13 @@ as
 /***************************************************************************/
 /** DESCRIPCION: ** Altas de Apoderados **						  		   */
 /***************************************************************************/
-/** REFERENCIAS:				
+/** REFERENCIAS:
+ ****************************************************************************
+** Modifico:	José Rivera												****
+** Fecha:		25/06/2026												****
+** Descripcion:	Se agrega validación para tipos de actividades 			****
+				económicas válidas para PF y PFAE						****
+** Help:		TRACL-17683									            ****				
 ****************************************************************************
 ** Modifico:	Javier Eduardo Ceron Rangel								****
 ** Fecha:		04/11/2025												****

@@ -51,6 +51,14 @@ as
 *** DESCRIPCION: Actualiza Datos de Persona Unificada			  **
 ********************************************************************
 *** REFERENCIAS: 												  **
+ *******************************************************************
+** Modifico:	José Rivera										****
+** Fecha:		25/06/2026										****
+** Descripcion:	Se agrega validación para tipos de 				****
+				actividadea económicas válidas para PF y PFAE	****
+				Se agrega Upper en campos de registro de nombre,**** 
+				RFC y CURP										****
+** Help:		TRACL-17683									    ****
 ********************************************************************
 ** Modificó:	Francisco Euan          						****
 ** Fecha:		14/Marzo/2025							        ****
