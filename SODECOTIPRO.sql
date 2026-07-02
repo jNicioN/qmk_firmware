@@ -95,9 +95,9 @@ select	@Bit_Si		= 1,				-- Si (bit)
 		@Car_Cero	= '0',				-- Caracter: Cero
 		@Ent_NivPro = 1,				-- Nivel Producto
 		@Ent_VigMod = 2,				/* Vigencia de Configuraciones Especiales de Modalidades.
-											-- Esta Vigencia NO podria utilizarse dentro del proceso
-											-- determinacion del Nivel. En este caso el Nivel es
-											-- asignado directamente*/
+											- Esta Vigencia NO podria utilizarse dentro del proceso
+											- determinacion del Nivel. En este caso el Nivel es
+											- asignado directamente*/
 		@Sto_CieCom	= 'SODECOTIPRO',	-- Proceso de Cierre de Comisiones
 		@Sta_Activo = 'A',				-- Status Activo
 		@Ent_ProMod = 29				-- Numero de Producto Modalidad
@@ -263,6 +263,7 @@ if @Var_Contin = @Bit_Si begin
 		inner join CLCLIENT noholdlock
 			on Cli_Numero	= Cue_Client
 		where Cue_Status = @Sta_Activo
+	set @Status = @@error
 	if @Status <> @Ent_Cero begin
 		return @Status
 	end
@@ -303,6 +304,7 @@ if @Var_Contin = @Bit_Si begin
 		Grc_CliEnt,	Grc_Grupo)
 		select	convert(int, GCh_Client),	GCh_Grupo
 			from CHGRUCLI noholdlock
+	set @Status = @@error
 	if @Status <> @Ent_Cero begin
 		return @Status
 	end
