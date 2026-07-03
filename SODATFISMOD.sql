@@ -25,6 +25,12 @@ as
 **	REFERENCIAS:														****
 ****************************************************************************
 ** Modificó:	Javier Eduardo Ceron Rangel		                    	****
+** Fecha:	    19/03/2026      					                    ****
+** Help:	    TRACL-16526  						                    ****
+** Descripción:	Validaciones de regimen/CFDI y separacion de campos		****
+** por tipo de personalidad												****
+****************************************************************************
+** Modificó:	Javier Eduardo Ceron Rangel		                    	****
 ** Fecha:	    28/07/2023      					                    ****
 ** Help:	    TRACL-5359 						                        ****
 ** Descripción:	Se agrega UPPER para guardar informacion en MAYUSCULAS	****
@@ -36,15 +42,26 @@ as
 **/
 
 /* Declaracion de variables */
-declare @Status		int
+declare @Status		int,
+		@Ent_Regime	int,
+		@Ent_UsoCfd	int,
+		@Ent_UcrId	int,
+		@Tip_Person char(1)
 
 /*Declaración Constantes*/
 declare	@Ent_Cero   int,        /* Entero en Cero */
 		@Ent_Uno	int,		/* Entero uno     */
-		@Str_Vacio	char(1)
+		@Str_Vacio	char(1),
+		@Str_PM     char(1),
+		@Str_PF     char(1),
+		@Str_PFAE   char(1),
+		@Str_Descri char(254)
 
 /*Asignación Constantes*/
 select	@Str_Vacio = '',		/* String Vacio */
+		@Str_PM	   = '1',		/* Persona Moral */
+		@Str_PF	   = '2',		/* Persona Fisica */
+		@Str_PFAE  = '3',		/* Persona Fisica AE */
 		@Ent_Cero   = 0,		/* Entero en Cero	*/
 		@Ent_Uno	= 1			/* Entero uno		*/
 
@@ -62,13 +79,120 @@ if isnull(@Daf_Regime, @Ent_Cero) = @Ent_Cero begin
 	return @Ent_Uno
 end 
 
-if isnull(@Daf_Nombre, @Str_Vacio) = @Str_Vacio and isnull(@Daf_RazSoc, @Str_Vacio) = @Str_Vacio begin
-	select	Err_Codigo = '000006',
-			Err_Mensaj = 'El Nombre o Razon Social no puede ser vacio.',
-			Err_Variab = 'Daf_Nombre Daf_RazSoc'
+if isnull(@Daf_UsoCfd, @Ent_Cero) = @Ent_Cero begin
+	select	Err_Codigo = '000004',
+			Err_Mensaj = 'El Uso de CFDI no puede ser vacio.'
 	rollback
-	return @Ent_Uno	
+	return @Ent_Uno
 end 
+
+-- Obtenemos tipo de personalidad
+SELECT @Tip_Person = Per_Tipo 
+FROM SOPERSON noholdlock 
+WHERE PerPersoID = @PerPersoID
+
+if isnull(@Tip_Person, '') = '' begin
+	select	Err_Codigo = '000015',
+			Err_Mensaj = 'No se pudo obtener el tipo de personalidad'
+	rollback
+	return @Ent_Uno
+end
+
+-- Validamos catalogo FSREGFIS por tipo de persona
+if @Tip_Person = @Str_PM begin
+	select @Ent_Regime = Rfi_Id from FSREGFIS noholdlock 
+	where Rfi_Moral = @Ent_Uno and Rfi_Id = @Daf_Regime and Rfi_Activo = @Ent_Uno
+	
+	if isnull(@Ent_Regime, @Ent_Cero) = @Ent_Cero begin
+		
+		select @Str_Descri = Rfi_Descri from FSREGFIS noholdlock where Rfi_Id = @Daf_Regime
+
+		select	Err_Codigo = '000016',
+				Err_Mensaj = 'No esta permitido para PM el regimen '+@Str_Descri
+		rollback
+		return @Ent_Uno
+	end
+	
+	select @Ent_UsoCfd = Ucf_Id from FSUSOCFD noholdlock 
+	where Ucf_Moral = @Ent_Uno and Ucf_Id = @Daf_UsoCfd and Ucf_Activo = @Ent_Uno
+	
+	if isnull(@Ent_UsoCfd, @Ent_Cero) = @Ent_Cero begin
+		
+		select @Str_Descri = Ucf_Descri from FSUSOCFD noholdlock where Ucf_Id = @Daf_UsoCfd
+
+		select	Err_Codigo = '000017',
+				Err_Mensaj = 'No esta permitido para PM el uso de CFDI '+@Str_Descri
+		rollback
+		return @Ent_Uno
+	end
+	
+end else if (@Tip_Person = @Str_PF or @Tip_Person = @Str_PFAE) begin
+	select @Ent_Regime = Rfi_Id from FSREGFIS noholdlock 
+	where Rfi_Fisica = @Ent_Uno and Rfi_Id = @Daf_Regime and Rfi_Activo = @Ent_Uno
+	
+	if isnull(@Ent_Regime, @Ent_Cero) = @Ent_Cero begin
+		
+		select @Str_Descri = Rfi_Descri from FSREGFIS noholdlock where Rfi_Id = @Daf_Regime
+
+		select	Err_Codigo = '000018',
+				Err_Mensaj = 'No esta permitido para PF/PFAE el regimen '+@Str_Descri
+		rollback
+		return @Ent_Uno
+	end
+	
+	select @Ent_UsoCfd = Ucf_Id from FSUSOCFD noholdlock 
+	where Ucf_Fisica = @Ent_Uno and Ucf_Id = @Daf_UsoCfd and Ucf_Activo = @Ent_Uno
+	
+	if isnull(@Ent_UsoCfd, @Ent_Cero) = @Ent_Cero begin
+		
+		select @Str_Descri = Ucf_Descri from FSUSOCFD noholdlock where Ucf_Id = @Daf_UsoCfd
+
+		select	Err_Codigo = '000019',
+				Err_Mensaj = 'No esta permitido para PF/PFAE el uso de CFDI '+@Str_Descri
+		rollback
+		return @Ent_Uno
+	end
+end
+
+--Validamos que tipos de regimenes fiscales pueden usar ciertos usos de CFDI
+select @Ent_UcrId = Ucr_Id from FSUSOREG noholdlock 
+where Ucr_RegFis = @Daf_Regime 
+and Ucr_UsoCfd = @Daf_UsoCfd 
+and Ucr_Activo = @Ent_Uno
+	
+if isnull(@Ent_UcrId, @Ent_Cero) = @Ent_Cero begin
+	select	Err_Codigo = '000020',
+			Err_Mensaj = 'No esta permitido el regimen fiscal para ese uso de CFDI '
+	rollback
+	return @Ent_Uno
+end
+
+-- Separacion de campos por tipo de personalidad
+if @Tip_Person = @Str_PM begin
+	-- Para Persona Moral: Solo RazSoc, limpiar nombres
+	if isnull(@Daf_RazSoc, @Str_Vacio) = @Str_Vacio begin
+		select	Err_Codigo = '000021',
+				Err_Mensaj = 'Para Persona Moral la Razon Social es obligatoria'
+		rollback
+		return @Ent_Uno
+	end
+	-- Limpiar campos que no corresponden a PM
+	select @Daf_Nombre = @Str_Vacio,
+		   @Daf_ApePat = @Str_Vacio,
+		   @Daf_ApeMat = @Str_Vacio
+		   
+end else if (@Tip_Person = @Str_PF or @Tip_Person = @Str_PFAE) begin
+	-- Para Persona Fisica: Solo nombres/apellidos, limpiar RazSoc
+	if isnull(@Daf_Nombre, @Str_Vacio) = @Str_Vacio begin
+		select	Err_Codigo = '000022',
+				Err_Mensaj = 'Para Persona Fisica el Nombre es obligatorio'
+		rollback
+		return @Ent_Uno
+	end
+	
+	-- Limpiar campo que no corresponde a PF
+	select @Daf_RazSoc = @Str_Vacio
+end
 
 select  @Daf_Nombre = UPPER(@Daf_Nombre),
 		@Daf_ApePat = UPPER(@Daf_ApePat),
