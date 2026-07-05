@@ -20,7 +20,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         ├─────────┼─────────┼─────────┼─────────┼─────────┼─────────┤                        ├─────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
         │    ⌘    │    Z    │    X    │    C    │    V    │    B    │                        │    N    │    N    │    ,    │    .    │    -    │   '/?   │
         └─────────┴─────────┴─────────┴─────────┼─────────┼─────────┼─────────┐    ┌─────────┼─────────┼─────────┼─────────┴─────────┴─────────┴─────────┘
-                                                │   ⌃/⌥   │  LT(1)  │  /LT(3) │    │         │ ↵/LT(2) │         │
+                                                │   ⌃/⌥   │  LT(1)  │  /LT(3) │    │         │ ↵/LT(2) │LT(4)/F17│
                                                 └─────────┴─────────┴─────────┘    └─────────┴─────────┴─────────┘
 */
     [_QWERTY] = LAYOUT_split_3x6_3(
@@ -32,19 +32,19 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     ),
 /* NAV(1)
         ┌─────────┬─────────┬─────────┬─────────┬─────────┬─────────┐                        ┌─────────┬─────────┬─────────┬─────────┬─────────┬─────────┐
-        │   Esc   │  paste  │  M(R)   │  M(↑)   │  M(L)   │  W(↑)   │                        │   HOME  │    ↑    │   END   │ XXXXXXX │  ImpPnt │    ⌦    │
+        │   Esc   │    @    │  M(Rc)  │  M(↑)   │  M(Lc)  │  W(↑)   │                        │   HOME  │    ↑    │   END   │ XXXXXXX │   F13   │    ⌦    │
         ├─────────┼─────────┼─────────┼─────────┼─────────┼─────────┤                        ├─────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
-        │    ⇧    │  copy   │  M(←)   │  M(↓)   │  M(→)   │  W(↓)   │                        │    ←    │    ↓    │    →    │    ⇧    │   F14   │  Insert │
+        │    ⇧    │  W(←)   │  M(←)   │  M(↓)   │  M(→)   │  W(→)   │                        │    ←    │    ↓    │    →    │    ⇧    │   F14   │  Insert │
         ├─────────┼─────────┼─────────┼─────────┼─────────┼─────────┤                        ├─────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
-        │    ⌃    │    ⌥    │    ⌘    │   W(←)  │    @    │  W(→)   │                        │ ⌃ + F4  │   F15   │ XXXXXXX │    ⌃    │    ⌥    │    ⌘    │
+        │    ⌃    │    ⌥    │    ⌘    │  copy   │  paste  │  W(↓)   │                        │ ⌃ + F4  │   F15   │ XXXXXXX │    ⌃    │    ⌥    │    ⌘    │
         └─────────┴─────────┴─────────┴─────────┼─────────┼─────────┼─────────┐    ┌─────────┼─────────┼─────────┼─────────┴─────────┴─────────┴─────────┘
                                                 │    ⌘    │ _______ │         │    │  MO(4)  │ _______ │ _______ │
                                                 └─────────┴─────────┴─────────┘    └─────────┴─────────┴─────────┘
 */
     [_NAV] = LAYOUT_split_3x6_3(
-        KC_ESCAPE,      RALT(KC_Q),     MS_BTN1,    MS_UP,              MS_BTN2,    KC_WH_U,                        KC_HOME,    KC_UP,      KC_END,     XXXXXXX,    KC_F13,    KC_DELETE,
-        KC_LSFT,        KC_WH_L,        MS_LEFT,    MS_DOWN,            MS_RGHT,  KC_WH_R  ,                        KC_LEFT,    KC_DOWN,    KC_RIGHT,   KC_RSFT,    KC_F14,    KC_INSERT,
-        KC_LCTL,        KC_LALT,        KC_LGUI,    LCTL(KC_INSERT),    LSFT(KC_INSERT), KC_WH_D,                   C(KC_F4),   KC_F15,     XXXXXXX,    KC_LCTL,    KC_LALT,   KC_LGUI,
+        KC_ESCAPE,      RALT(KC_Q),     MS_BTN1,    MS_UP,              MS_BTN2,    MS_WHLU,                        KC_HOME,    KC_UP,      KC_END,     XXXXXXX,    KC_F13,    KC_DELETE,
+        KC_LSFT,        MS_WHLL,        MS_LEFT,    MS_DOWN,            MS_RGHT,  MS_WHLR,                          KC_LEFT,    KC_DOWN,    KC_RIGHT,   KC_RSFT,    KC_F14,    KC_INSERT,
+        KC_LCTL,        KC_LALT,        KC_LGUI,    LCTL(KC_INSERT),    LSFT(KC_INSERT), MS_WHLD,                   C(KC_F4),   KC_F15,     XXXXXXX,    KC_LCTL,    KC_LALT,   KC_LGUI,
                                                                         KC_LGUI,   _______,    KC_SPC,          MO(4),       _______,   _______
 
     ),
