@@ -47,6 +47,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #if defined(RGB_MATRIX_ENABLE)
 #    define RGB_MATRIX_KEYPRESSES               // reacts to keypresses
 #    define RGB_DISABLE_WHEN_USB_SUSPENDED      // turn off effects when suspended
+#    undef RGB_MATRIX_MAXIMUM_BRIGHTNESS
 #    define RGB_MATRIX_MAXIMUM_BRIGHTNESS 150
         // limits maximum brightness of LEDs to 150 out of 255. Higher may cause the controller to crash.
 #    define RGB_MATRIX_HUE_STEP 32
