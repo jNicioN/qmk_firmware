@@ -580,7 +580,7 @@ if (@Modulo <> @Ban_Electr) and (@Tip_Proces = @Tip_CueChe and @Cob_Tipo <> @Per
 		if @Per_Tipo = @Per_Fisica and @Per_ActEmp in (@Str_No, @Str_Si) begin
 			if isnull(@Act_ActReg, '') <> '04' begin
 				select	Err_Codigo	= '000024',
-						Err_Mensaj	= 'Personas fisicas solo pueden registrar actividades de tipo comercial',
+						Err_Mensaj	= 'La actividad ecónomica no corresponde al tipo de personalidad del cliente',
 						Err_Variab	= 'Per_Activi'
 				rollback
 				return @Ent_Uno
