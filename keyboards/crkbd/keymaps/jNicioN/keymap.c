@@ -38,14 +38,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         ├─────────┼─────────┼─────────┼─────────┼─────────┼─────────┤                        ├─────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
         │    ⌃    │    ⌥    │    ⌘    │  copy   │  paste  │  W(↓)   │                        │ ⌃ + F4  │   F15   │ XXXXXXX │    ⌃    │    ⌥    │    ⌘    │
         └─────────┴─────────┴─────────┴─────────┼─────────┼─────────┼─────────┐    ┌─────────┼─────────┼─────────┼─────────┴─────────┴─────────┴─────────┘
-                                                │    ⌘    │ _______ │         │    │  MO(4)  │ _______ │ _______ │
+                                                │    ⌘    │ _______ │         │    │  MO(4)  │ Fijar   │ Salir   │
                                                 └─────────┴─────────┴─────────┘    └─────────┴─────────┴─────────┘
 */
     [_NAV] = LAYOUT_split_3x6_3(
         KC_ESCAPE,      RALT(KC_Q),     MS_BTN1,    MS_UP,              MS_BTN2,    MS_WHLU,                        KC_HOME,    KC_UP,      KC_END,     XXXXXXX,    KC_F13,    KC_DELETE,
         KC_LSFT,        MS_WHLL,        MS_LEFT,    MS_DOWN,            MS_RGHT,  MS_WHLR,                          KC_LEFT,    KC_DOWN,    KC_RIGHT,   KC_RSFT,    KC_F14,    KC_INSERT,
         KC_LCTL,        KC_LALT,        KC_LGUI,    LCTL(KC_INSERT),    LSFT(KC_INSERT), MS_WHLD,                   C(KC_F4),   KC_F15,     XXXXXXX,    KC_LCTL,    KC_LALT,   KC_LGUI,
-                                                                        KC_LGUI,   _______,    KC_SPC,          MO(4),       _______,   _______
+                                                                        KC_LGUI,   _______,    KC_SPC,          MO(4),       TG(1),    TO(0)
 
     ),
 /* SYMBOL(2)
@@ -84,11 +84,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   ),
 /* CONFIG(4)
     ┌─────────┬─────────┬─────────┬─────────┬─────────┬─────────┐                      ┌─────────┬─────────┬─────────┬─────────┬─────────┬─────────┐
-    │  BOOT   │ CG_TOGG │ XXXXXXX │ XXXXXXX │ XXXXXXX │ XXXXXXX │                      │ XXXXXXX │ XXXXXXX │ XXXXXXX │ XXXXXXX │ XXXXXXX │ XXXXXXX │
+    │  Reset  │Swap C/⌘ │ XXXXXXX │ XXXXXXX │ XXXXXXX │ XXXXXXX │                      │ XXXXXXX │ XXXXXXX │ XXXXXXX │ XXXXXXX │ XXXXXXX │ XXXXXXX │
     ├─────────┼─────────┼─────────┼─────────┼─────────┼─────────┤                      ├─────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
-    │ RGB_TOG │ RGB_HUI │ RGB_SAI │ RGB_VAI │ RGB_M_SN│ RGB_M_B │                      │ XXXXXXX │ XXXXXXX │ XXXXXXX │ XXXXXXX │ XXXXXXX │ XXXXXXX │
+    │RGB on/off│C/⌘ norm │  Sat +  │  Luz +  │  Snake  │ Respira │                      │ XXXXXXX │ XXXXXXX │ XXXXXXX │ XXXXXXX │ XXXXXXX │ XXXXXXX │
     ├─────────┼─────────┼─────────┼─────────┼─────────┼─────────┤                      ├─────────┼─────────┼─────────┼─────────┼─────────┼─────────┤
-    │ RGB_MOD │ RGB_HUD │ RGB_SAD │ RGB_VAD │ RGB_M_K │ RGB_M_R │                      │ XXXXXXX │ XXXXXXX │ XXXXXXX │ XXXXXXX │ XXXXXXX │ XXXXXXX │
+    │ Sig. fx │ Tono -  │  Sat -  │  Luz -  │  Knight │Arcoiris │                      │ XXXXXXX │ XXXXXXX │ XXXXXXX │ XXXXXXX │ XXXXXXX │ XXXXXXX │
     └─────────┴─────────┴─────────┴───────┬─┴───────┬─┴───────┬─┴───────┐  ┌─────────┬─┴─────────┴───────┬─┴─────────┴─────────┴─────────┴─────────┘
                                           │    ⌘    │ _______ │   SPC   │  │    ↵    │ _______ │ _______ │
                                           └─────────┴─────────┴─────────┘  └─────────┴─────────┴─────────┘
