@@ -87,7 +87,15 @@ as
 /***************************************************************************/
 /* DESCRIPCION: Modificacion de Personas Unicas (por sistemas externos)	  */
 /***************************************************************************/
-/** REFERENCIAS: 												  
+/** REFERENCIAS:
+ ****************************************************************************
+** Modifico:	José Rivera												****
+** Fecha:		25/06/2026												****
+** Descripcion:	Se agrega validación para tipos de actividades 			****
+				económicas válidas para PF y PFAE						****
+				Se agrega Upper en campos de registro de nombre, 		****
+				RFC y CURP												****
+** Help:		TRACL-17683									            **** 												  
 ****************************************************************************
 ** Modificó:	Javier E Ceron 									        ****
 ** Fecha:		22/Oct/2025										        ****
@@ -126,6 +134,7 @@ as
 declare	@Per_Comple	varchar(254),	/*	Declaracion de Variables	*/
 		@Per_ComOrd	varchar(254),
 		@Per_ActINE	char(6),
+		@Act_ActReg	char(2),
 		@Act_Numero	char(10),
 		@Act_Status	char(1),
 		@Status		int,
@@ -327,13 +336,23 @@ if @Per_Tipo <> @Per_Moral and @Adi_Sexo not in (@Tip_Mascul, @Tip_Femeni) begin
 	return @Ent_Uno
 end
 
+if @Per_RFC <> @Str_Vacio
+	select @Per_RFC  = UPPER(@Per_RFC)
+
+if @Per_Tipo <> @Per_Moral
+	select @Per_CURP = UPPER(@Per_CURP)
+
 if @Per_Tipo = @Per_Moral begin
-	select	@Per_Comple	= LTrim(RTrim(@Per_RazSoc))
-	select	@Per_ComOrd	= LTrim(RTrim(@Per_RazSoc))
+	select  @Per_RazSoc = UPPER(LTrim(RTrim(@Per_RazSoc)))
+	select	@Per_Comple	= @Per_RazSoc
+	select	@Per_ComOrd	= @Per_RazSoc
 	select	@Adi_Sexo	= @Str_Vacio
 end else begin
-	select	@Per_Comple	= LTrim(RTrim(@Per_ApePat)) + ' ' + LTrim(RTrim(@Per_ApeMat)) + ' ' + LTrim(RTrim(@Per_Nombre))
-	select	@Per_ComOrd	= LTrim(RTrim(@Per_Nombre)) + ' ' + LTrim(RTrim(@Per_ApePat)) + ' ' + LTrim(RTrim(@Per_ApeMat))
+	select  @Per_ApePat = UPPER(LTrim(RTrim(@Per_ApePat))),
+			@Per_ApeMat = UPPER(LTrim(RTrim(@Per_ApeMat))),
+			@Per_Nombre = UPPER(LTrim(RTrim(@Per_Nombre)))
+	select	@Per_Comple	= @Per_ApePat + @Str_Espaci + @Per_ApeMat + @Str_Espaci + @Per_Nombre
+	select	@Per_ComOrd	= @Per_Nombre + @Str_Espaci + @Per_ApePat + @Str_Espaci + @Per_ApeMat
 end
 
 if @Per_TipPar = @Tip_Benefi begin
@@ -466,9 +485,20 @@ end
 /* Actividad de Inegi */ 
 if isnull(@Per_Activi, @Str_Vacio) != @Str_Vacio begin
 	
-	select	@Per_ActINE	= Act_NumINE 
+	select	@Per_ActINE	= Act_NumINE,
+			@Act_ActReg	= Act_ActReg
 		from CLACTIVI noholdlock
 		where	Act_Numero	= @Per_Activi
+
+	if @Per_Tipo = @Per_Fisica and @Per_ActEmp in (@Str_No, @Str_Si) begin
+		if isnull(@Act_ActReg, '') <> '04' begin
+			select	Err_Codigo	= '000008',
+					Err_Mensaj	= 'La actividad ecónomica no corresponde al tipo de personalidad del cliente',
+					Err_Variab	= 'Per_Activi'
+			rollback
+			return @Ent_Uno
+		end
+	end
 	
 end
 	
